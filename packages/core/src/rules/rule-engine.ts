@@ -199,6 +199,30 @@ export class RuleEngine {
     });
 
     this.registerRule({
+      id: 'url-vbscript-uri',
+      name: 'VBScript URI',
+      description: 'VBScript URI scheme can execute malicious scripts',
+      category: RiskCategory.MALWARE,
+      severity: Severity.DEVICE_COMPROMISE,
+      weight: 90,
+      evaluate: (input: string, inputType: InputType) => {
+        if (inputType !== InputType.URL) return null;
+        if (input.trim().toLowerCase().startsWith('vbscript:')) {
+          return {
+            source: 'RULE_ENGINE',
+            name: 'VBScript URI Scheme',
+            description: 'Malicious VBScript URI detected',
+            weight: 90,
+            confidence: 1.0,
+            indicator: 'url-vbscript-uri',
+            isCriticalOverride: true
+          };
+        }
+        return null;
+      }
+    });
+
+    this.registerRule({
       id: 'url-excessive-subdomains',
       name: 'Excessive Subdomains',
       description: 'Unusually high number of subdomains often used in phishing',
