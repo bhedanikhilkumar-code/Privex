@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "Private Protection — On-Device Threat Defender",
+  "version": "0.1.0",
+  "description": "Privacy-first real-time threat, phishing, and scam protection running 100% locally on-device.",
+  "permissions": [
+    "webNavigation",
+    "storage",
+    "activeTab",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Private Protection Security Status"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "interstitial.html",
+        "assets/*"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; default-src 'self'; style-src 'self' 'unsafe-inline';"
+  }
+}
