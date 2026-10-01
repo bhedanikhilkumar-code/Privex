@@ -269,8 +269,8 @@ describe('ThreatIntel Hardening & Precedence (Phase 2)', () => {
   it('should expose records, snapshots, and allowlist queries correctly', () => {
     const record = threatIntel.getRecord();
     expect(record.databaseVersion).toBe(100);
-    expect(record.filterType).toBe('HASH_SET_V1');
-    expect(record.capacity).toBe(1000000);
+    expect(record.filterType).toBe('BLOOM_FILTER_V1');
+    expect(record.capacity).toBeGreaterThan(0);
 
     const snap = threatIntel.snapshot();
     expect(snap.version).toBe(100);

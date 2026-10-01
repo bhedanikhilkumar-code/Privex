@@ -330,6 +330,22 @@ export class TextAnalyzer {
       });
     }
 
+    // 14. Employment & Task Scam
+    const isTaskScam = (/rate\s+apps|optimize\s+apps|daily\s+salary|part-time\s+job|work\s+from\s+home\s+task|remote\s+task\s+commission|deposit.*unlock/i.test(lower)) ||
+                       (/earn\s+\$?\d+.*(?:day|hour)/i.test(lower) && /task|rating|commission|telegram/i.test(lower));
+    if (isTaskScam) {
+      indicators.push('employment-task-scam');
+      evidenceList.push({
+        source: 'TEXT_ANALYZER',
+        name: 'Employment / Task Scam',
+        description: 'Task-based or fake job hiring offering unrealistic earnings for trivial tasks',
+        weight: 75,
+        scoreContribution: 75,
+        confidence: 0.90,
+        indicator: 'employment-task-scam'
+      });
+    }
+
     // Composite risk calculation
     let score = 0;
     if (evidenceList.length > 0) {

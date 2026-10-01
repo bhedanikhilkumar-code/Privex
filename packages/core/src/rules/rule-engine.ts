@@ -223,6 +223,29 @@ export class RuleEngine {
     });
 
     this.registerRule({
+      id: 'url-blob-uri',
+      name: 'Blob URI',
+      description: 'Blob URI scheme used to load untrusted in-memory payloads',
+      category: RiskCategory.MALWARE,
+      severity: Severity.DEVICE_COMPROMISE,
+      weight: 85,
+      evaluate: (input: string, inputType: InputType) => {
+        if (inputType !== InputType.URL) return null;
+        if (input.trim().toLowerCase().startsWith('blob:')) {
+          return {
+            source: 'RULE_ENGINE',
+            name: 'Blob URI Scheme',
+            description: 'Suspicious blob URI scheme detected',
+            weight: 85,
+            confidence: 0.95,
+            indicator: 'url-blob-uri'
+          };
+        }
+        return null;
+      }
+    });
+
+    this.registerRule({
       id: 'url-excessive-subdomains',
       name: 'Excessive Subdomains',
       description: 'Unusually high number of subdomains often used in phishing',
@@ -434,6 +457,35 @@ export class RuleEngine {
             weight: Math.min(95, 40 + matches.length * 20),
             confidence: 0.9,
             indicator: 'text-advance-fee'
+          };
+        }
+        return null;
+      }
+    });
+
+    this.registerRule({
+      id: 'text-employment-scam',
+      name: 'Employment / Task Scam',
+      description: 'Task-based or fake job hiring offering unrealistic earnings for trivial tasks',
+      category: RiskCategory.SCAM,
+      severity: Severity.FINANCIAL_FRAUD,
+      weight: 75,
+      evaluate: (input: string, inputType: InputType) => {
+        if (inputType !== InputType.TEXT) return null;
+        const lower = normalizeText(input);
+        const keywords = [
+          'earn $', 'rate apps', 'optimize apps', 'daily salary', 'work from home task',
+          'part-time job hiring', 'online tasks commission', 'task wire', 'deposit to unlock commission'
+        ];
+        const matches = keywords.filter(k => lower.includes(k));
+        if (matches.length > 0 || (/earn\s+\$?\d+.*(?:day|hour|task)/i.test(lower) && /commission|task|rating/i.test(lower))) {
+          return {
+            source: 'RULE_ENGINE',
+            name: 'Employment / Task Scam',
+            description: 'Contains task-based employment fraud keywords: ' + matches.join(', '),
+            weight: Math.min(95, 60 + matches.length * 15),
+            confidence: 0.90,
+            indicator: 'text-employment-scam'
           };
         }
         return null;

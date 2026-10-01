@@ -1,4 +1,5 @@
 import { sha256, verifyEd25519Signature } from '../utils/crypto';
+import { BloomFilter } from './bloom-filter';
 import {
   Evidence,
   RiskCategory,
@@ -30,6 +31,7 @@ export type StalenessState = 'FRESH' | 'AGED' | 'STALE' | 'EXPIRED_CACHE';
 export class ThreatIntel {
   private badHashes: Map<string, ThreatIntelEntry> = new Map();
   private goodHashes: Set<string> = new Set();
+  private bloomFilter: BloomFilter;
   private lastUpdated: number;
   private databaseVersion: number = 101;
   private rootPublicKeyHex: string;
@@ -39,6 +41,7 @@ export class ThreatIntel {
     this.databaseVersion = options?.initialVersion ?? 101;
     // Standard compiled Root Ed25519 Public Key (can be overridden in options for testing)
     this.rootPublicKeyHex = options?.rootPublicKeyHex ?? '00'.repeat(32);
+    this.bloomFilter = new BloomFilter({ expectedElements: 100000, targetFalsePositiveRate: 0.001 });
     this.loadSeedData();
   }
 
@@ -97,11 +100,15 @@ export class ThreatIntel {
   public getRecord(): ThreatIntelRecord {
     return {
       databaseVersion: this.databaseVersion,
-      filterType: 'HASH_SET_V1',
-      capacity: 1000000,
-      falsePositiveRate: 0.0001,
+      filterType: 'BLOOM_FILTER_V1',
+      capacity: this.bloomFilter.capacity,
+      falsePositiveRate: this.bloomFilter.getFalsePositiveRate() || 0.0001,
       generatedEpoch: this.lastUpdated
     };
+  }
+
+  public getBloomFilter(): BloomFilter {
+    return this.bloomFilter;
   }
 
   public addMaliciousDomain(
@@ -117,6 +124,7 @@ export class ThreatIntel {
     const normalized = domain.toLowerCase().trim();
     const hash = sha256(normalized);
     const expiresAt = options?.ttl !== undefined ? Date.now() + options.ttl : undefined;
+    this.bloomFilter.add(hash);
     this.badHashes.set(hash, {
       hash,
       expiresAt,
@@ -145,6 +153,7 @@ export class ThreatIntel {
     const normalized = url.toLowerCase().trim();
     const hash = sha256(normalized);
     const expiresAt = options?.ttl !== undefined ? Date.now() + options.ttl : undefined;
+    this.bloomFilter.add(hash);
     this.badHashes.set(hash, {
       hash,
       expiresAt,
@@ -169,6 +178,7 @@ export class ThreatIntel {
     const normalized = ip.toLowerCase().trim();
     const hash = sha256(normalized);
     const expiresAt = options?.ttl !== undefined ? Date.now() + options.ttl : undefined;
+    this.bloomFilter.add(hash);
     this.badHashes.set(hash, {
       hash,
       expiresAt,
@@ -216,6 +226,7 @@ export class ThreatIntel {
     if (!hash) return;
     const normalized = hash.toLowerCase().trim();
     const expiresAt = options?.ttl !== undefined ? Date.now() + options.ttl : undefined;
+    this.bloomFilter.add(normalized);
     this.badHashes.set(normalized, {
       hash: normalized,
       expiresAt,
@@ -242,7 +253,20 @@ export class ThreatIntel {
       };
     }
 
-    // 2. Check threat intelligence blocklist
+    // 2. High-speed O(1) Bloom filter test: if not in Bloom filter, guaranteed clean (zero false negatives)
+    if (!this.bloomFilter.has(normalizedHash)) {
+      return {
+        source: 'THREAT_INTEL',
+        name: 'Clean Target',
+        description: 'No threat intelligence flags for this target',
+        weight: 0,
+        scoreContribution: 0,
+        confidence: 0.5,
+        isMalicious: false
+      };
+    }
+
+    // 3. Bloom filter match verification against confirmed local hash index & TTL
     const entry = this.badHashes.get(normalizedHash);
     if (entry) {
       if (entry.expiresAt && Date.now() > entry.expiresAt) {
@@ -267,6 +291,7 @@ export class ThreatIntel {
       }
     }
 
+    // Bloom filter false positive or removed entry
     return {
       source: 'THREAT_INTEL',
       name: 'Clean Target',
@@ -415,6 +440,7 @@ export class ThreatIntel {
     // STEP 5: Atomic Staging & Activation (Zero-Downtime Live Activation)
     const backupBad = new Map(this.badHashes);
     const backupGood = new Set(this.goodHashes);
+    const backupFilterBytes = this.bloomFilter.serialize();
     const backupVersion = this.databaseVersion;
     const backupUpdated = this.lastUpdated;
 
@@ -442,6 +468,7 @@ export class ThreatIntel {
       // Rollback on any failure during application
       this.badHashes = backupBad;
       this.goodHashes = backupGood;
+      this.bloomFilter = BloomFilter.deserialize(backupFilterBytes);
       this.databaseVersion = backupVersion;
       this.lastUpdated = backupUpdated;
       return {
@@ -454,12 +481,22 @@ export class ThreatIntel {
   /**
    * Creates an encrypted/in-memory snapshot of current state
    */
-  public snapshot(): { version: number; lastUpdated: number; badCount: number; goodCount: number } {
+  public snapshot(): {
+    version: number;
+    lastUpdated: number;
+    badCount: number;
+    goodCount: number;
+    bloomFilterBits: number;
+    bloomFilterElements: number;
+  } {
     return {
       version: this.databaseVersion,
       lastUpdated: this.lastUpdated,
       badCount: this.badHashes.size,
-      goodCount: this.goodHashes.size
+      goodCount: this.goodHashes.size,
+      bloomFilterBits: this.bloomFilter.sizeBits,
+      bloomFilterElements: this.bloomFilter.elementCount
     };
   }
 }
+

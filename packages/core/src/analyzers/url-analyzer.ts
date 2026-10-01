@@ -129,6 +129,21 @@ export class URLAnalyzer {
       });
     }
 
+    // Check for blob: URI scheme
+    if (normalizedInput.toLowerCase().startsWith('blob:')) {
+      indicators.push('url-blob-uri');
+      evidenceList.push({
+        source: 'URL_ANALYZER',
+        name: 'Blob URI Scheme',
+        description: 'Blob URI used to execute or display untrusted in-memory content',
+        weight: 85,
+        scoreContribution: 85,
+        confidence: 0.95,
+        indicator: 'url-blob-uri'
+      });
+      return buildResult(true, 85, indicators, normalizedInput);
+    }
+
     try {
       if (!normalizedInput.includes('.') && !normalizedInput.includes(':') && !normalizedInput.includes('/')) {
         throw new Error('Not a valid domain or URL');

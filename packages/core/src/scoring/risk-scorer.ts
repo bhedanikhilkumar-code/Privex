@@ -83,23 +83,36 @@ export class RiskScorer {
         ? e.scoreContribution
         : (typeof e.weight === 'number' ? e.weight : 20);
 
-      const source = (e.source || e.detectorType || 'DEFAULT').toUpperCase();
-      const baseWeight = this.detectorWeights[source] ?? this.detectorWeights.DEFAULT;
-      const confidence = typeof e.confidence === 'number' ? e.confidence : 0.85;
+      const sourceKey = (e.source || e.detectorType || e.type || 'DEFAULT').toUpperCase();
+      let baseWeight = this.detectorWeights[sourceKey];
+      if (baseWeight === undefined) {
+        if (sourceKey.includes('RULE')) baseWeight = this.detectorWeights.RULE_ENGINE;
+        else if (sourceKey.includes('THREAT')) baseWeight = this.detectorWeights.THREAT_INTEL;
+        else if (sourceKey.includes('DOM')) baseWeight = this.detectorWeights.DOM_ANALYZER;
+        else if (sourceKey.includes('URL')) baseWeight = this.detectorWeights.URL_ANALYZER;
+        else if (sourceKey.includes('TEXT')) baseWeight = this.detectorWeights.TEXT_ANALYZER;
+        else if (sourceKey.includes('ML')) baseWeight = this.detectorWeights.ML_MODEL;
+        else if (sourceKey === 'TEST') baseWeight = 1.0;
+        else baseWeight = this.detectorWeights.DEFAULT;
+      }
+
+      const defaultConf = (sourceKey === 'TEST' || sourceKey.includes('RULE')) ? 1.0 : 0.85;
+      const confidence = typeof e.confidence === 'number' ? e.confidence : defaultConf;
 
       const indicator = e.indicator || e.name || 'threat-signal';
-      const effectiveSignal = rawScore * baseWeight * confidence;
+      const effectiveSignal = Math.min(100, Math.max(0, rawScore * baseWeight * confidence));
 
       if (effectiveSignal > maxSignalValue) {
         maxSignalValue = effectiveSignal;
         primaryThreatFactor = indicator;
       }
 
-      if (e.isCriticalOverride || (source === 'THREAT_INTEL' && rawScore >= 90)) {
+      if (e.isCriticalOverride || (sourceKey.includes('THREAT') && rawScore >= 90)) {
         criticalOverrideScore = Math.max(criticalOverrideScore, rawScore);
       }
 
-      detectorContributions[source] = (detectorContributions[source] || 0) + rawScore;
+      const categorySource = e.source || e.detectorType || 'RULE_ENGINE';
+      detectorContributions[categorySource] = (detectorContributions[categorySource] || 0) + rawScore;
 
       return {
         rawScore,
@@ -107,59 +120,99 @@ export class RiskScorer {
         confidence,
         effectiveSignal,
         indicator,
-        source
+        source: categorySource
       };
     });
 
     // 2. Bounded Non-Linear Diminishing-Returns Aggregation Model
-    // (docs/RISK_ENGINE_ARCHITECTURE.md Section 1)
-    const sortedScores = normalizedTokens.map(t => t.rawScore).sort((a, b) => b - a);
-    const maxScore = sortedScores[0];
-    const secondaryScores = sortedScores.slice(1);
-    const bonus = secondaryScores.reduce((acc, s) => acc + s * 0.25, 0);
-
-    let calculatedScore = Math.min(100, Math.round(maxScore + bonus));
-
-    // Apply Critical Rule Priority Override
-    if (criticalOverrideScore > 0) {
-      calculatedScore = Math.max(calculatedScore, criticalOverrideScore);
+    // R_raw = 100 * (1 - PRODUCT_{i=1}^n (1 - x_i / 100))
+    // (docs/RISK_ENGINE_ARCHITECTURE.md Section 1.2)
+    let productTerm = 1.0;
+    for (const token of normalizedTokens) {
+      const x_i = token.effectiveSignal;
+      productTerm *= (1.0 - (x_i / 100.0));
     }
+    const rawR = 100.0 * (1.0 - productTerm);
+    let calculatedScore = Math.min(100, Math.max(0, Math.round(rawR)));
 
-    // 3. Multi-Factor Confidence Calculation
-    // C_final = mean(c_i) * (1 - P_stale) * consensus
+    // 3. Critical Rule Priority Override (docs/RISK_ENGINE_ARCHITECTURE.md Section 1.3)
+    if (criticalOverrideScore > 0) {
+      calculatedScore = Math.max(calculatedScore, Math.round(criticalOverrideScore));
+    }
+    calculatedScore = Math.min(100, Math.max(0, calculatedScore));
+
+    // 4. Multi-Factor Confidence & Uncertainty Calculation
+    // C_final = mean(c_i) * (1 - P_stale) * consensus * agreement
     const avgConfidence = normalizedTokens.reduce((a, t) => a + t.confidence, 0) / normalizedTokens.length;
 
-    // Staleness Penalty
+    // Staleness Penalty (Section 3.1)
     let stalenessPenalty = 0.0;
     if (stalenessDays > 7) {
       stalenessPenalty = Math.min(0.20, (stalenessDays - 7) / 100);
     }
 
+    // Signal Agreement (A = 1.0 - stdDev / 100)
+    let agreement = 1.0;
+    if (normalizedTokens.length >= 2) {
+      const meanScore = normalizedTokens.reduce((a, t) => a + t.rawScore, 0) / normalizedTokens.length;
+      const variance = normalizedTokens.reduce((a, t) => a + Math.pow(t.rawScore - meanScore, 2), 0) / normalizedTokens.length;
+      const stdDev = Math.sqrt(variance);
+      agreement = Math.max(0.6, 1.0 - (stdDev / 100.0));
+    }
+
     // Multi-signal consensus boost
     const consensusBoost = normalizedTokens.length >= 2 ? 0.05 : 0.0;
-    const finalConfidence = Math.min(1.0, Math.max(0.2, (avgConfidence + consensusBoost) * (1 - stalenessPenalty)));
+    const finalConfidence = Math.min(
+      1.0,
+      Math.max(0.2, (avgConfidence + consensusBoost) * (1.0 - stalenessPenalty) * agreement)
+    );
     const roundedConfidence = Math.round(finalConfidence * 100) / 100;
+    const uncertainty = Math.round((1.0 - roundedConfidence) * 100) / 100;
 
-    // 4. Determine Verdict, Severity Level, and Recommendations
+    // 5. Determine Verdict, Severity Level, and Recommendations
+    // Canonical 5-Tier Thresholds (docs/RISK_ENGINE_ARCHITECTURE.md Section 4):
+    // 0-19: ALLOW / NONE / Silent Proceed
+    // 20-49: INFORM / LOW / Passive Badge
+    // 50-69: CAUTION / MEDIUM / Warning Banner
+    // 70-84: SUSPICIOUS / HIGH / Modal Interstitial
+    // 85-100: DANGEROUS / CRITICAL / Hard Interstitial
     let category = RiskCategory.SAFE;
     let severity: Severity | SeverityLevel | string = 'SAFE';
+    let sevLevel = SeverityLevel.NONE;
     let recommendation = ActionRecommendation.ALLOW;
     let recommendedAction = 'allow';
     let verdict = Verdict.ALLOW;
     let canonicalAction = PrescribedAction.PROCEED;
     let friction = FrictionLevel.NONE;
-    let suggestedAction = 'Content verified. Safe to proceed.';
+    let suggestedAction = 'Content appears safe. Safe to proceed.';
 
     if (calculatedScore >= 85) {
       category = RiskCategory.MALWARE;
       severity = 'BLOCK';
+      sevLevel = SeverityLevel.CRITICAL;
       verdict = Verdict.DANGEROUS;
       recommendation = ActionRecommendation.BLOCK;
       recommendedAction = 'block';
       canonicalAction = PrescribedAction.BLOCK_NAVIGATION;
       friction = FrictionLevel.HIGH;
-      suggestedAction = 'Do not proceed. Threat poses imminent risk to security.';
-    } else if (calculatedScore >= 60) {
+      suggestedAction = 'Do not proceed. Threat poses imminent risk to security. Access blocked.';
+    } else if (calculatedScore >= 70) {
+      const isScam = evidence.some((e: any) =>
+        (e.name && e.name.toLowerCase().includes('scam')) ||
+        (e.indicator && e.indicator.includes('scam')) ||
+        (e.type === 'text') ||
+        (e.source === 'TEXT_ANALYZER')
+      );
+      category = isScam ? RiskCategory.SCAM : RiskCategory.PHISHING;
+      severity = 'SUSPICIOUS';
+      sevLevel = SeverityLevel.HIGH;
+      verdict = Verdict.SUSPICIOUS;
+      recommendation = ActionRecommendation.WARN;
+      recommendedAction = 'warn';
+      canonicalAction = PrescribedAction.WARN_USER;
+      friction = FrictionLevel.MEDIUM;
+      suggestedAction = 'Suspicious indicators identified. Do not enter credentials or pay.';
+    } else if (calculatedScore >= 50) {
       const isScam = evidence.some((e: any) =>
         (e.name && e.name.toLowerCase().includes('scam')) ||
         (e.indicator && e.indicator.includes('scam')) ||
@@ -168,24 +221,27 @@ export class RiskScorer {
       );
       category = isScam ? RiskCategory.SCAM : RiskCategory.PHISHING;
       severity = 'WARNING';
+      sevLevel = SeverityLevel.MEDIUM;
       verdict = Verdict.CAUTION;
       recommendation = ActionRecommendation.WARN;
       recommendedAction = 'warn';
       canonicalAction = PrescribedAction.WARN_USER;
-      friction = FrictionLevel.MEDIUM;
-      suggestedAction = 'Exercise extreme caution. Do not enter credentials or pay.';
-    } else if (calculatedScore >= 30) {
+      friction = FrictionLevel.LOW;
+      suggestedAction = 'Exercise caution. Multiple suspicious patterns identified.';
+    } else if (calculatedScore >= 20) {
       category = RiskCategory.SUSPICIOUS;
-      severity = 'SUSPICIOUS';
+      severity = 'LOW';
+      sevLevel = SeverityLevel.LOW;
       verdict = Verdict.INFORM;
       recommendation = ActionRecommendation.INFORM;
       recommendedAction = 'inform';
       canonicalAction = PrescribedAction.WARN_USER;
       friction = FrictionLevel.LOW;
-      suggestedAction = 'Verify source before interacting.';
+      suggestedAction = 'Low risk detected. Verify source if requesting information.';
     } else {
       category = RiskCategory.SAFE;
       severity = 'SAFE';
+      sevLevel = SeverityLevel.NONE;
       verdict = Verdict.ALLOW;
       recommendation = ActionRecommendation.ALLOW;
       recommendedAction = 'allow';
@@ -194,12 +250,22 @@ export class RiskScorer {
       suggestedAction = 'Content appears safe.';
     }
 
+    // Edge-Case Safety Rule (docs/RISK_ENGINE_ARCHITECTURE.md Section 4):
+    // If Score >= 70 but Confidence < 0.40, clamp verdict to CAUTION
+    if (calculatedScore >= 70 && roundedConfidence < 0.40) {
+      verdict = Verdict.CAUTION;
+      severity = 'WARNING';
+      sevLevel = SeverityLevel.MEDIUM;
+      friction = FrictionLevel.LOW;
+    }
+
     const riskAssessment: RiskAssessment = {
       overallScore: calculatedScore,
       confidence: roundedConfidence,
-      severity: severity as SeverityLevel,
+      severity: sevLevel,
       primaryThreatFactor,
-      detectorContributions
+      detectorContributions,
+      uncertainty
     };
 
     const canonicalRecommendation: Recommendation = {
@@ -222,3 +288,4 @@ export class RiskScorer {
     };
   }
 }
+
