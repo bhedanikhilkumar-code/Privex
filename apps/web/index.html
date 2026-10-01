@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none';" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="description" content="Private Protection — Zero-Install On-Device Security Scanner and Phishing Protection." />
+    <link rel="manifest" href="/manifest.json" />
+    <title>PRIVATE PROTECTION — Security Dashboard</title>
+    <style>
+      :root {
+        --bg-primary: #090d16;
+        --bg-secondary: #0f172a;
+        --bg-card: #1e293b;
+        --text-primary: #f8fafc;
+        --text-muted: #94a3b8;
+        --border-color: #334155;
+        --color-safe: #10b981;
+        --color-caution: #f59e0b;
+        --color-danger: #ef4444;
+        --color-brand: #3b82f6;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+      #root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
