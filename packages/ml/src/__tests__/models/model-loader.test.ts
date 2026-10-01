@@ -333,4 +333,102 @@ describe('ModelLoader & Model Security Verification', () => {
     expect(throwRes.success).toBe(false);
     expect(throwRes.error).toContain('ExplosionOnLoad');
   });
+
+  it('should reject registration of a downgraded model version', () => {
+    const v2Provider: ModelProvider = {
+      id: 'downgrade-test-model',
+      metadata: {
+        modelId: 'downgrade-test-model',
+        version: '2.0.0',
+        format: 'ONNX',
+        task: 'INTENT_CLASSIFICATION',
+        sha256: 'a1b2c3',
+        sizeBytes: 100,
+        inputShape: [1],
+        outputClasses: ['A'],
+        quantization: 'INT8',
+        isProductionArtifact: false
+      },
+      load: async () => true,
+      unload: async () => {},
+      isLoaded: () => true,
+      infer: async () => ({} as any)
+    };
+
+    loader.registerProvider(v2Provider);
+
+    const v1Provider: ModelProvider = {
+      ...v2Provider,
+      metadata: {
+        ...v2Provider.metadata,
+        version: '1.9.0'
+      }
+    };
+
+    expect(() => loader.registerProvider(v1Provider)).toThrow('ModelDowngradeRejectedError');
+  });
+
+  it('should reject loadModelFromBuffer when incoming buffer version is older than active version', async () => {
+    const activeProvider: ModelProvider = {
+      id: 'buffer-downgrade-model',
+      metadata: {
+        modelId: 'buffer-downgrade-model',
+        version: '2.5.0',
+        format: 'ONNX',
+        task: 'INTENT_CLASSIFICATION',
+        sha256: 'xyz',
+        sizeBytes: 100,
+        inputShape: [1],
+        outputClasses: ['A'],
+        quantization: 'INT8',
+        isProductionArtifact: false
+      },
+      load: async () => true,
+      unload: async () => {},
+      isLoaded: () => true,
+      infer: async () => ({} as any)
+    };
+
+    loader.registerProvider(activeProvider);
+
+    const oldMeta: ModelMetadata = {
+      ...activeProvider.metadata,
+      version: '2.4.9'
+    };
+
+    const res = await loader.loadModelFromBuffer(Buffer.from('ANY_DATA'), oldMeta, () => activeProvider);
+    expect(res.success).toBe(false);
+    expect(res.error).toContain('ModelDowngradeRejectedError');
+  });
+
+  it('should validate metadata task, format, and quantization types', () => {
+    const invalidFormatMeta: any = {
+      modelId: 'test',
+      version: '1.0.0',
+      format: 'UNSUPPORTED_FORMAT',
+      task: 'INTENT_CLASSIFICATION',
+      sha256: 'hash',
+      sizeBytes: 100,
+      inputShape: [1],
+      outputClasses: ['A'],
+      quantization: 'INT8'
+    };
+    expect(ModelIntegrityVerifier.validateMetadata(invalidFormatMeta).valid).toBe(false);
+
+    const invalidQuantMeta: any = {
+      ...invalidFormatMeta,
+      format: 'ONNX',
+      quantization: 'INT1'
+    };
+    expect(ModelIntegrityVerifier.validateMetadata(invalidQuantMeta).valid).toBe(false);
+
+    const invalidTaskMeta: any = {
+      ...invalidFormatMeta,
+      format: 'ONNX',
+      quantization: 'INT8',
+      task: 'INVALID_TASK'
+    };
+    expect(ModelIntegrityVerifier.validateMetadata(invalidTaskMeta).valid).toBe(false);
+  });
 });
+

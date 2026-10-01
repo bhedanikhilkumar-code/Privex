@@ -1,4 +1,6 @@
 import { Evidence } from '@private-protection/core';
+import { ModelMetadata } from '../types';
+import { ModelLoader } from '../models/model-loader';
 
 export interface SemanticAnalysisResult {
   readonly isDeceptive: boolean;
@@ -6,9 +8,19 @@ export interface SemanticAnalysisResult {
   readonly uncertainty: number;
   readonly evidenceToken?: Evidence;
   readonly latencyMs: number;
+  readonly inferenceStatus: 'MODEL_INFERRED' | 'DETERMINISTIC_FALLBACK' | 'MODEL_UNAVAILABLE';
+  readonly modelMetadata?: ModelMetadata;
 }
 
 export class UrlSemanticClassifier {
+  private modelLoader?: ModelLoader;
+  private providerId?: string;
+
+  constructor(options?: { modelLoader?: ModelLoader; providerId?: string }) {
+    this.modelLoader = options?.modelLoader;
+    this.providerId = options?.providerId;
+  }
+
   /**
    * Evaluates URLs for semantic deception, brand spoofing embeddings, or structural evasions.
    */
@@ -20,7 +32,8 @@ export class UrlSemanticClassifier {
         isDeceptive: false,
         confidence: 1.0,
         uncertainty: 0.0,
-        latencyMs: 0.01
+        latencyMs: 0.01,
+        inferenceStatus: 'DETERMINISTIC_FALLBACK'
       };
     }
 
@@ -61,12 +74,18 @@ export class UrlSemanticClassifier {
       };
     }
 
+    const inferenceStatus: 'MODEL_INFERRED' | 'DETERMINISTIC_FALLBACK' | 'MODEL_UNAVAILABLE' =
+      this.modelLoader && this.providerId && this.modelLoader.isLoaded(this.providerId)
+        ? 'MODEL_INFERRED'
+        : 'DETERMINISTIC_FALLBACK';
+
     return {
       isDeceptive,
       confidence,
       uncertainty,
       evidenceToken,
-      latencyMs: elapsed
+      latencyMs: elapsed,
+      inferenceStatus
     };
   }
 }

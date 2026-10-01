@@ -1,8 +1,8 @@
 export class ResponsePolicy {
   // Prohibited request patterns where users ask for help bypassing controls or writing attacks
   private static readonly DANGEROUS_INTENTS: RegExp[] = [
-    /(?:how\s+to|help\s+me|show\s+me\s+how\s+to)\s+(?:create|write|craft|make)\s+(?:a\s+)?(?:phishing|malware|virus|trojan|ransomware|exploit)/i,
-    /(?:how\s+to|can\s+you)\s+(?:bypass|evade|disable|circumvent|turn\s+off)\s+(?:detection|antivirus|filter|security|protection)/i,
+    /(?:how\s+to|help\s+me|show\s+me\s+how\s+to|how\s+can\s+i|how\s+do\s+i)\s+(?:create|write|craft|make|build)\s+(?:a\s+)?(?:phishing|malware|virus|trojan|ransomware|exploit)/i,
+    /(?:how\s+to|can\s+you|how\s+can\s+i|how\s+do\s+i)\s+(?:bypass|evade|disable|circumvent|turn\s+off)\s+(?:detection|antivirus|filter|security|protection|pipeline)/i,
     /(?:steal|harvest|sniff|exfiltrate)\s+(?:passwords|credentials|keys|tokens)/i,
     /(?:generate|create)\s+(?:an?\s+)?(?:evil|fake|spoofed)\s+(?:login|bank|paypal|website)/i,
     /(?:how\s+to\s+hack|hack\s+into)\s+[a-z0-9.-]+/i

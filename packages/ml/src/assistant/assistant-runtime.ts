@@ -93,24 +93,35 @@ export class AISecurityAssistant {
     }
 
     if (provider && provider.isLoaded()) {
+      const abortController = new AbortController();
+      let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+
       try {
         const { systemPrompt, sanitizedEvidenceContext } = PromptBoundary.buildIsolatedPrompt(input);
 
-        // Execute inference with timeout protection
+        // Execute inference with timeout protection and abort signal propagation
         const inferencePromise = provider.infer({
           requestId: input.requestId,
           task: 'EXPLANATION_SYNTHESIS',
           input: sanitizedEvidenceContext,
-          context: { systemPrompt }
+          context: { systemPrompt },
+          abortSignal: abortController.signal
         });
 
-        const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('InferenceTimeoutError')), this.executionTimeoutMs)
-        );
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          timeoutHandle = setTimeout(() => {
+            abortController.abort();
+            reject(new Error('InferenceTimeoutError'));
+          }, this.executionTimeoutMs);
+        });
 
         const inferenceResult = await Promise.race([inferencePromise, timeoutPromise]);
+        if (timeoutHandle) clearTimeout(timeoutHandle);
 
-        if (inferenceResult && inferenceResult.status === 'SUCCESS') {
+        if (
+          inferenceResult &&
+          (inferenceResult.status === 'SUCCESS' || inferenceResult.status === 'MODEL_INFERRED')
+        ) {
           // Schema validation on model output
           const outputToValidate = inferenceResult.rawOutput ?? inferenceResult.predictions;
           const validation = SchemaValidator.validateAssistantOutput(
@@ -129,6 +140,8 @@ export class AISecurityAssistant {
           }
         }
       } catch {
+        abortController.abort();
+        if (timeoutHandle) clearTimeout(timeoutHandle);
         // Fallback transparently on any provider failure or timeout
       }
     }

@@ -6,6 +6,23 @@ export class ModelLoader {
   private loadedProviders: Map<string, ModelProvider> = new Map();
 
   public registerProvider(provider: ModelProvider): void {
+    if (provider.metadata) {
+      const metaCheck = ModelIntegrityVerifier.validateMetadata(provider.metadata);
+      if (!metaCheck.valid) {
+        throw new Error(metaCheck.error || 'InvalidMetadataError');
+      }
+
+      const existing = this.registeredProviders.get(provider.id);
+      if (existing && existing.metadata?.version && provider.metadata?.version) {
+        const cmp = ModelIntegrityVerifier.compareVersions(provider.metadata.version, existing.metadata.version);
+        if (cmp < 0) {
+          throw new Error(
+            `ModelDowngradeRejectedError: incoming version ${provider.metadata.version} is older than registered version ${existing.metadata.version}`
+          );
+        }
+      }
+    }
+
     this.registeredProviders.set(provider.id, provider);
   }
 
@@ -25,7 +42,19 @@ export class ModelLoader {
     metadata: ModelMetadata,
     providerFactory: (meta: ModelMetadata, buf: Uint8Array | Buffer) => ModelProvider
   ): Promise<{ success: boolean; provider?: ModelProvider; error?: string }> {
-    // 1. Verify buffer integrity
+    // 0. Anti-downgrade verification against currently active or registered model
+    const existing = this.registeredProviders.get(metadata.modelId);
+    if (existing) {
+      const cmp = ModelIntegrityVerifier.compareVersions(metadata.version, existing.metadata.version);
+      if (cmp < 0) {
+        return {
+          success: false,
+          error: `ModelDowngradeRejectedError: incoming version ${metadata.version} is older than active version ${existing.metadata.version}`
+        };
+      }
+    }
+
+    // 1. Verify buffer integrity and metadata
     const verification = ModelIntegrityVerifier.verifyModelBuffer(buffer, metadata);
     if (!verification.valid) {
       return { success: false, error: verification.error };

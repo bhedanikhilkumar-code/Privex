@@ -127,4 +127,94 @@ describe('OnnxModelProvider Abstraction', () => {
     expect(provider.isLoaded()).toBe(false);
     expect((provider as any).session).toBeNull();
   });
+
+  it('should preprocess string text into input_ids and attention_mask feeds', async () => {
+    let capturedFeeds: Record<string, any> = {};
+    const provider = new OnnxModelProvider(metadata, Buffer.from('FAKE_ONNX_BYTES'));
+    (provider as any).loaded = true;
+    (provider as any).session = {
+      run: async (feeds: any) => {
+        capturedFeeds = feeds;
+        return {
+          logits: { data: [0.1, 0.2, 0.7] }
+        };
+      }
+    };
+
+    const result = await provider.infer({
+      requestId: 'req-text-preprocess',
+      task: 'INTENT_CLASSIFICATION',
+      input: 'urgent: please verify your credentials'
+    });
+
+    expect(capturedFeeds['input_ids']).toBeDefined();
+    expect(capturedFeeds['attention_mask']).toBeDefined();
+    expect(result.status).toBe('SUCCESS');
+    expect(result.topLabel).toBe('PHISHING');
+  });
+
+  it('should accept direct modelInputs dictionary feeds', async () => {
+    let capturedFeeds: Record<string, any> = {};
+    const provider = new OnnxModelProvider(metadata, Buffer.from('FAKE_ONNX_BYTES'));
+    (provider as any).loaded = true;
+    (provider as any).session = {
+      run: async (feeds: any) => {
+        capturedFeeds = feeds;
+        return {
+          BENIGN: { data: [0.8] },
+          SCAM: { data: [0.1] },
+          PHISHING: { data: [0.1] }
+        };
+      }
+    };
+
+    const customInputs = { custom_tensor: { data: [1, 2, 3] } };
+    const result = await provider.infer({
+      requestId: 'req-custom-feeds',
+      task: 'INTENT_CLASSIFICATION',
+      input: '',
+      modelInputs: customInputs
+    });
+
+    expect(capturedFeeds).toEqual(customInputs);
+    expect(result.status).toBe('SUCCESS');
+    expect(result.topLabel).toBe('BENIGN');
+  });
+
+  it('should reject NaN or non-finite numbers in tensor input', async () => {
+    const provider = new OnnxModelProvider(metadata, Buffer.from('FAKE_ONNX_BYTES'));
+    (provider as any).loaded = true;
+    (provider as any).session = { run: async () => ({}) };
+
+    const result = await provider.infer({
+      requestId: 'req-nan',
+      task: 'INTENT_CLASSIFICATION',
+      input: [1.0, NaN, 3.0, 4.0]
+    });
+
+    expect(result.status).toBe('ERROR');
+    expect(result.error).toContain('InvalidTensorValueError');
+  });
+
+  it('should parse logits tensor and compute calibrated softmax probabilities', async () => {
+    const provider = new OnnxModelProvider(metadata, Buffer.from('FAKE_ONNX_BYTES'));
+    (provider as any).loaded = true;
+    (provider as any).session = {
+      run: async () => ({
+        logits: { data: [-1.0, 0.0, 2.0] } // 3 classes: BENIGN, SCAM, PHISHING
+      })
+    };
+
+    const result = await provider.infer({
+      requestId: 'req-softmax',
+      task: 'INTENT_CLASSIFICATION',
+      input: [0.1, 0.2, 0.3, 0.4]
+    });
+
+    expect(result.status).toBe('SUCCESS');
+    expect(result.topLabel).toBe('PHISHING');
+    expect(result.predictions.PHISHING).toBeGreaterThan(result.predictions.BENIGN);
+    expect(result.predictions.PHISHING).toBeGreaterThan(result.predictions.SCAM);
+  });
 });
+

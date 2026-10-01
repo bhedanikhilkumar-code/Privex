@@ -28,6 +28,8 @@ export interface ModelMetadata {
   readonly isProductionArtifact: boolean;
   readonly providerName?: string;
   readonly description?: string;
+  readonly inputNames?: string[];
+  readonly outputNames?: string[];
 }
 
 // ==========================================
@@ -40,9 +42,18 @@ export interface InferenceRequest {
   readonly input: string | number[] | Float32Array;
   readonly context?: Record<string, unknown>;
   readonly timeoutMs?: number;
+  readonly abortSignal?: AbortSignal;
+  readonly modelInputs?: Record<string, unknown>;
 }
 
-export type InferenceStatus = 'SUCCESS' | 'UNCERTAIN' | 'FALLBACK' | 'ERROR';
+export type InferenceStatus =
+  | 'SUCCESS'
+  | 'MODEL_INFERRED'
+  | 'UNCERTAIN'
+  | 'FALLBACK'
+  | 'ERROR'
+  | 'DETERMINISTIC_FALLBACK'
+  | 'MODEL_UNAVAILABLE';
 
 export interface InferenceResult {
   readonly requestId: string;
@@ -88,6 +99,8 @@ export interface IntentClassificationResult {
   readonly evidenceToken: Evidence;
   readonly latencyMs: number;
   readonly isModelBacked: boolean;
+  readonly inferenceStatus: 'MODEL_INFERRED' | 'DETERMINISTIC_FALLBACK' | 'MODEL_UNAVAILABLE';
+  readonly modelMetadata?: ModelMetadata;
 }
 
 // ==========================================

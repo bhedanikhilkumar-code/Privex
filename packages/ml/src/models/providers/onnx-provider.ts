@@ -4,6 +4,7 @@ import {
   ModelMetadata
 } from '../../types';
 import { BaseModelProvider } from './model-provider';
+import { TextPreprocessor } from '../preprocessing/text-preprocessor';
 
 export interface OnnxSessionOptions {
   readonly executionProvider?: 'cpu' | 'wasm' | 'webgpu' | 'npu';
@@ -11,11 +12,20 @@ export interface OnnxSessionOptions {
   readonly graphOptimizationLevel?: 'disabled' | 'basic' | 'extended' | 'all';
 }
 
+function stableSoftmax(logits: number[]): number[] {
+  if (logits.length === 0) return [];
+  const max = Math.max(...logits);
+  const exps = logits.map(x => Math.exp(x - max));
+  const sum = exps.reduce((a, b) => a + b, 0);
+  return exps.map(x => (sum > 0 ? Math.round((x / sum) * 10000) / 10000 : 1 / logits.length));
+}
+
 /**
  * PRODUCTION-READY ONNX RUNTIME PROVIDER ABSTRACTION
  *
  * Implements the on-device inference contract for ONNX models.
- * Manages runtime session lifecycle, tensor input validation, and execution boundaries.
+ * Manages runtime session lifecycle, explicit input mapping, tokenization/preprocessing,
+ * tensor shape/type validation, output extraction with stable softmax, and abort cancellation.
  * Fails safely and gracefully when runtime binaries or model artifacts are unavailable,
  * guaranteeing zero silent crashes and zero cloud dependencies.
  */
@@ -25,6 +35,7 @@ export class OnnxModelProvider extends BaseModelProvider {
   private modelBuffer?: Uint8Array | Buffer;
   private sessionOptions: OnnxSessionOptions;
   private session: unknown | null = null;
+  private preprocessor: TextPreprocessor;
 
   constructor(
     metadata: ModelMetadata,
@@ -36,6 +47,10 @@ export class OnnxModelProvider extends BaseModelProvider {
     this.metadata = metadata;
     this.modelBuffer = modelBuffer;
     this.sessionOptions = sessionOptions ?? { executionProvider: 'cpu', numThreads: 1 };
+    const maxSeqLen = metadata.inputShape && metadata.inputShape.length > 1
+      ? metadata.inputShape[metadata.inputShape.length - 1]
+      : 128;
+    this.preprocessor = new TextPreprocessor({ maxSequenceLength: maxSeqLen });
   }
 
   /**
@@ -53,7 +68,7 @@ export class OnnxModelProvider extends BaseModelProvider {
     }
 
     try {
-      // In a production environment with onnxruntime-node or onnxruntime-web installed,
+      // In an environment with onnxruntime-node or onnxruntime-web installed,
       // create the InferenceSession from buffer.
       // If the native module is not installed in the current environment, fail safely.
       let ort: any;
@@ -86,6 +101,22 @@ export class OnnxModelProvider extends BaseModelProvider {
   public async infer(request: InferenceRequest): Promise<InferenceResult> {
     const startTime = Date.now();
 
+    // Check cancellation
+    if (request.abortSignal?.aborted) {
+      return {
+        requestId: request.requestId,
+        predictions: {},
+        topLabel: 'ABORTED',
+        topScore: 0.0,
+        confidence: 0.0,
+        uncertainty: 1.0,
+        latencyMs: 0.01,
+        status: 'ERROR',
+        modelMetadata: this.metadata,
+        error: 'InferenceAbortedError: inference was cancelled by abort signal'
+      };
+    }
+
     if (!this.loaded || !this.session) {
       return {
         requestId: request.requestId,
@@ -102,11 +133,53 @@ export class OnnxModelProvider extends BaseModelProvider {
     }
 
     try {
-      // Input tensor shape validation
-      const expectedShape = this.metadata.inputShape;
-      if (Array.isArray(request.input) && expectedShape.length > 0) {
-        const expectedElements = expectedShape.reduce((a, b) => a * b, 1);
-        if (request.input.length !== expectedElements) {
+      // 1. Build and validate input feeds
+      let feeds: Record<string, unknown> = {};
+
+      if (request.modelInputs) {
+        feeds = { ...request.modelInputs };
+      } else if (typeof request.input === 'string') {
+        // Tokenize and map text input into explicit model tensors
+        const preprocessed = this.preprocessor.preprocess(request.input);
+        const inputNames = this.metadata.inputNames ?? ['input_ids', 'attention_mask'];
+        const inputIdName = inputNames[0] || 'input_ids';
+        const maskName = inputNames[1] || 'attention_mask';
+
+        feeds[inputIdName] = {
+          data: preprocessed.inputIds,
+          dims: [1, preprocessed.inputIds.length],
+          type: 'int64'
+        };
+        feeds[maskName] = {
+          data: preprocessed.attentionMask,
+          dims: [1, preprocessed.attentionMask.length],
+          type: 'int64'
+        };
+      } else if (Array.isArray(request.input) || request.input instanceof Float32Array) {
+        // Numerical tensor input validation
+        const inputArray = Array.isArray(request.input) ? request.input : Array.from(request.input);
+        const expectedShape = this.metadata.inputShape;
+
+        if (expectedShape.length > 0) {
+          const expectedElements = expectedShape.reduce((a, b) => a * b, 1);
+          if (inputArray.length !== expectedElements) {
+            return {
+              requestId: request.requestId,
+              predictions: {},
+              topLabel: 'INVALID_INPUT',
+              topScore: 0.0,
+              confidence: 0.0,
+              uncertainty: 1.0,
+              latencyMs: Date.now() - startTime,
+              status: 'ERROR',
+              modelMetadata: this.metadata,
+              error: `TensorShapeMismatchError: input elements ${inputArray.length} != expected ${expectedElements}`
+            };
+          }
+        }
+
+        // Validate numerical finite values
+        if (inputArray.some(v => typeof v !== 'number' || !Number.isFinite(v))) {
           return {
             requestId: request.requestId,
             predictions: {},
@@ -117,28 +190,79 @@ export class OnnxModelProvider extends BaseModelProvider {
             latencyMs: Date.now() - startTime,
             status: 'ERROR',
             modelMetadata: this.metadata,
-            error: `TensorShapeMismatchError: input elements ${request.input.length} != expected ${expectedElements}`
+            error: 'InvalidTensorValueError: input contains NaN or non-finite numerical values'
           };
         }
+
+        const primaryInputName = this.metadata.inputNames?.[0] || 'input';
+        feeds[primaryInputName] = {
+          data: inputArray,
+          dims: expectedShape.length > 0 ? expectedShape : [1, inputArray.length],
+          type: 'float32'
+        };
       }
 
-      // Execute session run on underlying engine
+      // Check cancellation prior to execution
+      if (request.abortSignal?.aborted) {
+        return {
+          requestId: request.requestId,
+          predictions: {},
+          topLabel: 'ABORTED',
+          topScore: 0.0,
+          confidence: 0.0,
+          uncertainty: 1.0,
+          latencyMs: Date.now() - startTime,
+          status: 'ERROR',
+          modelMetadata: this.metadata,
+          error: 'InferenceAbortedError: inference was cancelled prior to session execution'
+        };
+      }
+
+      // 2. Execute session run on underlying engine
       const session = this.session as any;
-      const feeds: Record<string, unknown> = {};
-      // Execute inference via ONNX runtime session
       const outputMap = await session.run(feeds);
       const latencyMs = Math.max(0.1, Date.now() - startTime);
 
-      // Process tensor output classes
+      // 3. Process tensor output
       const predictions: Record<string, number> = {};
       let topLabel = 'UNKNOWN';
       let topScore = 0.0;
 
-      for (const cls of this.metadata.outputClasses) {
-        predictions[cls] = outputMap[cls]?.data?.[0] ?? 0.0;
-        if (predictions[cls] > topScore) {
-          topScore = predictions[cls];
-          topLabel = cls;
+      // Check if output is formatted as individual class keys or as a logits tensor
+      const outputKeys = Object.keys(outputMap);
+      const hasClassKeys = this.metadata.outputClasses.every(cls => cls in outputMap);
+
+      if (hasClassKeys) {
+        // Individual class probability outputs
+        for (const cls of this.metadata.outputClasses) {
+          const val = outputMap[cls]?.data?.[0] ?? outputMap[cls] ?? 0.0;
+          predictions[cls] = typeof val === 'number' ? Math.round(val * 10000) / 10000 : 0.0;
+          if (predictions[cls] > topScore) {
+            topScore = predictions[cls];
+            topLabel = cls;
+          }
+        }
+      } else {
+        // Single logits tensor output (e.g. outputMap.logits or first output key)
+        const logitsKey = this.metadata.outputNames?.[0] ?? outputKeys[0] ?? 'logits';
+        const rawTensor = outputMap[logitsKey];
+        const rawData = rawTensor?.data ? Array.from(rawTensor.data as ArrayLike<number>) : [];
+
+        if (rawData.length >= this.metadata.outputClasses.length) {
+          const probabilities = stableSoftmax(rawData.slice(0, this.metadata.outputClasses.length));
+          this.metadata.outputClasses.forEach((cls, idx) => {
+            predictions[cls] = probabilities[idx] ?? 0.0;
+            if (predictions[cls] > topScore) {
+              topScore = predictions[cls];
+              topLabel = cls;
+            }
+          });
+        } else {
+          // Fallback mapping if output length doesn't match class count
+          for (const cls of this.metadata.outputClasses) {
+            predictions[cls] = 0.0;
+          }
+          topLabel = this.metadata.outputClasses[0] || 'UNKNOWN';
         }
       }
 
@@ -154,7 +278,8 @@ export class OnnxModelProvider extends BaseModelProvider {
         uncertainty,
         latencyMs,
         status: 'SUCCESS',
-        modelMetadata: this.metadata
+        modelMetadata: this.metadata,
+        rawOutput: outputMap
       };
     } catch (err: any) {
       return {

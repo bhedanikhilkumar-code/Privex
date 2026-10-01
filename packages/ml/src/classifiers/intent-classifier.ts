@@ -30,7 +30,8 @@ export class ScamIntentClassifier {
           confidence: 1.0
         },
         latencyMs: 0.01,
-        isModelBacked: false
+        isModelBacked: false,
+        inferenceStatus: 'DETERMINISTIC_FALLBACK'
       };
     }
 
@@ -72,7 +73,9 @@ export class ScamIntentClassifier {
           uncertainty,
           evidenceToken,
           latencyMs: elapsed,
-          isModelBacked: true
+          isModelBacked: true,
+          inferenceStatus: 'MODEL_INFERRED',
+          modelMetadata: provider.metadata
         };
       } catch {
         // Fall through to deterministic intent heuristic
@@ -119,13 +122,16 @@ export class ScamIntentClassifier {
       indicator: `semantic-intent-${detectedIntent.toLowerCase().replace(/_/g, '-')}`
     };
 
+    const inferenceStatus = (this.modelLoader && this.providerId) ? 'MODEL_UNAVAILABLE' : 'DETERMINISTIC_FALLBACK';
+
     return {
       intent: detectedIntent,
       confidence,
       uncertainty,
       evidenceToken,
       latencyMs: elapsed,
-      isModelBacked: false
+      isModelBacked: false,
+      inferenceStatus
     };
   }
 }
