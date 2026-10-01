@@ -1,0 +1,109 @@
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { HomeScreen } from '../../screens/HomeScreen';
+import { UrlScannerScreen } from '../../screens/UrlScannerScreen';
+import { TextScannerScreen } from '../../screens/TextScannerScreen';
+import { FileScannerScreen } from '../../screens/FileScannerScreen';
+import { PrivacyScreen } from '../../screens/PrivacyScreen';
+import { SettingsScreen } from '../../screens/SettingsScreen';
+import { FrictionGateModal } from '../../components/FrictionGateModal';
+import { MobileSecurityAdapter } from '../../adapters/mobile-security-adapter';
+import { UrlScannerService } from '../../services/url-scanner.service';
+import { TextScannerService } from '../../services/text-scanner.service';
+import { FileScannerService } from '../../services/file-scanner.service';
+
+describe('Mobile Screen Components & Presentation Layer', () => {
+  const adapter = new MobileSecurityAdapter();
+  const urlService = new UrlScannerService(adapter);
+  const textService = new TextScannerService(adapter);
+  const fileService = new FileScannerService();
+
+  it('renders HomeScreen with title, quick actions, and posture card', async () => {
+    const navSpy = vi.fn();
+    render(<HomeScreen onNavigate={navSpy} onSelectResult={() => {}} />);
+
+    expect(screen.getByText(/PRIVATE PROTECTION/i)).toBeDefined();
+    expect(screen.getByText(/Scan URL/i)).toBeDefined();
+    expect(screen.getByText(/Scan Message/i)).toBeDefined();
+    expect(screen.getByText(/Inspect File/i)).toBeDefined();
+  });
+
+  it('renders UrlScannerScreen and executes scan on sample click', async () => {
+    render(<UrlScannerScreen scannerService={urlService} onNavigateHome={() => {}} />);
+
+    expect(screen.getByText(/On-Device URL Scanner/i)).toBeDefined();
+    const safeSampleBtn = screen.getByText(/Safe Baseline: https:\/\/google.com/i);
+    fireEvent.click(safeSampleBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Analysis Verdict/i)).toBeDefined();
+      expect(screen.getByText(/SAFE \/ ALLOWED/i)).toBeDefined();
+    }, { timeout: 4000 });
+  });
+
+  it('renders TextScannerScreen and executes scan on scam sample click', async () => {
+    render(<TextScannerScreen scannerService={textService} onNavigateHome={() => {}} />);
+
+    expect(screen.getByText(/On-Device Message & SMS Scanner/i)).toBeDefined();
+    const scamSampleBtn = screen.getByText(/Crypto Extortion/i);
+    fireEvent.click(scamSampleBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Analysis Verdict/i)).toBeDefined();
+    }, { timeout: 4000 });
+  });
+
+  it('renders FileScannerScreen and handles file inspection', async () => {
+    render(<FileScannerScreen scannerService={fileService} onNavigateHome={() => {}} />);
+
+    expect(screen.getByText(/On-Device File Inspection/i)).toBeDefined();
+    const fileSampleBtn = screen.getByText(/Test Deceptive Executable/i);
+    fireEvent.click(fileSampleBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText('invoice_document.pdf.exe')).toBeDefined();
+      expect(screen.getByText(/DANGEROUS \/ MALICIOUS/i)).toBeDefined();
+    });
+  });
+
+  it('enforces countdown gate inside FrictionGateModal', async () => {
+    const bypassSpy = vi.fn();
+    const cancelSpy = vi.fn();
+
+    render(
+      <FrictionGateModal
+        isOpen={true}
+        threatCategory="MALWARE_PHISH"
+        durationSec={2}
+        onConfirmBypass={bypassSpy}
+        onCancel={cancelSpy}
+      />
+    );
+
+    const bypassBtn = screen.getByRole('button', { name: /Proceed Anyway/i });
+    expect(bypassBtn.hasAttribute('disabled')).toBe(true);
+
+    const backBtn = screen.getByRole('button', { name: /Back to Safety/i });
+    fireEvent.click(backBtn);
+    expect(cancelSpy).toHaveBeenCalled();
+  });
+
+  it('renders PrivacyScreen and triggers crypto-shredder action', async () => {
+    render(<PrivacyScreen />);
+
+    expect(screen.getByText(/Privacy Architecture & Guarantees/i)).toBeDefined();
+    const shredBtn = screen.getByRole('button', { name: /Crypto-Shred All Local Data/i });
+    fireEvent.click(shredBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(/All local data and memory purged successfully/i)).toBeDefined();
+    });
+  });
+
+  it('renders SettingsScreen and handles allowlist interaction', async () => {
+    render(<SettingsScreen />);
+
+    expect(screen.getByText(/Mobile Protection Settings/i)).toBeDefined();
+    expect(screen.getByText(/Trusted Domains Allowlist/i)).toBeDefined();
+  });
+});
