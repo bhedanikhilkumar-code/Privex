@@ -112,6 +112,44 @@ export class QuarantineService {
   }
 
   /**
+   * Sanitizes a file name to prevent directory traversal and Windows device name attacks.
+   * Strips paths, control chars, and prefixes reserved names (CON, PRN, AUX, NUL, COM1-9, LPT1-9).
+   */
+  public static sanitizeFileName(rawName: string): string {
+    if (!rawName || typeof rawName !== 'string') {
+      return `quarantined_file_${Date.now()}`;
+    }
+
+    // 1. Remove null bytes and trim whitespace
+    let clean = rawName.replace(/\0/g, '').trim();
+
+    // 2. Extract base name to eliminate directory traversal sequences (../, ..\, /foo/bar, C:\foo)
+    clean = path.basename(clean);
+
+    // 3. Remove illegal filesystem characters (< > : " / \ | ? *)
+    clean = clean.replace(/[<>:"/\\|?*]/g, '_');
+
+    // 4. Check for Windows reserved device names (CON, PRN, AUX, NUL, COM1-9, LPT1-9)
+    const baseWithoutExt = clean.split('.')[0].toUpperCase();
+    const reservedNames = new Set([
+      'CON', 'PRN', 'AUX', 'NUL',
+      'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
+      'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
+    ]);
+
+    if (reservedNames.has(baseWithoutExt)) {
+      clean = `safe_${clean}`;
+    }
+
+    // 5. Final fallback if empty or just dots
+    if (!clean || clean === '.' || clean === '..') {
+      clean = `quarantined_file_${Date.now()}`;
+    }
+
+    return clean;
+  }
+
+  /**
    * Isolates a detected threat into the encrypted quarantine vault.
    * Enforces canonical threat verdict/severity policy (GAP-16) and symlink/system path protection.
    */
@@ -168,10 +206,12 @@ export class QuarantineService {
     // 8. Securely unlink the original malicious file from the user's filesystem
     await fs.promises.unlink(canonicalSource);
 
+    const safeFileName = QuarantineService.sanitizeFileName(threat.fileName || path.basename(canonicalSource));
+
     const item: QuarantineItem = {
       quarantineId,
       originalPath: canonicalSource,
-      fileName: threat.fileName,
+      fileName: safeFileName,
       fileSize: threat.fileSize,
       sha256: threat.sha256,
       threatName: threat.threatName,
@@ -201,14 +241,27 @@ export class QuarantineService {
       throw new Error(`CORRUPTED_VAULT: Quarantined blob missing at '${item.blobPath}'.`);
     }
 
-    // Path Traversal Defense on Destination
+    // Path Traversal & Windows Device Name Defense on Destination (GAP-24)
+    const safeFileName = QuarantineService.sanitizeFileName(item.fileName || path.basename(item.originalPath));
     let destinationPath = item.originalPath;
+
     if (customDestinationDir) {
       const canonicalDestDir = path.resolve(customDestinationDir);
-      if (canonicalDestDir.includes('..') || !fs.existsSync(canonicalDestDir)) {
+      if (!fs.existsSync(canonicalDestDir) || !fs.statSync(canonicalDestDir).isDirectory()) {
         throw new Error('INVALID_DESTINATION: Destination directory is invalid or inaccessible.');
       }
-      destinationPath = path.join(canonicalDestDir, item.fileName);
+      if (IpcValidator.isProtectedSystemPath(canonicalDestDir)) {
+        throw new Error('SECURITY_VIOLATION: Restoring to protected system directory is forbidden.');
+      }
+
+      const candidatePath = path.join(canonicalDestDir, safeFileName);
+      const resolvedDestination = path.resolve(candidatePath);
+
+      const expectedPrefix = canonicalDestDir.endsWith(path.sep) ? canonicalDestDir : canonicalDestDir + path.sep;
+      if (!resolvedDestination.startsWith(expectedPrefix)) {
+        throw new Error('SECURITY_VIOLATION: Destination path escapes target directory.');
+      }
+      destinationPath = resolvedDestination;
     }
 
     // Symlink & Collision Avoidance: Use lstatSync to detect dangling symlinks or existing files
