@@ -10,3 +10,8 @@ release/*.tar.gz
 .vite
 .vite-temp
 *.log
+.gradle/
+**/build/
+local.properties
+*.apk
+*.aab

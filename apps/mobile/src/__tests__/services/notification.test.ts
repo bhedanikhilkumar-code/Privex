@@ -71,4 +71,32 @@ describe('NotificationService (Security Alerts & Channels)', () => {
     const notif = await NotificationService.notifyScanResult(dangerous);
     expect(notif).toBeNull();
   });
+
+  it('invokes native Android bridge haptics and dispatchNotification when available', async () => {
+    const triggerWarningHaptics = vi.fn();
+    const dispatchNativeNotification = vi.fn().mockReturnValue(true);
+
+    (window as any).AndroidSecurityBridge = {
+      triggerWarningHaptics,
+      dispatchNativeNotification
+    };
+
+    const dangerous = {
+      ...baseResult,
+      verdict: Verdict.DANGEROUS,
+      threatCategory: 'CRYPTO_EXTORTION',
+      overallScore: 95
+    };
+
+    const notif = await NotificationService.notifyScanResult(dangerous);
+    expect(notif).not.toBeNull();
+    expect(triggerWarningHaptics).toHaveBeenCalledWith('CRITICAL');
+    expect(dispatchNativeNotification).toHaveBeenCalledWith(
+      expect.stringContaining('Dangerous Threat Blocked'),
+      expect.stringContaining('CRYPTO_EXTORTION'),
+      'HIGH'
+    );
+
+    delete (window as any).AndroidSecurityBridge;
+  });
 });

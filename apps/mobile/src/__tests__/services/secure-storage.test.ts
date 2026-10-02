@@ -66,4 +66,24 @@ describe('SecureStorageService (Settings & Crypto-Shredding)', () => {
     const historyAfter = await SecureStorageService.getScanHistory();
     expect(historyAfter).toEqual([]);
   });
+
+  it('interacts with native AndroidSecurityBridge secureStorage methods when available', async () => {
+    const nativeStore = new Map<string, string>();
+    (window as any).AndroidSecurityBridge = {
+      secureStorageGet: (k: string) => nativeStore.get(k) || null,
+      secureStoragePut: (k: string, v: string) => { nativeStore.set(k, v); return true; },
+      secureStorageClear: () => { nativeStore.clear(); return true; }
+    };
+
+    await SecureStorageService.saveSettings({ readingGrade: 8 });
+    expect(nativeStore.has('mobile_settings')).toBe(true);
+
+    const loaded = await SecureStorageService.getSettings();
+    expect(loaded.readingGrade).toBe(8);
+
+    await SecureStorageService.purgeAllData();
+    expect(nativeStore.size).toBe(0);
+
+    delete (window as any).AndroidSecurityBridge;
+  });
 });

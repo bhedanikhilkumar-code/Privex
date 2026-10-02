@@ -14,7 +14,13 @@ export class SecureStorageService {
 
   public static async getSettings(): Promise<MobileSettings> {
     try {
-      const data = this.memoryStore.get('mobile_settings');
+      let data: string | null = null;
+      if (typeof window !== 'undefined' && (window as any).AndroidSecurityBridge?.secureStorageGet) {
+        data = (window as any).AndroidSecurityBridge.secureStorageGet('mobile_settings');
+      }
+      if (!data) {
+        data = this.memoryStore.get('mobile_settings') || null;
+      }
       if (data) {
         const parsed = JSON.parse(data);
         return {
@@ -39,7 +45,11 @@ export class SecureStorageService {
       ...settings,
       allowlistDomains: settings.allowlistDomains ? [...settings.allowlistDomains] : [...current.allowlistDomains]
     };
-    this.memoryStore.set('mobile_settings', JSON.stringify(updated));
+    const serialized = JSON.stringify(updated);
+    if (typeof window !== 'undefined' && (window as any).AndroidSecurityBridge?.secureStoragePut) {
+      (window as any).AndroidSecurityBridge.secureStoragePut('mobile_settings', serialized);
+    }
+    this.memoryStore.set('mobile_settings', serialized);
     return updated;
   }
 
@@ -85,6 +95,9 @@ export class SecureStorageService {
    * Crypto-shredding: Immediately wipes all persisted and in-memory settings, history, and keys.
    */
   public static async purgeAllData(): Promise<void> {
+    if (typeof window !== 'undefined' && (window as any).AndroidSecurityBridge?.secureStorageClear) {
+      (window as any).AndroidSecurityBridge.secureStorageClear();
+    }
     this.memoryStore.clear();
   }
 }

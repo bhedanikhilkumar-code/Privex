@@ -21,6 +21,18 @@ export class NotificationService {
     }
 
     if (result.verdict === Verdict.DANGEROUS) {
+      if (typeof window !== 'undefined' && (window as any).AndroidSecurityBridge) {
+        const bridge = (window as any).AndroidSecurityBridge;
+        if (typeof bridge.triggerWarningHaptics === 'function') bridge.triggerWarningHaptics('CRITICAL');
+        if (typeof bridge.dispatchNativeNotification === 'function') {
+          bridge.dispatchNativeNotification(
+            '⚠️ Dangerous Threat Blocked',
+            `A ${result.threatCategory} threat was detected (${result.sanitizedTarget}). Do not interact with this content.`,
+            'HIGH'
+          );
+        }
+      }
+
       const notif: DispatchedNotification = {
         id: `notif-${Date.now()}`,
         channelId: 'threat_alerts',
@@ -34,6 +46,18 @@ export class NotificationService {
     }
 
     if (result.verdict === Verdict.SUSPICIOUS) {
+      if (typeof window !== 'undefined' && (window as any).AndroidSecurityBridge) {
+        const bridge = (window as any).AndroidSecurityBridge;
+        if (typeof bridge.triggerWarningHaptics === 'function') bridge.triggerWarningHaptics('SUSPICIOUS');
+        if (typeof bridge.dispatchNativeNotification === 'function') {
+          bridge.dispatchNativeNotification(
+            '⚡ Suspicious Content Warning',
+            `Potential scam or phishing indicators identified in scanned content.`,
+            'DEFAULT'
+          );
+        }
+      }
+
       const notif: DispatchedNotification = {
         id: `notif-${Date.now()}`,
         channelId: 'threat_alerts',
