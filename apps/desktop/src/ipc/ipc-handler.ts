@@ -1,4 +1,5 @@
 import * as os from 'os';
+import { IPC_CHANNELS } from './ipc-channels';
 import { IpcValidator } from './ipc-validator';
 import { ScannerService } from '../services/scanner.service';
 import { QuickScanService } from '../services/quick-scan.service';
@@ -14,7 +15,8 @@ import {
   DesktopProtectionStatus,
   DesktopSettings,
   DetectedThreat,
-  DesktopAssistantExplanation
+  DesktopAssistantExplanation,
+  ScanProgress
 } from '../types/desktop.types';
 
 export class IpcHandler {
@@ -67,10 +69,7 @@ export class IpcHandler {
   }
 
   public async handleStartCustomScan(targets: string[]) {
-    if (!Array.isArray(targets) || targets.length === 0) {
-      throw new Error('INVALID_TARGETS: Must provide at least one target path.');
-    }
-    const validated = targets.map((t) => IpcValidator.validatePath(t));
+    const validated = IpcValidator.validateScanTargets(targets);
     return this.scanner.scanPaths(validated, 'custom');
   }
 
@@ -172,5 +171,124 @@ export class IpcHandler {
   public handlePrivacyShred(): void {
     this.quarantine.purgeAllQuarantine();
     this.storage.purgeAllData();
+  }
+
+  /**
+   * Registers all allowed IPC channels onto an Electron ipcMain instance with origin validation
+   * and binds real-time scan progress events to the renderer webContents.
+   */
+  public registerElectronHandlers(
+    ipcMain: {
+      handle: (channel: string, listener: (event: any, ...args: any[]) => any) => void;
+    },
+    getWebContents?: () => { send: (channel: string, ...args: any[]) => void } | null | undefined
+  ): void {
+    const verifyOrigin = (event: any) => {
+      const senderUrl = event?.senderFrame?.url ?? 'file://local';
+      IpcValidator.validateSenderOrigin(senderUrl);
+    };
+
+    // Forward real-time progress events from ScannerService to Renderer
+    this.scanner.on('progress', (progress: ScanProgress) => {
+      const wc = getWebContents?.();
+      if (wc) {
+        wc.send(IPC_CHANNELS.SCAN_PROGRESS_EVENT, progress);
+      }
+    });
+
+    ipcMain.handle(IPC_CHANNELS.SCAN_START_QUICK, async (event) => {
+      verifyOrigin(event);
+      return this.handleStartQuickScan();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.SCAN_START_FULL, async (event, rootPath?: string) => {
+      verifyOrigin(event);
+      return this.handleStartFullScan(rootPath);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.SCAN_START_CUSTOM, async (event, targets: string[]) => {
+      verifyOrigin(event);
+      return this.handleStartCustomScan(targets);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.SCAN_CANCEL, (event) => {
+      verifyOrigin(event);
+      return this.handleCancelScan();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.SCAN_PAUSE, (event) => {
+      verifyOrigin(event);
+      return this.handlePauseScan();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.SCAN_RESUME, (event) => {
+      verifyOrigin(event);
+      return this.handleResumeScan();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.QUARANTINE_LIST, (event) => {
+      verifyOrigin(event);
+      return this.handleListQuarantine();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.QUARANTINE_ISOLATE, async (event, filePath: string) => {
+      verifyOrigin(event);
+      return this.handleIsolateFile(filePath);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.QUARANTINE_RESTORE, async (event, quarantineId: string, customDir?: string) => {
+      verifyOrigin(event);
+      return this.handleRestoreQuarantine(quarantineId, customDir);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.QUARANTINE_DELETE, async (event, quarantineId: string) => {
+      verifyOrigin(event);
+      return this.handleDeleteQuarantine(quarantineId);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.STATUS_GET, (event) => {
+      verifyOrigin(event);
+      return this.handleGetProtectionStatus();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.SETTINGS_GET, (event) => {
+      verifyOrigin(event);
+      return this.handleGetSettings();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.SETTINGS_SAVE, (event, settings: Partial<DesktopSettings>) => {
+      verifyOrigin(event);
+      return this.handleSaveSettings(settings);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.ASSISTANT_EXPLAIN, async (event, threat: DetectedThreat, level?: 'grade6' | 'grade8') => {
+      verifyOrigin(event);
+      return this.handleExplainThreat(threat, level);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.PROCESSES_AUDIT, async (event) => {
+      verifyOrigin(event);
+      return this.handleAuditProcesses();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.PERSISTENCE_AUDIT, async (event) => {
+      verifyOrigin(event);
+      return this.handleAuditPersistence();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.REMOVABLE_MEDIA_GET, async (event) => {
+      verifyOrigin(event);
+      return this.handleGetRemovableMedia();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.NETWORK_POSTURE_GET, async (event) => {
+      verifyOrigin(event);
+      return this.handleGetNetworkPosture();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.PRIVACY_SHRED, (event) => {
+      verifyOrigin(event);
+      return this.handlePrivacyShred();
+    });
   }
 }

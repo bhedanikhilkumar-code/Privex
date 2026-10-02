@@ -15,9 +15,15 @@ import { FileAnalyzer } from '../core/file-analyzer';
 export class ScannerService extends EventEmitter {
   private currentStatus: ScanStatus = 'idle';
   private currentScanId: string | null = null;
+  private currentScanType: ScanType = 'custom';
   private cancelRequested = false;
   private isPaused = false;
   private pauseResolver: (() => void) | null = null;
+  private activeStartTime = 0;
+  private activeFilesScanned = 0;
+  private activeBytesScanned = 0;
+  private activeSkippedCount = 0;
+  private activeErrorCount = 0;
 
   // Maximum file size to inspect full body (50 MB)
   private readonly MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
@@ -84,11 +90,18 @@ export class ScannerService extends EventEmitter {
   ): Promise<ScanResult> {
     const scanId = `scan-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
     this.currentScanId = scanId;
+    this.currentScanType = scanType;
     this.currentStatus = 'running';
     this.cancelRequested = false;
     this.isPaused = false;
 
     const startTime = Date.now();
+    this.activeStartTime = startTime;
+    this.activeFilesScanned = 0;
+    this.activeBytesScanned = 0;
+    this.activeSkippedCount = 0;
+    this.activeErrorCount = 0;
+
     let totalFilesScanned = 0;
     let totalBytesScanned = 0;
     const threats: DetectedThreat[] = [];
@@ -107,6 +120,7 @@ export class ScannerService extends EventEmitter {
         const canonicalTarget = path.resolve(target);
         if (!fs.existsSync(canonicalTarget)) {
           skippedFiles.push({ path: target, reason: 'Path does not exist' });
+          this.activeSkippedCount = skippedFiles.length;
           continue;
         }
 
@@ -117,7 +131,12 @@ export class ScannerService extends EventEmitter {
             threats,
             skippedFiles,
             errors,
-            (bytes) => { totalBytesScanned += bytes; totalFilesScanned++; }
+            (bytes) => {
+              totalBytesScanned += bytes;
+              totalFilesScanned++;
+              this.activeBytesScanned = totalBytesScanned;
+              this.activeFilesScanned = totalFilesScanned;
+            }
           );
         } else if (rootStat.isDirectory()) {
           await this.traverseDirectory(
@@ -127,11 +146,17 @@ export class ScannerService extends EventEmitter {
             skippedFiles,
             errors,
             fileFilter,
-            (bytes) => { totalBytesScanned += bytes; totalFilesScanned++; }
+            (bytes) => {
+              totalBytesScanned += bytes;
+              totalFilesScanned++;
+              this.activeBytesScanned = totalBytesScanned;
+              this.activeFilesScanned = totalFilesScanned;
+            }
           );
         }
       } catch (err: any) {
         errors.push({ path: target, error: err.message || 'Unknown traversal error' });
+        this.activeErrorCount = errors.length;
       }
     }
 
@@ -150,6 +175,7 @@ export class ScannerService extends EventEmitter {
     const result: ScanResult = {
       scanId,
       scanType,
+      status: this.currentStatus,
       totalFilesScanned,
       totalBytesScanned,
       durationMs,
@@ -180,11 +206,13 @@ export class ScannerService extends EventEmitter {
       const realDirPath = fs.realpathSync(dirPath);
       if (visitedRealPaths.has(realDirPath)) {
         skippedFiles.push({ path: dirPath, reason: 'Symlink recursion cycle avoided' });
+        this.activeSkippedCount = skippedFiles.length;
         return;
       }
       visitedRealPaths.add(realDirPath);
     } catch (err: any) {
       skippedFiles.push({ path: dirPath, reason: `Unresolvable realpath: ${err.message}` });
+      this.activeSkippedCount = skippedFiles.length;
       return;
     }
 
@@ -194,8 +222,10 @@ export class ScannerService extends EventEmitter {
     } catch (err: any) {
       if (err.code === 'EACCES' || err.code === 'EPERM') {
         skippedFiles.push({ path: dirPath, reason: 'Permission denied (access restricted)' });
+        this.activeSkippedCount = skippedFiles.length;
       } else {
         errors.push({ path: dirPath, error: err.message || 'Error reading directory' });
+        this.activeErrorCount = errors.length;
       }
       return;
     }
@@ -213,6 +243,7 @@ export class ScannerService extends EventEmitter {
             if (targetStat.isDirectory()) {
               if (visitedRealPaths.has(linkTarget)) {
                 skippedFiles.push({ path: fullPath, reason: 'Symlink loop detected' });
+                this.activeSkippedCount = skippedFiles.length;
                 continue;
               }
               await this.traverseDirectory(
@@ -231,6 +262,7 @@ export class ScannerService extends EventEmitter {
             }
           } catch {
             skippedFiles.push({ path: fullPath, reason: 'Broken symlink target' });
+            this.activeSkippedCount = skippedFiles.length;
           }
         } else if (entry.isDirectory()) {
           await this.traverseDirectory(
@@ -249,6 +281,7 @@ export class ScannerService extends EventEmitter {
         }
       } catch (err: any) {
         errors.push({ path: fullPath, error: err.message || 'File processing error' });
+        this.activeErrorCount = errors.length;
       }
     }
   }
@@ -265,6 +298,7 @@ export class ScannerService extends EventEmitter {
 
       if (stat.size > this.MAX_FILE_SIZE_BYTES) {
         skippedFiles.push({ path: filePath, reason: `File exceeds size limit (${Math.round(stat.size / 1024 / 1024)} MB)` });
+        this.activeSkippedCount = skippedFiles.length;
         return;
       }
 
@@ -294,26 +328,31 @@ export class ScannerService extends EventEmitter {
     } catch (err: any) {
       if (err.code === 'EACCES' || err.code === 'EPERM' || err.code === 'EBUSY') {
         skippedFiles.push({ path: filePath, reason: `File locked or permission denied (${err.code})` });
+        this.activeSkippedCount = skippedFiles.length;
       } else {
         errors.push({ path: filePath, error: err.message || 'File analysis error' });
+        this.activeErrorCount = errors.length;
       }
     }
   }
 
   private emitProgress(currentPath: string, threatsFound: number): void {
+    const elapsedMs = Math.max(1, Date.now() - this.activeStartTime);
+    const scanSpeedFilesPerSec = Math.round((this.activeFilesScanned / (elapsedMs / 1000)) * 10) / 10;
+
     const progress: ScanProgress = {
       scanId: this.currentScanId || 'unknown',
-      scanType: 'custom',
+      scanType: this.currentScanType,
       status: this.currentStatus,
-      filesScanned: 0,
+      filesScanned: this.activeFilesScanned,
       threatsFound,
       currentPath,
-      bytesScanned: 0,
-      skippedCount: 0,
-      errorCount: 0,
-      startTime: 0,
-      elapsedMs: 0,
-      scanSpeedFilesPerSec: 0
+      bytesScanned: this.activeBytesScanned,
+      skippedCount: this.activeSkippedCount,
+      errorCount: this.activeErrorCount,
+      startTime: this.activeStartTime,
+      elapsedMs,
+      scanSpeedFilesPerSec
     };
     this.emit('progress', progress);
   }

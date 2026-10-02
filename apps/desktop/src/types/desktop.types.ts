@@ -46,6 +46,7 @@ export interface ScanErrorItem {
 export interface ScanResult {
   scanId: string;
   scanType: ScanType;
+  status?: ScanStatus;
   totalFilesScanned: number;
   totalBytesScanned: number;
   durationMs: number;
