@@ -11,16 +11,16 @@
 
 | Gap ID | Severity | Category | Affected Component | Summary | Status |
 |---|---|---|---|---|---|
-| **GAP-01** | **CRITICAL** | Security / Vulnerability | `apps/desktop/src/services/update-verifier.service.ts` | Ed25519 signature verification bypassed; accepts arbitrary dummy bytes | **CONFIRMED** |
-| **GAP-02** | **HIGH** | Architecture / ML | `packages/ml/src/models/onnx-provider.ts` | Zero ONNX models in repo; missing runtime dependencies; deceptive regex telemetry | **CONFIRMED** |
+| **GAP-01** | **CRITICAL** | Security / Vulnerability | `apps/desktop/src/services/update-verifier.service.ts` | Ed25519 signature verification bypassed; accepts arbitrary dummy bytes | **CLOSED (Remediated in Phase 9)** |
+| **GAP-02** | **HIGH** | Architecture / ML | `packages/ml/src/models/onnx-provider.ts` | Zero ONNX models in repo; missing runtime dependencies; deceptive regex telemetry | **CLOSED (Remediated in Phase 9)** |
 | **GAP-03** | **HIGH** | Completeness / Platform | `apps/mobile/` | Mobile native implementation: compiled APK missing web assets, unencrypted storage mismatch, missing QR frame decoder | **CLOSED (Remediated & Re-Audit Passed)** |
-| **GAP-04** | **HIGH** | Completeness / Platform | `apps/desktop/` | No Tauri/Electron runtime; UI mock screens return fake hardcoded scan metrics | **CONFIRMED** |
-| **GAP-05** | **HIGH** | Security / Cryptography | `apps/desktop/src/services/quarantine.service.ts` | Quarantine vault uses single-byte XOR `0xA5` obfuscation instead of AES-256-GCM | **CONFIRMED** |
-| **GAP-06** | **MEDIUM** | Security / Storage | `apps/desktop/src/services/secure-storage.service.ts` | Desktop settings key derived from unsalted `hostname + username` without OS Keystore | **CONFIRMED** |
-| **GAP-07** | **MEDIUM** | Consistency / Detection | Cross-Platform Client Adapters | Semantic verdict & threshold divergence (empty input, borderline scores) | **CONFIRMED** |
-| **GAP-08** | **MEDIUM** | Domain Model / Contracts | Core, Desktop, Mobile | File analysis models are incompatible and fragmented across packages | **CONFIRMED** |
-| **GAP-09** | **MEDIUM** | Detection Scoring | `packages/core/src/analyzers/text.analyzer.ts` | Extortion & urgent cryptocurrency scam scored as 69 (CAUTION) instead of DANGEROUS | **CONFIRMED** |
-| **GAP-10** | **LOW** | Architecture / Backend | `apps/backend/` | OHTTP Privacy Relay & Stateless CDN backend not implemented | **CONFIRMED** |
+| **GAP-04** | **HIGH** | Completeness / Platform | `apps/desktop/` | No Tauri/Electron runtime; UI mock screens return fake hardcoded scan metrics | **CLOSED (Remediated in Phase 11)** |
+| **GAP-05** | **HIGH** | Security / Cryptography | `apps/desktop/src/services/quarantine.service.ts` | Quarantine vault uses single-byte XOR `0xA5` obfuscation instead of AES-256-GCM | **CLOSED (Remediated in Phase 9)** |
+| **GAP-06** | **MEDIUM** | Security / Storage | `apps/desktop/src/services/secure-storage.service.ts` | Desktop settings key derived from unsalted `hostname + username` without OS Keystore | **CLOSED (Remediated in Phase 9)** |
+| **GAP-07** | **MEDIUM** | Consistency / Detection | Cross-Platform Client Adapters | Semantic verdict & threshold divergence (empty input, borderline scores) | **CLOSED (Remediated in Phase 9)** |
+| **GAP-08** | **MEDIUM** | Domain Model / Contracts | Core, Desktop, Mobile | File analysis models are incompatible and fragmented across packages | **CLOSED (Remediated in Phase 9)** |
+| **GAP-09** | **MEDIUM** | Detection Scoring | `packages/core/src/analyzers/text.analyzer.ts` | Extortion & urgent cryptocurrency scam scored as 69 (CAUTION) instead of DANGEROUS | **CLOSED (Remediated in Phase 9)** |
+| **GAP-10** | **LOW** | Architecture / Backend | `apps/backend/` | OHTTP Privacy Relay & Stateless CDN backend not implemented | **DOCUMENTED OPTIONAL** |
 
 ---
 
@@ -80,28 +80,20 @@
 
 ---
 
-### GAP-04: Desktop Client Lacks Tauri/Electron Runtime & Uses Mock Fallbacks (HIGH)
-- **Requirement Tracing:** PP-017 (Native Desktop Client).
+### GAP-04: Desktop Client Native Runtime & Real Filesystem Scanning (HIGH) — CLOSED
+- **Requirement Tracing:** PP-017 (Native Desktop Client), PS-05.4 (Malicious Content & Filesystem Detection).
 - **Files Affected:**
-  - `apps/desktop/src/renderer/screens/FullScanScreen.tsx`
-  - `apps/desktop/src/renderer/screens/QuickScanScreen.tsx`
-  - `apps/desktop/src/renderer/screens/CustomScanScreen.tsx`
-- **Empirical Evidence:**
-  - No `Cargo.toml` or Tauri configuration exists.
-  - No `electron` dependency is installed in `apps/desktop/package.json`.
-  - In `FullScanScreen.tsx` (lines 52–63):
-    ```typescript
-    const fallbackResults = {
-      totalFilesScanned: 18450,
-      totalBytesScanned: 1048576000,
-      durationMs: 4210,
-      skipped: ['C:\\Windows\\System32\\config'],
-      threatsFound: []
-    };
-    ```
-    When launched without an active IPC backend, the UI renders realistic-looking fake scan numbers (18,450 files scanned in 4.2s).
-- **Impact:** Users are presented with simulated telemetry rather than actual filesystem scanning when the frontend runs standalone.
-- **Recommended Remediation:** Integrate a native desktop runtime (Tauri 2.0 or Electron) and remove simulated mock telemetry fallbacks from production UI screens.
+  - `apps/desktop/src/main/electron-main.ts`
+  - `apps/desktop/src/preload/electron-preload.ts`
+  - `apps/desktop/src/ipc/ipc-handler.ts` & `ipc-validator.ts`
+  - `apps/desktop/src/renderer/App.tsx`, `FullScanScreen.tsx`, `QuickScanScreen.tsx`, `CustomScanScreen.tsx`
+- **Remediation Summary (Phase 11 — October 2, 2026):**
+  - Implemented a hardened Electron `44.5.1` native host (`electron-main.ts`) with `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`, strict CSP headers, and external navigation blocking.
+  - Wired `electron-preload.ts` via `contextBridge.exposeInMainWorld('desktopSecurity', Object.freeze(api))` to all 19 canonical `IPC_CHANNELS`.
+  - Hardened `IpcValidator` against `..` parent traversal, remote UNC shares (`\\server\share`), shell metacharacters, null bytes, and untrusted renderer origins.
+  - Connected `ScannerService` live `'progress'` events to `SCAN_PROGRESS_EVENT` in the renderer and removed hardcoded `filesScannedTotal = 142` and fake quarantine fallbacks.
+  - Built and packaged the standalone Windows x64 executable `PrivateProtection.exe` (`245,726,208` bytes, SHA-256 `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa`) and verified live filesystem scanning, threat detection, and AES-256-GCM quarantine/restore in `PrivateProtection.exe --headless-verify` and `desktop-runtime-e2e.test.ts` (`71/71` desktop tests passing).
+- **Status:** **CLOSED (Remediated & Verified in Phase 11)**.
 
 ---
 

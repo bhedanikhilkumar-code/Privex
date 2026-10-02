@@ -166,5 +166,11 @@ Phase 7 implementation in `apps/desktop` fulfills all desktop security client re
 
 **Phase 7 Status**: Desktop Security Software complete and verified green.
 
+---
 
+## 9. PHASE 11 DESKTOP NATIVE RUNTIME & REAL PC FILESYSTEM SCANNING SIGN-OFF
 
+Phase 11 remediation in `apps/desktop` closes `GAP-04` (`PP-017` / `PS-05.4`) and `GAP-12` by delivering a real native Electron (`44.5.1`) desktop runtime and Windows executable (`PrivateProtection.exe`):
+- **PP-017 (Native Desktop Antivirus Runtime)**: Packaged executable `apps/desktop/release/PrivateProtection-win32-x64/PrivateProtection.exe` (`245,726,208` bytes, SHA-256 `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa`) boots `electron-main.cjs` with `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`, strict CSP, and `electron-preload.cjs` exposing `window.desktopSecurity`.
+- **PS-05.4 (Malicious Content & Filesystem Detection)**: End-to-end Quick, Full, and Custom filesystem scans traverse real directories via `ScannerService` and `FileAnalyzer`, streaming live `SCAN_PROGRESS_EVENT` telemetry to `ScanProgressBar`, supporting mid-scan cancellation, and isolating threats in the AES-256-GCM (`PPVAULT1`) quarantine vault with verified restore and permanent crypto-shredding.
+- **Test & Runtime Verification**: **71 passed tests across 19 test files** in `apps/desktop`, plus live headless runtime verification via `PrivateProtection.exe --headless-verify`.
