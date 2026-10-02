@@ -13,7 +13,7 @@
 |---|---|---|---|---|---|
 | **GAP-01** | **CRITICAL** | Security / Vulnerability | `apps/desktop/src/services/update-verifier.service.ts` | Ed25519 signature verification bypassed; accepts arbitrary dummy bytes | **CONFIRMED** |
 | **GAP-02** | **HIGH** | Architecture / ML | `packages/ml/src/models/onnx-provider.ts` | Zero ONNX models in repo; missing runtime dependencies; deceptive regex telemetry | **CONFIRMED** |
-| **GAP-03** | **HIGH** | Completeness / Platform | `apps/mobile/` | Mobile native implementation: compiled APK missing web assets, unencrypted storage mismatch, missing QR frame decoder | **OPEN (Audit Failed)** |
+| **GAP-03** | **HIGH** | Completeness / Platform | `apps/mobile/` | Mobile native implementation: compiled APK missing web assets, unencrypted storage mismatch, missing QR frame decoder | **CLOSED (Remediated & Re-Audit Passed)** |
 | **GAP-04** | **HIGH** | Completeness / Platform | `apps/desktop/` | No Tauri/Electron runtime; UI mock screens return fake hardcoded scan metrics | **CONFIRMED** |
 | **GAP-05** | **HIGH** | Security / Cryptography | `apps/desktop/src/services/quarantine.service.ts` | Quarantine vault uses single-byte XOR `0xA5` obfuscation instead of AES-256-GCM | **CONFIRMED** |
 | **GAP-06** | **MEDIUM** | Security / Storage | `apps/desktop/src/services/secure-storage.service.ts` | Desktop settings key derived from unsalted `hostname + username` without OS Keystore | **CONFIRMED** |
@@ -69,19 +69,14 @@
 
 ---
 
-### GAP-03: Mobile Native Implementation Blockers (HIGH) — OPEN (AUDIT FAILED)
+### GAP-03: Mobile Native Implementation Blockers (HIGH) — CLOSED
 - **Requirement Tracing:** PP-016 (Native Mobile App).
 - **Files Affected:** `apps/mobile/`
-- **Phase 10 Progress:**
-  - Authored Android native application shell: `MainApplication.java` and `MainActivity.java` with `@JavascriptInterface` `AndroidSecurityBridge`.
-  - Built real APK (`app-debug.apk`, 3.81 MB) and installed on Android 17 emulator (`Medium_Phone`).
-  - Added on-device `CameraScannerService` and intent handlers for `ACTION_SEND` and custom deep links.
-- **Independent Audit Findings (Audit ID: `AUDIT-PHASE-10-MOBILE-001`):**
-  1. **CRITICAL:** Missing web assets in APK (`src/main/assets` does not exist). Runtime logcat reveals `cr_AndroidProtocolHandler: Unable to open asset URL: file:///android_asset/index.html`. App renders blank screen on device.
-  2. **HIGH (Security):** Secure storage implementation mismatch. Code uses plain unencrypted `Context.getSharedPreferences(..., Context.MODE_PRIVATE)` stored as raw XML. Keystore / `EncryptedSharedPreferences` / `MasterKey` never instantiated despite report claims.
-  3. **HIGH (Functionality):** Camera QR scanner lacks a computer vision barcode decoder (no ZXing/ML Kit/jsQR). Only string-level routing exists.
-  4. **MEDIUM (Test Quality):** 100% of mobile unit tests run in Node.js/JSDOM with mocked bridges; zero tests run on the native Android JVM or emulator.
-- **Status:** **REMAINS OPEN / BLOCKER (Phase 10 Independent Audit Failed)**.
+- **Audit History:**
+  - `AUDIT-PHASE-10-MOBILE-001` (October 2, 2026): **FAILED**. Identified missing web assets in APK, unencrypted `SharedPreferences` mismatch, missing camera QR frame decoder, bridge security exposure, and cold-start race conditions.
+  - `REPORT-PHASE-10-REMEDIATION-001` (October 2, 2026): Remediated all 5 defects via Vite build/sync pipeline, `SecureStorageManager` with Android Keystore AES-256-GCM, ZXing 3.5.3 CV QR decoder, `WebViewAssetLoader` virtual host origin isolation, and atomic pending intent queue.
+  - `AUDIT-PHASE-10-MOBILE-REAUDIT-002` (October 2, 2026): **PASSED**. Empirical on-device verification on Android 17 emulator (`Medium_Phone`, API 37 x86_64). APK contains web assets (`7.42 MB`, SHA-256 `99B8828E...`), storage XML confirmed Tink encrypted (`AesSivKey`/`AesGcmKey`, zero plaintext), ZXing decodes camera frames, 8 JVM unit tests + 2 on-device connected instrumentation tests + 56 Vitest tests passing.
+- **Status:** **CLOSED (Remediated & Re-Audit Passed)**.
 
 ---
 
