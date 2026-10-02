@@ -16,6 +16,9 @@ export const DevicePostureCard: React.FC<DevicePostureCardProps> = ({ posture, o
   } else if (posture.overallHealth === 'WARNING') {
     badgeColor = '#f59e0b';
     badgeLabel = 'MODERATE POSTURE';
+  } else if (posture.overallHealth === 'UNKNOWN') {
+    badgeColor = '#64748b';
+    badgeLabel = 'POSTURE UNKNOWN';
   }
 
   return (

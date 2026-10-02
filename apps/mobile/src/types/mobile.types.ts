@@ -32,7 +32,7 @@ export interface DeviceSecurityPosture {
   screenLockConfigured: boolean;
   mockLocationsEnabled: boolean;
   unknownSourcesEnabled: boolean;
-  overallHealth: 'HEALTHY' | 'WARNING' | 'RISK';
+  overallHealth: 'HEALTHY' | 'WARNING' | 'RISK' | 'UNKNOWN';
   recommendations: string[];
   lastCheckedTimestamp: number;
 }

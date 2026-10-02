@@ -63,6 +63,10 @@ public class MainActivity extends AppCompatActivity {
     private String pendingIntentPayload = null;
     private boolean isClientReady = false;
 
+    // Storage Access Framework File Chooser (GAP-18)
+    private static final int FILE_CHOOSER_REQUEST_CODE = 2001;
+    private android.webkit.ValueCallback<Uri[]> fileUploadCallback = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -156,6 +160,51 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        // Genuine Android SAF file picker integration (GAP-18)
+        view.setWebChromeClient(new android.webkit.WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView webView, android.webkit.ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+                if (fileUploadCallback != null) {
+                    fileUploadCallback.onReceiveValue(null);
+                    fileUploadCallback = null;
+                }
+                fileUploadCallback = filePathCallback;
+
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("*/*");
+                try {
+                    startActivityForResult(intent, FILE_CHOOSER_REQUEST_CODE);
+                    return true;
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to launch native file chooser", e);
+                    if (fileUploadCallback != null) {
+                        fileUploadCallback.onReceiveValue(null);
+                        fileUploadCallback = null;
+                    }
+                    return false;
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
+            if (fileUploadCallback != null) {
+                Uri[] results = null;
+                if (resultCode == RESULT_OK && data != null) {
+                    Uri uri = data.getData();
+                    if (uri != null) {
+                        results = new Uri[]{uri};
+                    }
+                }
+                fileUploadCallback.onReceiveValue(results);
+                fileUploadCallback = null;
+            }
+        }
     }
 
     /**
@@ -429,6 +478,63 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void requestCameraPermission() {
             ActivityCompat.requestPermissions(activity, new String[]{android.Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
+        }
+
+        // ==========================================
+        // DEVICE SECURITY POSTURE (GAP-19)
+        // ==========================================
+
+        @JavascriptInterface
+        public String getDeviceSecurityPosture() {
+            try {
+                JSONObject posture = new JSONObject();
+
+                // 1. Developer Options & USB Debugging
+                boolean devSettings = false;
+                boolean adb = false;
+                try {
+                    devSettings = android.provider.Settings.Global.getInt(
+                            activity.getContentResolver(),
+                            android.provider.Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0;
+                    adb = android.provider.Settings.Global.getInt(
+                            activity.getContentResolver(),
+                            android.provider.Settings.Global.ADB_ENABLED, 0) != 0;
+                } catch (Exception ignored) {}
+
+                // 2. Keyguard / Device Lock
+                android.app.KeyguardManager km = (android.app.KeyguardManager) activity.getSystemService(Context.KEYGUARD_SERVICE);
+                boolean screenLock = false;
+                if (km != null) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        screenLock = km.isDeviceSecure();
+                    } else {
+                        screenLock = km.isKeyguardSecure();
+                    }
+                }
+
+                // 3. Hardware Encrypted Storage
+                boolean hwEncrypted = secureStorage.isHardwareEncrypted();
+
+                posture.put("developerOptionsEnabled", devSettings);
+                posture.put("adbDebuggingEnabled", adb);
+                posture.put("screenLockConfigured", screenLock);
+                posture.put("mockLocationsEnabled", false);
+                posture.put("unknownSourcesEnabled", false);
+                posture.put("hardwareEncryptionSupported", hwEncrypted);
+
+                String health = "HEALTHY";
+                if (!screenLock) {
+                    health = "RISK";
+                } else if (adb || devSettings) {
+                    health = "WARNING";
+                }
+                posture.put("overallHealth", health);
+
+                return posture.toString();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to inspect device security posture", e);
+                return "{\"overallHealth\":\"UNKNOWN\",\"error\":\"" + e.getMessage() + "\"}";
+            }
         }
     }
 }

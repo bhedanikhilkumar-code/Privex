@@ -11,8 +11,48 @@ interface FileScannerScreenProps {
 
 export const FileScannerScreen: React.FC<FileScannerScreenProps> = ({ scannerService, onNavigateHome }) => {
   const [result, setResult] = useState<FileInspectionResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size === 0) {
+      setErrorMessage('Selected file is empty (0 bytes).');
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      // Read first 8,192 bytes for header analysis and entropy calculation
+      const sliceSize = Math.min(8192, file.size);
+      const sliceBlob = file.slice(0, sliceSize);
+      const arrayBuffer = await sliceBlob.arrayBuffer();
+      const headerBytes = Array.from(new Uint8Array(arrayBuffer));
+
+      const inspection = scannerService.inspectFile({
+        name: file.name,
+        sizeBytes: file.size,
+        mimeType: file.type || 'application/octet-stream',
+        headerBytes
+      });
+      setResult(inspection);
+    } catch (err: any) {
+      setErrorMessage(`Failed to inspect file: ${err?.message || 'Read error'}`);
+    } finally {
+      setIsLoading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
 
   const simulateFileScan = (fileName: string, mime: string, header: number[]) => {
+    setErrorMessage(null);
     const inspection = scannerService.inspectFile({
       name: fileName,
       sizeBytes: header.length * 1024,
@@ -41,6 +81,65 @@ export const FileScannerScreen: React.FC<FileScannerScreenProps> = ({ scannerSer
         <span style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'block', marginBottom: '1rem' }}>
           Single-file scoped analysis via Android Storage Access Framework
         </span>
+
+        {/* Hidden SAF Native File Input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          data-testid="saf-file-input"
+          onChange={handleFileSelect}
+          style={{ display: 'none' }}
+        />
+
+        {/* Primary Real File Chooser Button */}
+        <button
+          type="button"
+          data-testid="choose-file-btn"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isLoading}
+          style={{
+            width: '100%',
+            padding: '0.85rem',
+            backgroundColor: '#3b82f6',
+            border: 'none',
+            borderRadius: '10px',
+            color: '#ffffff',
+            fontWeight: 700,
+            fontSize: '0.95rem',
+            cursor: isLoading ? 'not-allowed' : 'pointer',
+            marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem'
+          }}
+        >
+          <span>📁</span>
+          <span>{isLoading ? 'Reading File Bytes...' : 'Choose File from Storage (SAF)'}</span>
+        </button>
+
+        {errorMessage && (
+          <div
+            data-testid="file-error-banner"
+            style={{
+              padding: '0.6rem',
+              backgroundColor: '#451a1a',
+              border: '1px solid #ef4444',
+              borderRadius: '8px',
+              color: '#fca5a5',
+              fontSize: '0.8rem',
+              marginBottom: '1rem'
+            }}
+          >
+            {errorMessage}
+          </div>
+        )}
+
+        <div style={{ borderTop: '1px solid #334155', paddingTop: '1rem', marginBottom: '0.5rem' }}>
+          <span style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Or Run Quick Verification Samples
+          </span>
+        </div>
 
         {/* Test sample files */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', textAlign: 'left' }}>
