@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://appassets.androidplatform.net; script-src 'self' 'unsafe-inline' https://appassets.androidplatform.net; style-src 'self' 'unsafe-inline' https://appassets.androidplatform.net; img-src 'self' data: blob: https://appassets.androidplatform.net; media-src 'self' blob:; connect-src 'self' https://appassets.androidplatform.net;" />
+    <meta name="theme-color" content="#0b1120" />
+    <meta name="description" content="Private Protection Mobile — On-Device Security & Phishing Protection for Android" />
+    <title>PRIVATE PROTECTION</title>
+    <style>
+      :root {
+        --bg-primary: #0b1120;
+        --bg-card: #1e293b;
+        --text-primary: #f8fafc;
+        --text-muted: #94a3b8;
+        --border-color: #334155;
+        --color-safe: #10b981;
+        --color-caution: #f59e0b;
+        --color-danger: #ef4444;
+        --color-brand: #38bdf8;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+        line-height: 1.5;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      #root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
