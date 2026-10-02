@@ -43,9 +43,10 @@ describe('DetectionPipeline', () => {
     expect(Array.isArray(result.evidence)).toBe(true);
   });
 
-  it('should handle invalid input gracefully', async () => {
+  it('should handle invalid input gracefully with fail-closed caution', async () => {
     const result = await pipeline.scan({ type: 'unknown' as any, content: null as any });
-    expect(result.action).toBe('ALLOW');
+    expect(result.action).toBe('WARN');
+    expect(result.verdict).toBe('CAUTION');
     expect(result.error).toBeDefined();
   });
 

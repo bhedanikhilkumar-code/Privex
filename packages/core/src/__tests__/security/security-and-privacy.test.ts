@@ -83,12 +83,14 @@ describe('Security Hardening & Privacy Audits (Phase 2)', () => {
 
   it('Fail-Closed: should safely handle malformed, null, or empty scan requests without crashing', async () => {
     const emptyResult = await pipeline.scan({} as any);
-    expect(emptyResult.verdict).toBe(Verdict.ALLOW);
-    expect(emptyResult.riskCategory).toBe(RiskCategory.SAFE);
+    expect(emptyResult.verdict).toBe(Verdict.CAUTION);
+    expect(emptyResult.riskCategory).toBe(RiskCategory.SUSPICIOUS);
+    expect(emptyResult.score).toBe(50);
     expect(emptyResult.error).toBeDefined();
 
     const nullResult = await pipeline.scan({ input: null as any, inputType: null as any });
-    expect(nullResult.verdict).toBe(Verdict.ALLOW);
+    expect(nullResult.verdict).toBe(Verdict.CAUTION);
+    expect(nullResult.score).toBe(50);
     expect(nullResult.error).toBeDefined();
   });
 });

@@ -79,13 +79,22 @@ export class RiskScorer {
     let criticalOverrideScore = 0;
 
     const normalizedTokens = evidence.map((e: any) => {
-      const rawScore = typeof e.scoreContribution === 'number'
-        ? e.scoreContribution
-        : (typeof e.weight === 'number' ? e.weight : 20);
+      let rawScore: number;
+      if (typeof e.scoreContribution === 'number' && Number.isFinite(e.scoreContribution)) {
+        rawScore = e.scoreContribution;
+      } else if (typeof e.weight === 'number' && Number.isFinite(e.weight)) {
+        rawScore = e.weight;
+      } else {
+        // Fail-closed invariant (GAP-22): Non-finite numeric evidence (NaN, Infinity, -Infinity)
+        // must NEVER silently evaluate to zero or ALLOW. Clamp to an anomaly warning score.
+        rawScore = 50;
+      }
+      // Bound rawScore to [0, 100]
+      rawScore = Math.min(100, Math.max(0, rawScore));
 
       const sourceKey = (e.source || e.detectorType || e.type || 'DEFAULT').toUpperCase();
       let baseWeight = this.detectorWeights[sourceKey];
-      if (baseWeight === undefined) {
+      if (baseWeight === undefined || !Number.isFinite(baseWeight) || baseWeight <= 0) {
         if (sourceKey.includes('RULE')) baseWeight = this.detectorWeights.RULE_ENGINE;
         else if (sourceKey.includes('THREAT')) baseWeight = this.detectorWeights.THREAT_INTEL;
         else if (sourceKey.includes('DOM')) baseWeight = this.detectorWeights.DOM_ANALYZER;
@@ -97,10 +106,15 @@ export class RiskScorer {
       }
 
       const defaultConf = (sourceKey === 'TEST' || sourceKey.includes('RULE')) ? 1.0 : 0.85;
-      const confidence = typeof e.confidence === 'number' ? e.confidence : defaultConf;
+      let confidence = (typeof e.confidence === 'number' && Number.isFinite(e.confidence)) ? e.confidence : defaultConf;
+      confidence = Math.min(1.0, Math.max(0.01, confidence));
 
       const indicator = e.indicator || e.name || 'threat-signal';
-      const effectiveSignal = Math.min(100, Math.max(0, rawScore * baseWeight * confidence));
+      let effectiveSignal = rawScore * baseWeight * confidence;
+      if (!Number.isFinite(effectiveSignal) || Number.isNaN(effectiveSignal)) {
+        effectiveSignal = 50;
+      }
+      effectiveSignal = Math.min(100, Math.max(0, effectiveSignal));
 
       if (effectiveSignal > maxSignalValue) {
         maxSignalValue = effectiveSignal;
@@ -108,7 +122,9 @@ export class RiskScorer {
       }
 
       if (e.isCriticalOverride || (sourceKey.includes('THREAT') && rawScore >= 90)) {
-        criticalOverrideScore = Math.max(criticalOverrideScore, rawScore);
+        if (Number.isFinite(rawScore)) {
+          criticalOverrideScore = Math.max(criticalOverrideScore, rawScore);
+        }
       }
 
       const categorySource = e.source || e.detectorType || 'RULE_ENGINE';
@@ -132,12 +148,18 @@ export class RiskScorer {
       const x_i = token.effectiveSignal;
       productTerm *= (1.0 - (x_i / 100.0));
     }
-    const rawR = 100.0 * (1.0 - productTerm);
+    let rawR = 100.0 * (1.0 - productTerm);
+    if (!Number.isFinite(rawR) || Number.isNaN(rawR)) {
+      rawR = 60.0; // Fail-closed on mathematical anomaly
+    }
     let calculatedScore = Math.min(100, Math.max(0, Math.round(rawR)));
 
     // 3. Critical Rule Priority Override (docs/RISK_ENGINE_ARCHITECTURE.md Section 1.3)
-    if (criticalOverrideScore > 0) {
+    if (criticalOverrideScore > 0 && Number.isFinite(criticalOverrideScore)) {
       calculatedScore = Math.max(calculatedScore, Math.round(criticalOverrideScore));
+    }
+    if (!Number.isFinite(calculatedScore) || Number.isNaN(calculatedScore)) {
+      calculatedScore = 75; // Fail-closed fallback
     }
     calculatedScore = Math.min(100, Math.max(0, calculatedScore));
 

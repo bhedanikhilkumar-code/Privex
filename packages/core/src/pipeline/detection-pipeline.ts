@@ -59,8 +59,47 @@ export class DetectionPipeline {
 
   public async scan(request: ScanRequest | DetectionRequest): Promise<DetectionResult> {
     const startTime = Date.now();
-    const scanId = request.id || uuidv4();
+    const scanId = (request && typeof request === 'object' && request.id) ? request.id : uuidv4();
     const timestamp = new Date(startTime).toISOString();
+
+    if (!request || typeof request !== 'object') {
+      const elapsed = Math.max(0.01, Date.now() - startTime);
+      const defaultRec: Recommendation = {
+        action: PrescribedAction.WARN_USER,
+        frictionLevel: FrictionLevel.MEDIUM,
+        suggestedAction: 'Invalid, malformed, or empty input provided for analysis. Fail-closed caution policy applied.',
+        bypassPermitted: false
+      };
+      const defaultAssessment: RiskAssessment = {
+        overallScore: 50,
+        confidence: 0.5,
+        severity: SeverityLevel.MEDIUM,
+        primaryThreatFactor: 'MALFORMED_INPUT',
+        detectorContributions: {}
+      };
+
+      return {
+        requestId: scanId,
+        scanId,
+        id: scanId,
+        timestamp,
+        inputType: InputType.TEXT,
+        verdict: Verdict.CAUTION,
+        riskCategory: RiskCategory.SUSPICIOUS,
+        riskScore: 50,
+        score: 50,
+        confidence: 0.5,
+        severity: 'CAUTION',
+        riskAssessment: defaultAssessment,
+        threats: [],
+        evidence: [],
+        explanation: 'Invalid, malformed, or empty input provided for analysis. Fail-closed caution policy applied.',
+        recommendation: ActionRecommendation.WARN,
+        action: ActionRecommendation.WARN,
+        executionTimeMs: elapsed,
+        error: 'Invalid input or unsupported input type'
+      };
+    }
 
     // Map input content and type from flexible request shapes
     const rawInput =
@@ -116,16 +155,16 @@ export class DetectionPipeline {
     if (!rawInput || typeof rawInput !== 'string' || !inputType) {
       const elapsed = Math.max(0.01, Date.now() - startTime);
       const defaultRec: Recommendation = {
-        action: PrescribedAction.PROCEED,
-        frictionLevel: FrictionLevel.NONE,
-        suggestedAction: 'Invalid or empty input provided for analysis.',
-        bypassPermitted: true
+        action: PrescribedAction.WARN_USER,
+        frictionLevel: FrictionLevel.MEDIUM,
+        suggestedAction: 'Invalid, malformed, or empty input provided for analysis. Fail-closed caution policy applied.',
+        bypassPermitted: false
       };
       const defaultAssessment: RiskAssessment = {
-        overallScore: 0,
-        confidence: 1.0,
-        severity: SeverityLevel.NONE,
-        primaryThreatFactor: 'NONE',
+        overallScore: 50,
+        confidence: 0.5,
+        severity: SeverityLevel.MEDIUM,
+        primaryThreatFactor: 'MALFORMED_INPUT',
         detectorContributions: {}
       };
 
@@ -135,18 +174,18 @@ export class DetectionPipeline {
         id: scanId,
         timestamp,
         inputType: inputType || InputType.TEXT,
-        verdict: Verdict.ALLOW,
-        riskCategory: RiskCategory.SAFE,
-        riskScore: 0,
-        score: 0,
-        confidence: 1.0,
-        severity: 'SAFE',
+        verdict: Verdict.CAUTION,
+        riskCategory: RiskCategory.SUSPICIOUS,
+        riskScore: 50,
+        score: 50,
+        confidence: 0.5,
+        severity: 'CAUTION',
         riskAssessment: defaultAssessment,
         threats: [],
         evidence: [],
-        explanation: 'Invalid or empty input provided for analysis.',
-        recommendation: ActionRecommendation.ALLOW,
-        action: ActionRecommendation.ALLOW,
+        explanation: 'Invalid, malformed, or empty input provided for analysis. Fail-closed caution policy applied.',
+        recommendation: ActionRecommendation.WARN,
+        action: ActionRecommendation.WARN,
         executionTimeMs: elapsed,
         error: 'Invalid input or unsupported input type'
       };
