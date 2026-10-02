@@ -17,7 +17,8 @@ import {
   QuarantineItem,
   ScanResult,
   DesktopProtectionStatus,
-  DesktopSettings
+  DesktopSettings,
+  RealtimeThreatEvent
 } from '../types/desktop.types';
 
 export const App: React.FC = () => {
@@ -26,6 +27,7 @@ export const App: React.FC = () => {
   const [quarantineItems, setQuarantineItems] = useState<QuarantineItem[]>([]);
   const [selectedThreat, setSelectedThreat] = useState<DetectedThreat | null>(null);
   const [filesScannedTotal, setFilesScannedTotal] = useState<number>(0);
+  const [realtimeAlert, setRealtimeAlert] = useState<RealtimeThreatEvent | null>(null);
 
   const [status, setStatus] = useState<DesktopProtectionStatus>({
     realtimeShieldActive: true,
@@ -62,6 +64,38 @@ export const App: React.FC = () => {
     }
     if (window.desktopSecurity?.getSettings) {
       window.desktopSecurity.getSettings().then(setSettings).catch(() => {});
+    }
+
+    // Subscribe to real-time ingress threat events (GAP-14)
+    if (window.desktopSecurity?.onRealtimeThreat) {
+      const unsubscribe = window.desktopSecurity.onRealtimeThreat((event: RealtimeThreatEvent) => {
+        setThreats((prev) => {
+          const exists = prev.some(
+            (t) => t.id === event.threat.id || t.filePath === event.threat.filePath
+          );
+          if (exists) {
+            return prev.map((t) =>
+              t.id === event.threat.id || t.filePath === event.threat.filePath ? event.threat : t
+            );
+          }
+          return [event.threat, ...prev];
+        });
+
+        if (event.actionTaken === 'AUTO_QUARANTINED' && event.quarantineItem) {
+          setQuarantineItems((prev) => {
+            const exists = prev.some(
+              (q) => q.quarantineId === event.quarantineItem!.quarantineId
+            );
+            return exists ? prev : [event.quarantineItem!, ...prev];
+          });
+        }
+
+        setRealtimeAlert(event);
+      });
+
+      return () => {
+        unsubscribe();
+      };
     }
   }, []);
 
@@ -122,6 +156,9 @@ export const App: React.FC = () => {
       await window.desktopSecurity.saveSettings(newSettings);
     }
     setSettings((prev) => ({ ...prev, ...newSettings }));
+    if (window.desktopSecurity?.getProtectionStatus) {
+      window.desktopSecurity.getProtectionStatus().then(setStatus).catch(() => {});
+    }
   };
 
   const renderActiveScreen = () => {
@@ -237,6 +274,122 @@ export const App: React.FC = () => {
           engineActive={status.realtimeShieldActive}
           offline={status.offlineMode}
         />
+
+        {realtimeAlert && (
+          <div
+            data-testid="realtime-threat-alert"
+            style={{
+              backgroundColor:
+                realtimeAlert.actionTaken === 'AUTO_QUARANTINED' ? '#fef2f2' : '#fffbeb',
+              borderBottom: `2px solid ${
+                realtimeAlert.actionTaken === 'AUTO_QUARANTINED' ? '#ef4444' : '#f59e0b'
+              }`,
+              padding: '14px 24px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <strong style={{ color: '#991b1b', fontSize: '14px' }}>
+                  REAL-TIME INGRESS THREAT DETECTED
+                </strong>
+                <span
+                  data-testid="realtime-action-badge"
+                  style={{
+                    backgroundColor:
+                      realtimeAlert.actionTaken === 'AUTO_QUARANTINED' ? '#dc2626' : '#d97706',
+                    color: '#ffffff',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    fontWeight: 700
+                  }}
+                >
+                  ACTION TAKEN: {realtimeAlert.actionTaken}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRealtimeAlert(null)}
+                style={{
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '4px',
+                  padding: '4px 10px',
+                  fontSize: '12px',
+                  cursor: 'pointer'
+                }}
+              >
+                Dismiss
+              </button>
+            </div>
+
+            <div style={{ fontSize: '13px', color: '#1e293b', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+              <span><strong>File:</strong> {realtimeAlert.threat.fileName}</span>
+              <span><strong>Verdict:</strong> {realtimeAlert.threat.verdict}</span>
+              <span><strong>Severity:</strong> {realtimeAlert.threat.severity.toUpperCase()}</span>
+              <span><strong>Risk Score:</strong> {realtimeAlert.threat.riskScore}/100</span>
+            </div>
+
+            <div style={{ fontSize: '12px', color: '#475569' }}>
+              <strong>Reason / Evidence:</strong> {realtimeAlert.threat.evidenceFactors.join(' • ')}
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {realtimeAlert.actionTaken === 'ALERTED' && !realtimeAlert.threat.quarantined && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await handleIsolateThreat(realtimeAlert.threat);
+                    setRealtimeAlert((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            actionTaken: 'AUTO_QUARANTINED',
+                            threat: { ...prev.threat, quarantined: true }
+                          }
+                        : null
+                    );
+                  }}
+                  style={{
+                    backgroundColor: '#dc2626',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '6px 12px',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Quarantine Threat Now
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  handleExplainThreat(realtimeAlert.threat);
+                  setRealtimeAlert(null);
+                }}
+                style={{
+                  backgroundColor: '#e2e8f0',
+                  color: '#1e293b',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '6px 12px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Explain Threat
+              </button>
+            </div>
+          </div>
+        )}
+
         <main style={{ flex: 1, overflowY: 'auto' }}>
           {renderActiveScreen()}
         </main>

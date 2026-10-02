@@ -62,7 +62,9 @@ async function runHeadlessRuntimeVerification(win: BrowserWindow): Promise<void>
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'pp-electron-e2e-'));
   const scanDir = path.join(tempRoot, 'scan-target');
   const subDir = path.join(scanDir, 'nested');
+  const watchDir = path.join(tempRoot, 'watch-target');
   fs.mkdirSync(subDir, { recursive: true });
+  fs.mkdirSync(watchDir, { recursive: true });
 
   const safeFile = path.join(scanDir, 'readme-notes.txt');
   fs.writeFileSync(safeFile, 'This is a completely benign text note for Private Protection desktop verification.\n', 'utf8');
@@ -80,26 +82,44 @@ async function runHeadlessRuntimeVerification(win: BrowserWindow): Promise<void>
   fs.writeFileSync(suspiciousFile, Buffer.concat([mzHeader, suspiciousPayload]));
 
   try {
-    // Execute verification inside the real Electron Renderer context using window.desktopSecurity
+    // Point RealtimeMonitorService at watchDir to test end-to-end realtime event -> IPC -> Renderer -> Auto-Quarantine
+    ipcHandler!.getRealtimeMonitor().start([watchDir]);
+
     const rendererProof = await win.webContents.executeJavaScript(`
       (async () => {
         if (typeof window.desktopSecurity !== 'object' || window.desktopSecurity === null) {
           throw new Error('window.desktopSecurity is missing in renderer');
         }
         const progressEvents = [];
-        const unsubscribe = window.desktopSecurity.onScanProgress((p) => {
+        const unsubscribeProgress = window.desktopSecurity.onScanProgress((p) => {
           progressEvents.push(p);
+        });
+
+        window.__realtimeEvents = [];
+        window.__unsubscribeRealtime = window.desktopSecurity.onRealtimeThreat((ev) => {
+          window.__realtimeEvents.push(ev);
         });
 
         const status = await window.desktopSecurity.getProtectionStatus();
         const scanResult = await window.desktopSecurity.startCustomScan([${JSON.stringify(scanDir)}]);
-        unsubscribe();
+        unsubscribeProgress();
 
         if (scanResult.totalFilesScanned < 3) {
           throw new Error('Expected at least 3 files scanned, got ' + scanResult.totalFilesScanned);
         }
         if (scanResult.threats.length < 1) {
           throw new Error('Expected synthetic double-extension PE file to be detected as threat');
+        }
+
+        // GAP-16 verification: benign file quarantine must be rejected
+        let benignQuarantineRejected = false;
+        try {
+          await window.desktopSecurity.isolateFile(${JSON.stringify(safeFile)});
+        } catch (err) {
+          benignQuarantineRejected = String(err.message || err).includes('QUARANTINE_POLICY_REJECTED');
+        }
+        if (!benignQuarantineRejected) {
+          throw new Error('Expected benign file quarantine to be rejected with QUARANTINE_POLICY_REJECTED');
         }
 
         const detectedThreat = scanResult.threats[0];
@@ -110,12 +130,16 @@ async function runHeadlessRuntimeVerification(win: BrowserWindow): Promise<void>
         const restoredPath = await window.desktopSecurity.restoreQuarantine(qItem.quarantineId);
         const qListAfterRestore = await window.desktopSecurity.listQuarantine();
 
+        // Enable autoQuarantineCritical via saveSettings (GAP-15)
+        await window.desktopSecurity.saveSettings({ autoQuarantineCritical: true });
+
         return {
           bridgeAvailable: true,
           nodeIntegrationDisabled: typeof process === 'undefined' || typeof process.versions === 'undefined',
           rootTitleRendered: document.body.innerText.includes('System Protection Overview') || document.body.innerText.includes('Private Protection'),
           protectionStatus: status,
           progressEventsReceived: progressEvents.length,
+          benignQuarantineRejected,
           scanResult: {
             scanId: scanResult.scanId,
             scanType: scanResult.scanType,
@@ -142,7 +166,27 @@ async function runHeadlessRuntimeVerification(win: BrowserWindow): Promise<void>
       })();
     `);
 
+    // Re-point RealtimeMonitorService to watchDir after saveSettings and drop a synthetic critical file to verify GAP-14
+    ipcHandler!.getRealtimeMonitor().start([watchDir]);
+    const droppedThreatPath = path.join(watchDir, 'dropped_payroll_bonus.pdf.exe');
+    fs.writeFileSync(droppedThreatPath, Buffer.concat([mzHeader, suspiciousPayload]));
+    await new Promise((r) => setTimeout(r, 450));
+
+    const realtimeProof = await win.webContents.executeJavaScript(`
+      (() => {
+        if (window.__unsubscribeRealtime) window.__unsubscribeRealtime();
+        return {
+          realtimeEventsCount: (window.__realtimeEvents || []).length,
+          firstRealtimeEvent: (window.__realtimeEvents || [])[0] || null,
+          alertBannerRendered: document.body.innerText.includes('REAL-TIME INGRESS THREAT DETECTED')
+        };
+      })();
+    `);
+
     const restoredExists = fs.existsSync(suspiciousFile);
+    const SafeFileStillExists = fs.existsSync(safeFile);
+    const droppedThreatQuarantined = !fs.existsSync(droppedThreatPath);
+
     const fullReport = {
       verifiedAt: new Date().toISOString(),
       electronVersion: process.versions.electron,
@@ -151,7 +195,10 @@ async function runHeadlessRuntimeVerification(win: BrowserWindow): Promise<void>
       platform: process.platform,
       arch: process.arch,
       restoredFileVerifiedOnDisk: restoredExists,
-      ...rendererProof
+      safeFilePreservedOnDisk: SafeFileStillExists,
+      droppedThreatAutoQuarantinedFromDisk: droppedThreatQuarantined,
+      ...rendererProof,
+      ...realtimeProof
     };
 
     console.log('[ELECTRON_E2E_PROOF] ' + JSON.stringify(fullReport));
@@ -180,16 +227,10 @@ app.whenReady().then(() => {
   const storageDir = getStorageDir();
   ipcHandler = new IpcHandler({
     vaultDir: path.join(storageDir, 'vault'),
-    configDir: path.join(storageDir, 'config')
+    configDir: path.join(storageDir, 'config'),
+    autoStartRealtime: true
   });
   ipcHandler.registerElectronHandlers(ipcMain, () => mainWindow?.webContents ?? null);
-
-  const watchDirs = [path.join(os.homedir(), 'Downloads'), os.tmpdir()].filter((dir) =>
-    fs.existsSync(dir)
-  );
-  if (watchDirs.length > 0) {
-    ipcHandler.getRealtimeMonitor().start(watchDirs);
-  }
 
   const isHeadlessVerify = process.argv.includes('--headless-verify');
   mainWindow = createMainWindow(isHeadlessVerify);

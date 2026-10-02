@@ -1,12 +1,9 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 import { createDesktopSecurityApi } from './preload';
-import { IPC_CHANNELS } from '../ipc/ipc-channels';
+import { IPC_INVOKE_CHANNELS, IPC_EVENT_CHANNELS } from '../ipc/ipc-channels';
 
-const ALLOWED_INVOKE_CHANNELS = new Set<string>(Object.values(IPC_CHANNELS));
-const ALLOWED_EVENT_CHANNELS = new Set<string>([
-  IPC_CHANNELS.SCAN_PROGRESS_EVENT,
-  IPC_CHANNELS.REALTIME_THREAT_EVENT
-]);
+const ALLOWED_INVOKE_CHANNELS = new Set<string>(IPC_INVOKE_CHANNELS);
+const ALLOWED_EVENT_CHANNELS = new Set<string>(IPC_EVENT_CHANNELS);
 
 const safeIpcRenderer = {
   invoke: (channel: string, ...args: any[]): Promise<any> => {

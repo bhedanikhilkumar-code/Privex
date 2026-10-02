@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DesktopSettings } from '../../types/desktop.types';
 
 interface SettingsScreenProps {
@@ -12,6 +12,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 }) => {
   const [settings, setSettings] = useState<DesktopSettings>(initialSettings);
   const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    setSettings(initialSettings);
+  }, [initialSettings]);
 
   const handleToggle = (key: keyof DesktopSettings) => {
     setSettings((prev) => ({
@@ -65,6 +69,21 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         <hr style={{ border: 'none', borderTop: '1px solid #f1f5f9', margin: 0 }} />
 
+        {/* Monitor Temp */}
+        <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+          <div>
+            <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '14px' }}>Monitor System Temp Directory</div>
+            <div style={{ fontSize: '12px', color: '#64748b' }}>Watches system temporary folder for dropped executables and scripts</div>
+          </div>
+          <input
+            type="checkbox"
+            checked={settings.monitorTemp}
+            onChange={() => handleToggle('monitorTemp')}
+          />
+        </label>
+
+        <hr style={{ border: 'none', borderTop: '1px solid #f1f5f9', margin: 0 }} />
+
         {/* Entropy Detection */}
         <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
           <div>
@@ -104,8 +123,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <input
               type="number"
-              min="10"
-              max="500"
+              min="1"
+              max="2048"
               value={settings.scanLargeFilesLimitMb}
               onChange={(e) => setSettings({ ...settings, scanLargeFilesLimitMb: parseInt(e.target.value, 10) || 50 })}
               style={{ width: '60px', padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}

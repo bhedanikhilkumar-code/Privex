@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import * as os from 'os';
 import { QuarantineItem, DetectedThreat } from '../types/desktop.types';
+import { IpcValidator } from '../ipc/ipc-validator';
 
 export class QuarantineService {
   private vaultDir: string;
@@ -112,39 +113,59 @@ export class QuarantineService {
 
   /**
    * Isolates a detected threat into the encrypted quarantine vault.
+   * Enforces canonical threat verdict/severity policy (GAP-16) and symlink/system path protection.
    */
   public async isolateFile(threat: DetectedThreat): Promise<QuarantineItem> {
     const canonicalSource = path.resolve(threat.filePath);
 
-    // 1. Path Traversal & Symlink Defense
+    // 1. Path Existence & Symlink Defense
     if (!fs.existsSync(canonicalSource)) {
       throw new Error(`FILE_NOT_FOUND: Cannot quarantine non-existent file '${threat.filePath}'.`);
     }
 
-    const lstat = fs.lstatSync(canonicalSource);
+    const lstat = await fs.promises.lstat(canonicalSource);
     if (lstat.isSymbolicLink()) {
       throw new Error('SECURITY_VIOLATION: Quarantining symbolic links is forbidden to prevent target hijacking.');
     }
 
-    // 2. Read file bytes and encrypt with AES-256-GCM to prevent execution
+    // 2. Protected OS System Path Defense
+    if (IpcValidator.isProtectedSystemPath(canonicalSource)) {
+      throw new Error('SECURITY_VIOLATION: Quarantining protected OS system files is forbidden.');
+    }
+
+    // 3. Canonical Quarantine Policy Enforcement (GAP-16):
+    // Benign ALLOW/INFORM or safe/low severity files must NEVER be quarantined or unlinked.
+    const isQuarantinableVerdict = threat.verdict === 'BLOCK' || threat.verdict === 'WARN';
+    const isQuarantinableSeverity =
+      threat.severity === 'critical' ||
+      threat.severity === 'dangerous' ||
+      threat.severity === 'suspicious';
+
+    if (!isQuarantinableVerdict || !isQuarantinableSeverity) {
+      throw new Error(
+        `QUARANTINE_POLICY_REJECTED: Benign or safe files (verdict=${threat.verdict}, severity=${threat.severity}) cannot be quarantined.`
+      );
+    }
+
+    // 4. Read file bytes and encrypt with AES-256-GCM to prevent execution
     const rawBytes = await fs.promises.readFile(canonicalSource);
     const encryptedContainer = this.encryptBytes(rawBytes);
 
-    // 3. Generate unique quarantine ID
+    // 5. Generate unique quarantine ID
     const quarantineId = `quarantine-${crypto.randomUUID()}`;
     const blobPath = path.join(this.vaultDir, `${quarantineId}.blob`);
 
-    // 4. Atomic write encrypted container to vault
+    // 6. Atomic write encrypted container to vault
     await fs.promises.writeFile(blobPath, encryptedContainer);
 
-    // 5. Try stripping execution permissions on container
+    // 7. Try stripping execution permissions on container
     try {
       fs.chmodSync(blobPath, 0o400); // Read-only user access, zero execute
     } catch {
       // Best-effort permission stripping across platforms
     }
 
-    // 6. Securely unlink the original malicious file from the user's filesystem
+    // 8. Securely unlink the original malicious file from the user's filesystem
     await fs.promises.unlink(canonicalSource);
 
     const item: QuarantineItem = {
@@ -190,8 +211,21 @@ export class QuarantineService {
       destinationPath = path.join(canonicalDestDir, item.fileName);
     }
 
-    // Collision Avoidance: Do not silently overwrite existing file
-    if (fs.existsSync(destinationPath)) {
+    // Symlink & Collision Avoidance: Use lstatSync to detect dangling symlinks or existing files
+    let destinationExists = false;
+    try {
+      const destStat = fs.lstatSync(destinationPath);
+      if (destStat.isSymbolicLink()) {
+        throw new Error('SECURITY_VIOLATION: Restore destination cannot be a symbolic link.');
+      }
+      destinationExists = true;
+    } catch (err: any) {
+      if (err.message?.includes('SECURITY_VIOLATION')) {
+        throw err;
+      }
+    }
+
+    if (destinationExists) {
       const parsed = path.parse(destinationPath);
       destinationPath = path.join(parsed.dir, `${parsed.name}_restored_${Date.now()}${parsed.ext}`);
     }

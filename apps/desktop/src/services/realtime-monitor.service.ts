@@ -8,6 +8,9 @@ export class RealtimeMonitorService extends EventEmitter {
   private watchers: Map<string, fs.FSWatcher> = new Map();
   private isMonitoring = false;
   private debounceTimers: Map<string, NodeJS.Timeout> = new Map();
+  private entropyDetectionEnabled = true;
+  private maxFileSizeBytes = 50 * 1024 * 1024;
+  private excludedPaths: Set<string> = new Set();
 
   // Transient download extensions to ignore while writing
   private static readonly IGNORED_TRANSIENT_EXTENSIONS = new Set([
@@ -22,6 +25,32 @@ export class RealtimeMonitorService extends EventEmitter {
     return Array.from(this.watchers.keys());
   }
 
+  public setEntropyDetectionEnabled(enabled: boolean): void {
+    this.entropyDetectionEnabled = Boolean(enabled);
+  }
+
+  public isEntropyDetectionEnabled(): boolean {
+    return this.entropyDetectionEnabled;
+  }
+
+  public setMaxFileSizeBytes(bytes: number): void {
+    this.maxFileSizeBytes = Math.max(1024 * 1024, Math.floor(bytes));
+  }
+
+  public setExcludedPaths(paths: string[]): void {
+    this.excludedPaths = new Set((paths || []).map((p) => path.resolve(p)));
+  }
+
+  public isPathExcluded(filePath: string): boolean {
+    const canonical = path.resolve(filePath);
+    for (const excluded of this.excludedPaths) {
+      if (canonical === excluded || canonical.startsWith(excluded + path.sep)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Starts monitoring the provided target directories.
    */
@@ -30,9 +59,18 @@ export class RealtimeMonitorService extends EventEmitter {
       this.stop();
     }
 
+    const validDirs = directories
+      .map((d) => path.resolve(d))
+      .filter((d) => fs.existsSync(d) && !this.isPathExcluded(d));
+
+    if (validDirs.length === 0) {
+      this.isMonitoring = false;
+      return;
+    }
+
     this.isMonitoring = true;
 
-    for (const dir of directories) {
+    for (const dir of validDirs) {
       this.addWatchDirectory(dir);
     }
 
@@ -78,6 +116,10 @@ export class RealtimeMonitorService extends EventEmitter {
   }
 
   private handleFilesystemEvent(_eventType: string, filePath: string): void {
+    if (!this.isMonitoring || this.isPathExcluded(filePath)) {
+      return;
+    }
+
     const ext = path.extname(filePath).toLowerCase();
     if (RealtimeMonitorService.IGNORED_TRANSIENT_EXTENSIONS.has(ext)) {
       return;
@@ -99,14 +141,19 @@ export class RealtimeMonitorService extends EventEmitter {
   /**
    * Safely inspects the finalized incoming file.
    */
-  private async evaluateIncomingFile(filePath: string): Promise<void> {
+  public async evaluateIncomingFile(filePath: string): Promise<void> {
+    if (!this.isMonitoring || this.isPathExcluded(filePath)) return;
     if (!fs.existsSync(filePath)) return;
 
     try {
-      const stat = await fs.promises.stat(filePath);
-      if (!stat.isFile() || stat.size === 0) return;
+      const stat = await fs.promises.lstat(filePath);
+      if (stat.isSymbolicLink() || !stat.isFile() || stat.size === 0 || stat.size > this.maxFileSizeBytes) {
+        return;
+      }
 
-      const analysis = await FileAnalyzer.analyzeFile(filePath);
+      const analysis = await FileAnalyzer.analyzeFile(filePath, {
+        entropyDetectionEnabled: this.entropyDetectionEnabled
+      });
 
       if (analysis.verdict === 'BLOCK' || analysis.verdict === 'WARN') {
         const threat: DetectedThreat = {

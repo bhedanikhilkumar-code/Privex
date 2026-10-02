@@ -18,6 +18,15 @@ export interface DetectedThreat {
   quarantined: boolean;
 }
 
+export type RealtimeThreatAction = 'AUTO_QUARANTINED' | 'ALERTED';
+
+export interface RealtimeThreatEvent {
+  threat: DetectedThreat;
+  actionTaken: RealtimeThreatAction;
+  quarantineItem?: QuarantineItem;
+  timestamp: number;
+}
+
 export interface ScanProgress {
   scanId: string;
   scanType: ScanType;

@@ -28,10 +28,13 @@ export class DesktopSecurityAdapter {
   }
 
   /**
-   * Analyzes a local filesystem file using the desktop file analyzer.
+   * Analyzes a local filesystem file using the canonical @private-protection/core file analyzer.
    */
-  public async analyzeFile(filePath: string): Promise<FileAnalysisResult> {
-    return FileAnalyzer.analyzeFile(filePath);
+  public async analyzeFile(
+    filePath: string,
+    options?: { entropyDetectionEnabled?: boolean }
+  ): Promise<FileAnalysisResult> {
+    return FileAnalyzer.analyzeFile(filePath, options);
   }
 
   /**

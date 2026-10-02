@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import * as os from 'os';
 import { IPC_CHANNELS } from './ipc-channels';
 import { IpcValidator } from './ipc-validator';
@@ -16,8 +18,17 @@ import {
   DesktopSettings,
   DetectedThreat,
   DesktopAssistantExplanation,
-  ScanProgress
+  ScanProgress,
+  RealtimeThreatEvent
 } from '../types/desktop.types';
+
+export interface IpcHandlerOptions {
+  vaultDir?: string;
+  configDir?: string;
+  downloadsDir?: string;
+  tempDir?: string;
+  autoStartRealtime?: boolean;
+}
 
 export class IpcHandler {
   private scanner: ScannerService;
@@ -30,11 +41,12 @@ export class IpcHandler {
   private networkMonitor: NetworkMonitorService;
   private storage: SecureStorageService;
   private adapter: DesktopSecurityAdapter;
+  private downloadsDir: string;
+  private tempDir: string;
+  private autoStartRealtime: boolean;
+  private getWebContentsFn?: () => { send: (channel: string, ...args: any[]) => void } | null | undefined;
 
-  constructor(options?: {
-    vaultDir?: string;
-    configDir?: string;
-  }) {
+  constructor(options?: IpcHandlerOptions) {
     this.scanner = new ScannerService();
     this.quickScanner = new QuickScanService(this.scanner);
     this.quarantine = new QuarantineService(options?.vaultDir);
@@ -45,6 +57,18 @@ export class IpcHandler {
     this.networkMonitor = new NetworkMonitorService();
     this.storage = new SecureStorageService(options?.configDir);
     this.adapter = new DesktopSecurityAdapter();
+
+    this.downloadsDir = options?.downloadsDir || path.join(os.homedir(), 'Downloads');
+    this.tempDir = options?.tempDir || os.tmpdir();
+    this.autoStartRealtime = options?.autoStartRealtime ?? false;
+
+    // Subscribe to RealtimeMonitorService detections (GAP-14)
+    this.realtimeMonitor.on('threatDetected', (threat: DetectedThreat) => {
+      void this.handleRealtimeThreatDetected(threat);
+    });
+
+    // Apply persisted settings immediately on startup (GAP-15)
+    this.applySettings(this.storage.getSettings(), this.autoStartRealtime);
   }
 
   public getScanner(): ScannerService {
@@ -59,16 +83,98 @@ export class IpcHandler {
     return this.realtimeMonitor;
   }
 
+  /**
+   * Applies DesktopSettings across ScannerService and RealtimeMonitorService at runtime (GAP-15).
+   */
+  public applySettings(settings: DesktopSettings, updateWatchers = true): void {
+    this.scanner.applySettings(settings);
+
+    this.realtimeMonitor.setEntropyDetectionEnabled(settings.entropyDetectionEnabled);
+    this.realtimeMonitor.setMaxFileSizeBytes(settings.scanLargeFilesLimitMb * 1024 * 1024);
+    this.realtimeMonitor.setExcludedPaths(settings.excludedPaths || []);
+
+    if (!updateWatchers) {
+      return;
+    }
+
+    if (!settings.realtimeShieldEnabled) {
+      this.realtimeMonitor.stop();
+      return;
+    }
+
+    const watchDirs: string[] = [];
+    if (settings.monitorDownloads && fs.existsSync(this.downloadsDir)) {
+      watchDirs.push(this.downloadsDir);
+    }
+    if (settings.monitorTemp && fs.existsSync(this.tempDir)) {
+      watchDirs.push(this.tempDir);
+    }
+
+    if (watchDirs.length > 0) {
+      this.realtimeMonitor.start(watchDirs);
+    } else {
+      this.realtimeMonitor.stop();
+    }
+  }
+
+  /**
+   * Processes a real-time threat event from RealtimeMonitorService, executes auto-quarantine
+   * if policy requires, and dispatches REALTIME_THREAT_EVENT over IPC to the renderer (GAP-14).
+   */
+  public async handleRealtimeThreatDetected(threat: DetectedThreat): Promise<RealtimeThreatEvent> {
+    const settings = this.storage.getSettings();
+    const shouldAutoQuarantine =
+      settings.autoQuarantineCritical === true &&
+      threat.verdict === 'BLOCK' &&
+      (threat.severity === 'critical' || threat.severity === 'dangerous');
+
+    let eventPayload: RealtimeThreatEvent;
+
+    if (shouldAutoQuarantine) {
+      try {
+        const quarantineItem = await this.quarantine.isolateFile(threat);
+        eventPayload = {
+          threat: { ...threat, quarantined: true },
+          actionTaken: 'AUTO_QUARANTINED',
+          quarantineItem,
+          timestamp: Date.now()
+        };
+      } catch {
+        eventPayload = {
+          threat,
+          actionTaken: 'ALERTED',
+          timestamp: Date.now()
+        };
+      }
+    } else {
+      eventPayload = {
+        threat,
+        actionTaken: 'ALERTED',
+        timestamp: Date.now()
+      };
+    }
+
+    const wc = this.getWebContentsFn?.();
+    if (wc) {
+      wc.send(IPC_CHANNELS.REALTIME_THREAT_EVENT, eventPayload);
+    }
+
+    return eventPayload;
+  }
+
   public async handleStartQuickScan() {
+    this.scanner.applySettings(this.storage.getSettings());
     return this.quickScanner.executeQuickScan();
   }
 
   public async handleStartFullScan(targetPath?: string) {
+    this.scanner.applySettings(this.storage.getSettings());
     const root = targetPath ? IpcValidator.validatePath(targetPath) : os.homedir();
     return this.scanner.scanPaths([root], 'full');
   }
 
   public async handleStartCustomScan(targets: string[]) {
+    this.scanner.applySettings(this.storage.getSettings());
     const validated = IpcValidator.validateScanTargets(targets);
     return this.scanner.scanPaths(validated, 'custom');
   }
@@ -89,9 +195,43 @@ export class IpcHandler {
     return this.quarantine.listQuarantine();
   }
 
+  /**
+   * Validates path, resolves symlinks, analyzes file, and enforces threat policy before quarantine (GAP-16).
+   */
   public async handleIsolateFile(filePath: string) {
     const validatedPath = IpcValidator.validatePath(filePath);
-    const analysis = await this.adapter.analyzeFile(validatedPath);
+
+    if (!fs.existsSync(validatedPath)) {
+      throw new Error(`FILE_NOT_FOUND: Cannot quarantine non-existent file '${validatedPath}'.`);
+    }
+
+    const lstat = await fs.promises.lstat(validatedPath);
+    if (lstat.isSymbolicLink()) {
+      throw new Error('SECURITY_VIOLATION: Quarantining symbolic links is forbidden to prevent target hijacking.');
+    }
+
+    if (IpcValidator.isProtectedSystemPath(validatedPath)) {
+      throw new Error('SECURITY_VIOLATION: Quarantining protected OS system files is forbidden.');
+    }
+
+    const currentSettings = this.storage.getSettings();
+    const analysis = await this.adapter.analyzeFile(validatedPath, {
+      entropyDetectionEnabled: currentSettings.entropyDetectionEnabled
+    });
+
+    // GAP-16 Policy Enforcement: Reject benign ALLOW/INFORM or safe/low severity files
+    const isDangerousOrSuspiciousVerdict = analysis.verdict === 'BLOCK' || analysis.verdict === 'WARN';
+    const isElevatedSeverity =
+      analysis.severity === 'critical' ||
+      analysis.severity === 'dangerous' ||
+      analysis.severity === 'suspicious';
+
+    if (!isDangerousOrSuspiciousVerdict || !isElevatedSeverity) {
+      throw new Error(
+        `QUARANTINE_POLICY_REJECTED: Benign or safe files (verdict=${analysis.verdict}, severity=${analysis.severity}) cannot be quarantined.`
+      );
+    }
+
     const threat: DetectedThreat = {
       id: `threat-${Date.now()}`,
       filePath: analysis.filePath,
@@ -141,15 +281,22 @@ export class IpcHandler {
   }
 
   public handleSaveSettings(settings: Partial<DesktopSettings>): void {
-    this.storage.saveSettings(settings);
+    const validatedPatch = IpcValidator.validateSettings(settings);
+    this.storage.saveSettings(validatedPatch);
+    const updated = this.storage.getSettings();
+    this.applySettings(updated, true);
   }
 
   public async handleExplainThreat(
     threat: DetectedThreat,
-    cognitiveLevel: 'grade6' | 'grade8' = 'grade6'
+    cognitiveLevel?: 'grade6' | 'grade8'
   ): Promise<DesktopAssistantExplanation> {
-    const validLevel = IpcValidator.validateCognitiveLevel(cognitiveLevel);
-    return this.adapter.explainThreat(threat, validLevel);
+    const validThreat = IpcValidator.validateThreatInput(threat);
+    const storedLevel = this.storage.getSettings().cognitiveLevel;
+    const validLevel = cognitiveLevel
+      ? IpcValidator.validateCognitiveLevel(cognitiveLevel)
+      : storedLevel;
+    return this.adapter.explainThreat(validThreat, validLevel);
   }
 
   public async handleAuditProcesses() {
@@ -171,11 +318,12 @@ export class IpcHandler {
   public handlePrivacyShred(): void {
     this.quarantine.purgeAllQuarantine();
     this.storage.purgeAllData();
+    this.applySettings(this.storage.getSettings(), false);
   }
 
   /**
    * Registers all allowed IPC channels onto an Electron ipcMain instance with origin validation
-   * and binds real-time scan progress events to the renderer webContents.
+   * and binds real-time scan progress and threat events to the renderer webContents.
    */
   public registerElectronHandlers(
     ipcMain: {
@@ -183,14 +331,16 @@ export class IpcHandler {
     },
     getWebContents?: () => { send: (channel: string, ...args: any[]) => void } | null | undefined
   ): void {
+    this.getWebContentsFn = getWebContents;
+
     const verifyOrigin = (event: any) => {
-      const senderUrl = event?.senderFrame?.url ?? 'file://local';
+      const senderUrl = event?.senderFrame?.url;
       IpcValidator.validateSenderOrigin(senderUrl);
     };
 
     // Forward real-time progress events from ScannerService to Renderer
     this.scanner.on('progress', (progress: ScanProgress) => {
-      const wc = getWebContents?.();
+      const wc = this.getWebContentsFn?.();
       if (wc) {
         wc.send(IPC_CHANNELS.SCAN_PROGRESS_EVENT, progress);
       }

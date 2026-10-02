@@ -8,7 +8,8 @@ import {
   ScanResult,
   DetectedThreat,
   SkippedItem,
-  ScanErrorItem
+  ScanErrorItem,
+  DesktopSettings
 } from '../types/desktop.types';
 import { FileAnalyzer } from '../core/file-analyzer';
 
@@ -25,8 +26,55 @@ export class ScannerService extends EventEmitter {
   private activeSkippedCount = 0;
   private activeErrorCount = 0;
 
-  // Maximum file size to inspect full body (50 MB)
-  private readonly MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
+  // Dynamic settings enforced at runtime (GAP-15)
+  private maxFileSizeBytes = 50 * 1024 * 1024;
+  private entropyDetectionEnabled = true;
+  private excludedPaths: Set<string> = new Set();
+
+  public setMaxFileSizeBytes(bytes: number): void {
+    this.maxFileSizeBytes = Math.max(1024 * 1024, Math.floor(bytes));
+  }
+
+  public getMaxFileSizeBytes(): number {
+    return this.maxFileSizeBytes;
+  }
+
+  public setEntropyDetectionEnabled(enabled: boolean): void {
+    this.entropyDetectionEnabled = Boolean(enabled);
+  }
+
+  public isEntropyDetectionEnabled(): boolean {
+    return this.entropyDetectionEnabled;
+  }
+
+  public setExcludedPaths(paths: string[]): void {
+    this.excludedPaths = new Set((paths || []).map((p) => path.resolve(p)));
+  }
+
+  public getExcludedPaths(): string[] {
+    return Array.from(this.excludedPaths);
+  }
+
+  public applySettings(
+    settings: Pick<
+      DesktopSettings,
+      'scanLargeFilesLimitMb' | 'entropyDetectionEnabled' | 'excludedPaths'
+    >
+  ): void {
+    this.setMaxFileSizeBytes(settings.scanLargeFilesLimitMb * 1024 * 1024);
+    this.setEntropyDetectionEnabled(settings.entropyDetectionEnabled);
+    this.setExcludedPaths(settings.excludedPaths || []);
+  }
+
+  public isPathExcluded(targetPath: string): boolean {
+    const canonical = path.resolve(targetPath);
+    for (const excluded of this.excludedPaths) {
+      if (canonical === excluded || canonical.startsWith(excluded + path.sep)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   public getStatus(): ScanStatus {
     return this.currentStatus;
@@ -118,6 +166,12 @@ export class ScannerService extends EventEmitter {
 
       try {
         const canonicalTarget = path.resolve(target);
+        if (this.isPathExcluded(canonicalTarget)) {
+          skippedFiles.push({ path: canonicalTarget, reason: 'Excluded by user settings' });
+          this.activeSkippedCount = skippedFiles.length;
+          continue;
+        }
+
         if (!fs.existsSync(canonicalTarget)) {
           skippedFiles.push({ path: target, reason: 'Path does not exist' });
           this.activeSkippedCount = skippedFiles.length;
@@ -201,6 +255,12 @@ export class ScannerService extends EventEmitter {
   ): Promise<void> {
     if (await this.checkPauseAndCancel()) return;
 
+    if (this.isPathExcluded(dirPath)) {
+      skippedFiles.push({ path: dirPath, reason: 'Excluded by user settings' });
+      this.activeSkippedCount = skippedFiles.length;
+      return;
+    }
+
     // Symlink / Junction Cycle Detection
     try {
       const realDirPath = fs.realpathSync(dirPath);
@@ -234,6 +294,12 @@ export class ScannerService extends EventEmitter {
       if (await this.checkPauseAndCancel()) return;
 
       const fullPath = path.join(dirPath, entry.name);
+
+      if (this.isPathExcluded(fullPath)) {
+        skippedFiles.push({ path: fullPath, reason: 'Excluded by user settings' });
+        this.activeSkippedCount = skippedFiles.length;
+        continue;
+      }
 
       try {
         if (entry.isSymbolicLink()) {
@@ -296,13 +362,18 @@ export class ScannerService extends EventEmitter {
     try {
       const stat = await fs.promises.stat(filePath);
 
-      if (stat.size > this.MAX_FILE_SIZE_BYTES) {
-        skippedFiles.push({ path: filePath, reason: `File exceeds size limit (${Math.round(stat.size / 1024 / 1024)} MB)` });
+      if (stat.size > this.maxFileSizeBytes) {
+        skippedFiles.push({
+          path: filePath,
+          reason: `File exceeds size limit (${Math.round(stat.size / 1024 / 1024)} MB > ${Math.round(this.maxFileSizeBytes / 1024 / 1024)} MB)`
+        });
         this.activeSkippedCount = skippedFiles.length;
         return;
       }
 
-      const analysis = await FileAnalyzer.analyzeFile(filePath);
+      const analysis = await FileAnalyzer.analyzeFile(filePath, {
+        entropyDetectionEnabled: this.entropyDetectionEnabled
+      });
       onFileProcessed(stat.size);
 
       if (analysis.verdict === 'BLOCK' || analysis.verdict === 'WARN' || analysis.riskScore >= 30) {

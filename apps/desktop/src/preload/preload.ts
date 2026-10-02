@@ -9,7 +9,8 @@ import {
   ProcessInfo,
   PersistenceItem,
   RemovableDrive,
-  ScanProgress
+  ScanProgress,
+  RealtimeThreatEvent
 } from '../types/desktop.types';
 import { NetworkPostureReport } from '../services/network-monitor.service';
 
@@ -21,6 +22,7 @@ export interface DesktopSecurityApi {
   pauseScan: () => Promise<void>;
   resumeScan: () => Promise<void>;
   onScanProgress: (callback: (progress: ScanProgress) => void) => () => void;
+  onRealtimeThreat: (callback: (event: RealtimeThreatEvent) => void) => () => void;
 
   listQuarantine: () => Promise<QuarantineItem[]>;
   isolateFile: (filePath: string) => Promise<QuarantineItem>;
@@ -47,6 +49,35 @@ declare global {
   }
 }
 
+function isValidScanProgress(payload: unknown): payload is ScanProgress {
+  if (!payload || typeof payload !== 'object') return false;
+  const p = payload as Record<string, unknown>;
+  return (
+    typeof p.scanId === 'string' &&
+    typeof p.filesScanned === 'number' &&
+    typeof p.threatsFound === 'number' &&
+    typeof p.currentPath === 'string'
+  );
+}
+
+function isValidRealtimeThreatEvent(payload: unknown): payload is RealtimeThreatEvent {
+  if (!payload || typeof payload !== 'object') return false;
+  const ev = payload as Record<string, unknown>;
+  if (ev.actionTaken !== 'AUTO_QUARANTINED' && ev.actionTaken !== 'ALERTED') return false;
+  if (typeof ev.timestamp !== 'number') return false;
+  if (!ev.threat || typeof ev.threat !== 'object') return false;
+  const t = ev.threat as Record<string, unknown>;
+  return (
+    typeof t.id === 'string' &&
+    typeof t.filePath === 'string' &&
+    typeof t.fileName === 'string' &&
+    typeof t.riskScore === 'number' &&
+    typeof t.verdict === 'string' &&
+    typeof t.severity === 'string' &&
+    Array.isArray(t.evidenceFactors)
+  );
+}
+
 /**
  * Creates the typed API bridge for the renderer process.
  * In production Electron, this is wired via contextBridge.exposeInMainWorld('desktopSecurity', api).
@@ -64,9 +95,22 @@ export function createDesktopSecurityApi(ipcRenderer: {
     pauseScan: () => ipcRenderer.invoke(IPC_CHANNELS.SCAN_PAUSE),
     resumeScan: () => ipcRenderer.invoke(IPC_CHANNELS.SCAN_RESUME),
     onScanProgress: (callback) => {
-      const handler = (_event: any, progress: ScanProgress) => callback(progress);
+      const handler = (_event: any, progress: unknown) => {
+        if (isValidScanProgress(progress)) {
+          callback(progress);
+        }
+      };
       ipcRenderer.on(IPC_CHANNELS.SCAN_PROGRESS_EVENT, handler);
       return () => ipcRenderer.removeListener(IPC_CHANNELS.SCAN_PROGRESS_EVENT, handler);
+    },
+    onRealtimeThreat: (callback) => {
+      const handler = (_event: any, threatEvent: unknown) => {
+        if (isValidRealtimeThreatEvent(threatEvent)) {
+          callback(threatEvent);
+        }
+      };
+      ipcRenderer.on(IPC_CHANNELS.REALTIME_THREAT_EVENT, handler);
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.REALTIME_THREAT_EVENT, handler);
     },
 
     listQuarantine: () => ipcRenderer.invoke(IPC_CHANNELS.QUARANTINE_LIST),
