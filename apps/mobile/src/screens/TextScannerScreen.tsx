@@ -8,13 +8,29 @@ import { ScanResultScreen } from './ScanResultScreen';
 interface TextScannerScreenProps {
   scannerService: TextScannerService;
   onNavigateHome: () => void;
+  initialText?: string;
+  autoScan?: boolean;
 }
 
-export const TextScannerScreen: React.FC<TextScannerScreenProps> = ({ scannerService, onNavigateHome }) => {
-  const [textInput, setTextInput] = useState<string>('');
+export const TextScannerScreen: React.FC<TextScannerScreenProps> = ({
+  scannerService,
+  onNavigateHome,
+  initialText,
+  autoScan
+}) => {
+  const [textInput, setTextInput] = useState<string>(initialText || '');
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<MobileScanResult | null>(null);
+
+  React.useEffect(() => {
+    if (initialText) {
+      setTextInput(initialText);
+      if (autoScan) {
+        handleScan(initialText);
+      }
+    }
+  }, [initialText, autoScan]);
 
   const handleScan = async (sampleText?: string) => {
     const candidate = sampleText || textInput;

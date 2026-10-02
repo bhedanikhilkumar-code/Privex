@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type MobileTab = 'HOME' | 'URL_SCAN' | 'TEXT_SCAN' | 'FILE_SCAN' | 'ASSISTANT' | 'STATUS' | 'PRIVACY' | 'SETTINGS';
+export type MobileTab = 'HOME' | 'URL_SCAN' | 'TEXT_SCAN' | 'FILE_SCAN' | 'QR_SCAN' | 'ASSISTANT' | 'STATUS' | 'PRIVACY' | 'SETTINGS';
 
 interface TabBarProps {
   currentTab: MobileTab;
@@ -12,6 +12,7 @@ export const TabBar: React.FC<TabBarProps> = ({ currentTab, onSelectTab }) => {
     { id: 'HOME', label: 'Home', icon: '🛡️' },
     { id: 'URL_SCAN', label: 'URL', icon: '🔗' },
     { id: 'TEXT_SCAN', label: 'Message', icon: '💬' },
+    { id: 'QR_SCAN', label: 'QR', icon: '📷' },
     { id: 'FILE_SCAN', label: 'File', icon: '📁' },
     { id: 'ASSISTANT', label: 'Assistant', icon: '🤖' },
     { id: 'STATUS', label: 'Engine', icon: '⚙️' },
@@ -50,7 +51,7 @@ export const TabBar: React.FC<TabBarProps> = ({ currentTab, onSelectTab }) => {
               cursor: 'pointer',
               padding: '0.35rem 0.5rem',
               color: isActive ? '#38bdf8' : '#64748b',
-              minWidth: '50px'
+              minWidth: '45px'
             }}
           >
             <span style={{ fontSize: '1.1rem' }}>{tab.icon}</span>

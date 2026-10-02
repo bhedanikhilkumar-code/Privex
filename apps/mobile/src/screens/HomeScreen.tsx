@@ -74,6 +74,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
 
         <button
           type="button"
+          onClick={() => onNavigate('QR_SCAN')}
+          style={{
+            padding: '1rem',
+            backgroundColor: '#1e293b',
+            border: '1px solid #f472b6',
+            borderRadius: '12px',
+            color: '#f8fafc',
+            cursor: 'pointer',
+            textAlign: 'left'
+          }}
+        >
+          <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.25rem' }}>📷</span>
+          <strong style={{ display: 'block', fontSize: '0.95rem' }}>Scan QR Code</strong>
+          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Camera barcode analysis</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => onNavigate('TEXT_SCAN')}
           style={{
             padding: '1rem',

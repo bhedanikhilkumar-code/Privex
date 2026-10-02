@@ -8,13 +8,29 @@ import { ScanResultScreen } from './ScanResultScreen';
 interface UrlScannerScreenProps {
   scannerService: UrlScannerService;
   onNavigateHome: () => void;
+  initialUrl?: string;
+  autoScan?: boolean;
 }
 
-export const UrlScannerScreen: React.FC<UrlScannerScreenProps> = ({ scannerService, onNavigateHome }) => {
-  const [urlInput, setUrlInput] = useState<string>('');
+export const UrlScannerScreen: React.FC<UrlScannerScreenProps> = ({
+  scannerService,
+  onNavigateHome,
+  initialUrl,
+  autoScan
+}) => {
+  const [urlInput, setUrlInput] = useState<string>(initialUrl || '');
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<MobileScanResult | null>(null);
+
+  React.useEffect(() => {
+    if (initialUrl) {
+      setUrlInput(initialUrl);
+      if (autoScan) {
+        handleScan(initialUrl);
+      }
+    }
+  }, [initialUrl, autoScan]);
 
   const handleScan = async (targetUrl?: string) => {
     const candidate = targetUrl || urlInput;

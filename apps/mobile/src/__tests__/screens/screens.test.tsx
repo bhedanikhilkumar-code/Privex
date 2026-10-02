@@ -4,6 +4,8 @@ import { HomeScreen } from '../../screens/HomeScreen';
 import { UrlScannerScreen } from '../../screens/UrlScannerScreen';
 import { TextScannerScreen } from '../../screens/TextScannerScreen';
 import { FileScannerScreen } from '../../screens/FileScannerScreen';
+import { QrScannerScreen } from '../../screens/QrScannerScreen';
+import { CameraScannerService } from '../../services/camera-scanner.service';
 import { PrivacyScreen } from '../../screens/PrivacyScreen';
 import { SettingsScreen } from '../../screens/SettingsScreen';
 import { FrictionGateModal } from '../../components/FrictionGateModal';
@@ -105,5 +107,19 @@ describe('Mobile Screen Components & Presentation Layer', () => {
 
     expect(screen.getByText(/Mobile Protection Settings/i)).toBeDefined();
     expect(screen.getByText(/Trusted Domains Allowlist/i)).toBeDefined();
+  });
+
+  it('renders QrScannerScreen and executes scan on synthetic sample click', async () => {
+    const cameraService = new CameraScannerService(adapter);
+    render(<QrScannerScreen cameraService={cameraService} onNavigateHome={() => {}} />);
+
+    expect(screen.getByText(/On-Device QR Code Scanner/i)).toBeDefined();
+    const safeSampleBtn = screen.getByText(/Safe QR Link: https:\/\/google.com/i);
+    fireEvent.click(safeSampleBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Analysis Verdict/i)).toBeDefined();
+      expect(screen.getByText(/SAFE \/ ALLOWED/i)).toBeDefined();
+    }, { timeout: 4000 });
   });
 });

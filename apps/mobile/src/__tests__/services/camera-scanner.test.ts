@@ -68,4 +68,35 @@ describe('CameraScannerService & QR Threat Analysis', () => {
     const badDeepLink = 'privateprotection://bypass?token=evil';
     await expect(cameraScanner.scanQrPayload(badDeepLink)).rejects.toThrow('INVALID_DEEP_LINK_QR');
   });
+
+  it('decodes QR frames using native Android bridge ZXing engine', async () => {
+    (window as any).AndroidSecurityBridge = {
+      decodeQrFrame: vi.fn().mockReturnValue('https://paypal-security-update.com/verify')
+    };
+
+    const result = await cameraScanner.decodeFrame('data:image/jpeg;base64,fakeimageframe');
+    expect(result.detected).toBe(true);
+    expect(result.payload).toBe('https://paypal-security-update.com/verify');
+
+    // Test non-QR frame returns detected = false
+    (window as any).AndroidSecurityBridge.decodeQrFrame = vi.fn().mockReturnValue(null);
+    const emptyResult = await cameraScanner.decodeFrame('data:image/jpeg;base64,noqr');
+    expect(emptyResult.detected).toBe(false);
+    expect(emptyResult.payload).toBeNull();
+
+    delete (window as any).AndroidSecurityBridge;
+  });
+
+  it('safely stops camera streams and releases hardware tracks', () => {
+    const stopMock = vi.fn();
+    const fakeStream = {
+      getTracks: () => [{ stop: stopMock }, { stop: stopMock }]
+    } as any;
+
+    cameraScanner.stopCameraStream(fakeStream);
+    expect(stopMock).toHaveBeenCalledTimes(2);
+
+    // Handles null stream gracefully
+    expect(() => cameraScanner.stopCameraStream(null)).not.toThrow();
+  });
 });
