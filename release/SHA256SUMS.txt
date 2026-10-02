@@ -1,2 +1,2 @@
-9505fc14072ba1ca11c400a053a8e30372b0c492954d07b9ccde2110042bd29f  private-protection-extension-0.1.0.zip
-3f4bf9e475fff7616d069fb06754aa4dfd67f0f2288656b5a897e5710835090a  private-protection-web-0.1.0.zip
+0e5ea27942210c6389ad8c59e7f95f08385cdc6b0dd46965e4b7914d819ad118  private-protection-extension-0.1.0.zip
+8c320d36abcf45f0aed3559368da7a4e9d28398d79e610ce270e87737f183884  private-protection-web-0.1.0.zip
