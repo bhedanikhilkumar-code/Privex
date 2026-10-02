@@ -84,6 +84,10 @@ describe('SecureStorageService (Settings & Crypto-Shredding)', () => {
     await SecureStorageService.purgeAllData();
     expect(nativeStore.size).toBe(0);
 
+    (window as any).AndroidSecurityBridge.isSecureStorageEncrypted = () => true;
+    expect(SecureStorageService.isEncryptedStorageActive()).toBe(true);
+
     delete (window as any).AndroidSecurityBridge;
+    expect(SecureStorageService.isEncryptedStorageActive()).toBe(false);
   });
 });

@@ -12,6 +12,16 @@ export interface ScanHistoryRecord {
 export class SecureStorageService {
   private static memoryStore: Map<string, string> = new Map();
 
+  /**
+   * Verifies if hardware-backed Android Keystore / AES encryption is active.
+   */
+  public static isEncryptedStorageActive(): boolean {
+    if (typeof window !== 'undefined' && (window as any).AndroidSecurityBridge?.isSecureStorageEncrypted) {
+      return (window as any).AndroidSecurityBridge.isSecureStorageEncrypted();
+    }
+    return false;
+  }
+
   public static async getSettings(): Promise<MobileSettings> {
     try {
       let data: string | null = null;
