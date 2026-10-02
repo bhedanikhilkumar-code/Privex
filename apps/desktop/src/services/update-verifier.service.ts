@@ -1,4 +1,5 @@
 import * as crypto from 'crypto';
+import { verifyEd25519Signature } from '@private-protection/core';
 
 export interface UpdatePackageManifest {
   version: string;
@@ -45,11 +46,24 @@ export class UpdateVerifierService {
       };
     }
 
-    // 3. Signature Verification
-    if (!this.rootPublicKeyHex || !manifest.signature || manifest.signature.length < 32) {
+    // 3. Ed25519 Signature Verification
+    if (!this.rootPublicKeyHex || !manifest.signature) {
       return {
         valid: false,
-        reason: 'SIGNATURE_INVALID: Update package signature is missing or corrupted'
+        reason: 'SIGNATURE_INVALID: Update package signature or public key is missing'
+      };
+    }
+
+    const isVerified = verifyEd25519Signature(
+      manifest.sha256,
+      manifest.signature,
+      this.rootPublicKeyHex
+    );
+
+    if (!isVerified) {
+      return {
+        valid: false,
+        reason: 'SIGNATURE_INVALID: Cryptographic Ed25519 signature verification failed'
       };
     }
 
