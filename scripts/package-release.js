@@ -65,12 +65,20 @@ if (fs.existsSync(webDist)) {
 const sumsFile = path.resolve(releaseDir, 'SHA256SUMS.txt');
 const lines = [];
 
-const artifacts = [extZip, webZip];
+const apkFile = path.resolve(rootDir, 'apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk');
+const desktopExe = path.resolve(rootDir, 'apps/desktop/release/PrivateProtection-win32-x64/PrivateProtection.exe');
+
+const artifacts = [
+  { path: extZip, name: path.basename(extZip) },
+  { path: webZip, name: path.basename(webZip) },
+  { path: apkFile, name: 'private-protection-mobile-0.1.0.apk' },
+  { path: desktopExe, name: 'PrivateProtection-0.1.0-win-x64.exe' }
+];
+
 for (const artifact of artifacts) {
-  if (fs.existsSync(artifact)) {
-    const sha = calculateSha256(artifact);
-    const baseName = path.basename(artifact);
-    lines.push(`${sha}  ${baseName}`);
+  if (fs.existsSync(artifact.path)) {
+    const sha = calculateSha256(artifact.path);
+    lines.push(`${sha}  ${artifact.name}`);
   }
 }
 

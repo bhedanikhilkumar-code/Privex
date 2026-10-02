@@ -30,7 +30,7 @@ Every package manifest and platform configuration has been normalized to the can
 | **On-Device AI / ML** | `packages/ml/package.json` | `0.1.0` | Model Metadata: `1.0.0` | **SYNCHRONIZED** |
 | **Web Application** | `apps/web/package.json` | `0.1.0` | PWA Cache: `v0.1.0` | **SYNCHRONIZED** |
 | **Browser Extension** | `apps/extension/package.json` | `0.1.0` | `manifest.json`: `"version": "0.1.0"` | **SYNCHRONIZED** |
-| **Mobile Android Client** | `apps/mobile/package.json` | `0.1.0` | `versionName: "0.1.0"`, `versionCode: 100` | **SYNCHRONIZED** |
+| **Mobile Android Client** | `apps/mobile/package.json` | `0.1.0` | `versionName: "0.1.0"`, `versionCode: 1` | **SYNCHRONIZED** |
 | **Desktop Client** | `apps/desktop/package.json` | `0.1.0` | Win ProductVersion: `0.1.0.0` | **SYNCHRONIZED** |
 
 ---
@@ -60,7 +60,7 @@ v0.1.0
 
 - **Google Play Store / Android (`apps/mobile`):**
   - `versionName`: `"0.1.0"` (Human-visible string)
-  - `versionCode`: `100` (Monotonically increasing integer: `MAJOR * 10000 + MINOR * 100 + PATCH`)
+  - `versionCode`: `1` (Initial release; monotonically increasing integer)
 - **Chrome Web Store / Edge Add-ons (`apps/extension`):**
   - `manifest.json`: `"version": "0.1.0"` (Strict 1-4 dot-separated integers required by Chrome MV3).
 - **Windows / macOS Desktop (`apps/desktop`):**
