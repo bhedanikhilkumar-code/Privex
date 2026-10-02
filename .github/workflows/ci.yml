@@ -1,0 +1,86 @@
+name: CI & Release Gate
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  security-audit:
+    name: Security & Secret Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Dependency Vulnerability Audit
+        run: npm audit --audit-level=high
+
+      - name: Verify Secret Absence
+        run: |
+          echo "Scanning for accidental secret leaks..."
+          ! grep -rEI "BEGIN (RSA |EC )?PRIVATE KEY|AKIA[0-9A-Z]{16}|ghp_[a-zA-Z0-9]{30,}" packages apps tests || exit 1
+
+  quality-gate:
+    name: Lint, Typecheck & Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Lint Analysis
+        run: npm run lint
+
+      - name: Typecheck Compiler Validation
+        run: npm run typecheck
+
+      - name: Full Test Suite & Coverage Verification
+        run: npm run test:coverage
+
+  build-and-package:
+    name: Build & Artifact Generation
+    runs-on: ubuntu-latest
+    needs: [security-audit, quality-gate]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build All Workspaces
+        run: npm run build
+
+      - name: Package Production Artifacts & Checksums
+        run: npm run package
+
+      - name: Upload Release Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: release/

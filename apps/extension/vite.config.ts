@@ -2,8 +2,30 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
+import fs from 'fs';
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'flatten-html',
+      closeBundle() {
+        const outDir = path.resolve(__dirname, 'dist');
+        const pairs = [
+          ['src/popup/popup.html', 'popup.html'],
+          ['src/options/options.html', 'options.html'],
+          ['src/warning/interstitial.html', 'interstitial.html']
+        ];
+        for (const [src, dest] of pairs) {
+          const srcPath = path.resolve(outDir, src);
+          const destPath = path.resolve(outDir, dest);
+          if (fs.existsSync(srcPath)) {
+            fs.copyFileSync(srcPath, destPath);
+          }
+        }
+      }
+    }
+  ],
   resolve: {
     alias: {
       crypto: path.resolve(__dirname, './src/shared/shims/crypto-shim.ts'),
