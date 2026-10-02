@@ -135,14 +135,14 @@ export class TextAnalyzer {
 
     // 4. Ransomware / Extortion & Scareware
     let paymentExtortionDetected = false;
-    const isExtortion = /unlock\s+your\s+computer|ransom|files\s+encrypted|pay\s+to\s+decrypt|destroy\s+all\s+data/i.test(lower);
+    const isExtortion = /unlock\s+your\s+computer|ransom|files\s+encrypted|pay\s+to\s+decrypt|destroy\s+all\s+data|photos\s+will\s+be\s+leaked|leak\s+your|blackmail|compromised\s+your\s+webcam|recorded\s+you/i.test(lower);
     if (isExtortion) {
       paymentExtortionDetected = true;
       indicators.push('ransomware-extortion');
       evidenceList.push({
         source: 'TEXT_ANALYZER',
-        name: 'Ransomware Extortion',
-        description: 'Threatens device lock or file encryption demanding payment',
+        name: 'Extortion / Blackmail Threat',
+        description: 'Threatens data leak, file encryption, or blackmail demanding payment',
         weight: 90,
         scoreContribution: 90,
         confidence: 0.95,

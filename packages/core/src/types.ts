@@ -296,3 +296,31 @@ export interface UpdateMetadata {
   readonly downloadUrl: string;
   readonly sizeBytes: number;
 }
+
+// ==========================================
+// 4. CANONICAL FILE ANALYSIS DOMAIN MODELS
+// ==========================================
+
+export interface FileScanRequest {
+  readonly filePath?: string;
+  readonly fileName: string;
+  readonly fileSize: number;
+  readonly headerBytes: Uint8Array | Buffer;
+  readonly mimeType?: string;
+}
+
+export interface FileScanResult {
+  readonly fileName: string;
+  readonly filePath?: string;
+  readonly fileSize: number;
+  readonly sha256: string;
+  readonly entropy: number;
+  readonly magicHeader: string | null;
+  readonly isExecutable: boolean;
+  readonly isDeceptiveExtension: boolean;
+  readonly riskScore: number;
+  readonly severity: SeverityLevel;
+  readonly verdict: Verdict;
+  readonly threatName: string;
+  readonly evidenceFactors: string[];
+}

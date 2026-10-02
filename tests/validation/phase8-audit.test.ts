@@ -217,12 +217,14 @@ describe('PHASE 8 INDEPENDENT PRODUCT VALIDATION & GAP DISCOVERY SUITE', () => {
       expect(fs.existsSync(maliciousFile)).toBe(false); // Unlinked
       expect(fs.existsSync(qItem.blobPath)).toBe(true);
 
-      // 2. Verify XOR 0xA5 scrambling
+      // 2. Verify AES-256-GCM container format [MAGIC: 8 bytes][IV: 12 bytes][TAG: 16 bytes][CIPHERTEXT]
       const storedBytes = fs.readFileSync(qItem.blobPath);
-      expect(storedBytes[0]).toBe(0x4d ^ 0xa5);
-      expect(storedBytes[1]).toBe(0x5a ^ 0xa5);
+      expect(storedBytes.subarray(0, 8).toString('utf8')).toBe('PPVAULT1'); // Vault magic header
+      expect(storedBytes.length).toBeGreaterThanOrEqual(8 + 12 + 16 + originalBytes.length);
+      // Ensure plaintext executable headers are not present in raw container
+      expect(storedBytes.subarray(36, 38).equals(Buffer.from([0x4d, 0x5a]))).toBe(false);
 
-      // 3. Restore
+      // 3. Restore and verify byte-for-byte fidelity
       const restoredPath = await quarantineService.restoreItem(qItem.quarantineId, tmpDir);
       expect(fs.existsSync(restoredPath)).toBe(true);
       const restoredBytes = fs.readFileSync(restoredPath);
@@ -313,7 +315,7 @@ describe('PHASE 8 INDEPENDENT PRODUCT VALIDATION & GAP DISCOVERY SUITE', () => {
   // RED-TEAM FINDINGS & SECURITY GAPS DISCOVERY
   // =========================================================================
   describe('Red-Team Findings: Update Signature Verification & Security Gaps', () => {
-    it('CRITICAL GAP DISCOVERY: Desktop UpdateVerifier accepts arbitrary fake signatures', () => {
+    it('REMEDIATED: Desktop UpdateVerifier now strictly rejects arbitrary fake signatures', () => {
       const verifier = new UpdateVerifierService();
       const fakePayload = Buffer.from('console.log("Malicious update payload");');
       const fakeHash = sha256(fakePayload);
@@ -331,8 +333,9 @@ describe('PHASE 8 INDEPENDENT PRODUCT VALIDATION & GAP DISCOVERY SUITE', () => {
       console.log('--- Red Team Discovery: UpdateVerifier signature check result ---');
       console.log('Result:', result);
 
-      // If this passes as valid, it confirms the vulnerability!
-      expect(result.valid).toBe(true); // BUG CONFIRMED: Did not verify cryptographic Ed25519 signature!
+      // Cryptographic verification must reject the fake signature
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('SIGNATURE_INVALID');
     });
 
     it('VERIFICATION: Shared Core crypto.verifyEd25519Signature correctly rejects fake signature', () => {
