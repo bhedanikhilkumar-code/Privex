@@ -3,6 +3,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { IpcHandler } from '../../ipc/ipc-handler';
+import { IPC_CHANNELS } from '../../ipc/ipc-channels';
+import { ScanProgress } from '../../types/desktop.types';
 
 describe('IpcHandler & Security Boundary', () => {
   let handler: IpcHandler;
@@ -32,9 +34,17 @@ describe('IpcHandler & Security Boundary', () => {
     expect(result.overallVerdict).toBe('ALLOW');
   });
 
-  it('rejects shell metacharacters in custom scan targets with a security violation', async () => {
+  it('rejects shell metacharacters, parent traversal, and UNC shares in custom scan targets', async () => {
     await expect(
       handler.handleStartCustomScan(['C:\\folder;format C: /y'])
+    ).rejects.toThrow('SECURITY_VIOLATION');
+
+    await expect(
+      handler.handleStartCustomScan(['..\\..\\Windows\\System32'])
+    ).rejects.toThrow('SECURITY_VIOLATION');
+
+    await expect(
+      handler.handleStartCustomScan(['\\\\evil-server\\share\\malware.exe'])
     ).rejects.toThrow('SECURITY_VIOLATION');
   });
 
@@ -61,5 +71,53 @@ describe('IpcHandler & Security Boundary', () => {
     expect(status.threatDatabaseVersion).toBeDefined();
     expect(status.offlineMode).toBe(true);
     expect(status.memoryRssBytes).toBeGreaterThan(0);
+  });
+
+  it('registers Electron ipcMain handlers, enforces sender origin, and streams SCAN_PROGRESS_EVENT', async () => {
+    const registeredHandlers = new Map<string, (event: any, ...args: any[]) => any>();
+    const sentEvents: Array<{ channel: string; payload: any }> = [];
+
+    const mockIpcMain = {
+      handle: (channel: string, listener: (event: any, ...args: any[]) => any) => {
+        registeredHandlers.set(channel, listener);
+      }
+    };
+
+    const mockWebContents = {
+      send: (channel: string, payload: any) => {
+        sentEvents.push({ channel, payload });
+      }
+    };
+
+    handler.registerElectronHandlers(mockIpcMain, () => mockWebContents);
+
+    // Verify all 18 invoke channels are bound
+    expect(registeredHandlers.has(IPC_CHANNELS.SCAN_START_QUICK)).toBe(true);
+    expect(registeredHandlers.has(IPC_CHANNELS.SCAN_START_FULL)).toBe(true);
+    expect(registeredHandlers.has(IPC_CHANNELS.SCAN_START_CUSTOM)).toBe(true);
+    expect(registeredHandlers.has(IPC_CHANNELS.QUARANTINE_ISOLATE)).toBe(true);
+    expect(registeredHandlers.has(IPC_CHANNELS.QUARANTINE_RESTORE)).toBe(true);
+    expect(registeredHandlers.has(IPC_CHANNELS.STATUS_GET)).toBe(true);
+
+    // Verify untrusted origin is blocked
+    const customScanHandler = registeredHandlers.get(IPC_CHANNELS.SCAN_START_CUSTOM)!;
+    await expect(
+      customScanHandler({ senderFrame: { url: 'https://malicious.site/exploit' } }, [workDir])
+    ).rejects.toThrow('SECURITY_VIOLATION: Untrusted renderer origin rejected');
+
+    // Verify trusted file:// origin succeeds and streams live progress events
+    fs.writeFileSync(path.join(workDir, 'sample1.txt'), 'Sample 1 content');
+    fs.writeFileSync(path.join(workDir, 'sample2.txt'), 'Sample 2 content');
+
+    const scanRes = await customScanHandler(
+      { senderFrame: { url: 'file:///C:/app/dist/renderer/index.html' } },
+      [workDir]
+    );
+    expect(scanRes.totalFilesScanned).toBe(2);
+    expect(sentEvents.length).toBeGreaterThanOrEqual(2);
+    expect(sentEvents[0].channel).toBe(IPC_CHANNELS.SCAN_PROGRESS_EVENT);
+    const firstProgress = sentEvents[0].payload as ScanProgress;
+    expect(firstProgress.filesScanned).toBeGreaterThanOrEqual(1);
+    expect(firstProgress.bytesScanned).toBeGreaterThan(0);
   });
 });

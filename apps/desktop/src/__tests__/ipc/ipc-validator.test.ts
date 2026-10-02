@@ -23,8 +23,53 @@ describe('IpcValidator (IPC Parameter Hardening & Traversal Defense)', () => {
     );
   });
 
+  it('rejects parent directory traversal segments (..)', () => {
+    expect(() => IpcValidator.validatePath('C:\\Users\\Public\\..\\..\\Windows\\System32')).toThrow(
+      'SECURITY_VIOLATION: Relative parent directory traversal (..) is prohibited.'
+    );
+    expect(() => IpcValidator.validatePath('../../etc/passwd')).toThrow(
+      'SECURITY_VIOLATION: Relative parent directory traversal (..) is prohibited.'
+    );
+  });
+
+  it('rejects remote UNC network share paths', () => {
+    expect(() => IpcValidator.validatePath('\\\\192.168.1.99\\malicious_share\\payload.exe')).toThrow(
+      'SECURITY_VIOLATION: Remote UNC network paths are prohibited.'
+    );
+    expect(() => IpcValidator.validatePath('//evil-smb-server/share/dropper.exe')).toThrow(
+      'SECURITY_VIOLATION: Remote UNC network paths are prohibited.'
+    );
+  });
+
   it('rejects path strings containing embedded null bytes', () => {
     expect(() => IpcValidator.validatePath('C:\\test\0.exe')).toThrow('Null byte detected');
+  });
+
+  it('validates scan target arrays and enforces target count bounds', () => {
+    const targets = IpcValidator.validateScanTargets(['./src']);
+    expect(targets.length).toBe(1);
+
+    expect(() => IpcValidator.validateScanTargets([])).toThrow('INVALID_TARGETS');
+    expect(() => IpcValidator.validateScanTargets(new Array(33).fill('./src'))).toThrow(
+      'INVALID_TARGETS'
+    );
+    expect(() => IpcValidator.validateScanTargets(['../secret'])).toThrow(
+      'SECURITY_VIOLATION'
+    );
+  });
+
+  it('validates trusted Electron renderer sender origins and blocks external origins', () => {
+    expect(() => IpcValidator.validateSenderOrigin('file:///C:/app/dist/renderer/index.html')).not.toThrow();
+    expect(() => IpcValidator.validateSenderOrigin('app://private-protection/index.html')).not.toThrow();
+    expect(() => IpcValidator.validateSenderOrigin('http://localhost:5173/')).not.toThrow();
+    expect(() => IpcValidator.validateSenderOrigin('http://127.0.0.1:3000/')).not.toThrow();
+
+    expect(() => IpcValidator.validateSenderOrigin('https://evil-phishing.example.com')).toThrow(
+      'SECURITY_VIOLATION: Untrusted renderer origin rejected'
+    );
+    expect(() => IpcValidator.validateSenderOrigin('')).toThrow(
+      'SECURITY_VIOLATION: Missing or untrusted IPC sender origin.'
+    );
   });
 
   it('validates alphanumeric identifiers with mandatory prefixes', () => {
