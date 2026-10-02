@@ -3,6 +3,7 @@ import {
   DetectionRequest,
   DetectionResult,
   Evidence,
+  FileScanRequest,
   FrictionLevel,
   InputType,
   PrescribedAction,
@@ -17,6 +18,7 @@ import {
 import { RuleEngine } from '../rules/rule-engine';
 import { URLAnalyzer } from '../analyzers/url-analyzer';
 import { TextAnalyzer } from '../analyzers/text-analyzer';
+import { CoreFileAnalyzer, CoreFileAnalysisOptions, CoreFileAnalysisOutput } from '../analyzers/file-analyzer';
 import { RiskScorer } from '../scoring/risk-scorer';
 import { ExplanationEngine } from '../explanation/explanation-engine';
 import { ThreatIntel } from '../threat-intel/threat-intel';
@@ -48,6 +50,13 @@ export class DetectionPipeline {
     this.threatIntel = deps?.threatIntel || new ThreatIntel();
   }
 
+  public scanFile(
+    request: FileScanRequest,
+    options?: CoreFileAnalysisOptions
+  ): CoreFileAnalysisOutput {
+    return CoreFileAnalyzer.analyzeBuffer(request, options);
+  }
+
   public async scan(request: ScanRequest | DetectionRequest): Promise<DetectionResult> {
     const startTime = Date.now();
     const scanId = request.id || uuidv4();
@@ -72,6 +81,36 @@ export class DetectionPipeline {
       else if (typeStr === 'FILE' || typeStr === 'FILE_HEADER') inputType = InputType.FILE;
       else if (typeStr === 'QR') inputType = InputType.QR;
       else if (typeStr === 'DOM' || typeStr === 'DOM_STRUCTURE') inputType = InputType.DOM;
+    }
+
+    if (inputType === InputType.FILE && request.payload instanceof Uint8Array) {
+      const meta = (request as ScanRequest).metadata || {};
+      const fileOut = CoreFileAnalyzer.analyzeBuffer({
+        fileName: meta.fileName || 'unknown',
+        filePath: meta.filePath,
+        fileSize: Number(meta.fileSize || request.payload.length),
+        headerBytes: request.payload,
+        mimeType: meta.mimeType
+      });
+      const elapsed = Math.max(0.01, Date.now() - startTime);
+      return {
+        requestId: scanId,
+        scanId,
+        id: scanId,
+        timestamp,
+        inputType: InputType.FILE,
+        verdict: fileOut.verdict,
+        riskCategory: fileOut.riskScore >= 50 ? RiskCategory.MALWARE : RiskCategory.SAFE,
+        riskScore: fileOut.riskScore,
+        score: fileOut.riskScore,
+        confidence: 0.95,
+        severity: fileOut.severity,
+        evidence: fileOut.evidence,
+        explanation: fileOut.evidenceFactors.join('; '),
+        recommendation: fileOut.actionRecommendation,
+        action: fileOut.actionRecommendation,
+        executionTimeMs: elapsed
+      };
     }
 
     if (!rawInput || typeof rawInput !== 'string' || !inputType) {
@@ -145,6 +184,16 @@ export class DetectionPipeline {
     } else if (inputType === InputType.TEXT) {
       const textEvidence = this.textAnalyzer.analyze(rawInput);
       evidence.push(...textEvidence);
+    } else if (inputType === InputType.FILE) {
+      const meta = (request as ScanRequest).metadata || {};
+      const headerBytes = new TextEncoder().encode(rawInput);
+      const fileOut = CoreFileAnalyzer.analyzeBuffer({
+        fileName: meta.fileName || rawInput,
+        filePath: meta.filePath,
+        fileSize: Number(meta.fileSize || headerBytes.length),
+        headerBytes
+      });
+      evidence.push(...fileOut.evidence);
     }
 
     // 3. Aggregate and Score
