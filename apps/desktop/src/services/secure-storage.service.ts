@@ -24,15 +24,38 @@ export class SecureStorageService {
   constructor(customConfigDir?: string) {
     this.configDir = customConfigDir || path.join(os.homedir(), '.private-protection');
     this.settingsPath = path.join(this.configDir, 'settings.enc');
-    // Derive machine-specific key for AES-256-GCM encryption
-    this.encryptionKey = crypto.createHash('sha256').update(os.hostname() + os.userInfo().username).digest();
     this.initStorage();
+    this.encryptionKey = this.deriveEncryptionKey();
   }
 
   private initStorage(): void {
     if (!fs.existsSync(this.configDir)) {
-      fs.mkdirSync(this.configDir, { recursive: true });
+      fs.mkdirSync(this.configDir, { recursive: true, mode: 0o700 });
     }
+  }
+
+  /**
+   * Derives an authenticated AES-256-GCM encryption key using machine-specific identity
+   * combined with a persistent cryptographically random salt and 100,000 PBKDF2 iterations.
+   */
+  private deriveEncryptionKey(): Buffer {
+    const saltPath = path.join(this.configDir, '.storage.salt');
+    let salt: Buffer;
+
+    if (fs.existsSync(saltPath)) {
+      try {
+        salt = fs.readFileSync(saltPath);
+      } catch {
+        salt = crypto.randomBytes(32);
+        fs.writeFileSync(saltPath, salt, { mode: 0o600 });
+      }
+    } else {
+      salt = crypto.randomBytes(32);
+      fs.writeFileSync(saltPath, salt, { mode: 0o600 });
+    }
+
+    const machineSecret = `${os.hostname()}:${os.userInfo().username}:${os.platform()}:${os.arch()}`;
+    return crypto.pbkdf2Sync(machineSecret, salt, 100000, 32, 'sha256');
   }
 
   private encrypt(plainText: string): string {

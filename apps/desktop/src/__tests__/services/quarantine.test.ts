@@ -170,4 +170,66 @@ describe('QuarantineService (Cryptographic Vault & Safe Remediation)', () => {
     expect(fs.existsSync(qItem.blobPath)).toBe(false);
     expect(quarantine.listQuarantine().length).toBe(0);
   });
+
+  it('rejects tampered quarantine container when ciphertext is modified', async () => {
+    const filePath = path.join(workDir, 'tamper_test.exe');
+    fs.writeFileSync(filePath, 'Sensitive untampered malware bytes');
+
+    const threat: DetectedThreat = {
+      id: 'threat-tamper',
+      filePath,
+      fileName: 'tamper_test.exe',
+      fileSize: 32,
+      sha256: crypto.createHash('sha256').update('Sensitive untampered malware bytes').digest('hex'),
+      riskScore: 90,
+      severity: 'critical',
+      verdict: 'BLOCK',
+      threatName: 'TAMPER_TEST',
+      detectedAt: Date.now(),
+      evidenceFactors: [],
+      quarantined: false
+    };
+
+    const qItem = await quarantine.isolateFile(threat);
+    const containerBuf = fs.readFileSync(qItem.blobPath);
+
+    // Tamper with ciphertext (after 8 bytes magic + 12 bytes IV + 16 bytes tag = offset 36)
+    fs.chmodSync(qItem.blobPath, 0o666);
+    containerBuf[38] = containerBuf[38] ^ 0xff;
+    fs.writeFileSync(qItem.blobPath, containerBuf);
+
+    // Restoration must reject tampered container
+    await expect(quarantine.restoreItem(qItem.quarantineId)).rejects.toThrow(/INTEGRITY_CHECK_FAILED|tampered/i);
+  });
+
+  it('rejects tampered quarantine container when authentication tag is modified', async () => {
+    const filePath = path.join(workDir, 'tag_tamper.exe');
+    fs.writeFileSync(filePath, 'Another malware sample payload');
+
+    const threat: DetectedThreat = {
+      id: 'threat-tag-tamper',
+      filePath,
+      fileName: 'tag_tamper.exe',
+      fileSize: 30,
+      sha256: crypto.createHash('sha256').update('Another malware sample payload').digest('hex'),
+      riskScore: 85,
+      severity: 'critical',
+      verdict: 'BLOCK',
+      threatName: 'TAG_TAMPER',
+      detectedAt: Date.now(),
+      evidenceFactors: [],
+      quarantined: false
+    };
+
+    const qItem = await quarantine.isolateFile(threat);
+    const containerBuf = fs.readFileSync(qItem.blobPath);
+
+    // Tamper with authentication tag (bytes 20..35)
+    fs.chmodSync(qItem.blobPath, 0o666);
+    containerBuf[25] = containerBuf[25] ^ 0xaa;
+    fs.writeFileSync(qItem.blobPath, containerBuf);
+
+    // Restoration must reject due to authentication tag mismatch
+    await expect(quarantine.restoreItem(qItem.quarantineId)).rejects.toThrow(/INTEGRITY_CHECK_FAILED/i);
+  });
 });

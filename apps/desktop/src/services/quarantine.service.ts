@@ -8,19 +8,38 @@ export class QuarantineService {
   private vaultDir: string;
   private manifestPath: string;
   private manifest: Map<string, QuarantineItem> = new Map();
+  private vaultKey: Buffer;
 
-  // Static XOR obfuscation key to neutralize executable headers in vault
-  private static readonly OBFUSCATION_MASK = 0xa5;
+  // Header magic for Private Protection AES-256-GCM Quarantine Vault container
+  private static readonly CONTAINER_MAGIC = Buffer.from('PPVAULT1', 'utf8'); // 8 bytes
 
   constructor(customVaultDir?: string) {
     this.vaultDir = customVaultDir || path.join(os.homedir(), '.private-protection', 'quarantine');
     this.manifestPath = path.join(this.vaultDir, 'manifest.json');
+    this.vaultKey = this.initVaultKey();
     this.initVault();
+  }
+
+  private initVaultKey(): Buffer {
+    const keyPath = path.join(this.vaultDir, '.vault.key');
+    if (fs.existsSync(keyPath)) {
+      try {
+        return fs.readFileSync(keyPath);
+      } catch {
+        // regenerate below if read fails
+      }
+    }
+    const key = crypto.randomBytes(32);
+    if (!fs.existsSync(this.vaultDir)) {
+      fs.mkdirSync(this.vaultDir, { recursive: true, mode: 0o700 });
+    }
+    fs.writeFileSync(keyPath, key, { mode: 0o600 });
+    return key;
   }
 
   private initVault(): void {
     if (!fs.existsSync(this.vaultDir)) {
-      fs.mkdirSync(this.vaultDir, { recursive: true });
+      fs.mkdirSync(this.vaultDir, { recursive: true, mode: 0o700 });
     }
     this.loadManifest();
   }
@@ -47,14 +66,48 @@ export class QuarantineService {
   }
 
   /**
-   * Applies reversible byte scrambling to neutralize executable magic headers.
+   * Applies authenticated AES-256-GCM encryption with random IV and authentication tag.
+   * Container format: [MAGIC: 8 bytes][IV: 12 bytes][AUTH_TAG: 16 bytes][CIPHERTEXT]
    */
-  private static scrambleBytes(buffer: Buffer): Buffer {
-    const out = Buffer.alloc(buffer.length);
-    for (let i = 0; i < buffer.length; i++) {
-      out[i] = buffer[i] ^ this.OBFUSCATION_MASK;
+  public encryptBytes(buffer: Buffer): Buffer {
+    const iv = crypto.randomBytes(12);
+    const cipher = crypto.createCipheriv('aes-256-gcm', this.vaultKey, iv);
+    const ciphertext = Buffer.concat([cipher.update(buffer), cipher.final()]);
+    const authTag = cipher.getAuthTag();
+
+    return Buffer.concat([
+      QuarantineService.CONTAINER_MAGIC,
+      iv,
+      authTag,
+      ciphertext
+    ]);
+  }
+
+  /**
+   * Decrypts an authenticated AES-256-GCM quarantine container.
+   */
+  public decryptBytes(containerBuffer: Buffer): Buffer {
+    if (containerBuffer.length < 8 + 12 + 16) {
+      throw new Error('CORRUPTED_VAULT: Quarantined container is too small to contain valid metadata.');
     }
-    return out;
+
+    const magic = containerBuffer.subarray(0, 8);
+    if (!magic.equals(QuarantineService.CONTAINER_MAGIC)) {
+      throw new Error('SECURITY_VIOLATION: Quarantined container header magic is invalid or corrupted.');
+    }
+
+    const iv = containerBuffer.subarray(8, 20);
+    const authTag = containerBuffer.subarray(20, 36);
+    const ciphertext = containerBuffer.subarray(36);
+
+    const decipher = crypto.createDecipheriv('aes-256-gcm', this.vaultKey, iv);
+    decipher.setAuthTag(authTag);
+
+    try {
+      return Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+    } catch {
+      throw new Error('INTEGRITY_CHECK_FAILED: Quarantined container authentication tag verification failed. Ciphertext has been tampered with.');
+    }
   }
 
   /**
@@ -73,16 +126,16 @@ export class QuarantineService {
       throw new Error('SECURITY_VIOLATION: Quarantining symbolic links is forbidden to prevent target hijacking.');
     }
 
-    // 2. Read file bytes and scramble to prevent execution
+    // 2. Read file bytes and encrypt with AES-256-GCM to prevent execution
     const rawBytes = await fs.promises.readFile(canonicalSource);
-    const scrambledBytes = QuarantineService.scrambleBytes(rawBytes);
+    const encryptedContainer = this.encryptBytes(rawBytes);
 
     // 3. Generate unique quarantine ID
     const quarantineId = `quarantine-${crypto.randomUUID()}`;
     const blobPath = path.join(this.vaultDir, `${quarantineId}.blob`);
 
-    // 4. Atomic write scrambled container to vault
-    await fs.promises.writeFile(blobPath, scrambledBytes);
+    // 4. Atomic write encrypted container to vault
+    await fs.promises.writeFile(blobPath, encryptedContainer);
 
     // 5. Try stripping execution permissions on container
     try {
@@ -143,9 +196,9 @@ export class QuarantineService {
       destinationPath = path.join(parsed.dir, `${parsed.name}_restored_${Date.now()}${parsed.ext}`);
     }
 
-    // Read scrambled bytes, de-scramble, and restore
-    const scrambledBytes = await fs.promises.readFile(item.blobPath);
-    const restoredBytes = QuarantineService.scrambleBytes(scrambledBytes);
+    // Read encrypted container, decrypt with AES-256-GCM, and restore
+    const encryptedContainer = await fs.promises.readFile(item.blobPath);
+    const restoredBytes = this.decryptBytes(encryptedContainer);
 
     // Verify hash integrity before finalizing restoration
     const restoredHash = crypto.createHash('sha256').update(restoredBytes).digest('hex');
