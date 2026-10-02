@@ -40,12 +40,12 @@ PRIVATE PROTECTION is an integrated multi-platform platform consisting of six co
 
 | Workspace / Subsystem | Platform / Technology | Core Responsibility |
 |---|---|---|
-| **`@private-protection/core`** | TypeScript / ES Modules | Canonical detection engine, URL & text analyzers, Bloom filter threat intelligence, Bayesian risk scoring. |
+| **`@private-protection/core`** | TypeScript / ES Modules | Canonical detection engine, URL & text analyzers, binary file header/entropy/double-extension analyzer (`CoreFileAnalyzer`), Bloom filter threat intelligence, Bayesian risk scoring. |
 | **`@private-protection/ml`** | TypeScript / On-Device ML | On-device AI Security Assistant, prompt injection defense, XML boundary encloser, Grade 6/8 fallback engine. |
 | **`@private-protection/web`** | React 18, Vite 6, Web Worker | Zero-install client-side web scanner dashboard and interactive security education suite. |
 | **`@private-protection/extension`** | Manifest V3 (Chrome/Edge/Brave) | Real-time browser protection, pre-navigation interception, in-page DOM password form shielding, and interstitial warning gate. |
-| **`@private-protection/mobile`** | Android / React Native | Mobile security client with notification threat filtering, live QR camera scanning, and device posture auditing. |
-| **`@private-protection/desktop`** | Electron 3-tier, Node.js daemon | Windows 10/11 security software with recursive filesystem scanning, ingress directory monitoring, and cryptographic quarantine vault. |
+| **`@private-protection/mobile`** | Android / React Native / Capacitor | Mobile security client with notification threat filtering, live QR camera scanning, file scanning, and device posture auditing. |
+| **`@private-protection/desktop`** | Electron 44.5.1, Node.js daemon | Windows 10/11 native security application with recursive filesystem scanning, real-time ingress directory shield, and AES-256-GCM (`PPVAULT1`) authenticated quarantine vault. |
 
 ---
 
@@ -61,10 +61,10 @@ Private Protection enforces strict data classification boundaries:
 - **Mandate:** Processed solely in volatile RAM. Zeroed upon scan completion. **NEVER TRANSMITTED OFF-DEVICE UNDER ANY CIRCUMSTANCE.**
 
 ### Tier 2: Internal Local State (Encrypted At Rest)
-- Custom allowlists and user overrides
+- Custom allowlists, user overrides, and persisted desktop protection settings (`AES-256-GCM`)
 - Local scan event counters and timestamps
-- Quarantined file payloads (magic-byte scrambled with XOR `0xA5`)
-- **Mandate:** Stored exclusively in local application storage. Purgeable forensically via 3-pass crypto-shredder.
+- Quarantined file payloads (authenticated `AES-256-GCM` encryption with `PPVAULT1` container header, random 96-bit IV, and 128-bit GCM auth tag)
+- **Mandate:** Stored exclusively in local application storage. Purgeable forensically via 3-pass crypto-shredder (`0x00`, `0xFF`, CSPRNG + `fsync`).
 
 ### Tier 3: Opt-in Telemetry (Disabled by Default)
 - Triggered rule identifier (e.g. `url-ip-based`) and engine version

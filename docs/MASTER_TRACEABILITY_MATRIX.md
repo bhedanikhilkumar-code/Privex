@@ -65,8 +65,8 @@ CONCRETE ACCEPTANCE CRITERIA (DEFINITION OF DONE)
 │   • Core Detection Engine (@private-protection/core) ──► Implements REQ-02, 03, 05, 06, 10, 11 │
 │   • Browser Extension (Manifest V3) ──────────────────► Implements REQ-02, 04, 06, 08, 09, 10 │
 │   • Mobile Client (Android/iOS) ──────────────────────► Implements REQ-01, 02, 03, 05, 08, 09 │
-│   • Desktop Client (Tauri 2.x) ───────────────────────► Implements REQ-01, 02, 04, 08, 09, 11 │
-│   • Web Dashboard (Next.js PWA) ──────────────────────► Implements REQ-01, 02, 03, 08, 09, 10 │
+│   • Desktop Client (Electron 44.5.1) ─────────────────► Implements REQ-01, 02, 04, 08, 09, 11 │
+│   • Web Dashboard (Next.js / Vite PWA) ───────────────► Implements REQ-01, 02, 03, 08, 09, 10 │
 │   • Optional Backend (Edge CDN & OHTTP) ──────────────► Supports REQ-07 (Privacy Relay Only)   │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -128,7 +128,7 @@ Phase 6 implementation in `apps/mobile` fulfills all mobile application requirem
 - **REQ-01 (On-Device AI Security Assistant)**: Synthesizes Grade 6 and Grade 8 threat explanations on-device within $< 0.1\text{ ms}$ via `@private-protection/ml`.
 - **REQ-02 (Phishing Link Detection)**: On-device URL scanner (`UrlScannerService`) invokes `@private-protection/core` and `@private-protection/ml` with $p95 < 1.3\text{ ms}$ latency.
 - **REQ-03 (Scam Message Detection)**: Local message & SMS scanner (`TextScannerService`) detects extortion, urgency pressure, and postal scams with $p95 < 0.5\text{ ms}$ latency.
-- **REQ-04 (Malicious Content Detection)**: Single-file header and entropy analyzer (`FileScannerService`) catches deceptive double extensions (`.pdf.exe`), MZ executables, and DEX bytecode without broad storage crawling.
+- **REQ-04 (Malicious Content Detection)**: Single-file header and entropy analyzer (`FileScannerService`) delegates to `CoreFileAnalyzer` in `@private-protection/core` to catch deceptive double extensions (`.pdf.exe`), MZ executables, and DEX bytecode without broad storage crawling.
 - **REQ-05 (Suspicious Communication Detection)**: Multi-signal correlation evaluated in volatile memory without cloud upload.
 - **REQ-06 (Real-Time Detection)**: Sub-millisecond execution times verified across all mobile scan paths (URL $p50 = 0.167\text{ ms}$, Text $p50 = 0.071\text{ ms}$).
 - **REQ-07 (Privacy-First Processing)**: Automated mock network traps in `network-isolation.test.ts` verify 0 outbound requests across `fetch`, `XMLHttpRequest`, and `navigator.sendBeacon`. Zero forbidden permissions requested (no contacts, no SMS reading, no location).
@@ -137,47 +137,30 @@ Phase 6 implementation in `apps/mobile` fulfills all mobile application requirem
 - **REQ-10 (Offline Functionality)**: 100% detection parity air-gapped with zero internet connectivity required.
 - **REQ-11 (Low Latency & Low Resource)**: Heap memory $39.25\text{ MB}$ (well below $150\text{ MB}$ ceiling), 0 background wake locks, projected daily battery impact $< 1.0\%$.
 
-**Test Suite Health**:
-- Monorepo tests: **355 passed across 63 test files** (128 Core, 87 ML, 52 Web, 43 Extension, 45 Mobile).
-- Zero skipped, zero failures, zero network leaks.
-
-**Phase 6 Status**: Mobile Security Application complete and verified green. Ready for Phase 7.
+**Phase 6 & Phase 10 Status**: Mobile Security Application complete and verified green on Android 17 emulator (`AUDIT-PHASE-10-MOBILE-REAUDIT-002`).
 
 ---
 
-## 8. PHASE 7 DESKTOP SECURITY SOFTWARE (FULL PC CLIENT) SIGN-OFF
+## 8. PHASE 7 & PHASE 11 DESKTOP SECURITY SOFTWARE (NATIVE ELECTRON CLIENT) SIGN-OFF
 
-Phase 7 implementation in `apps/desktop` fulfills all desktop security client requirements:
+Phase 7 & Phase 11 implementation and remediation in `apps/desktop` fulfill all desktop security client requirements:
 - **REQ-01 (On-Device AI Security Assistant)**: Synthesizes Grade 6 and Grade 8 threat explanations on-device within $< 0.1\text{ ms}$ via `@private-protection/ml`.
 - **REQ-02 (Phishing Link Detection)**: On-device URL scanner invokes `@private-protection/core` and `@private-protection/ml`.
 - **REQ-03 (Scam Message Detection)**: Local message and email text scanner detects extortion, urgency pressure, and postal scams.
-- **REQ-04 (Malicious Content Detection)**: Desktop file analyzer (`FileAnalyzer`) checks PE/MZ, ELF, Mach-O headers, double extension deception (`.pdf.exe`), and Shannon byte entropy ($> 7.2$).
+- **REQ-04 (Malicious Content Detection)**: Desktop file analyzer (`FileAnalyzer`) delegates to canonical `CoreFileAnalyzer` in `@private-protection/core` (`GAP-08`) to inspect PE/MZ, ELF, Mach-O headers, double extension deception (`.pdf.exe`), and Shannon byte entropy ($> 7.2$).
 - **REQ-05 (Suspicious Communication Detection)**: Multi-signal correlation evaluated in volatile memory without cloud upload.
-- **REQ-06 (Real-Time Detection)**: Real-time ingress filesystem monitoring (`RealtimeMonitorService`) debounces events and triggers fast-path header analysis on finalized file writes.
-- **REQ-07 (Privacy-First Processing)**: Automated tripwire traps in `network-isolation.test.ts` verify 0 outbound requests across `fetch`, `XMLHttpRequest`, and `sendBeacon`. Raw file bytes reside exclusively in volatile memory.
-- **REQ-08 (Instant Warnings)**: Full desktop UI with 11 functional views, color-coded `SecurityBadge`, and 3-second countdown friction gates (`FrictionGateModal`).
+- **REQ-06 (Real-Time Detection)**: Real-time ingress filesystem monitoring (`RealtimeMonitorService`) debounces events, triggers fast-path header analysis on finalized file writes, auto-quarantines critical threats when `autoQuarantineCritical` is enabled, and streams `REALTIME_THREAT_EVENT` over IPC to the renderer alert banner (`GAP-14`).
+- **REQ-07 (Privacy-First Processing)**: Automated tripwire traps in `network-isolation.test.ts` verify 0 outbound requests across `fetch`, `XMLHttpRequest`, and `sendBeacon`. Raw file bytes reside exclusively in volatile memory; quarantined files use authenticated `AES-256-GCM` (`PPVAULT1`).
+- **REQ-08 (Instant Warnings)**: Full native Electron UI with real-time threat alert banner (`data-testid="realtime-threat-alert"`), color-coded `SecurityBadge`, and 3-second countdown friction gates (`FrictionGateModal`).
 - **REQ-09 (Clear Explanations)**: Plain-language threat breakdowns below Grade 8 reading level.
 - **REQ-10 (Offline Functionality)**: 100% detection and quarantine parity air-gapped without internet connectivity.
-- **REQ-11 (Low Latency & Low Resource)**: Heap memory $34.41\text{ MB}$, idle CPU $0.0\%$, and fast-path file analysis $p50 = 30.733\text{ ms}$.
+- **REQ-11 (Low Latency & Low Resource)**: Heap memory $37.25\text{ MB}$, idle CPU $0.0\%$, and fast-path file analysis $p50 = 15.65\text{ ms}$.
 
 **Test Suite Health**:
-- Monorepo tests: **413 passed across 81 test files** (128 Core, 87 ML, 52 Web, 43 Extension, 45 Mobile, 58 Desktop).
+- Monorepo tests: **450 passed across 85 test files** (133 Core, 87 ML, 52 Web, 43 Extension, 56 Mobile, 79 Desktop).
 - Zero skipped, zero failures, zero network leaks.
 
-**Phase 7 Status**: Desktop Security Software complete and verified green.
+**Phase 11 Remediation Status (`docs/PHASE_11_REMEDIATION_REPORT.md`)**:
+- All Phase 11 Re-Audit gaps (`GAP-13`, `GAP-14`, `GAP-15`, `GAP-16`, `GAP-17`, `GAP-08`, and parent desktop gaps `GAP-04`, `GAP-12`) are **CLOSED** and independently verified by the read-only `FINAL VERIFICATION AGENT`.
 
----
-
-## 9. PHASE 11 DESKTOP NATIVE RUNTIME & INDEPENDENT RE-AUDIT STATUS
-
-- **Phase 11 Implementation (`docs/PHASE_11_DESKTOP_NATIVE_IMPLEMENTATION.md`)**: Delivered an Electron (`44.5.1`) native desktop host (`electron-main.ts`), preload bridge (`electron-preload.ts`), `IpcValidator` path checks, live `SCAN_PROGRESS_EVENT` streaming, AES-256-GCM (`PPVAULT1`) quarantine/restore, and packaged Windows x64 executable `PrivateProtection.exe` (`245,726,208` bytes, SHA-256 `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa`).
-- **Phase 11 Independent Zero-Trust Re-Audit (`docs/PHASE_11_INDEPENDENT_DESKTOP_REAUDIT.md`)**: **FAILED**.
-  - Verified working in `PrivateProtection.exe`: Electron `BrowserWindow` sandbox, `window.desktopSecurity` preload bridge, manual filesystem scanning (`Quick`, `Full`, `Custom`), pause/resume/cancel, and AES-256-GCM quarantine/restore/tamper rejection.
-  - Confirmed open blockers preventing `GAP-04` and `GAP-12` sign-off:
-    - **`GAP-13` (HIGH)**: `npm run build` fails `tsc --noEmit` (`TS2339: Property 'REALTIME_THREAT_EVENT' does not exist`).
-    - **`GAP-14` (HIGH)**: `RealtimeMonitorService` `'threatDetected'` events are disconnected from IPC, UI warnings, and auto-quarantine.
-    - **`GAP-15` (MEDIUM)**: Persisted security settings (`settings.enc`) are ignored at runtime by desktop services.
-    - **`GAP-16` (MEDIUM)**: `IpcHandler.handleIsolateFile` quarantines and unlinks benign (`ALLOW`) files without checking threat verdict or blocking system directories.
-    - **`GAP-08` (MEDIUM)**: Desktop `FileAnalyzer` remains standalone and bypasses `@private-protection/core`.
-    - **`GAP-17` (LOW)**: Documentation drift in `README.md` (`XOR 0xA5`) and `docs/PRODUCT_SCOPE.md`.
 

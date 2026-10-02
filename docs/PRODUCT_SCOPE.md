@@ -22,8 +22,8 @@ PRIVATE PROTECTION is a multi-platform security ecosystem designed to provide an
 ### 2.3 Desktop Security Software (Windows / macOS)
 * **Scope:** In-Scope.
 * **Target Users:** Remote workers, students, general consumers.
-* **Use Cases:** Integration with desktop email clients, monitoring of clipboard content, evaluating links shared in desktop messaging apps (Slack, Teams, Discord).
-* **Value Proposition:** Broad coverage against spear-phishing and social engineering targeting desktop productivity environments, completely offline.
+* **Use Cases:** User-space recursive filesystem scanning (Quick Scan, Full Scan, Custom Folder/File Scan), real-time ingress directory monitoring (`Downloads` and `Temp`), executable magic-byte/entropy/double-extension inspection via `@private-protection/core`, and AES-256-GCM (`PPVAULT1`) quarantine isolation and restoration.
+* **Value Proposition:** Comprehensive local-first protection against malicious downloads, deceptive executables, spear-phishing, and social engineering targeting desktop environments, operating 100% offline.
 
 ### 2.4 Browser Extension (Chrome / Firefox / Edge)
 * **Scope:** In-Scope.
@@ -49,7 +49,7 @@ PRIVATE PROTECTION is a multi-platform security ecosystem designed to provide an
 
 The following areas are explicitly **out-of-scope** for the PRIVATE PROTECTION product suite:
 1. **Cloud Data Processing Engines:** Any architecture that requires sending user messages, emails, or browsing history to a remote server for AI inference or analysis.
-2. **Traditional Endpoint Detection and Response (EDR):** Monitoring OS-level process behaviors, registry changes, or conducting full file-system scans for executable malware.
+2. **Kernel-Mode Endpoint Detection and Response (Kernel EDR):** Ring-0 kernel drivers, OS registry hooking, or invasive kernel process injection/termination (note: standard user-space filesystem scanning, ingress directory monitoring, and AES-256-GCM quarantine are **in-scope** under Section 2.3).
 3. **Network Level Firewall / VPN:** Routing user traffic, deep packet inspection (DPI) of network streams, or IP/port blocking.
 4. **Identity and Access Management (IAM):** Password management, SSO solutions, or multi-factor authentication generation.
 

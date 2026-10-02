@@ -8,6 +8,8 @@ export class RealtimeMonitorService extends EventEmitter {
   private watchers: Map<string, fs.FSWatcher> = new Map();
   private isMonitoring = false;
   private debounceTimers: Map<string, NodeJS.Timeout> = new Map();
+  private inFlightFiles: Set<string> = new Set();
+  private recentEvaluations: Map<string, number> = new Map();
   private entropyDetectionEnabled = true;
   private maxFileSizeBytes = 50 * 1024 * 1024;
   private excludedPaths: Set<string> = new Set();
@@ -91,6 +93,8 @@ export class RealtimeMonitorService extends EventEmitter {
       clearTimeout(timer);
     }
     this.debounceTimers.clear();
+    this.inFlightFiles.clear();
+    this.recentEvaluations.clear();
 
     this.isMonitoring = false;
     this.emit('stopped');
@@ -120,22 +124,23 @@ export class RealtimeMonitorService extends EventEmitter {
       return;
     }
 
-    const ext = path.extname(filePath).toLowerCase();
+    const canonicalPath = path.resolve(filePath);
+    const ext = path.extname(canonicalPath).toLowerCase();
     if (RealtimeMonitorService.IGNORED_TRANSIENT_EXTENSIONS.has(ext)) {
       return;
     }
 
     // Debounce to prevent event storms during multi-block writes
-    if (this.debounceTimers.has(filePath)) {
-      clearTimeout(this.debounceTimers.get(filePath)!);
+    if (this.debounceTimers.has(canonicalPath)) {
+      clearTimeout(this.debounceTimers.get(canonicalPath)!);
     }
 
     const timer = setTimeout(async () => {
-      this.debounceTimers.delete(filePath);
-      await this.evaluateIncomingFile(filePath);
+      this.debounceTimers.delete(canonicalPath);
+      await this.evaluateIncomingFile(canonicalPath);
     }, 250);
 
-    this.debounceTimers.set(filePath, timer);
+    this.debounceTimers.set(canonicalPath, timer);
   }
 
   /**
@@ -143,15 +148,33 @@ export class RealtimeMonitorService extends EventEmitter {
    */
   public async evaluateIncomingFile(filePath: string): Promise<void> {
     if (!this.isMonitoring || this.isPathExcluded(filePath)) return;
-    if (!fs.existsSync(filePath)) return;
+    const canonicalPath = path.resolve(filePath);
 
+    // Cancel any pending debounce timer for this path
+    if (this.debounceTimers.has(canonicalPath)) {
+      clearTimeout(this.debounceTimers.get(canonicalPath)!);
+      this.debounceTimers.delete(canonicalPath);
+    }
+
+    if (this.inFlightFiles.has(canonicalPath)) return;
+    if (!fs.existsSync(canonicalPath)) return;
+
+    this.inFlightFiles.add(canonicalPath);
     try {
-      const stat = await fs.promises.lstat(filePath);
+      const stat = await fs.promises.lstat(canonicalPath);
       if (stat.isSymbolicLink() || !stat.isFile() || stat.size === 0 || stat.size > this.maxFileSizeBytes) {
         return;
       }
 
-      const analysis = await FileAnalyzer.analyzeFile(filePath, {
+      const dedupeKey = `${canonicalPath}:${stat.size}:${Math.floor(stat.mtimeMs)}`;
+      const now = Date.now();
+      const lastEval = this.recentEvaluations.get(dedupeKey);
+      if (lastEval && now - lastEval < 1500) {
+        return;
+      }
+      this.recentEvaluations.set(dedupeKey, now);
+
+      const analysis = await FileAnalyzer.analyzeFile(canonicalPath, {
         entropyDetectionEnabled: this.entropyDetectionEnabled
       });
 
@@ -175,6 +198,8 @@ export class RealtimeMonitorService extends EventEmitter {
       }
     } catch {
       // Ignore transient access or lock errors safely
+    } finally {
+      this.inFlightFiles.delete(canonicalPath);
     }
   }
 }
