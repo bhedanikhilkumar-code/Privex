@@ -44,20 +44,7 @@ export const FullScanScreen: React.FC<FullScanScreenProps> = ({
         setLastResult(result);
         onScanComplete(result);
       } else {
-        const fallbackResult: ScanResult = {
-          scanId: 'full-simulated',
-          scanType: 'full',
-          totalFilesScanned: 18450,
-          totalBytesScanned: 1048576000,
-          durationMs: 4210,
-          threats: [],
-          skippedFiles: [{ path: 'C:\\Windows\\System32\\config', reason: 'System locked file (EACCES)' }],
-          errors: [],
-          overallVerdict: 'ALLOW',
-          completedAt: Date.now()
-        };
-        setLastResult(fallbackResult);
-        onScanComplete(fallbackResult);
+        throw new Error('DESKTOP_BRIDGE_UNAVAILABLE: Native desktop security service is disconnected or running in unprivileged web preview mode. Actual filesystem scanning requires the native desktop runtime.');
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Full PC scan failed.');

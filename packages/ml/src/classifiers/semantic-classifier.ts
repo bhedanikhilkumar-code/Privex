@@ -51,11 +51,11 @@ export class UrlSemanticClassifier {
     if (hasBrandWord && hasPhishPath && !lower.includes('paypal.com') && !lower.includes('apple.com') && !lower.includes('google.com') && !lower.includes('microsoft.com') && !lower.includes('amazon.com')) {
       isDeceptive = true;
       weight = 75;
-      description = 'Semantic embedding detected brand name combined with credential theft action path';
+      description = 'Lexical pattern detected brand name combined with credential theft action path';
     } else if (hasBrandWord && hasSuspiciousTLD) {
       isDeceptive = true;
       weight = 70;
-      description = 'Semantic embedding detected brand token registered on high-abuse TLD';
+      description = 'Lexical pattern detected brand token registered on high-abuse TLD';
     }
 
     const elapsed = Math.max(0.01, Date.now() - startTime);

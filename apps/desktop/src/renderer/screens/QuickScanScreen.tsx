@@ -44,21 +44,7 @@ export const QuickScanScreen: React.FC<QuickScanScreenProps> = ({
         setLastResult(result);
         onScanComplete(result);
       } else {
-        // Fallback result for standalone browser preview environments
-        const fallbackResult: ScanResult = {
-          scanId: 'quick-simulated',
-          scanType: 'quick',
-          totalFilesScanned: 142,
-          totalBytesScanned: 25489000,
-          durationMs: 820,
-          threats: [],
-          skippedFiles: [],
-          errors: [],
-          overallVerdict: 'ALLOW',
-          completedAt: Date.now()
-        };
-        setLastResult(fallbackResult);
-        onScanComplete(fallbackResult);
+        throw new Error('DESKTOP_BRIDGE_UNAVAILABLE: Native desktop security service is disconnected or running in unprivileged web preview mode. Actual filesystem scanning requires the native desktop runtime.');
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Quick scan failed to complete.');

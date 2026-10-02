@@ -50,20 +50,7 @@ export const CustomScanScreen: React.FC<CustomScanScreenProps> = ({
         setLastResult(result);
         onScanComplete(result);
       } else {
-        const fallbackResult: ScanResult = {
-          scanId: 'custom-simulated',
-          scanType: 'custom',
-          totalFilesScanned: 48,
-          totalBytesScanned: 5214000,
-          durationMs: 310,
-          threats: [],
-          skippedFiles: [],
-          errors: [],
-          overallVerdict: 'ALLOW',
-          completedAt: Date.now()
-        };
-        setLastResult(fallbackResult);
-        onScanComplete(fallbackResult);
+        throw new Error('DESKTOP_BRIDGE_UNAVAILABLE: Native desktop security service is disconnected or running in unprivileged web preview mode. Actual filesystem scanning requires the native desktop runtime.');
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Custom scan failed.');

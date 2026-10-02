@@ -146,6 +146,15 @@ export class FileAnalyzer {
       riskScore += 50;
       evidenceFactors.push(`Double extension deception: disguised as '${deceptive.fakeExt}', actual '${deceptive.realExt}'`);
       threatName = 'DECEPTIVE_DOUBLE_EXTENSION';
+
+      // Critical synergy: double extension masking an actual binary header
+      const hasExecutableHeader = magicHeader === 'PE/MZ_EXECUTABLE' ||
+                                  magicHeader === 'ELF_EXECUTABLE' ||
+                                  magicHeader === 'MACHO_EXECUTABLE';
+      if (hasExecutableHeader) {
+        riskScore += 30; // 50 + 30 + 15 = 95
+        evidenceFactors.push(`Deceptive double extension carries active executable payload (${magicHeader})`);
+      }
     }
 
     // Heuristic 2: Disguised executable (claimed doc, but has PE/MZ or ELF header)
