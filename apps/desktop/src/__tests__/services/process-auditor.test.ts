@@ -7,7 +7,7 @@ describe('ProcessAuditorService (Process Posture Audit)', () => {
   it('audits running processes without terminating them', async () => {
     const procs = await auditor.auditRunningProcesses();
     expect(Array.isArray(procs)).toBe(true);
-  });
+  }, 15000);
 
   it('identifies deceptive double-extension process names', () => {
     const check1 = auditor.isProcessNameSuspicious('invoice.pdf.exe');

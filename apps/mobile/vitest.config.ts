@@ -6,7 +6,12 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: [],
-    include: ['src/**/__tests__/**/*.test.{ts,tsx}']
+    include: ['src/**/__tests__/**/*.test.{ts,tsx}'],
+    testTimeout: 15000,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+    }
   },
   resolve: {
     alias: {

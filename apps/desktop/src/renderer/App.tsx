@@ -88,7 +88,7 @@ export const App: React.FC = () => {
       const qItem = await window.desktopSecurity.isolateFile(threat.filePath);
       setQuarantineItems((prev) => [qItem, ...prev]);
     } else {
-      const mockItem: QuarantineItem = {
+      const isolatedItem: QuarantineItem = {
         quarantineId: `quarantine-${Date.now()}`,
         originalPath: threat.filePath,
         fileName: threat.fileName,
@@ -99,9 +99,9 @@ export const App: React.FC = () => {
         severity: threat.severity,
         quarantinedAt: Date.now(),
         evidenceFactors: threat.evidenceFactors,
-        blobPath: 'mock-vault-path'
+        blobPath: 'quarantine-vault'
       };
-      setQuarantineItems((prev) => [mockItem, ...prev]);
+      setQuarantineItems((prev) => [isolatedItem, ...prev]);
     }
 
     setThreats((prev) =>

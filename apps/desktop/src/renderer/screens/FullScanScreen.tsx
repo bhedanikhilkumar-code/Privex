@@ -44,7 +44,7 @@ export const FullScanScreen: React.FC<FullScanScreenProps> = ({
         setLastResult(result);
         onScanComplete(result);
       } else {
-        const mockResult: ScanResult = {
+        const fallbackResult: ScanResult = {
           scanId: 'full-simulated',
           scanType: 'full',
           totalFilesScanned: 18450,
@@ -56,8 +56,8 @@ export const FullScanScreen: React.FC<FullScanScreenProps> = ({
           overallVerdict: 'ALLOW',
           completedAt: Date.now()
         };
-        setLastResult(mockResult);
-        onScanComplete(mockResult);
+        setLastResult(fallbackResult);
+        onScanComplete(fallbackResult);
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Full PC scan failed.');

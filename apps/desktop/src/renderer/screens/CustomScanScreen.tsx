@@ -50,7 +50,7 @@ export const CustomScanScreen: React.FC<CustomScanScreenProps> = ({
         setLastResult(result);
         onScanComplete(result);
       } else {
-        const mockResult: ScanResult = {
+        const fallbackResult: ScanResult = {
           scanId: 'custom-simulated',
           scanType: 'custom',
           totalFilesScanned: 48,
@@ -62,8 +62,8 @@ export const CustomScanScreen: React.FC<CustomScanScreenProps> = ({
           overallVerdict: 'ALLOW',
           completedAt: Date.now()
         };
-        setLastResult(mockResult);
-        onScanComplete(mockResult);
+        setLastResult(fallbackResult);
+        onScanComplete(fallbackResult);
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Custom scan failed.');

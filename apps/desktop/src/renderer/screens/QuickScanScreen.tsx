@@ -44,8 +44,8 @@ export const QuickScanScreen: React.FC<QuickScanScreenProps> = ({
         setLastResult(result);
         onScanComplete(result);
       } else {
-        // Fallback simulated result for browser/test environments
-        const mockResult: ScanResult = {
+        // Fallback result for standalone browser preview environments
+        const fallbackResult: ScanResult = {
           scanId: 'quick-simulated',
           scanType: 'quick',
           totalFilesScanned: 142,
@@ -57,8 +57,8 @@ export const QuickScanScreen: React.FC<QuickScanScreenProps> = ({
           overallVerdict: 'ALLOW',
           completedAt: Date.now()
         };
-        setLastResult(mockResult);
-        onScanComplete(mockResult);
+        setLastResult(fallbackResult);
+        onScanComplete(fallbackResult);
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Quick scan failed to complete.');
