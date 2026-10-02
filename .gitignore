@@ -1,7 +1,12 @@
 node_modules
 dist
 coverage
+release/*.zip
+release/*.tar.gz
 .env
 *.tsbuildinfo
 .DS_Store
 .agents
+.vite
+.vite-temp
+*.log
