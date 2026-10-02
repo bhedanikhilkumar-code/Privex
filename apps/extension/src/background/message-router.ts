@@ -9,6 +9,34 @@ import { SeverityLevel, Verdict, Evidence } from '@private-protection/core';
 export class MessageRouter {
   constructor(private interceptor: NavigationInterceptor) {}
 
+  private isPrivilegedSender(sender: chrome.runtime.MessageSender): boolean {
+    if (!sender) return false;
+
+    // Reject if sender has an ID that does not match our extension
+    if (typeof chrome !== 'undefined' && chrome.runtime?.id && sender.id && sender.id !== chrome.runtime.id) {
+      return false;
+    }
+
+    // Direct extension contexts (e.g. popup, background) have no tab
+    if (!sender.tab) {
+      return true;
+    }
+
+    // If sender is hosted in a tab, verify its URL is an internal extension page
+    if (typeof chrome !== 'undefined' && typeof chrome.runtime?.getURL === 'function') {
+      const extensionBase = chrome.runtime.getURL('');
+      if (sender.url && sender.url.startsWith(extensionBase)) {
+        return true;
+      }
+    }
+
+    if (sender.url && (sender.url.startsWith('chrome-extension://') || sender.url.startsWith('moz-extension://'))) {
+      return true;
+    }
+
+    return false;
+  }
+
   public async handleMessage(rawMessage: any, sender: chrome.runtime.MessageSender): Promise<any> {
     const validation = validateInboundMessage(rawMessage);
     if (!validation.valid || !validation.message) {
@@ -70,6 +98,16 @@ export class MessageRouter {
           return { success: false, error: 'Invalid override parameters' };
         }
 
+        // GAP-23: Privileged Origin Validation
+        if (!this.isPrivilegedSender(sender)) {
+          return { success: false, error: 'Unauthorized: Override requests cannot be initiated by content scripts' };
+        }
+
+        // If from internal tab page (e.g. interstitial), sender tab must match requested tabId
+        if (sender.tab && typeof sender.tab.id === 'number' && sender.tab.id !== tabId) {
+          return { success: false, error: 'Unauthorized: Mismatched tabId for override request' };
+        }
+
         const state = await ExtensionStorage.getTabState(tabId);
         if (state) {
           state.overridden = true;
@@ -103,6 +141,10 @@ export class MessageRouter {
       }
 
       case MessageType.UPDATE_SETTINGS: {
+        // GAP-23: Privileged Origin Validation
+        if (!this.isPrivilegedSender(sender)) {
+          return { success: false, error: 'Unauthorized: Settings can only be updated by extension UI' };
+        }
         if (!payload || typeof payload !== 'object') {
           return { success: false, error: 'Invalid settings payload' };
         }
@@ -111,6 +153,10 @@ export class MessageRouter {
       }
 
       case MessageType.CLEAR_ALL_DATA: {
+        // GAP-23: Privileged Origin Validation
+        if (!this.isPrivilegedSender(sender)) {
+          return { success: false, error: 'Unauthorized: Storage can only be cleared by extension UI' };
+        }
         await ExtensionStorage.clearAllStorage();
         return { success: true };
       }
