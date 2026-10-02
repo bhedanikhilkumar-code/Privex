@@ -14,13 +14,20 @@
 | **GAP-01** | **CRITICAL** | Security / Vulnerability | `apps/desktop/src/services/update-verifier.service.ts` | Ed25519 signature verification bypassed; accepts arbitrary dummy bytes | **CLOSED (Remediated in Phase 9)** |
 | **GAP-02** | **HIGH** | Architecture / ML | `packages/ml/src/models/onnx-provider.ts` | Zero ONNX models in repo; missing runtime dependencies; deceptive regex telemetry | **CLOSED (Remediated in Phase 9)** |
 | **GAP-03** | **HIGH** | Completeness / Platform | `apps/mobile/` | Mobile native implementation: compiled APK missing web assets, unencrypted storage mismatch, missing QR frame decoder | **CLOSED (Remediated & Re-Audit Passed)** |
-| **GAP-04** | **HIGH** | Completeness / Platform | `apps/desktop/` | No Tauri/Electron runtime; UI mock screens return fake hardcoded scan metrics | **CLOSED (Remediated in Phase 11)** |
+| **GAP-04** | **HIGH** | Completeness / Platform | `apps/desktop/` | Native Electron runtime & real filesystem scanning exist, but blocked by `GAP-13`..`GAP-16` & `GAP-08` | **OPEN (Failed Phase 11 Re-Audit)** |
 | **GAP-05** | **HIGH** | Security / Cryptography | `apps/desktop/src/services/quarantine.service.ts` | Quarantine vault uses single-byte XOR `0xA5` obfuscation instead of AES-256-GCM | **CLOSED (Remediated in Phase 9)** |
 | **GAP-06** | **MEDIUM** | Security / Storage | `apps/desktop/src/services/secure-storage.service.ts` | Desktop settings key derived from unsalted `hostname + username` without OS Keystore | **CLOSED (Remediated in Phase 9)** |
 | **GAP-07** | **MEDIUM** | Consistency / Detection | Cross-Platform Client Adapters | Semantic verdict & threshold divergence (empty input, borderline scores) | **CLOSED (Remediated in Phase 9)** |
-| **GAP-08** | **MEDIUM** | Domain Model / Contracts | Core, Desktop, Mobile | File analysis models are incompatible and fragmented across packages | **CLOSED (Remediated in Phase 9)** |
+| **GAP-08** | **MEDIUM** | Domain Model / Contracts | Core, Desktop, Mobile | Desktop `FileAnalyzer` (`apps/desktop/src/core/file-analyzer.ts`) remains standalone and bypasses `@private-protection/core` | **OPEN (Confirmed in Phase 11 Re-Audit)** |
 | **GAP-09** | **MEDIUM** | Detection Scoring | `packages/core/src/analyzers/text.analyzer.ts` | Extortion & urgent cryptocurrency scam scored as 69 (CAUTION) instead of DANGEROUS | **CLOSED (Remediated in Phase 9)** |
 | **GAP-10** | **LOW** | Architecture / Backend | `apps/backend/` | OHTTP Privacy Relay & Stateless CDN backend not implemented | **DOCUMENTED OPTIONAL** |
+| **GAP-11** | **MEDIUM** | Extension / Packaging | `apps/extension/` | Extension build script did not emit self-contained `dist/` unpacked bundle | **CLOSED (Remediated in Phase 9)** |
+| **GAP-12** | **MEDIUM** | Build / Desktop Packaging | `apps/desktop/` | `npm run package` builds `PrivateProtection.exe`, but `npm run build` fails `tsc --noEmit` (`GAP-13`) | **OPEN (Failed Phase 11 Re-Audit)** |
+| **GAP-13** | **HIGH** | Build / TypeScript | `apps/desktop/src/preload/electron-preload.ts:8` | `npm run build` fails `tsc --noEmit` (`TS2339: Property 'REALTIME_THREAT_EVENT' does not exist`) | **OPEN (Phase 11 Re-Audit Blocker)** |
+| **GAP-14** | **HIGH** | Runtime / Real-Time Shield | `apps/desktop/src/ipc/ipc-handler.ts`, `preload.ts`, `App.tsx` | `RealtimeMonitorService` detections are never forwarded over IPC to UI or auto-quarantined | **OPEN (Phase 11 Re-Audit Blocker)** |
+| **GAP-15** | **MEDIUM** | Runtime / Settings | `apps/desktop/src/services/*` | Persisted security settings (`settings.enc`) are ignored at runtime by `ScannerService`, `FileAnalyzer`, and `RealtimeMonitorService` | **OPEN (Phase 11 Re-Audit)** |
+| **GAP-16** | **MEDIUM** | Security / IPC | `apps/desktop/src/ipc/ipc-handler.ts:92-110` | `handleIsolateFile` quarantines and unlinks benign (`ALLOW`) files without verifying threat verdict or blocking system paths | **OPEN (Phase 11 Re-Audit)** |
+| **GAP-17** | **LOW** | Documentation Drift | `README.md:66`, `docs/PRODUCT_SCOPE.md:52` | `README.md` still references `XOR 0xA5` quarantine and `PRODUCT_SCOPE.md` lists full filesystem scans as Out-of-Scope | **OPEN (Phase 11 Re-Audit)** |
 
 ---
 
@@ -80,20 +87,17 @@
 
 ---
 
-### GAP-04: Desktop Client Native Runtime & Real Filesystem Scanning (HIGH) — CLOSED
+### GAP-04: Desktop Client Native Runtime & Real Filesystem Scanning (HIGH) — OPEN (Failed Phase 11 Re-Audit)
 - **Requirement Tracing:** PP-017 (Native Desktop Client), PS-05.4 (Malicious Content & Filesystem Detection).
 - **Files Affected:**
   - `apps/desktop/src/main/electron-main.ts`
   - `apps/desktop/src/preload/electron-preload.ts`
   - `apps/desktop/src/ipc/ipc-handler.ts` & `ipc-validator.ts`
   - `apps/desktop/src/renderer/App.tsx`, `FullScanScreen.tsx`, `QuickScanScreen.tsx`, `CustomScanScreen.tsx`
-- **Remediation Summary (Phase 11 — October 2, 2026):**
-  - Implemented a hardened Electron `44.5.1` native host (`electron-main.ts`) with `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`, strict CSP headers, and external navigation blocking.
-  - Wired `electron-preload.ts` via `contextBridge.exposeInMainWorld('desktopSecurity', Object.freeze(api))` to all 19 canonical `IPC_CHANNELS`.
-  - Hardened `IpcValidator` against `..` parent traversal, remote UNC shares (`\\server\share`), shell metacharacters, null bytes, and untrusted renderer origins.
-  - Connected `ScannerService` live `'progress'` events to `SCAN_PROGRESS_EVENT` in the renderer and removed hardcoded `filesScannedTotal = 142` and fake quarantine fallbacks.
-  - Built and packaged the standalone Windows x64 executable `PrivateProtection.exe` (`245,726,208` bytes, SHA-256 `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa`) and verified live filesystem scanning, threat detection, and AES-256-GCM quarantine/restore in `PrivateProtection.exe --headless-verify` and `desktop-runtime-e2e.test.ts` (`71/71` desktop tests passing).
-- **Status:** **CLOSED (Remediated & Verified in Phase 11)**.
+- **Audit History:**
+  - `PHASE-11-IMPLEMENTATION` (October 2, 2026): Implemented Electron `44.5.1` host (`electron-main.ts`), `contextBridge` preload (`electron-preload.ts`), `IpcValidator` path checks, live `SCAN_PROGRESS_EVENT` streaming, and packaged `PrivateProtection.exe`.
+  - `PHASE-11-INDEPENDENT-REAUDIT` (`docs/PHASE_11_INDEPENDENT_DESKTOP_REAUDIT.md`, October 2, 2026): **FAILED**. Verified that `PrivateProtection.exe` launches, exposes `window.desktopSecurity`, scans real directories, and encrypts/restores `.blob` quarantine files with AES-256-GCM, **but** remains blocked from closure by `GAP-13` (`npm run build` fails `tsc --noEmit`), `GAP-14` (`RealtimeMonitorService` detections are not wired to IPC/UI or auto-quarantine), `GAP-15` (persisted security settings ignored at runtime), `GAP-16` (`handleIsolateFile` quarantines/unlinks benign `ALLOW` files), and `GAP-08` (standalone desktop `FileAnalyzer` bypasses `@private-protection/core`).
+- **Status:** **OPEN (Partially Remediated; Failed Phase 11 Independent Re-Audit)**.
 
 ---
 
@@ -144,15 +148,13 @@
 
 ---
 
-### GAP-08: Fragmented & Incompatible File Analyzer Models (MEDIUM)
+### GAP-08: Fragmented & Incompatible File Analyzer Models (MEDIUM) — OPEN
 - **Requirement Tracing:** PP-018, PP-024 (File Analysis Domain Models).
-- **Files Affected:** `apps/desktop/src/services/file-analyzer.service.ts`, `apps/mobile/src/services/file-analyzer.service.ts`.
-- **Empirical Evidence:**
-  - `packages/core` does not export a `FileAnalyzer` or canonical `FileScanResult`.
-  - Desktop returns `{ riskScore, verdict: 'BLOCK' | 'WARN', isDeceptiveExtension }`.
-  - Mobile returns `{ score, verdict: Verdict.DANGEROUS, shannonEntropy }`.
-- **Impact:** Cross-platform shared core does not govern file analysis; desktop and mobile implement divergent file scoring logic.
-- **Recommended Remediation:** Move `FileAnalyzer` into `@private-protection/core` alongside URL and Text analyzers with a single canonical `FileScanResult` interface.
+- **Files Affected:** `apps/desktop/src/core/file-analyzer.ts`, `packages/core/src/types.ts`.
+- **Empirical Evidence (Confirmed in Phase 11 Re-Audit):**
+  - `packages/core/src/analyzers/file-analyzer.ts` does not exist; `packages/core` only defines `FileScanRequest`/`FileScanResult` interfaces in `types.ts`.
+  - `apps/desktop/src/core/file-analyzer.ts` implements its own standalone file scoring and returns lowercase severities (`'safe' | 'low' | 'suspicious' | 'dangerous' | 'critical'`), bypassing `@private-protection/core`'s `DetectionPipeline` and `RiskScorer`.
+- **Status:** **OPEN (Confirmed in Phase 11 Independent Re-Audit)**.
 
 ---
 
@@ -175,3 +177,51 @@
 - **Empirical Evidence:** `apps/backend/` does not exist in the repository.
 - **Impact:** No functional impact on on-device detection because the system is designed to be 100% offline. However, anonymous OHTTP telemetry relays and differential OTA update distribution servers described in architecture documents are absent.
 - **Recommended Remediation:** Document backend as an external standalone service or stub a reference OHTTP relay server in `packages/backend`.
+
+---
+
+### GAP-12: Desktop Build & Packaging Pipeline Incomplete Type Safety (MEDIUM) — OPEN
+- **Requirement Tracing:** PP-017 (Desktop Build & Packaging).
+- **Files Affected:** `apps/desktop/package.json`, `apps/desktop/scripts/build-desktop.js`, `apps/desktop/src/preload/electron-preload.ts`.
+- **Empirical Evidence:** While `npm run package` bundles and produces `PrivateProtection.exe`, `npm run build` (`tsc --noEmit && node scripts/build-desktop.js`) fails with exit code `1` due to `GAP-13`.
+- **Status:** **OPEN (Blocked by `GAP-13`)**.
+
+---
+
+### GAP-13: Desktop TypeScript Build Failure (`TS2339: Property 'REALTIME_THREAT_EVENT' does not exist`) (HIGH) — OPEN
+- **Requirement Tracing:** PP-017, Gate 24 (Clean Build Verification).
+- **Files Affected:** `apps/desktop/src/preload/electron-preload.ts:8`, `apps/desktop/src/ipc/ipc-channels.ts`.
+- **Empirical Evidence:** `electron-preload.ts` line 8 references `IPC_CHANNELS.REALTIME_THREAT_EVENT`, which is missing from `IPC_CHANNELS` in `ipc-channels.ts`. Running `npm run build` in `apps/desktop` fails with `error TS2339`.
+- **Status:** **OPEN (Discovered in Phase 11 Independent Re-Audit)**.
+
+---
+
+### GAP-14: Real-Time Shield Detections Disconnected from IPC, UI, and Auto-Quarantine (HIGH) — OPEN
+- **Requirement Tracing:** PP-017, PS-05.4, PS-05.6, PS-05.8 (Real-Time Detection & Instant Warnings).
+- **Files Affected:** `apps/desktop/src/ipc/ipc-handler.ts:180-293`, `apps/desktop/src/preload/preload.ts:16-42`, `apps/desktop/src/renderer/App.tsx`.
+- **Empirical Evidence:** `RealtimeMonitorService` watches `~/Downloads`, `~/Desktop`, and `$TEMP` and emits `'threatDetected'` in the main process when a malicious file is dropped, but `IpcHandler.registerElectronHandlers` never subscribes to `this.realtimeMonitor.on('threatDetected')`, `DesktopSecurityApi` exposes no `onRealtimeThreat` callback, `App.tsx` displays no real-time warning, and dropped threats are never auto-quarantined.
+- **Status:** **OPEN (Discovered in Phase 11 Independent Re-Audit)**.
+
+---
+
+### GAP-15: Persisted Desktop Security Settings Ignored at Runtime (MEDIUM) — OPEN
+- **Requirement Tracing:** PP-017 (Desktop User Configuration & Enforcement).
+- **Files Affected:** `apps/desktop/src/services/scanner.service.ts:20`, `apps/desktop/src/core/file-analyzer.ts`, `apps/desktop/src/services/realtime-monitor.service.ts`, `apps/desktop/src/main/electron-main.ts`.
+- **Empirical Evidence:** Settings saved via `SettingsScreen.tsx` (`realtimeShieldEnabled`, `monitorDownloads`, `monitorTemp`, `scanLargeFilesLimitMb`, `entropyDetectionEnabled`, `autoQuarantineCritical`) are written to `settings.enc` via `SecureStorageService`, but none of the backend services read `SecureStorageService.getSettings()` to enforce those configurations.
+- **Status:** **OPEN (Discovered in Phase 11 Independent Re-Audit)**.
+
+---
+
+### GAP-16: Arbitrary Benign File Quarantine & Unlinking via IPC (MEDIUM) — OPEN
+- **Requirement Tracing:** PP-019, Gate 07 (IPC Trust Boundary & Fail-Safe Quarantine).
+- **Files Affected:** `apps/desktop/src/ipc/ipc-handler.ts:92-110` (`handleIsolateFile`).
+- **Empirical Evidence:** `IpcHandler.handleIsolateFile(filePath)` analyzes the target file and calls `this.quarantine.isolateFile(threat)` even when `analysis.verdict === 'ALLOW'` and `severity === 'safe'`, encrypting and unlinking clean user files from disk without verifying threat status or blocking critical OS system directories.
+- **Status:** **OPEN (Discovered in Phase 11 Independent Re-Audit)**.
+
+---
+
+### GAP-17: Documentation Drift in `README.md` & `docs/PRODUCT_SCOPE.md` (LOW) — OPEN
+- **Requirement Tracing:** Gate 02 & Gate 15 Documentation Integrity.
+- **Files Affected:** `README.md:66`, `docs/PRODUCT_SCOPE.md:52`.
+- **Empirical Evidence:** `README.md` line 66 still states quarantine payloads are `"magic-byte scrambled with XOR 0xA5"` instead of AES-256-GCM (`PPVAULT1`), and `docs/PRODUCT_SCOPE.md` line 52 still lists full filesystem scans for executable malware under "Out-of-Scope".
+- **Status:** **OPEN (Discovered in Phase 11 Independent Re-Audit)**.

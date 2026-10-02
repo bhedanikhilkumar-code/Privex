@@ -168,9 +168,16 @@ Phase 7 implementation in `apps/desktop` fulfills all desktop security client re
 
 ---
 
-## 9. PHASE 11 DESKTOP NATIVE RUNTIME & REAL PC FILESYSTEM SCANNING SIGN-OFF
+## 9. PHASE 11 DESKTOP NATIVE RUNTIME & INDEPENDENT RE-AUDIT STATUS
 
-Phase 11 remediation in `apps/desktop` closes `GAP-04` (`PP-017` / `PS-05.4`) and `GAP-12` by delivering a real native Electron (`44.5.1`) desktop runtime and Windows executable (`PrivateProtection.exe`):
-- **PP-017 (Native Desktop Antivirus Runtime)**: Packaged executable `apps/desktop/release/PrivateProtection-win32-x64/PrivateProtection.exe` (`245,726,208` bytes, SHA-256 `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa`) boots `electron-main.cjs` with `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`, strict CSP, and `electron-preload.cjs` exposing `window.desktopSecurity`.
-- **PS-05.4 (Malicious Content & Filesystem Detection)**: End-to-end Quick, Full, and Custom filesystem scans traverse real directories via `ScannerService` and `FileAnalyzer`, streaming live `SCAN_PROGRESS_EVENT` telemetry to `ScanProgressBar`, supporting mid-scan cancellation, and isolating threats in the AES-256-GCM (`PPVAULT1`) quarantine vault with verified restore and permanent crypto-shredding.
-- **Test & Runtime Verification**: **71 passed tests across 19 test files** in `apps/desktop`, plus live headless runtime verification via `PrivateProtection.exe --headless-verify`.
+- **Phase 11 Implementation (`docs/PHASE_11_DESKTOP_NATIVE_IMPLEMENTATION.md`)**: Delivered an Electron (`44.5.1`) native desktop host (`electron-main.ts`), preload bridge (`electron-preload.ts`), `IpcValidator` path checks, live `SCAN_PROGRESS_EVENT` streaming, AES-256-GCM (`PPVAULT1`) quarantine/restore, and packaged Windows x64 executable `PrivateProtection.exe` (`245,726,208` bytes, SHA-256 `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa`).
+- **Phase 11 Independent Zero-Trust Re-Audit (`docs/PHASE_11_INDEPENDENT_DESKTOP_REAUDIT.md`)**: **FAILED**.
+  - Verified working in `PrivateProtection.exe`: Electron `BrowserWindow` sandbox, `window.desktopSecurity` preload bridge, manual filesystem scanning (`Quick`, `Full`, `Custom`), pause/resume/cancel, and AES-256-GCM quarantine/restore/tamper rejection.
+  - Confirmed open blockers preventing `GAP-04` and `GAP-12` sign-off:
+    - **`GAP-13` (HIGH)**: `npm run build` fails `tsc --noEmit` (`TS2339: Property 'REALTIME_THREAT_EVENT' does not exist`).
+    - **`GAP-14` (HIGH)**: `RealtimeMonitorService` `'threatDetected'` events are disconnected from IPC, UI warnings, and auto-quarantine.
+    - **`GAP-15` (MEDIUM)**: Persisted security settings (`settings.enc`) are ignored at runtime by desktop services.
+    - **`GAP-16` (MEDIUM)**: `IpcHandler.handleIsolateFile` quarantines and unlinks benign (`ALLOW`) files without checking threat verdict or blocking system directories.
+    - **`GAP-08` (MEDIUM)**: Desktop `FileAnalyzer` remains standalone and bypasses `@private-protection/core`.
+    - **`GAP-17` (LOW)**: Documentation drift in `README.md` (`XOR 0xA5`) and `docs/PRODUCT_SCOPE.md`.
+
