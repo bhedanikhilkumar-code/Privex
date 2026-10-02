@@ -1,8 +1,6 @@
-import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { App } from '../../renderer/App';
-import { HomeScreen } from '../../renderer/screens/HomeScreen';
 import { SecurityBadge } from '../../renderer/components/SecurityBadge';
 import { SettingsScreen } from '../../renderer/screens/SettingsScreen';
 import { PrivacyScreen } from '../../renderer/screens/PrivacyScreen';
