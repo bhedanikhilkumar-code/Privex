@@ -111,9 +111,9 @@ public class MainActivity extends AppCompatActivity {
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
 
-        // STRICT FILE & ORIGIN RESTRICTIONS (Remediates BLOCKER-04)
+        // STRICT FILE & ORIGIN RESTRICTIONS (Remediates BLOCKER-04; content:// enabled strictly for user-picked SAF URIs)
         settings.setAllowFileAccess(false);
-        settings.setAllowContentAccess(false);
+        settings.setAllowContentAccess(true);
         settings.setAllowFileAccessFromFileURLs(false);
         settings.setAllowUniversalAccessFromFileURLs(false);
         settings.setGeolocationEnabled(false);

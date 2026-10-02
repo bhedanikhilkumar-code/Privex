@@ -353,9 +353,9 @@ The monorepo test suite was executed across all 6 workspaces:
 
 ### Defect Register (Phase 14)
 
-| Defect ID | Severity | Component | Description | Impact |
-|---|---|---|---|---|
-| **DEFECT-P14-01** | **CRITICAL** | `apps/mobile` (Packaging) | Stale debug APK binary committed in repo. `app-debug.apk` was built on 02-10-2026 and lacks Phase 12 DEX bytecode (`getDeviceSecurityPosture`, `onShowFileChooser`) and updated web assets (`choose-file-btn`). | Real SAF file picker cannot be triggered; Device Security Posture returns hardcoded default (`ADB: Disabled`) instead of real device state. |
+| Defect ID | Severity | Component | Description | Impact | Status |
+|---|---|---|---|---|---|
+| **DEFECT-P14-01** | **CRITICAL** | `apps/mobile` (Packaging) | Stale debug APK binary committed in repo. `app-debug.apk` was built on 02-10-2026 and lacks Phase 12 DEX bytecode (`getDeviceSecurityPosture`, `onShowFileChooser`) and updated web assets (`choose-file-btn`). | Real SAF file picker cannot be triggered; Device Security Posture returns hardcoded default (`ADB: Disabled`) instead of real device state. | **REMEDIATED IN PHASE 15 (`docs/PHASE_15_ANDROID_PACKAGING_REMEDIATION.md`) — AWAITING PHASE 14 RE-VALIDATION (MASTER PROMPT #33)** |
 
 ### Remediation Requirements (For Next Remediation Phase)
 1. **Recompile Debug APK:**
