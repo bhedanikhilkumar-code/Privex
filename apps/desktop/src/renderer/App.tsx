@@ -25,7 +25,7 @@ export const App: React.FC = () => {
   const [threats, setThreats] = useState<DetectedThreat[]>([]);
   const [quarantineItems, setQuarantineItems] = useState<QuarantineItem[]>([]);
   const [selectedThreat, setSelectedThreat] = useState<DetectedThreat | null>(null);
-  const [filesScannedTotal, setFilesScannedTotal] = useState<number>(142);
+  const [filesScannedTotal, setFilesScannedTotal] = useState<number>(0);
 
   const [status, setStatus] = useState<DesktopProtectionStatus>({
     realtimeShieldActive: true,
@@ -36,8 +36,8 @@ export const App: React.FC = () => {
     mlAssistantReady: true,
     offlineMode: true,
     quarantinedCount: 0,
-    memoryRssBytes: 45 * 1024 * 1024,
-    heapUsedBytes: 22 * 1024 * 1024
+    memoryRssBytes: 0,
+    heapUsedBytes: 0
   });
 
   const [settings, setSettings] = useState<DesktopSettings>({
@@ -84,25 +84,11 @@ export const App: React.FC = () => {
   };
 
   const handleIsolateThreat = async (threat: DetectedThreat) => {
-    if (window.desktopSecurity?.isolateFile) {
-      const qItem = await window.desktopSecurity.isolateFile(threat.filePath);
-      setQuarantineItems((prev) => [qItem, ...prev]);
-    } else {
-      const isolatedItem: QuarantineItem = {
-        quarantineId: `quarantine-${Date.now()}`,
-        originalPath: threat.filePath,
-        fileName: threat.fileName,
-        fileSize: threat.fileSize,
-        sha256: threat.sha256,
-        threatName: threat.threatName,
-        riskScore: threat.riskScore,
-        severity: threat.severity,
-        quarantinedAt: Date.now(),
-        evidenceFactors: threat.evidenceFactors,
-        blobPath: 'quarantine-vault'
-      };
-      setQuarantineItems((prev) => [isolatedItem, ...prev]);
+    if (!window.desktopSecurity?.isolateFile) {
+      throw new Error('DESKTOP_BRIDGE_UNAVAILABLE: Native quarantine vault requires the desktop runtime.');
     }
+    const qItem = await window.desktopSecurity.isolateFile(threat.filePath);
+    setQuarantineItems((prev) => [qItem, ...prev]);
 
     setThreats((prev) =>
       prev.map((t) => (t.id === threat.id ? { ...t, quarantined: true } : t))

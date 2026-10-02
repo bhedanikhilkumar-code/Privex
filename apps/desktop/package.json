@@ -3,9 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "description": "On-device threat, phishing, scam, and malware desktop security application for PC",
-  "main": "src/index.ts",
+  "main": "dist/main/electron-main.cjs",
   "scripts": {
-    "build": "tsc --noEmit",
+    "build": "tsc --noEmit && node scripts/build-desktop.js",
+    "package": "node scripts/build-desktop.js --package",
+    "start": "electron dist/main/electron-main.cjs",
+    "verify:runtime": "electron dist/main/electron-main.cjs --headless-verify",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
@@ -15,12 +18,16 @@
   "dependencies": {
     "@private-protection/core": "*",
     "@private-protection/ml": "*",
-    "react": "^18.2.0"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@testing-library/react": "^14.1.2",
     "@types/node": "^22.13.0",
     "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "electron": "^44.5.1",
+    "esbuild": "^0.21.5",
     "jsdom": "^24.0.0",
     "typescript": "^5.3.3",
     "vitest": "*"

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScanProgress, ScanResult, DetectedThreat } from '../../types/desktop.types';
 import { ScanProgressBar } from '../components/ScanProgressBar';
 import { SecurityBadge } from '../components/SecurityBadge';
@@ -16,6 +16,16 @@ export const QuickScanScreen: React.FC<QuickScanScreenProps> = ({
   const [progress, setProgress] = useState<ScanProgress | null>(null);
   const [lastResult, setLastResult] = useState<ScanResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!window.desktopSecurity?.onScanProgress) return;
+    const unsubscribe = window.desktopSecurity.onScanProgress((liveProgress) => {
+      setProgress(liveProgress);
+    });
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, []);
 
   const handleStartScan = async () => {
     setIsScanning(true);

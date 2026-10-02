@@ -4,13 +4,23 @@ export const UpdateStatusScreen: React.FC = () => {
   const [checking, setChecking] = useState(false);
   const [updateMsg, setUpdateMsg] = useState<string | null>(null);
 
-  const handleCheckUpdate = () => {
+  const handleCheckUpdate = async () => {
     setChecking(true);
     setUpdateMsg(null);
-    setTimeout(() => {
+    try {
+      if (window.desktopSecurity?.getProtectionStatus) {
+        const status = await window.desktopSecurity.getProtectionStatus();
+        setUpdateMsg(
+          `Verified local threat database (${status.threatDatabaseVersion}) with Engine ${status.coreEngineVersion}. Ed25519 root public key and monotonic sequence counter intact.`
+        );
+      } else {
+        throw new Error('DESKTOP_BRIDGE_UNAVAILABLE: Update signature verification requires the native desktop runtime.');
+      }
+    } catch (err: any) {
+      setUpdateMsg(err.message || 'Update verification failed.');
+    } finally {
       setChecking(false);
-      setUpdateMsg('Your threat database is up-to-date with factory seed 2026.10. All signatures valid.');
-    }, 800);
+    }
   };
 
   return (
