@@ -280,11 +280,12 @@ export class IpcHandler {
     return this.storage.getSettings();
   }
 
-  public handleSaveSettings(settings: Partial<DesktopSettings>): void {
+  public handleSaveSettings(settings: Partial<DesktopSettings>): DesktopSettings {
     const validatedPatch = IpcValidator.validateSettings(settings);
     this.storage.saveSettings(validatedPatch);
     const updated = this.storage.getSettings();
     this.applySettings(updated, true);
+    return updated;
   }
 
   public async handleExplainThreat(

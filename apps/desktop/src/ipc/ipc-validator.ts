@@ -59,11 +59,14 @@ export class IpcValidator {
    * since temporary directories are active malware ingress points.
    */
   public static isProtectedSystemPath(filePath: string): boolean {
+    const rawSlash = filePath.trim().replace(/\\/g, '/').toLowerCase();
+    if (rawSlash === '/tmp' || rawSlash.startsWith('/tmp/')) {
+      return false;
+    }
     const normalized = path.resolve(filePath).toLowerCase();
     if (
       normalized === 'c:\\windows\\temp' ||
-      normalized.startsWith('c:\\windows\\temp\\') ||
-      normalized.startsWith('/tmp/')
+      normalized.startsWith('c:\\windows\\temp\\')
     ) {
       return false;
     }
@@ -71,7 +74,9 @@ export class IpcValidator {
       (prefix) =>
         normalized === prefix ||
         normalized.startsWith(prefix + '\\') ||
-        normalized.startsWith(prefix + '/')
+        normalized.startsWith(prefix + '/') ||
+        rawSlash === prefix ||
+        rawSlash.startsWith(prefix + '/')
     );
   }
 

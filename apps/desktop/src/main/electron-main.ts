@@ -202,11 +202,15 @@ async function runHeadlessRuntimeVerification(win: BrowserWindow): Promise<void>
     };
 
     console.log('[ELECTRON_E2E_PROOF] ' + JSON.stringify(fullReport));
+    ipcHandler?.getRealtimeMonitor().stop();
     fs.rmSync(tempRoot, { recursive: true, force: true });
+    win.destroy();
     app.exit(0);
   } catch (err: any) {
     console.error('[ELECTRON_E2E_ERROR] ' + (err?.stack || err?.message || String(err)));
+    ipcHandler?.getRealtimeMonitor().stop();
     fs.rmSync(tempRoot, { recursive: true, force: true });
+    win.destroy();
     app.exit(1);
   }
 }
