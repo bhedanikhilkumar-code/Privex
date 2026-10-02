@@ -13,6 +13,12 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    sourceSets {
+        main {
+            assets.srcDirs = ['src/main/assets']
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled true
@@ -29,6 +35,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
 configurations.all {
@@ -40,4 +50,17 @@ dependencies {
     implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "androidx.core:core-ktx:1.12.0"
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
+    implementation "androidx.webkit:webkit:1.10.0"
+    implementation "com.google.zxing:core:3.5.3"
+
+    // Unit test dependencies
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.json:json:20231013"
+    testImplementation "org.mockito:mockito-core:5.8.0"
+
+    // Android Instrumentation test dependencies
+    androidTestImplementation "androidx.test.ext:junit:1.1.5"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.5.1"
+    androidTestImplementation "androidx.test:runner:1.5.2"
+    androidTestImplementation "androidx.test:rules:1.5.0"
 }
