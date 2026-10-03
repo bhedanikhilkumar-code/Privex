@@ -66,18 +66,22 @@ export class IpcValidator {
     const normalized = path.resolve(filePath).toLowerCase();
     if (
       normalized === 'c:\\windows\\temp' ||
-      normalized.startsWith('c:\\windows\\temp\\')
+      normalized.startsWith('c:\\windows\\temp\\') ||
+      rawSlash === 'c:/windows/temp' ||
+      rawSlash.startsWith('c:/windows/temp/')
     ) {
       return false;
     }
-    return this.PROTECTED_SYSTEM_PREFIXES.some(
-      (prefix) =>
+    return this.PROTECTED_SYSTEM_PREFIXES.some((prefix) => {
+      const prefixSlash = prefix.replace(/\\/g, '/');
+      return (
         normalized === prefix ||
         normalized.startsWith(prefix + '\\') ||
         normalized.startsWith(prefix + '/') ||
-        rawSlash === prefix ||
-        rawSlash.startsWith(prefix + '/')
-    );
+        rawSlash === prefixSlash ||
+        rawSlash.startsWith(prefixSlash + '/')
+      );
+    });
   }
 
   /**

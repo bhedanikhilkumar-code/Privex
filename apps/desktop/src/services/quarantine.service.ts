@@ -124,7 +124,8 @@ export class QuarantineService {
     let clean = rawName.replace(/\0/g, '').trim();
 
     // 2. Extract base name to eliminate directory traversal sequences (../, ..\, /foo/bar, C:\foo)
-    clean = path.basename(clean);
+    clean = clean.replace(/\\/g, '/');
+    clean = path.posix.basename(clean);
 
     // 3. Remove illegal filesystem characters (< > : " / \ | ? *)
     clean = clean.replace(/[<>:"/\\|?*]/g, '_');

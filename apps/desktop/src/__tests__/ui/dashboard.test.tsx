@@ -1,11 +1,15 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+// @vitest-environment jsdom
+import { describe, it, expect, afterEach } from 'vitest';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { App } from '../../renderer/App';
 import { SecurityBadge } from '../../renderer/components/SecurityBadge';
 import { SettingsScreen } from '../../renderer/screens/SettingsScreen';
 import { PrivacyScreen } from '../../renderer/screens/PrivacyScreen';
 
 describe('Desktop UI & Dashboard Presentation Layer', () => {
+  afterEach(() => {
+    cleanup();
+  });
   it('renders App shell with header, sidebar, and initial HomeScreen', () => {
     render(<App />);
     expect(screen.getAllByText('PRIVATE PROTECTION').length).toBeGreaterThan(0);
