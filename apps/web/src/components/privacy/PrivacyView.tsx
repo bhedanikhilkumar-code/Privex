@@ -2,85 +2,163 @@ import React from 'react';
 
 export const PrivacyView: React.FC = () => {
   return (
-    <section aria-labelledby="privacy-heading" style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h2 id="privacy-heading" style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-          Privacy Architecture & Cryptographic Boundaries
+    <section aria-labelledby="privacy-heading" style={{ maxWidth: '980px', margin: '0 auto' }}>
+      {/* Top Header */}
+      <div style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+          <span
+            style={{
+              padding: '0.2rem 0.6rem',
+              backgroundColor: 'var(--color-brand)',
+              color: '#FFFFFF',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              textTransform: 'uppercase'
+            }}
+          >
+            ARCHITECTURE SPECIFICATION
+          </span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            ZERO-KNOWLEDGE • ZERO-CLOUD • RAM-ONLY
+          </span>
+        </div>
+
+        <h2
+          id="privacy-heading"
+          style={{
+            fontFamily: 'var(--font-serif)',
+            fontSize: '2.25rem',
+            fontWeight: 800,
+            letterSpacing: '-0.02em',
+            marginBottom: '0.5rem',
+            color: '#111111'
+          }}
+        >
+          Privacy Architecture &amp; Cryptographic Boundaries
         </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1rem', maxWidth: '750px', lineHeight: 1.5 }}>
           Traditional security services upload your visited URLs, private SMS messages, and emails to remote cloud servers.
           PRIVATE PROTECTION is architected on a zero-cloud, client-side execution model.
         </p>
       </div>
 
-      {/* Main Privacy Guarantee Banner */}
+      {/* Main Privacy Guarantee Banner (Matches How It Works.png) */}
       <div
         style={{
-          padding: '1.25rem',
-          backgroundColor: 'rgba(16, 185, 129, 0.08)',
-          border: '1px solid rgba(16, 185, 129, 0.3)',
-          borderRadius: '0.75rem',
-          marginBottom: '1.5rem',
+          padding: '1.5rem',
+          backgroundColor: 'var(--color-accent)',
+          border: '2px solid var(--border-dark)',
+          boxShadow: 'var(--shadow-brutal)',
+          marginBottom: '2rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '0.5rem'
+          gap: '0.65rem'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '1.25rem' }}>🔒</span>
-          <strong style={{ fontSize: '1rem', color: '#34d399' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          <span style={{ fontSize: '1.5rem' }}>🔒</span>
+          <strong style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', color: '#111111' }}>
             Your scan is processed locally in your browser.
           </strong>
         </div>
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+        <p style={{ fontSize: '0.9rem', color: '#111111', lineHeight: 1.6, margin: 0 }}>
           All URL parsers, homograph decoders, Shannon entropy calculations, Bloom filters, and intent classification
-          engines run in volatile RAM on this device. No network socket is opened to process your input.
+          engines run in volatile device memory on this endpoint. No network socket is opened to process your input.
         </p>
+      </div>
+
+      {/* Authority Comparison (From How It Works.png) */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '1.25rem',
+          marginBottom: '2rem'
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            border: '2px solid var(--border-dark)',
+            boxShadow: 'var(--shadow-brutal)',
+            padding: '1.5rem'
+          }}
+        >
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-brand)', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
+            SECURITY DECISION MAKER
+          </div>
+          <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.5rem' }}>
+            Core Detection Engine
+          </h3>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
+            <strong>100% Authority.</strong> Deterministic rule evaluation, IP host detection, Shannon entropy, and Bloom filters establish the final risk verdict and action recommendations.
+          </p>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            border: '2px solid var(--border-dark)',
+            boxShadow: 'var(--shadow-brutal)',
+            padding: '1.5rem'
+          }}
+        >
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, color: '#888888', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
+            EXPLANATION SYNTHESIZER
+          </div>
+          <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.5rem' }}>
+            AI Security Assistant
+          </h3>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
+            <strong>0% Decision Authority.</strong> Read-only synthesis layer. Translates structured deterministic evidence tokens into plain-language Grade 6 explanations. Cannot downgrade verdicts.
+          </p>
+        </div>
       </div>
 
       {/* Data Handling Classification Table */}
       <div
         style={{
-          backgroundColor: 'var(--bg-card)',
-          borderRadius: '0.75rem',
-          border: '1px solid var(--border-color)',
+          backgroundColor: '#FFFFFF',
+          border: '2px solid var(--border-dark)',
+          boxShadow: 'var(--shadow-brutal-lg)',
           overflow: 'hidden',
-          marginBottom: '1.5rem'
+          marginBottom: '2rem'
         }}
       >
-        <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border-color)', fontWeight: 600 }}>
+        <div style={{ padding: '1rem 1.5rem', backgroundColor: 'var(--bg-secondary)', borderBottom: '2px solid var(--border-dark)', fontWeight: 800, fontFamily: 'var(--font-mono)', fontSize: '0.85rem', textTransform: 'uppercase' }}>
           Data Handling Principles Matrix
         </div>
 
-        <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div>
-            <strong style={{ color: '#f87171', fontSize: '0.9rem' }}>
+            <strong style={{ color: 'var(--color-danger)', fontSize: '0.95rem', fontFamily: 'var(--font-mono)' }}>
               Tier 1: Scanned Content (URLs, Message Texts, Snippets)
             </strong>
-            <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.35rem', lineHeight: 1.55 }}>
               • <strong>Transmission:</strong> NEVER transmitted off this device. Zero HTTP requests.<br />
               • <strong>Storage:</strong> NEVER persisted to disk or indexed databases. Zero retention.<br />
-              • <strong>Lifecycle:</strong> Exists strictly in volatile browser RAM and is discarded immediately after scan display.
+              • <strong>Lifecycle:</strong> Exists strictly in Volatile RAM and is discarded immediately after scan display.
             </p>
           </div>
 
-          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
-            <strong style={{ color: '#60a5fa', fontSize: '0.9rem' }}>
+          <div style={{ borderTop: '1px solid #EBE7DE', paddingTop: '1rem' }}>
+            <strong style={{ color: 'var(--color-brand)', fontSize: '0.95rem', fontFamily: 'var(--font-mono)' }}>
               Tier 2: Client Settings (Reading Grade, Worker Preference)
             </strong>
-            <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.35rem', lineHeight: 1.55 }}>
               • <strong>Transmission:</strong> Never transmitted.<br />
               • <strong>Storage:</strong> Saved strictly in local browser storage on this device.<br />
               • <strong>Purge:</strong> Can be crypto-shredded and cleared instantly via the Settings tab.
             </p>
           </div>
 
-          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
-            <strong style={{ color: '#34d399', fontSize: '0.9rem' }}>
-              Network & Telemetry Isolation
+          <div style={{ borderTop: '1px solid #EBE7DE', paddingTop: '1rem' }}>
+            <strong style={{ color: 'var(--color-safe)', fontSize: '0.95rem', fontFamily: 'var(--font-mono)' }}>
+              Network &amp; Telemetry Isolation
             </strong>
-            <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-              • <strong>Content Security Policy:</strong> Enforces <code style={{ color: '#93c5fd' }}>connect-src &apos;self&apos;</code> to prevent unauthorized background exfiltration.<br />
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.35rem', lineHeight: 1.55 }}>
+              • <strong>Content Security Policy:</strong> Enforces <code style={{ color: 'var(--color-brand)', backgroundColor: 'var(--bg-secondary)', padding: '0.1rem 0.3rem', border: '1px solid var(--border-dark)' }}>connect-src &apos;self&apos;</code> to prevent unauthorized background exfiltration.<br />
               • <strong>Air-Gapped Parity:</strong> Fully operational with Wi-Fi, Ethernet, and cellular data turned off.
             </p>
           </div>
@@ -90,19 +168,19 @@ export const PrivacyView: React.FC = () => {
       {/* Verification Instructions */}
       <div
         style={{
-          padding: '1rem',
-          backgroundColor: 'var(--bg-secondary)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '0.5rem',
-          fontSize: '0.8rem',
+          padding: '1.25rem 1.5rem',
+          backgroundColor: '#FFFFFF',
+          border: '2px solid var(--border-dark)',
+          boxShadow: 'var(--shadow-brutal)',
+          fontSize: '0.85rem',
           color: 'var(--text-muted)'
         }}
       >
-        <strong style={{ color: '#ffffff', display: 'block', marginBottom: '0.35rem' }}>
+        <strong style={{ color: '#111111', display: 'block', marginBottom: '0.5rem', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', textTransform: 'uppercase' }}>
           How to Independently Verify Zero Network Transmission:
         </strong>
-        <ol style={{ paddingLeft: '1.25rem', lineHeight: 1.6 }}>
-          <li>Open your browser Developer Tools (<kbd>F12</kbd> or <kbd>Ctrl+Shift+I</kbd>).</li>
+        <ol style={{ paddingLeft: '1.25rem', lineHeight: 1.7, margin: 0 }}>
+          <li>Open your browser Developer Tools (<kbd style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.1rem 0.4rem', border: '1px solid var(--border-dark)' }}>F12</kbd> or <kbd style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.1rem 0.4rem', border: '1px solid var(--border-dark)' }}>Ctrl+Shift+I</kbd>).</li>
           <li>Navigate to the <strong>Network</strong> tab.</li>
           <li>Paste any URL or sensitive message in the scanner and click <strong>Scan</strong>.</li>
           <li>Observe that <strong>zero outbound HTTP requests</strong> occur during detection.</li>
