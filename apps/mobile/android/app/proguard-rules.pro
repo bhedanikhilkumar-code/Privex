@@ -10,3 +10,10 @@
     public static *** v(...);
     public static *** i(...);
 }
+
+# Tink and Security Crypto compile-time annotation suppressions
+-dontwarn com.google.errorprone.annotations.**
+-dontwarn javax.annotation.**
+-dontwarn com.google.crypto.tink.**
+-dontwarn androidx.security.crypto.**
+

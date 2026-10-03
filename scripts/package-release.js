@@ -61,17 +61,50 @@ if (fs.existsSync(webDist)) {
   console.error('Error: Web dist directory does not exist. Run npm run build first.');
 }
 
-// 3. Generate SHA256SUMS.txt
+// 3. Mobile Android Package
+const releaseApk = path.resolve(rootDir, 'apps/mobile/android/app/build/outputs/apk/release/app-release.apk');
+const debugApk = path.resolve(rootDir, 'apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk');
+const releaseAab = path.resolve(rootDir, 'apps/mobile/android/app/build/outputs/bundle/release/app-release.aab');
+
+const finalApkDest = path.resolve(releaseDir, 'private-protection-mobile-0.1.0.apk');
+const finalAabDest = path.resolve(releaseDir, 'private-protection-mobile-0.1.0.aab');
+
+if (fs.existsSync(releaseApk)) {
+  console.log('Packaging Mobile Android Release APK artifact...');
+  fs.copyFileSync(releaseApk, finalApkDest);
+  const apkSha = calculateSha256(finalApkDest);
+  const apkSize = fs.statSync(finalApkDest).size;
+  console.log(`✓ Mobile Release APK packaged: ${path.basename(finalApkDest)} (${apkSize} bytes)`);
+  console.log(`  SHA-256: ${apkSha}`);
+} else if (fs.existsSync(debugApk)) {
+  console.log('Packaging Mobile Android Debug APK fallback artifact...');
+  fs.copyFileSync(debugApk, finalApkDest);
+  const apkSha = calculateSha256(finalApkDest);
+  const apkSize = fs.statSync(finalApkDest).size;
+  console.log(`✓ Mobile Debug APK packaged: ${path.basename(finalApkDest)} (${apkSize} bytes)`);
+  console.log(`  SHA-256: ${apkSha}`);
+}
+
+if (fs.existsSync(releaseAab)) {
+  console.log('Packaging Mobile Android Release AAB artifact...');
+  fs.copyFileSync(releaseAab, finalAabDest);
+  const aabSha = calculateSha256(finalAabDest);
+  const aabSize = fs.statSync(finalAabDest).size;
+  console.log(`✓ Mobile Release AAB packaged: ${path.basename(finalAabDest)} (${aabSize} bytes)`);
+  console.log(`  SHA-256: ${aabSha}`);
+}
+
+// 4. Generate SHA256SUMS.txt
 const sumsFile = path.resolve(releaseDir, 'SHA256SUMS.txt');
 const lines = [];
 
-const apkFile = path.resolve(rootDir, 'apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk');
 const desktopExe = path.resolve(rootDir, 'apps/desktop/release/PrivateProtection-win32-x64/PrivateProtection.exe');
 
 const artifacts = [
   { path: extZip, name: path.basename(extZip) },
   { path: webZip, name: path.basename(webZip) },
-  { path: apkFile, name: 'private-protection-mobile-0.1.0.apk' },
+  { path: finalApkDest, name: 'private-protection-mobile-0.1.0.apk' },
+  { path: finalAabDest, name: 'private-protection-mobile-0.1.0.aab' },
   { path: desktopExe, name: 'PrivateProtection-0.1.0-win-x64.exe' }
 ];
 
