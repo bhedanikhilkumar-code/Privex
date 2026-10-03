@@ -96,8 +96,18 @@ if (fs.existsSync(releaseAab)) {
 
 // 4. Desktop Packages
 const desktopExe = path.resolve(rootDir, 'apps/desktop/release/PrivateProtection-win32-x64/PrivateProtection.exe');
+const desktopPortableDest = path.resolve(releaseDir, 'PrivateProtection-0.1.0-win-x64.exe');
 const desktopInstallerSrc = path.resolve(rootDir, 'apps/desktop/release/PrivateProtection-Setup-0.1.0.exe');
 const desktopInstallerDest = path.resolve(releaseDir, 'PrivateProtection-Setup-0.1.0.exe');
+
+if (fs.existsSync(desktopExe)) {
+  console.log('Packaging Desktop Portable Executable artifact...');
+  fs.copyFileSync(desktopExe, desktopPortableDest);
+  const exeSha = calculateSha256(desktopPortableDest);
+  const exeSize = fs.statSync(desktopPortableDest).size;
+  console.log(`✓ Desktop Portable Executable packaged: ${path.basename(desktopPortableDest)} (${exeSize} bytes)`);
+  console.log(`  SHA-256: ${exeSha}`);
+}
 
 if (fs.existsSync(desktopInstallerSrc)) {
   console.log('Packaging Desktop Consumer Installer artifact...');
