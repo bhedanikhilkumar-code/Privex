@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Verdict } from '@private-protection/core';
 import { ScanResultViewData } from '../../scanner/types';
-import { getVerdictVisuals, formatSeverity } from '../../lib/formatters';
+import { formatSeverity } from '../../lib/formatters';
 
 interface ResultCardProps {
   result: ScanResultViewData;
@@ -9,8 +9,8 @@ interface ResultCardProps {
 }
 
 export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
-  const visuals = getVerdictVisuals(result.verdict);
   const isDangerous = result.verdict === Verdict.DANGEROUS || result.verdict === Verdict.SUSPICIOUS;
+  const isSafe = result.verdict === Verdict.ALLOW;
 
   // 5-second friction gate for dangerous threats
   const [frictionSeconds, setFrictionSeconds] = useState<number>(isDangerous ? 5 : 0);
@@ -25,303 +25,375 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
     }
   }, [isDangerous, frictionSeconds]);
 
+  // Color mapping for brutalist banner
+  const bannerBg = isDangerous ? 'var(--color-danger)' : isSafe ? 'var(--color-safe)' : 'var(--color-caution)';
+  const bannerTextColor = '#FFFFFF';
+  const headerVerdictLabel = isDangerous
+    ? 'ACCESS BLOCKED / DANGEROUS THREAT'
+    : isSafe
+    ? 'SAFE / NO IMMEDIATE THREAT DETECTED'
+    : 'POTENTIAL RISK DETECTED';
+
   return (
     <article
       aria-labelledby="scan-result-verdict"
       style={{
-        backgroundColor: 'var(--bg-card)',
-        borderRadius: '0.75rem',
-        border: `1px solid ${visuals.borderColor}`,
-        padding: '1.75rem',
-        marginTop: '1.5rem',
+        backgroundColor: '#FFFFFF',
+        border: '2px solid var(--border-dark)',
+        boxShadow: 'var(--shadow-brutal-xl)',
+        marginTop: '1.75rem',
         display: 'flex',
         flexDirection: 'column',
-        gap: '1.25rem',
-        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.4)'
+        overflow: 'hidden'
       }}
     >
-      {/* 1. Header Banner & Verdict */}
+      {/* 1. Header Banner & Verdict (Matches Safe Result, Warning Result & High-Risk Blocked designs) */}
       <div
         style={{
+          backgroundColor: bannerBg,
+          color: bannerTextColor,
+          padding: '1.25rem 1.75rem',
+          borderBottom: '2px solid var(--border-dark)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
-          gap: '1rem',
-          borderBottom: '1px solid var(--border-color)',
-          paddingBottom: '1rem'
+          gap: '1rem'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span
-            id="scan-result-verdict"
-            style={{
-              display: 'inline-block',
-              padding: '0.4rem 1rem',
-              backgroundColor: visuals.badgeBg,
-              color: visuals.badgeText,
-              borderRadius: '9999px',
-              fontSize: '0.875rem',
-              fontWeight: 800,
-              letterSpacing: '0.05em',
-              textTransform: 'uppercase',
-              border: `1px solid ${visuals.borderColor}`
-            }}
-          >
-            {visuals.label}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <span style={{ fontSize: '1.5rem' }}>
+            {isDangerous ? '🚨' : isSafe ? '🛡️' : '⚠️'}
           </span>
-          <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-            Target: <strong style={{ color: '#ffffff' }}>{result.targetPreview}</strong>
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', color: '#34d399' }}>
-          <span>⚡ Local Latency: {result.executionTimeMs} ms</span>
-        </div>
-      </div>
-
-      {/* 2. Risk Score & Severity Meter */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1rem',
-          padding: '1rem',
-          backgroundColor: 'rgba(0, 0, 0, 0.2)',
-          borderRadius: '0.5rem'
-        }}
-      >
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Risk Score:</span>
-            <strong style={{ fontSize: '1rem', color: visuals.borderColor }}>
-              {result.overallScore} / 100
-            </strong>
-          </div>
-          <div
-            role="progressbar"
-            aria-valuenow={result.overallScore}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="Threat Risk Score Progress"
-            style={{
-              width: '100%',
-              height: '0.5rem',
-              backgroundColor: '#334155',
-              borderRadius: '9999px',
-              overflow: 'hidden'
-            }}
-          >
+          <div>
             <div
+              id="scan-result-verdict"
               style={{
-                width: `${result.overallScore}%`,
-                height: '100%',
-                backgroundColor: visuals.borderColor,
-                transition: 'width 0.4s ease'
-              }}
-            />
-          </div>
-        </div>
-
-        <div>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Severity Level:</span>
-          <p style={{ fontSize: '1rem', fontWeight: 600, color: visuals.borderColor }}>
-            {formatSeverity(result.severity as any)}
-          </p>
-        </div>
-
-        <div>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Confidence:</span>
-          <p style={{ fontSize: '1rem', fontWeight: 600 }}>
-            {Math.round(result.confidence * 100)}%
-          </p>
-        </div>
-      </div>
-
-      {/* 3. Action Recommendation & Friction Gate */}
-      <div
-        style={{
-          padding: '1rem',
-          backgroundColor: isDangerous ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-          borderLeft: `4px solid ${visuals.borderColor}`,
-          borderRadius: '0 0.5rem 0.5rem 0'
-        }}
-      >
-        <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.25rem' }}>
-          Recommended Action: {result.recommendation.action}
-        </h4>
-        <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-          {result.recommendation.suggestedAction}
-        </p>
-
-        {isDangerous && (
-          <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            {frictionSeconds > 0 ? (
-              <span style={{ fontSize: '0.8rem', color: '#fca5a5', fontWeight: 600 }}>
-                ⏳ Safety Friction Gate: Action blocked for {frictionSeconds} seconds to prevent impulsive clicks.
-              </span>
-            ) : !userBypassed ? (
-              <button
-                type="button"
-                onClick={() => setUserBypassed(true)}
-                style={{
-                  padding: '0.4rem 0.85rem',
-                  backgroundColor: 'transparent',
-                  border: '1px solid #ef4444',
-                  color: '#ef4444',
-                  borderRadius: '0.375rem',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                Acknowledge Risk & Proceed Anyway
-              </button>
-            ) : (
-              <span style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: 600 }}>
-                ⚠️ Risk acknowledged by user. Proceed with extreme caution.
-              </span>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* 4. AI Security Assistant Explanation (Grade 6 Reading Level) */}
-      {result.aiExplanation && (
-        <section
-          aria-labelledby="assistant-explanation-title"
-          style={{
-            padding: '1.25rem',
-            backgroundColor: 'rgba(30, 41, 59, 0.7)',
-            border: '1px solid #334155',
-            borderRadius: '0.5rem'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-            <h4 id="assistant-explanation-title" style={{ fontSize: '0.95rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span>🤖</span> AI Security Assistant Explanation
-            </h4>
-            <span
-              style={{
-                fontSize: '0.7rem',
-                padding: '0.2rem 0.5rem',
-                borderRadius: '9999px',
-                backgroundColor: result.aiExplanation.inferenceStatus === 'LOCAL_MODEL' ? '#1e3a8a' : '#334155',
-                color: '#93c5fd'
+                fontFamily: 'var(--font-mono)',
+                fontSize: '1rem',
+                fontWeight: 900,
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase'
               }}
             >
-              {result.aiExplanation.inferenceStatus === 'LOCAL_MODEL' ? 'On-Device Model' : 'Deterministic Template'}
+              {headerVerdictLabel}
+            </div>
+            <div style={{ fontSize: '0.8rem', opacity: 0.95, marginTop: '0.15rem' }}>
+              Target: <strong style={{ color: '#FFFFFF', textDecoration: 'underline' }}>{result.targetPreview}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.75rem',
+            fontWeight: 800,
+            backgroundColor: '#111111',
+            color: '#FFFFFF',
+            padding: '0.35rem 0.75rem',
+            border: '1px solid rgba(255,255,255,0.4)'
+          }}
+        >
+          ⚡ LATENCY: {result.executionTimeMs} ms
+        </div>
+      </div>
+
+      <div style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {/* 2. 3-Stat Metric Cards in a Row (Safe Result.png / High-Risk Blocked.png) */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gap: '1rem'
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: 'var(--bg-secondary)',
+              border: '2px solid var(--border-dark)',
+              boxShadow: '2px 2px 0px #111111',
+              padding: '1rem'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+              <span style={{ color: 'var(--text-muted)' }}>Risk Score</span>
+              <strong style={{ fontSize: '0.9rem', color: isDangerous ? 'var(--color-danger)' : isSafe ? 'var(--color-safe)' : 'var(--color-caution)' }}>
+                {result.overallScore} / 100
+              </strong>
+            </div>
+            <div
+              role="progressbar"
+              aria-valuenow={result.overallScore}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Threat Risk Score Progress"
+              style={{
+                width: '100%',
+                height: '0.65rem',
+                backgroundColor: '#FFFFFF',
+                border: '1px solid var(--border-dark)',
+                overflow: 'hidden'
+              }}
+            >
+              <div
+                style={{
+                  width: `${result.overallScore}%`,
+                  height: '100%',
+                  backgroundColor: isDangerous ? 'var(--color-danger)' : isSafe ? 'var(--color-safe)' : 'var(--color-caution)',
+                  transition: 'width 0.4s ease'
+                }}
+              />
+            </div>
+          </div>
+
+          <div
+            style={{
+              backgroundColor: 'var(--bg-secondary)',
+              border: '2px solid var(--border-dark)',
+              boxShadow: '2px 2px 0px #111111',
+              padding: '1rem',
+              fontFamily: 'var(--font-mono)'
+            }}
+          >
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>
+              Severity Level
+            </span>
+            <p style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0.2rem 0 0 0', color: isDangerous ? 'var(--color-danger)' : '#111111' }}>
+              {formatSeverity(result.severity as any)}
+            </p>
+          </div>
+
+          <div
+            style={{
+              backgroundColor: 'var(--bg-secondary)',
+              border: '2px solid var(--border-dark)',
+              boxShadow: '2px 2px 0px #111111',
+              padding: '1rem',
+              fontFamily: 'var(--font-mono)'
+            }}
+          >
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>
+              Detector Confidence
+            </span>
+            <p style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0.2rem 0 0 0', color: '#111111' }}>
+              {Math.round(result.confidence * 100)}%
+            </p>
+          </div>
+        </div>
+
+        {/* 3. Action Recommendation & Friction Gate */}
+        <div
+          style={{
+            padding: '1.25rem',
+            backgroundColor: isDangerous ? 'var(--color-danger-bg)' : isSafe ? 'var(--color-safe-bg)' : 'var(--color-caution-bg)',
+            border: '2px solid var(--border-dark)',
+            boxShadow: '3px 3px 0px #111111'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase' }}>
+              RECOMMENDED ACTION:
+            </span>
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.8rem',
+                fontWeight: 900,
+                color: isDangerous ? 'var(--color-danger)' : '#111111',
+                textTransform: 'uppercase'
+              }}
+            >
+              {result.recommendation.action}
             </span>
           </div>
 
-          <h5 style={{ fontSize: '0.875rem', fontWeight: 600, color: visuals.badgeText, marginBottom: '0.4rem' }}>
-            {result.aiExplanation.headline}
-          </h5>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.6 }}>
-            {result.aiExplanation.summaryParagraph}
+          <p style={{ fontSize: '0.95rem', fontWeight: 600, color: '#111111', margin: 0, lineHeight: 1.5 }}>
+            {result.recommendation.suggestedAction}
           </p>
 
-          {result.aiExplanation.dangerFactors.length > 0 && (
-            <div style={{ marginBottom: '0.5rem' }}>
-              <strong style={{ fontSize: '0.75rem', color: '#f8fafc' }}>Why this is dangerous:</strong>
-              <ul style={{ paddingLeft: '1.25rem', marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                {result.aiExplanation.dangerFactors.map((factor, idx) => (
-                  <li key={idx}>{factor}</li>
-                ))}
-              </ul>
+          {isDangerous && (
+            <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
+              {frictionSeconds > 0 ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-danger)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
+                  <span>⏳</span>
+                  <span>Safety Friction Gate: Action blocked for {frictionSeconds} seconds to prevent impulsive clicks.</span>
+                </div>
+              ) : !userBypassed ? (
+                <button
+                  type="button"
+                  onClick={() => setUserBypassed(true)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    backgroundColor: '#FFFFFF',
+                    border: '2px solid var(--color-danger)',
+                    boxShadow: '2px 2px 0px var(--color-danger)',
+                    color: 'var(--color-danger)',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.8rem',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Acknowledge Risk &amp; Proceed Anyway
+                </button>
+              ) : (
+                <div style={{ color: 'var(--color-caution)', fontWeight: 800, fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
+                  ⚠️ Risk acknowledged by user. Proceed with extreme caution.
+                </div>
+              )}
             </div>
           )}
+        </div>
 
-          {result.aiExplanation.recommendedSteps.length > 0 && (
-            <div style={{ marginBottom: '0.5rem' }}>
-              <strong style={{ fontSize: '0.75rem', color: '#f8fafc' }}>What you should do:</strong>
-              <ul style={{ paddingLeft: '1.25rem', marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                {result.aiExplanation.recommendedSteps.map((step, idx) => (
-                  <li key={idx}>{step}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <p style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '0.5rem', fontStyle: 'italic' }}>
-            Notice: {result.aiExplanation.uncertaintyNote}
-          </p>
-        </section>
-      )}
-
-      {/* 5. Evidence Chain Table */}
-      {result.evidence.length > 0 && (
-        <section aria-labelledby="evidence-chain-title">
-          <h4 id="evidence-chain-title" style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-            Detected Threat Signals ({result.evidence.length})
-          </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {result.evidence.map((item, idx) => (
-              <div
-                key={idx}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '0.6rem 0.85rem',
-                  backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                  borderRadius: '0.375rem',
-                  fontSize: '0.8rem'
-                }}
-              >
-                <div>
-                  <strong style={{ color: '#ffffff' }}>{item.name}</strong>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
-                    {item.description}
-                  </p>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <span style={{ color: visuals.borderColor, fontWeight: 700 }}>
-                    +{item.scoreContribution || item.weight} pts
-                  </span>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
-                    {item.source}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 6. Privacy & Action Footer */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '0.75rem',
-          paddingTop: '0.75rem',
-          borderTop: '1px solid var(--border-color)',
-          fontSize: '0.75rem',
-          color: '#64748b'
-        }}
-      >
-        <span>🔒 {result.privacyGuarantee}</span>
-        {onReset && (
-          <button
-            type="button"
-            onClick={onReset}
+        {/* 4. AI Security Assistant Explanation (Grade 6 Reading Level) */}
+        {result.aiExplanation && (
+          <section
+            aria-labelledby="assistant-explanation-title"
             style={{
-              padding: '0.4rem 0.85rem',
-              backgroundColor: 'var(--bg-secondary)',
-              border: '1px solid var(--border-color)',
-              color: 'var(--text-primary)',
-              borderRadius: '0.375rem',
-              cursor: 'pointer',
-              fontSize: '0.75rem',
-              fontWeight: 500
+              padding: '1.5rem',
+              backgroundColor: '#FFFFFF',
+              border: '2px solid var(--border-dark)',
+              boxShadow: 'var(--shadow-brutal)'
             }}
           >
-            Clear Result
-          </button>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <h4 id="assistant-explanation-title" style={{ fontFamily: 'var(--font-serif)', fontSize: '1.15rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+                <span>🤖</span> AI Security Assistant Explanation
+              </h4>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  padding: '0.2rem 0.5rem',
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-dark)',
+                  textTransform: 'uppercase'
+                }}
+              >
+                {result.aiExplanation.inferenceStatus === 'LOCAL_MODEL' ? 'On-Device Model' : 'Deterministic Template'}
+              </span>
+            </div>
+
+            <h5 style={{ fontFamily: 'var(--font-sans)', fontSize: '1.05rem', fontWeight: 800, color: isDangerous ? 'var(--color-danger)' : 'var(--color-brand)', marginBottom: '0.5rem' }}>
+              {result.aiExplanation.headline}
+            </h5>
+
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)', marginBottom: '1rem', lineHeight: 1.6 }}>
+              {result.aiExplanation.summaryParagraph}
+            </p>
+
+            {result.aiExplanation.dangerFactors.length > 0 && (
+              <div style={{ marginBottom: '0.85rem' }}>
+                <strong style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--color-danger)', textTransform: 'uppercase' }}>
+                  Why this is dangerous:
+                </strong>
+                <ul style={{ paddingLeft: '1.25rem', marginTop: '0.35rem', fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
+                  {result.aiExplanation.dangerFactors.map((factor, idx) => (
+                    <li key={idx} style={{ marginBottom: '0.2rem' }}>{factor}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {result.aiExplanation.recommendedSteps.length > 0 && (
+              <div style={{ marginBottom: '0.85rem' }}>
+                <strong style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--color-brand)', textTransform: 'uppercase' }}>
+                  What you should do:
+                </strong>
+                <ul style={{ paddingLeft: '1.25rem', marginTop: '0.35rem', fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
+                  {result.aiExplanation.recommendedSteps.map((step, idx) => (
+                    <li key={idx} style={{ marginBottom: '0.2rem' }}>{step}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.725rem', color: 'var(--text-muted)', marginTop: '0.75rem', fontStyle: 'italic', margin: 0 }}>
+              Notice: {result.aiExplanation.uncertaintyNote}
+            </p>
+          </section>
         )}
+
+        {/* 5. Evidence Chain Table */}
+        {result.evidence.length > 0 && (
+          <section aria-labelledby="evidence-chain-title">
+            <h4 id="evidence-chain-title" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.75rem', letterSpacing: '0.04em' }}>
+              Detected Threat Signals ({result.evidence.length})
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              {result.evidence.map((item, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.85rem 1.15rem',
+                    backgroundColor: 'var(--bg-secondary)',
+                    border: '1px solid var(--border-dark)',
+                    boxShadow: '1px 1px 0px #111111',
+                    fontSize: '0.85rem'
+                  }}
+                >
+                  <div>
+                    <strong style={{ color: '#111111', fontFamily: 'var(--font-mono)' }}>{item.name}</strong>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0.15rem 0 0 0' }}>
+                      {item.description}
+                    </p>
+                  </div>
+                  <div style={{ textAlign: 'right', minWidth: '90px' }}>
+                    <span style={{ color: isDangerous ? 'var(--color-danger)' : 'var(--color-brand)', fontWeight: 800, fontFamily: 'var(--font-mono)' }}>
+                      +{item.scoreContribution || item.weight} pts
+                    </span>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                      {item.source}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 6. Privacy & Action Footer */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '1rem',
+            paddingTop: '1rem',
+            borderTop: '2px solid var(--border-dark)',
+            fontSize: '0.8rem',
+            fontFamily: 'var(--font-mono)'
+          }}
+        >
+          <span style={{ color: 'var(--text-muted)' }}>🔒 {result.privacyGuarantee}</span>
+          {onReset && (
+            <button
+              type="button"
+              onClick={onReset}
+              style={{
+                padding: '0.55rem 1.25rem',
+                backgroundColor: 'var(--color-brand)',
+                color: '#FFFFFF',
+                border: '2px solid var(--border-dark)',
+                boxShadow: '2px 2px 0px #111111',
+                cursor: 'pointer',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.8rem',
+                fontWeight: 800,
+                textTransform: 'uppercase'
+              }}
+            >
+              Clear Result
+            </button>
+          )}
+        </div>
       </div>
     </article>
   );
