@@ -94,18 +94,31 @@ if (fs.existsSync(releaseAab)) {
   console.log(`  SHA-256: ${aabSha}`);
 }
 
-// 4. Generate SHA256SUMS.txt
+// 4. Desktop Packages
+const desktopExe = path.resolve(rootDir, 'apps/desktop/release/PrivateProtection-win32-x64/PrivateProtection.exe');
+const desktopInstallerSrc = path.resolve(rootDir, 'apps/desktop/release/PrivateProtection-Setup-0.1.0.exe');
+const desktopInstallerDest = path.resolve(releaseDir, 'PrivateProtection-Setup-0.1.0.exe');
+
+if (fs.existsSync(desktopInstallerSrc)) {
+  console.log('Packaging Desktop Consumer Installer artifact...');
+  fs.copyFileSync(desktopInstallerSrc, desktopInstallerDest);
+  const instSha = calculateSha256(desktopInstallerDest);
+  const instSize = fs.statSync(desktopInstallerDest).size;
+  console.log(`✓ Desktop Consumer Installer packaged: ${path.basename(desktopInstallerDest)} (${instSize} bytes)`);
+  console.log(`  SHA-256: ${instSha}`);
+}
+
+// 5. Generate SHA256SUMS.txt
 const sumsFile = path.resolve(releaseDir, 'SHA256SUMS.txt');
 const lines = [];
-
-const desktopExe = path.resolve(rootDir, 'apps/desktop/release/PrivateProtection-win32-x64/PrivateProtection.exe');
 
 const artifacts = [
   { path: extZip, name: path.basename(extZip) },
   { path: webZip, name: path.basename(webZip) },
   { path: finalApkDest, name: 'private-protection-mobile-0.1.0.apk' },
   { path: finalAabDest, name: 'private-protection-mobile-0.1.0.aab' },
-  { path: desktopExe, name: 'PrivateProtection-0.1.0-win-x64.exe' }
+  { path: desktopExe, name: 'PrivateProtection-0.1.0-win-x64.exe' },
+  { path: desktopInstallerDest, name: 'PrivateProtection-Setup-0.1.0.exe' }
 ];
 
 for (const artifact of artifacts) {

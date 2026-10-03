@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc --noEmit && node scripts/build-desktop.js",
     "package": "node scripts/build-desktop.js --package",
+    "build:installer": "node scripts/build-installer.js",
     "start": "electron dist/main/electron-main.cjs",
     "verify:runtime": "electron dist/main/electron-main.cjs --headless-verify",
     "test": "vitest run",
