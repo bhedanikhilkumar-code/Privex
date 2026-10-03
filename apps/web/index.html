@@ -11,16 +11,30 @@
     <title>PRIVATE PROTECTION — Security Dashboard</title>
     <style>
       :root {
-        --bg-primary: #090d16;
-        --bg-secondary: #0f172a;
-        --bg-card: #1e293b;
-        --text-primary: #f8fafc;
-        --text-muted: #94a3b8;
-        --border-color: #334155;
-        --color-safe: #10b981;
-        --color-caution: #f59e0b;
-        --color-danger: #ef4444;
-        --color-brand: #3b82f6;
+        --bg-primary: #F7F3EB;
+        --bg-secondary: #EBE7DE;
+        --bg-card: #FFFFFF;
+        --text-primary: #111111;
+        --text-muted: #555555;
+        --border-color: #111111;
+        --border-dark: #111111;
+        --border-width: 2px;
+        --shadow-brutal-sm: 2px 2px 0px #111111;
+        --shadow-brutal: 4px 4px 0px #111111;
+        --shadow-brutal-lg: 6px 6px 0px #111111;
+        --shadow-brutal-xl: 8px 8px 0px #111111;
+        --color-safe: #1DB954;
+        --color-safe-bg: #E7F9EE;
+        --color-caution: #FFB800;
+        --color-caution-bg: #FFF9E6;
+        --color-danger: #FF5A36;
+        --color-danger-bg: #FFECE8;
+        --color-brand: #2457FF;
+        --color-brand-hover: #1844DD;
+        --color-accent: #D7FF3F;
+        --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+        --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        --font-mono: 'Space Grotesk', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
       }
       * {
         box-sizing: border-box;
@@ -28,7 +42,7 @@
         padding: 0;
       }
       body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-family: var(--font-sans);
         background-color: var(--bg-primary);
         color: var(--text-primary);
         min-height: 100vh;
@@ -39,6 +53,54 @@
         min-height: 100vh;
         display: flex;
         flex-direction: column;
+      }
+      /* Brutalist UI utility classes */
+      .brutal-card {
+        background-color: var(--bg-card);
+        border: 2px solid var(--border-dark);
+        box-shadow: var(--shadow-brutal);
+      }
+      .brutal-card-lg {
+        background-color: var(--bg-card);
+        border: 2px solid var(--border-dark);
+        box-shadow: var(--shadow-brutal-lg);
+      }
+      .brutal-btn-primary {
+        background-color: var(--color-brand);
+        color: #FFFFFF;
+        border: 2px solid var(--border-dark);
+        box-shadow: var(--shadow-brutal-sm);
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
+      }
+      .brutal-btn-primary:hover:not(:disabled) {
+        transform: translate(-1px, -1px);
+        box-shadow: var(--shadow-brutal);
+      }
+      .brutal-btn-primary:active:not(:disabled) {
+        transform: translate(2px, 2px);
+        box-shadow: 0px 0px 0px #111111;
+      }
+      .brutal-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.65rem;
+        border: 2px solid var(--border-dark);
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      @keyframes pulse-ring {
+        0% { transform: scale(0.96); opacity: 0.85; }
+        50% { transform: scale(1.04); opacity: 1; }
+        100% { transform: scale(0.96); opacity: 0.85; }
+      }
+      .pulse-anim {
+        animation: pulse-ring 2s infinite ease-in-out;
       }
     </style>
   </head>

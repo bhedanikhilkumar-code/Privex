@@ -45,8 +45,8 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
       aria-label="Dashboard navigation tabs"
       style={{
         backgroundColor: 'var(--bg-secondary)',
-        borderBottom: '1px solid var(--border-color)',
-        padding: '0 2rem',
+        borderBottom: '2px solid var(--border-dark)',
+        padding: '0.6rem 2rem',
         overflowX: 'auto'
       }}
     >
@@ -55,7 +55,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
         role="tablist"
         style={{
           display: 'flex',
-          gap: '0.5rem',
+          gap: '0.65rem',
           minWidth: 'max-content'
         }}
       >
@@ -75,16 +75,19 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                padding: '0.85rem 1rem',
-                backgroundColor: 'transparent',
-                color: isActive ? '#60a5fa' : 'var(--text-muted)',
-                border: 'none',
-                borderBottom: isActive ? '2px solid #3b82f6' : '2px solid transparent',
-                fontSize: '0.875rem',
-                fontWeight: isActive ? 600 : 500,
+                padding: '0.65rem 1.15rem',
+                backgroundColor: isActive ? 'var(--color-brand)' : '#FFFFFF',
+                color: isActive ? '#FFFFFF' : 'var(--text-primary)',
+                border: '2px solid var(--border-dark)',
+                boxShadow: isActive ? '3px 3px 0px #111111' : '1px 1px 0px #111111',
+                fontSize: '0.825rem',
+                fontWeight: 700,
+                fontFamily: 'var(--font-mono)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.03em',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                outlineOffset: '-2px'
+                transition: 'all 0.1s ease',
+                outlineOffset: '2px'
               }}
             >
               <span aria-hidden="true">{item.icon}</span>

@@ -42,40 +42,80 @@ export const Header: React.FC = () => {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '1rem 2rem',
-        backgroundColor: 'var(--bg-secondary)',
-        borderBottom: '1px solid var(--border-color)',
+        backgroundColor: '#FFFFFF',
+        borderBottom: '2px solid var(--border-dark)',
         flexWrap: 'wrap',
         gap: '1rem'
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
         <div
           aria-hidden="true"
           style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '0.5rem',
+            width: '2.4rem',
+            height: '2.4rem',
             backgroundColor: 'var(--color-brand)',
+            border: '2px solid var(--border-dark)',
+            boxShadow: '2px 2px 0px #111111',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontWeight: 800,
+            fontSize: '1.25rem',
             color: '#ffffff'
           }}
         >
           🛡️
         </div>
         <div>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.025em' }}>
+          <h1
+            style={{
+              fontFamily: 'var(--font-serif)',
+              fontSize: '1.4rem',
+              fontWeight: 800,
+              letterSpacing: '-0.02em',
+              lineHeight: 1.1,
+              color: '#111111'
+            }}
+          >
             PRIVATE PROTECTION
           </h1>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          <p
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.725rem',
+              color: 'var(--text-muted)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+              marginTop: '0.15rem'
+            }}
+          >
             Zero-Install Client-Side Cyber Threat Dashboard
           </p>
         </div>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.35rem 0.75rem',
+            backgroundColor: 'var(--bg-secondary)',
+            border: '2px solid var(--border-dark)',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.725rem',
+            fontWeight: 700,
+            color: '#111111'
+          }}
+        >
+          <span>ENGINE: v0.1.0</span>
+          <span style={{ opacity: 0.4 }}>|</span>
+          <span>RAM: 42MB</span>
+          <span style={{ opacity: 0.4 }}>|</span>
+          <span>LATENCY: &lt;1ms</span>
+        </div>
+
         {installPrompt && !isInstalled && (
           <button
             type="button"
@@ -84,15 +124,15 @@ export const Header: React.FC = () => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.4rem',
-              padding: '0.35rem 0.85rem',
-              backgroundColor: 'rgba(59, 130, 246, 0.15)',
-              border: '1px solid #3b82f6',
-              borderRadius: '9999px',
+              padding: '0.4rem 0.9rem',
+              backgroundColor: 'var(--color-brand)',
+              border: '2px solid var(--border-dark)',
+              boxShadow: '2px 2px 0px #111111',
               fontSize: '0.75rem',
-              color: '#93c5fd',
-              fontWeight: 600,
+              color: '#ffffff',
+              fontWeight: 700,
               cursor: 'pointer',
-              transition: 'background-color 0.2s'
+              fontFamily: 'var(--font-mono)'
             }}
           >
             <span>📥</span> Install Web App
@@ -106,21 +146,23 @@ export const Header: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
-            padding: '0.35rem 0.85rem',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            borderRadius: '9999px',
+            padding: '0.4rem 0.9rem',
+            backgroundColor: 'var(--color-accent)',
+            border: '2px solid var(--border-dark)',
+            boxShadow: '2px 2px 0px #111111',
             fontSize: '0.75rem',
-            color: '#34d399',
-            fontWeight: 600
+            color: '#111111',
+            fontWeight: 800,
+            fontFamily: 'var(--font-mono)',
+            letterSpacing: '0.02em'
           }}
         >
           <span
             style={{
-              width: '0.5rem',
-              height: '0.5rem',
-              borderRadius: '50%',
-              backgroundColor: '#10b981'
+              width: '0.55rem',
+              height: '0.55rem',
+              backgroundColor: '#111111',
+              borderRadius: '50%'
             }}
           />
           100% Local On-Device Processing
