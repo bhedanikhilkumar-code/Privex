@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DeviceAuditService } from '../../services/device-audit.service';
 import { FileScannerService } from '../../services/file-scanner.service';
 import { Verdict } from '@private-protection/core';

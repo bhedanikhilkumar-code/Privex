@@ -20,7 +20,7 @@ export class CameraScannerService {
   private urlScanner: UrlScannerService;
   private textScanner: TextScannerService;
 
-  constructor(private adapter: MobileSecurityAdapter) {
+  constructor(adapter: MobileSecurityAdapter) {
     this.urlScanner = new UrlScannerService(adapter);
     this.textScanner = new TextScannerService(adapter);
   }
@@ -41,7 +41,7 @@ export class CameraScannerService {
     }
 
     // 2. Check standard web mediaDevices
-    if (typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    if (typeof navigator !== 'undefined' && navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
       try {
         if (navigator.permissions && navigator.permissions.query) {
           const perm = await navigator.permissions.query({ name: 'camera' as PermissionName });
