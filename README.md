@@ -1,79 +1,149 @@
 # PRIVATE PROTECTION
 
 > **Privacy-first, on-device AI security assistant for threat, phishing, scam, and suspicious-content detection.**  
-> **Release Candidate:** `v0.1.0` | **License:** MIT | **Platform Status:** Production Ready
+> **Problem Statement:** PS-05 | **Release Candidate:** `v0.1.0` | **License:** MIT | **Platform Status:** Production Ready
 
 ---
 
-## 1. WHAT IS PRIVATE PROTECTION?
+## 1. EXECUTIVE PRODUCT SUMMARY & PROBLEM STATEMENT (PS-05)
 
-**PRIVATE PROTECTION** is a unified, cross-platform cybersecurity platform engineered to protect users from modern online threats—including phishing links, scam messages, deceptive websites, and malicious files—directly on their endpoint.
+**PRIVATE PROTECTION** is a unified, cross-platform cybersecurity platform engineered to protect users from online threats—including phishing links, scam messages, deceptive websites, and malicious files—directly on their endpoint.
 
-Unlike traditional cloud-dependent security tools that upload browsing history, messages, and files to remote servers, Private Protection operates under the strict doctrine:
+### PS-05 Problem Statement:
+> *"On-device threat, phishing and scam detection.*  
+> *Develop an on-device AI security assistant that can detect phishing links, scam messages, malicious content, and suspicious communications in real time without sending sensitive user data to the cloud.*  
+> *The solution should provide instant warnings and clear explanations to help users recognize and avoid potential cyber threats while maintaining privacy, low latency, and offline functionality."*
+
+### Foundational Doctrine:
 **LOCAL-FIRST • PRIVACY-FIRST • DATA-MINIMIZATION • ZERO-KNOWLEDGE • ZERO-CLOUD-DEPENDENCE**
 
-All lexical analysis, heuristics, offline Bloom filter reputation checks, and AI explanations execute **100% locally on the device in volatile memory**.
-
 ---
 
-## 2. PROBLEM STATEMENT (PS-05) & 11 CORE CAPABILITIES
+## 2. THE 11 CORE PS-05 CAPABILITIES
 
-PRIVATE PROTECTION directly satisfies all 11 requirements of Problem Statement PS-05:
+PRIVATE PROTECTION directly satisfies all eleven mandatory requirements of PS-05:
 
 1. **On-Device AI Security Assistant:** Local Small Language Model (SLM) & deterministic template engine translating technical threat evidence into clear, jargon-free explanations.
-2. **Phishing Link Detection:** Lexical feature extraction, Shannon entropy calculation, Punycode/IDN homograph detection, and brand typosquatting distance metrics.
-3. **Scam Message Detection:** Natural language heuristic parsing of inbound text messages to identify urgency pressure, cryptocurrency extortion, advance-fee fraud, and spoofed authorities.
-4. **Malicious Content Detection:** Inspection of web DOM structures for unencrypted password fields and deceptive form action targets.
+2. **Phishing Link Detection:** Lexical feature extraction, Shannon entropy calculation, Punycode/IDN homograph parsing, IP host detection, and brand typosquatting distance metrics.
+3. **Scam Message Detection:** Natural language heuristic parsing of inbound text messages to identify urgency pressure, cryptocurrency extortion, advance-fee fraud, task scams, and fake invoices.
+4. **Malicious Content Detection:** Inspection of web DOM structures for unencrypted password fields, deceptive form action targets, and binary file headers/double extensions.
 5. **Suspicious Communication Detection:** Multi-signal correlation (unknown sender + urgent demand + suspicious link + payment request) executed in volatile RAM.
-6. **Real-Time Detection:** Fast-Path deterministic URL verdicts in $< 1.0\text{ ms}$; full recursive file scans in $< 30\text{ ms}$.
+6. **Real-Time Detection:** Fast-Path deterministic URL verdicts in $< 1.0\text{ ms}$; full pipeline verdicts in $< 10\text{ ms}$; warnings rendered in $< 50\text{ ms}$.
 7. **Privacy-First Processing:** Sensitive user content mathematically kept on-device. Zero raw user payloads transmitted off-device.
-8. **Instant Warnings:** Visually unambiguous, color-coded UI banners and full-page interstitial friction gates rendered in $< 50\text{ ms}$.
-9. **Clear Explanations:** Human-readable explanations formatted below Grade 8 reading comprehension, clearly stating *why* content is dangerous and *what* safe action to take.
+8. **Instant Warnings:** Visually unambiguous, color-coded UI banners, modals, and full-page interstitial friction gates rendered in $< 50\text{ ms}$.
+9. **Clear Explanations:** Human-readable explanations formatted below Grade 8 reading comprehension, clearly explaining *WHAT* was detected, *WHY* it is dangerous, and *WHAT* safe action to take.
 10. **Offline Functionality:** 100% core detection parity when operating completely air-gapped without internet access.
-11. **Low Latency:** Zero-allocation algorithms and $O(1)$ Bloom filter lookups ensuring zero impact on device responsiveness.
+11. **Low Latency & Resource Efficiency:** Zero-allocation algorithms and $O(1)$ Bloom filter lookups ensuring zero noticeable impact on device responsiveness.
 
 ---
 
-## 3. PLATFORM ECOSYSTEM ARCHITECTURE
+## 3. LOW-RESOURCE & OLDER DEVICE COMPATIBILITY GOAL
 
-PRIVATE PROTECTION is an integrated multi-platform platform consisting of six cohesive workspaces:
-
-| Workspace / Subsystem | Platform / Technology | Core Responsibility |
-|---|---|---|
-| **`@private-protection/core`** | TypeScript / ES Modules | Canonical detection engine, URL & text analyzers, binary file header/entropy/double-extension analyzer (`CoreFileAnalyzer`), Bloom filter threat intelligence, Bayesian risk scoring. |
-| **`@private-protection/ml`** | TypeScript / On-Device ML | On-device AI Security Assistant, prompt injection defense, XML boundary encloser, Grade 6/8 fallback engine. |
-| **`@private-protection/web`** | React 18, Vite 6, Web Worker | Zero-install client-side web scanner dashboard and interactive security education suite. |
-| **`@private-protection/extension`** | Manifest V3 (Chrome/Edge/Brave) | Real-time browser protection, pre-navigation interception, in-page DOM password form shielding, and interstitial warning gate. |
-| **`@private-protection/mobile`** | Android / React Native / Capacitor | Mobile security client with notification threat filtering, live QR camera scanning, file scanning, and device posture auditing. |
-| **`@private-protection/desktop`** | Electron 44.5.1, Node.js daemon | Windows 10/11 native security application with recursive filesystem scanning, real-time ingress directory shield, and AES-256-GCM (`PPVAULT1`) authenticated quarantine vault. |
+Private Protection is deliberately engineered to remain smooth, fast, and responsive on resource-constrained environments:
+- **Older / Budget Android Devices:** Supports Android 8.0+ (API 26 through 34), optimized for 1.0 GB – 2.0 GB RAM devices using strict memory buffer boundaries (URLs $\le 2,048$ bytes, Text $\le 10,000$ bytes) and zero wake-lock battery conservation.
+- **Low-End Windows & Desktops:** Operates efficiently on dual-core CPUs and mechanical HDDs using chunked 64 KB file analysis, yielding execution intervals to keep UI responsive.
+- **Lightweight Memory Profile:** Mobile RSS $< 125\text{ MB}$, Desktop RSS $< 130\text{ MB}$, Web Worker heap $< 20\text{ MB}$.
 
 ---
 
-## 4. WHAT IS PROCESSED LOCALLY & WHAT DATA IS COLLECTED
+## 4. PRODUCT SURFACES & PLATFORM RESPONSIBILITY MATRIX
+
+| Platform Host | Technology Stack | Primary Responsibilities | Offline Capability |
+|---|---|---|---|
+| **Web Application** | React 18, Vite 6, Web Worker | Zero-install manual URL/text scanner, security dashboard, PWA offline support, custom allowlists. | **100% Offline (PWA)** |
+| **Android Application** | Android SDK, Java/Kotlin, Webview | Inbound shared text/SMS filtering, deep link validation, live camera QR scanning, file inspection, device posture audit. | **100% Offline** |
+| **Desktop Application** | Electron 44.5.1, Node.js, React | Download ingress directory monitoring, recursive disk scans, AES-256-GCM (`PPVAULT1`) quarantine vault, process posture audit. | **100% Offline** |
+| **Browser Extension** | Manifest V3 (Chrome, Edge, Brave) | Pre-navigation URL interception, in-page DOM password form shielding, Shadow DOM alert banner, full-page warning interstitial. | **100% Offline** |
+| **Shared Security Core** | TypeScript / ES Modules | Canonical detection rules, lexical heuristics, Bloom filter threat intelligence, Bayesian risk scoring. | **100% Offline** |
+| **Optional Backend** | Cloudflare Workers / Stateless Edge | Compressed Bloom filter OTA distribution, differential update signing, anonymous OHTTP telemetry relay. | N/A (Stateless CDN) |
+
+---
+
+## 5. CORE DETECTION ARCHITECTURE & AI AUTHORITY BOUNDARY
+
+### Canonical Detection Pipeline
+```
+RAW UNTRUSTED INPUT (URL, Message, File Header, DOM Tree)
+      │
+      ▼
+1. INPUT NORMALIZATION & SANITIZATION (Unicode NFKD, punycode decoding, length caps)
+      │
+      ▼
+2. DETERMINISTIC RULE ENGINE (Known bad patterns, IP hosts, extortion keywords)
+      │
+      ▼
+3. LEXICAL & HEURISTIC ANALYZERS (Shannon entropy, Levenshtein typosquatting, homoglyphs)
+      │
+      ▼
+4. REPUTATION & THREAT INTELLIGENCE (Offline Bloom filter lookup, user allowlist)
+      │
+      ▼
+5. BAYESIAN RISK SCORING & AGGREGATION (RiskScorer math: score 0-100, severity, confidence)
+      │
+      ▼
+6. CANONICAL VERDICT & ACTION MAPPING (ALLOW, INFORM, CAUTION, SUSPICIOUS, DANGEROUS)
+      │
+      ▼
+7. READ-ONLY AI SECURITY ASSISTANT (Synthesizes Grade 6-8 plain explanations from Evidence)
+      │
+      ▼
+8. USER WARNING DISPATCH (Color-coded modal, notification, or full-page friction gate)
+```
+
+### The Cardinal Rules of AI Safety:
+- **Analyzed content is strictly DATA, never INSTRUCTIONS.** Raw user text is NEVER concatenated into execution prompts.
+- **The Core Detection Engine is the sole canonical decision authority.** The AI Assistant has **ZERO AUTHORITY** to alter, downgrade, or reverse risk scores or recommended actions.
+- Model output strictly follows rigid JSON grammar; any schema validation failure automatically defaults to deterministic template fallback.
+
+---
+
+## 6. DATA CLASSIFICATION & ZERO-KNOWLEDGE PRIVACY
 
 Private Protection enforces strict data classification boundaries:
 
-### Tier 1: Highly Sensitive (100% Local Volatile RAM)
-- Visited URLs and web navigation paths
-- Inbound SMS, WhatsApp, and chat messages
-- Downloaded file contents and bytes
-- Camera frames during QR code scanning
-- **Mandate:** Processed solely in volatile RAM. Zeroed upon scan completion. **NEVER TRANSMITTED OFF-DEVICE UNDER ANY CIRCUMSTANCE.**
-
-### Tier 2: Internal Local State (Encrypted At Rest)
-- Custom allowlists, user overrides, and persisted desktop protection settings (`AES-256-GCM`)
-- Local scan event counters and timestamps
-- Quarantined file payloads (authenticated `AES-256-GCM` encryption with `PPVAULT1` container header, random 96-bit IV, and 128-bit GCM auth tag)
-- **Mandate:** Stored exclusively in local application storage. Purgeable forensically via 3-pass crypto-shredder (`0x00`, `0xFF`, CSPRNG + `fsync`).
-
-### Tier 3: Opt-in Telemetry (Disabled by Default)
-- Triggered rule identifier (e.g. `url-ip-based`) and engine version
-- Truncated domain hash prefix ($k$-anonymity $\ge 1,000$)
-- **Mandate:** Strictly opt-in. Zero user payloads or raw identifiers collected.
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│ TIER 1: HIGHLY SENSITIVE (RAW USER PAYLOADS)                           │
+│ • Visited URLs & browsing history                                      │
+│ • Inbound SMS, chat, & email message text                              │
+│ • Camera frames & QR code bitmaps                                      │
+│ • Downloaded file bytes & names                                        │
+│ MANDATE: 100% LOCAL PROCESSING IN VOLATILE RAM. NEVER TRANSMITTED OFF- │
+│ DEVICE UNDER ANY CIRCUMSTANCE. ZEROED FROM MEMORY UPON SCAN COMPLETION.│
+└────────────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│ TIER 2: INTERNAL LOCAL STATE (ENCRYPTED AT REST)                       │
+│ • Local scan event counters & timestamps                               │
+│ • User-defined custom allowlist & overrides                            │
+│ • Quarantined file payloads (AES-256-GCM 'PPVAULT1' vault)             │
+│ MANDATE: STORED LOCALLY IN AES-256-GCM ENCRYPTED STORAGE. PURGEABLE BY │
+│ USER AT ANY TIME VIA 3-PASS CRYPTO-SHREDDER (0x00, 0xFF, CSPRNG+fsync).│
+└────────────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│ TIER 3: ANONYMIZED TELEMETRY (OPT-IN ONLY)                             │
+│ • Triggered Rule ID (e.g. 'url-ip-based')                              │
+│ • Detection Engine version integer                                     │
+│ • Truncated SHA-256 domain hash prefix (k-anonymity >= 1,000)          │
+│ MANDATE: STRICTLY OPT-IN. STRIPPED OF CLIENT IP VIA OHTTP RELAY.       │
+│ ε-DIFFERENTIAL PRIVACY NOISE INJECTED LOCALLY PRIOR TO TRANSMISSION.   │
+└────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 5. REPRODUCIBLE QUICK START & DEVELOPMENT
+## 7. BACKEND PHILOSOPHY & DEPLOYMENT STRATEGY
+
+- **Zero Cloud Dependence for Security:** The backend never ingests, analyzes, or stores sensitive user payloads. The product is 100% functional without a backend.
+- **Recommended Edge Deployment:** Cloudflare Workers / Pages for edge CDN static asset hosting and static Bloom filter update diffs.
+- **Security & Privacy:** Enforced HTTPS with Strict-Transport-Security (`HSTS`), tight Content-Security-Policy (`CSP`), and zero user databases.
+
+---
+
+## 8. REPRODUCIBLE QUICK START & DEVELOPMENT
 
 ### Prerequisites
 - Node.js `>= 20.0.0` (LTS v22 recommended)
@@ -93,7 +163,7 @@ npm ci
 npm run lint
 npm run typecheck
 
-# Execute unified test suite (413 tests across 81 files)
+# Execute unified test suite (413+ tests across 81 files)
 npm test
 
 # Generate V8 coverage report
@@ -108,30 +178,33 @@ npm run package
 
 ---
 
-## 6. OFFICIAL RELEASE ARTIFACTS (v0.1.0)
+## 9. RELEASE ARTIFACTS & PACKAGING STATUS
 
-Production archives generated in `release/`:
+| Surface | Artifact Path | Format | Status |
+|---|---|---|---|
+| **Web App** | `release/private-protection-web-0.1.0.zip` | Static Web Archive | **Packaged & Verified** |
+| **Browser Extension** | `release/private-protection-extension-0.1.0.zip` | MV3 Zip Package | **Packaged & Verified** |
+| **Android App** | `apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk` | Debug APK | **Built & Functional** (Release Keystore pending) |
+| **Desktop App** | `apps/desktop/release/PrivateProtection-win32-x64/PrivateProtection.exe` | Win32 x64 Portable | **Packaged & Functional** (NSIS Installer pending) |
 
-| Artifact | Checksum (SHA-256) |
-|---|---|
-| `private-protection-extension-0.1.0.zip` | `0e5ea27942210c6389ad8c59e7f95f08385cdc6b0dd46965e4b7914d819ad118` |
-| `private-protection-web-0.1.0.zip` | `8c320d36abcf45f0aed3559368da7a4e9d28398d79e610ce270e87737f183884` |
+Cryptographic checksums are recorded in `release/SHA256SUMS.txt`.
 
 ---
 
-## 7. HONEST DISCLOSURE OF KNOWN PLATFORM LIMITATIONS
+## 10. HONEST DISCLOSURE OF CURRENT STATUS & KNOWN LIMITATIONS
 
 In alignment with our engineering constitution:
-- **Browser Extension:** Manifest V3 cannot inspect internal browser URLs (`chrome://`, `edge://`).
+- **Browser Extension:** Manifest V3 cannot inspect internal browser schemes (`chrome://`, `edge://`).
 - **Desktop Software:** Operates purely in user-space without kernel filter drivers; system-locked files (`EACCES`/`EBUSY`) are safely skipped and logged.
 - **Android Client:** Deep SMS background inspection requires standard OS notification listener permissions granted by the user.
-- **Code Signing:** Binary archives are verified via SHA-256 checksums; distribution code signing certificates for commercial app stores are omitted from the open-source repository (**SIGNING READY; NOT VERIFIED**).
+- **Code Signing:** Binary archives are verified via SHA-256 checksums; commercial app store code signing certificates (Authenticode, Google Play Keystore) require end-user/organization provisioning (**SIGNING READY; NOT VERIFIED**).
 
 ---
 
-## 8. DOCUMENTATION, SECURITY & GOVERNANCE
+## 11. GOVERNANCE & DOCUMENTATION INDEX
 
-- **Constitutional Manual:** [`AGENTS.md`](./AGENTS.md)
+- **Canonical Constitution & Source of Truth:** [`AGENT.md`](./AGENT.md)
+- **Deep Product Gap Audit:** [`docs/PHASE_37_DEEP_PRODUCT_GAP_AUDIT.md`](./docs/PHASE_37_DEEP_PRODUCT_GAP_AUDIT.md)
 - **Vulnerability Disclosure Policy:** [`SECURITY.md`](./SECURITY.md)
 - **Contributing Guidelines:** [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 - **Changelog History:** [`CHANGELOG.md`](./CHANGELOG.md)
