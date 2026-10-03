@@ -7,6 +7,15 @@ import { IpcHandler } from '../ipc/ipc-handler';
 let mainWindow: BrowserWindow | null = null;
 let ipcHandler: IpcHandler | null = null;
 
+if (process.argv.includes('--no-sandbox') || process.env.ELECTRON_DISABLE_SANDBOX) {
+  app.commandLine.appendSwitch('no-sandbox');
+}
+if (process.argv.includes('--disable-gpu')) {
+  app.commandLine.appendSwitch('disable-gpu');
+  app.commandLine.appendSwitch('disable-software-rasterizer');
+  app.commandLine.appendSwitch('disable-dev-shm-usage');
+}
+
 function getStorageDir(): string {
   const customArg = process.argv.find((arg) => arg.startsWith('--storage-dir='));
   if (customArg) {

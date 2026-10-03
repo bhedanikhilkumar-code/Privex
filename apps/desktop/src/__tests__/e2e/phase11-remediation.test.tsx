@@ -366,13 +366,27 @@ describe('Phase 11 Remediation Suite (GAP-13, GAP-14, GAP-15, GAP-16, GAP-08 & N
       const mainBundle = path.resolve(__dirname, '../../../dist/main/electron-main.cjs');
       expect(fs.existsSync(mainBundle)).toBe(true);
 
-      const proc = spawnSync(electronBinary, [mainBundle, '--headless-verify'], {
-        encoding: 'utf-8',
-        timeout: 45000
-      });
+      const proc = spawnSync(
+        electronBinary,
+        [mainBundle, '--headless-verify', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
+        {
+          encoding: 'utf-8',
+          timeout: 45000,
+          env: {
+            ...process.env,
+            ELECTRON_DISABLE_SANDBOX: '1',
+            ELECTRON_ENABLE_LOGGING: '1'
+          }
+        }
+      );
 
       const combinedOutput = `${proc.stdout || ''}\n${proc.stderr || ''}`;
       const match = combinedOutput.match(/\[ELECTRON_E2E_PROOF\]\s*(\{.*\})/);
+      if (!match) {
+        throw new Error(
+          `[ELECTRON_E2E_PROOF_NOT_FOUND] Status: ${proc.status}, Signal: ${proc.signal}\nOutput:\n${combinedOutput}`
+        );
+      }
       expect(match).not.toBeNull();
 
       const proof = JSON.parse(match![1]);
