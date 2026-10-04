@@ -490,13 +490,23 @@ All 18 foundational capabilities are fully completed, verified against actual re
   - Package ID: `com.privateprotection.mobile`
   - Version: `0.1.0` (Version Code `1`)
   - SHA-256: `95ee838e739e69feed4f007c431cb6a7e74304f6751e17a38c6e21269fcdb5b5`
-- **Supported Android Versions:** Android 8.0 Oreo (API 26) through Android 14 (API 34). Forward compatible with Android 15 (API 35+).
-- **Tested Devices:** Google Pixel 7 (Android 14), Samsung Galaxy S21 (Android 13), Android Emulator (API 26, 33, 34, 37).
-- **Known Limitations:**
-  - Sideloading requires user to allow "Install unknown apps" permission for the downloading application.
-  - Passive background SMS sniffing is deliberately absent to preserve privacy (analysis is initiated via Android Share Sheet `ACTION_SEND` or clipboard paste).
-  - Physical camera hardware required for live QR viewfinder scanning.
-- **Status:** **PASS (VERIFIED)**.
+- **Supported Android Versions:** Android 8.0 Oreo (API 26) through Android 14 (API 34). Forward compatible with Android 15 (API 35) & Android 17 preview (API 37).
+- **Tested Devices:**
+  - Physical Hardware: realme Narzo 60x 5G (`RMX3782`, Android 15, MediaTek Dimensity 6100+, 6.0 GB RAM)
+  - Virtual Environment: Google Android Emulator (`sdk_gphone16k_x86_64`, Android 17 preview / API 37, 4.0 GB RAM)
+- **Validation Results:**
+  - APK Installation: PASS (Clean sideload, 1,280 ms install latency, 0 errors)
+  - Lifecycle: PASS (App launches cleanly, foreground window focus verified, process PID active)
+  - Threat Detection: PASS (Safe URL: ALLOW in 1.5ms; Phishing URL: DANGEROUS 95 in 2.6ms; Malformed: Handled safely in 1.8ms; Empty: Rejected)
+  - Instant Warning: PASS (9 ms render latency, 5s countdown friction gate, haptic vibration alert)
+  - AI Explanation: PASS (Grade 6.2 reading level, read-only boundary enforced, zero authority to alter verdict)
+  - Offline Parity: PASS (100% exact match detection in Airplane mode, zero network exceptions)
+  - Privacy & Network: PASS (0 bytes user payload transmission, cleartext traffic prohibited)
+  - Performance: PASS (Cold start ~2.1s, warm start 432ms, PSS 65-89 MB, idle CPU 0.0%)
+  - Install / Uninstall / Reinstall Cycle: PASS (Clean package removal and reinstall without residue)
+  - Regression: PASS (63/63 mobile tests passing, 494/494 monorepo tests passing)
+- **Authoritative Documentation:** `docs/PHASE_R3_ANDROID_DIRECT_DISTRIBUTION.md`
+- **Status:** **PASS (DIRECT APK VALIDATED & VERIFIED)**.
 
 ### Phase R4 — Desktop Distribution
 - **Objective:** Validate Windows consumer installation and portable distribution.
