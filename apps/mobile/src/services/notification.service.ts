@@ -23,7 +23,9 @@ export class NotificationService {
     if (result.verdict === Verdict.DANGEROUS) {
       if (typeof window !== 'undefined' && (window as any).AndroidSecurityBridge) {
         const bridge = (window as any).AndroidSecurityBridge;
-        if (typeof bridge.triggerWarningHaptics === 'function') bridge.triggerWarningHaptics('CRITICAL');
+        if (settings.hapticFeedbackEnabled !== false && typeof bridge.triggerWarningHaptics === 'function') {
+          bridge.triggerWarningHaptics('CRITICAL');
+        }
         if (typeof bridge.dispatchNativeNotification === 'function') {
           bridge.dispatchNativeNotification(
             '⚠️ Dangerous Threat Blocked',
@@ -48,7 +50,9 @@ export class NotificationService {
     if (result.verdict === Verdict.SUSPICIOUS) {
       if (typeof window !== 'undefined' && (window as any).AndroidSecurityBridge) {
         const bridge = (window as any).AndroidSecurityBridge;
-        if (typeof bridge.triggerWarningHaptics === 'function') bridge.triggerWarningHaptics('SUSPICIOUS');
+        if (settings.hapticFeedbackEnabled !== false && typeof bridge.triggerWarningHaptics === 'function') {
+          bridge.triggerWarningHaptics('SUSPICIOUS');
+        }
         if (typeof bridge.dispatchNativeNotification === 'function') {
           bridge.dispatchNativeNotification(
             '⚡ Suspicious Content Warning',

@@ -163,7 +163,7 @@ npm ci
 npm run lint
 npm run typecheck
 
-# Execute unified test suite (494 tests across 83 files)
+# Execute unified test suite (500 tests across 91 files)
 npm test
 
 # Generate V8 coverage report
@@ -182,8 +182,8 @@ npm run package
 
 | Surface | Artifact Path | Format | Status | SHA-256 Checksum |
 |---|---|---|---|---|
-| **Web App** | `release/private-protection-web-0.1.0.zip` | Static Web Archive | **Packaged & Verified** | `820a194173c7cbf19aa6f61cb19dfeb6f13416901f77ce38834b7ae639ebda17` |
-| **Browser Extension** | `release/private-protection-extension-0.1.0.zip` | MV3 Zip Package | **Packaged & Verified** | `e4fac38b9195969490f9e1fa8e1b2727dff74545cf13a7e13578b2e7b9a00b8e` |
+| **Web App** | `release/private-protection-web-0.1.0.zip` | Static Web Archive | **Packaged & Verified** | `e7278fae666909ea6046d07773120e4944e56964bf1f3bc3f4314f182c3ccbfe` |
+| **Browser Extension** | `release/private-protection-extension-0.1.0.zip` | MV3 Zip Package | **Packaged & Verified** | `271bb89cac731b0151b1681766534f12b05daa25a3be1a42956b611f8f7478cd` |
 | **Android APK** | `release/private-protection-mobile-0.1.0.apk` | Release APK | **Packaged & Verified** | `95ee838e739e69feed4f007c431cb6a7e74304f6751e17a38c6e21269fcdb5b5` |
 | **Android AAB** | `release/private-protection-mobile-0.1.0.aab` | Release Bundle | **Packaged & Verified** | `5f039cc7ce5e8aa3793b1207ebfd74163ef576423a10b96ea08b5177de1dcd24` |
 | **Desktop Installer**| `release/PrivateProtection-Setup-0.1.0.exe` | Windows Setup | **Packaged & Verified** | `7bf197ff1810d6db0019598bd465e9f309b1321357be80f7c80c568317e0971a` |

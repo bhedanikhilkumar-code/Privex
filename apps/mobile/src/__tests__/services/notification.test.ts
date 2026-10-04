@@ -99,4 +99,33 @@ describe('NotificationService (Security Alerts & Channels)', () => {
 
     delete (window as any).AndroidSecurityBridge;
   });
+
+  it('respects hapticFeedbackEnabled=false while still dispatching notification (DEFECT-ANDROID-01)', async () => {
+    await SecureStorageService.saveSettings({
+      notificationsEnabled: true,
+      hapticFeedbackEnabled: false
+    });
+
+    const triggerWarningHaptics = vi.fn();
+    const dispatchNativeNotification = vi.fn().mockReturnValue(true);
+
+    (window as any).AndroidSecurityBridge = {
+      triggerWarningHaptics,
+      dispatchNativeNotification
+    };
+
+    const dangerous = {
+      ...baseResult,
+      verdict: Verdict.DANGEROUS,
+      threatCategory: 'CREDENTIAL_PHISHING',
+      overallScore: 92
+    };
+
+    const notif = await NotificationService.notifyScanResult(dangerous);
+    expect(notif).not.toBeNull();
+    expect(triggerWarningHaptics).not.toHaveBeenCalled();
+    expect(dispatchNativeNotification).toHaveBeenCalled();
+
+    delete (window as any).AndroidSecurityBridge;
+  });
 });

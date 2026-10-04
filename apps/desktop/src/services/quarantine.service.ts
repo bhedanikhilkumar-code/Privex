@@ -360,6 +360,23 @@ export class QuarantineService {
     for (const item of items) {
       try {
         if (fs.existsSync(item.blobPath)) {
+          try {
+            fs.chmodSync(item.blobPath, 0o666);
+          } catch {
+            // continue
+          }
+          const stat = fs.statSync(item.blobPath);
+          if (stat.size > 0) {
+            const randomNoise = crypto.randomBytes(stat.size);
+            const fd = fs.openSync(item.blobPath, 'r+');
+            try {
+              fs.writeSync(fd, randomNoise, 0, randomNoise.length, 0);
+              fs.fsyncSync(fd);
+            } finally {
+              fs.closeSync(fd);
+            }
+            fs.truncateSync(item.blobPath, 0);
+          }
           fs.unlinkSync(item.blobPath);
         }
       } catch {
@@ -370,3 +387,4 @@ export class QuarantineService {
     this.saveManifest();
   }
 }
+

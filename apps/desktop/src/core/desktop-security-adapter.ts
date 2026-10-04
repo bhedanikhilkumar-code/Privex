@@ -53,12 +53,23 @@ export class DesktopSecurityAdapter {
 
     const semanticResult = this.urlClassifier.analyzeUrlSemantics(trimmed);
     let combinedScore = coreResult.riskScore || 0;
+    let verdict = (coreResult.verdict as Verdict) || Verdict.ALLOW;
+    let severity = (coreResult.riskAssessment?.severity as SeverityLevel) || SeverityLevel.NONE;
+    const evidence = [...(coreResult.evidence || [])];
     if (semanticResult.isDeceptive && semanticResult.evidenceToken) {
-      combinedScore = Math.min(100, Math.max(combinedScore, semanticResult.evidenceToken.scoreContribution || 50));
+      evidence.push(semanticResult.evidenceToken);
+      combinedScore = Math.min(100, Math.max(combinedScore, semanticResult.evidenceToken.scoreContribution || semanticResult.evidenceToken.weight || 50));
+      if (combinedScore >= 85) {
+        verdict = Verdict.DANGEROUS;
+        severity = SeverityLevel.CRITICAL;
+      } else if (combinedScore >= 70) {
+        verdict = Verdict.SUSPICIOUS;
+        severity = SeverityLevel.HIGH;
+      } else if (combinedScore >= 50) {
+        verdict = Verdict.CAUTION;
+        severity = SeverityLevel.MEDIUM;
+      }
     }
-
-    const verdict = (coreResult.verdict as Verdict) || Verdict.ALLOW;
-    const severity = (coreResult.riskAssessment?.severity as SeverityLevel) || SeverityLevel.NONE;
 
     const assistantInput: AssistantInput = {
       requestId: `url-${Date.now()}`,
@@ -70,8 +81,8 @@ export class DesktopSecurityAdapter {
         primaryThreatFactor: 'URL_INTEGRITY',
         detectorContributions: {}
       },
-      evidenceTokens: (coreResult.evidence || []).map((ev) => ({
-        ruleId: ev.ruleId || 'rule',
+      evidenceTokens: evidence.map((ev) => ({
+        ruleId: ev.indicator || ev.ruleId || 'rule',
         category: (ev as any).type || (ev as any).category || 'URL',
         description: ev.description,
         scoreContribution: ev.scoreContribution || 10
@@ -88,7 +99,7 @@ export class DesktopSecurityAdapter {
       riskScore: combinedScore,
       verdict,
       severity,
-      evidence: coreResult.evidence,
+      evidence,
       explanation
     };
   }
@@ -121,7 +132,7 @@ export class DesktopSecurityAdapter {
         detectorContributions: {}
       },
       evidenceTokens: (coreResult.evidence || []).map((ev) => ({
-        ruleId: ev.ruleId || 'rule',
+        ruleId: ev.indicator || ev.ruleId || 'rule',
         category: (ev as any).type || (ev as any).category || 'TEXT',
         description: ev.description,
         scoreContribution: ev.scoreContribution || 10

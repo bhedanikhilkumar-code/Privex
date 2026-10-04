@@ -72,10 +72,19 @@ export class ClientScanner {
       return this.buildEmptyResult('URL', 'Empty URL', effectivePrefs);
     }
 
-    // Check allowlist
-    const isDomainAllowlisted = this.allowlist.some(allowed =>
-      allowed && cleanUrl.toLowerCase().includes(allowed.toLowerCase().trim())
-    );
+    // Check allowlist (merged from instance + effective preferences using strict hostname matching)
+    const activeAllowlist = [...new Set([...this.allowlist, ...(effectivePrefs.allowlistDomains || [])])];
+    let isDomainAllowlisted = false;
+    try {
+      const parsed = new URL(cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') ? cleanUrl : `http://${cleanUrl}`);
+      const hostname = parsed.hostname.toLowerCase();
+      isDomainAllowlisted = activeAllowlist.some((allowed) => {
+        const cleanAllowed = (allowed || '').toLowerCase().trim();
+        return cleanAllowed.length > 0 && (hostname === cleanAllowed || hostname.endsWith(`.${cleanAllowed}`));
+      });
+    } catch {
+      isDomainAllowlisted = false;
+    }
     if (isDomainAllowlisted) {
       return this.buildAllowlistedResult(cleanUrl, 'URL', effectivePrefs);
     }
@@ -88,7 +97,8 @@ export class ClientScanner {
 
     let verdict: Verdict = (coreResult.verdict as Verdict) || Verdict.ALLOW;
     let overallScore: number = coreResult.score ?? coreResult.riskScore ?? 0;
-    let severity: any = coreResult.severity ?? SeverityLevel.NONE;
+    let severity: any = (coreResult.riskAssessment?.severity as SeverityLevel) ??
+      (verdict === Verdict.DANGEROUS ? SeverityLevel.CRITICAL : verdict === Verdict.SUSPICIOUS ? SeverityLevel.HIGH : verdict === Verdict.CAUTION ? SeverityLevel.MEDIUM : verdict === Verdict.INFORM ? SeverityLevel.LOW : SeverityLevel.NONE);
     let confidence: number = coreResult.confidence ?? 0.85;
     let evidence = [...(coreResult.evidence || [])];
 
@@ -97,12 +107,15 @@ export class ClientScanner {
     if (semanticResult.isDeceptive && semanticResult.evidenceToken) {
       evidence.push(semanticResult.evidenceToken);
       overallScore = Math.min(100, Math.max(overallScore, semanticResult.evidenceToken.weight));
-      if (overallScore >= 80) {
+      if (overallScore >= 85) {
         verdict = Verdict.DANGEROUS;
         severity = SeverityLevel.CRITICAL;
-      } else if (overallScore >= 50) {
+      } else if (overallScore >= 70) {
         verdict = Verdict.SUSPICIOUS;
         severity = SeverityLevel.HIGH;
+      } else if (overallScore >= 50) {
+        verdict = Verdict.CAUTION;
+        severity = SeverityLevel.MEDIUM;
       }
     }
 
@@ -182,7 +195,8 @@ export class ClientScanner {
 
     let verdict: Verdict = (coreResult.verdict as Verdict) || Verdict.ALLOW;
     let overallScore: number = coreResult.score ?? coreResult.riskScore ?? 0;
-    let severity: any = coreResult.severity ?? SeverityLevel.NONE;
+    let severity: any = (coreResult.riskAssessment?.severity as SeverityLevel) ??
+      (verdict === Verdict.DANGEROUS ? SeverityLevel.CRITICAL : verdict === Verdict.SUSPICIOUS ? SeverityLevel.HIGH : verdict === Verdict.CAUTION ? SeverityLevel.MEDIUM : verdict === Verdict.INFORM ? SeverityLevel.LOW : SeverityLevel.NONE);
     let confidence: number = coreResult.confidence ?? 0.85;
     let evidence = [...(coreResult.evidence || [])];
 
@@ -191,12 +205,15 @@ export class ClientScanner {
     if (intentResult.intent !== 'BENIGN_COMMUNICATION' && intentResult.evidenceToken) {
       evidence.push(intentResult.evidenceToken);
       overallScore = Math.min(100, Math.max(overallScore, intentResult.evidenceToken.weight));
-      if (overallScore >= 80) {
+      if (overallScore >= 85) {
         verdict = Verdict.DANGEROUS;
         severity = SeverityLevel.CRITICAL;
-      } else if (overallScore >= 50) {
+      } else if (overallScore >= 70) {
         verdict = Verdict.SUSPICIOUS;
         severity = SeverityLevel.HIGH;
+      } else if (overallScore >= 50) {
+        verdict = Verdict.CAUTION;
+        severity = SeverityLevel.MEDIUM;
       }
     }
 

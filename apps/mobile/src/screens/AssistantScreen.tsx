@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AISecurityAssistant, AssistantInput } from '@private-protection/ml';
 import { Verdict, SeverityLevel } from '@private-protection/core';
 import { SecureStorageService } from '../services/secure-storage.service';
@@ -8,6 +8,16 @@ export const AssistantScreen: React.FC = () => {
   const [_simulatedTopic, setSimulatedTopic] = useState<string>('PHISHING');
   const [explanation, setExplanation] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    SecureStorageService.getSettings()
+      .then((settings) => {
+        if (settings?.readingGrade === 6 || settings?.readingGrade === 8) {
+          setReadingGrade(settings.readingGrade);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSimulateExplanation = async (topic: string, grade: 6 | 8) => {
     setLoading(true);

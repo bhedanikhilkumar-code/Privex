@@ -61,6 +61,11 @@ export class MessageRouter {
           return { success: false, error: 'No tab associated with sender' };
         }
 
+        const settings = await ExtensionStorage.getSettings();
+        if (!settings.enabled) {
+          return { success: true };
+        }
+
         const signals = payload;
         if (signals?.hasPasswordInput && signals?.isFormInsecure) {
           const currentState = await ExtensionStorage.getTabState(tabId);
@@ -86,7 +91,11 @@ export class MessageRouter {
               evidence: [...currentState.evidence, insecureFormEvidence]
             };
             await ExtensionStorage.setTabState(tabId, updatedState);
-            return { success: true, updatedState, actionRequired: 'SHOW_SHADOW_BANNER' };
+            return {
+              success: true,
+              updatedState,
+              actionRequired: settings.showShadowDomBanners !== false ? 'SHOW_SHADOW_BANNER' : undefined
+            };
           }
         }
         return { success: true };

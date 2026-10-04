@@ -64,8 +64,6 @@ export function isRestrictedUrl(url: string): boolean {
     lower.startsWith('edge://') ||
     lower.startsWith('about:') ||
     lower.startsWith('view-source:') ||
-    lower.startsWith('devtools://') ||
-    lower.startsWith('data:') ||
-    lower.startsWith('blob:')
+    lower.startsWith('devtools://')
   );
 }

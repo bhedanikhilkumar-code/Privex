@@ -16,6 +16,12 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
   const [frictionSeconds, setFrictionSeconds] = useState<number>(isDangerous ? 5 : 0);
   const [userBypassed, setUserBypassed] = useState<boolean>(false);
 
+  // Reset friction gate state whenever a new scan result arrives without unmounting
+  useEffect(() => {
+    setFrictionSeconds(isDangerous ? 5 : 0);
+    setUserBypassed(false);
+  }, [result.id, result.targetPreview, result.timestamp, isDangerous]);
+
   useEffect(() => {
     if (isDangerous && frictionSeconds > 0) {
       const timer = setTimeout(() => {

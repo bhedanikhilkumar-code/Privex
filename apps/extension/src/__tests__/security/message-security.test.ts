@@ -102,4 +102,50 @@ describe('Message Security & Schema Validation', () => {
     expect(updated?.verdict).toBe('DANGEROUS');
     expect(updated?.overallScore).toBeGreaterThanOrEqual(85);
   });
+
+  it('respects showShadowDomBanners=false when reporting DOM signals (DEFECT-EXT-01)', async () => {
+    await ExtensionStorage.saveSettings({
+      enabled: true,
+      readingGrade: 6,
+      allowlistDomains: [],
+      showShadowDomBanners: false,
+      frictionGateDurationSec: 5
+    });
+
+    await ExtensionStorage.setTabState(21, {
+      tabId: 21,
+      url: 'http://insecure-login.example.com',
+      domain: 'insecure-login.example.com',
+      verdict: 'ALLOW' as any,
+      overallScore: 10,
+      severity: 'NONE' as any,
+      confidence: 0.9,
+      threatCategory: 'BENIGN',
+      evidence: [],
+      recommendation: {
+        action: 'ALLOW' as any,
+        frictionLevel: 'NONE' as any,
+        suggestedAction: 'None',
+        bypassPermitted: true
+      },
+      timestamp: Date.now(),
+      overridden: false
+    });
+
+    const domMsg = {
+      id: 'msg-dom-2',
+      type: MessageType.REPORT_DOM_SIGNALS,
+      payload: {
+        hasPasswordInput: true,
+        isFormInsecure: true,
+        formActionUrl: 'http://insecure-login.example.com/login'
+      },
+      timestamp: Date.now()
+    };
+
+    const res = await router.handleMessage(domMsg, { tab: { id: 21 } as any });
+    expect(res.success).toBe(true);
+    expect(res.actionRequired).toBeUndefined();
+    expect(res.updatedState?.verdict).toBe('DANGEROUS');
+  });
 });

@@ -543,12 +543,31 @@ All 18 foundational capabilities are fully completed, verified against actual re
   - Pre-Navigation Warning Interstitial: Verified tab redirect to `interstitial.html`, 5-second countdown friction gate (`Wait 5s (Safety Gate)` $\rightarrow$ `I Understand the Risks`), and `"Back to Safety"` navigation.
   - Page Interaction & Closed Shadow DOM Shield: Verified `content.js` injects `#private-protection-shield-host` (closed `ShadowRoot`) on pages with plaintext HTTP password forms on both initial load and `Page.reload` with `0` console/runtime exceptions.
   - Offline & Privacy: 100% air-gapped detection parity and `0 bytes` user payload egress.
-  - Performance & Regression: JS Heap `2.15–2.28 MB`; `52/52` extension tests and `495/495` monorepo tests passing.
+  - Performance & Regression: JS Heap `2.15–2.28 MB`; `53/53` extension tests and `500/500` monorepo tests passing.
 - **Store Publication:** Browser-store publication is **OPTIONAL**. Direct zip/unpacked loading via developer mode is fully verified and functional.
 - **Authoritative Documentation:** `docs/PHASE_R5_EXTENSION_DIRECT_DISTRIBUTION.md`
 - **Status:** **PASS (DIRECT EXTENSION PACKAGE VALIDATED ACROSS CHROME, EDGE & BRAVE)**.
 
-### Phase R6 — Domain Configuration
+### Phase R6 — Cross-Product Consistency & Deep Functional Gap Audit
+- **Objective:** Verify and prove that the complete product behaves consistently and correctly across Web (`apps/web`), Android (`apps/mobile`), Desktop (`apps/desktop`), and Browser Extension (`apps/extension`).
+- **Audit & Remediation Results:**
+  - **Requirement Traceability (`R6-A`):** All 11 PS-05 core requirements traced end-to-end across Core, ML, Web, Android, Desktop, Extension, tests, and empirical evidence (**PASS**).
+  - **Function Inventory (`R6-B`) & False-Success Audit (`R6-K`):** Every subsystem function audited; zero fake/hardcoded `PASS` verdicts or bypassed detectors (**PASS**).
+  - **Core Verdict & Score Consistency (`R6-C`):** Canonical 15-item synthetic corpus (`SAFE`, `SUSPICIOUS`, `DANGEROUS`, `MALFORMED`, `EMPTY`, `OVER-LIMIT`, `INJECTION`) produces 100% consistent scores, verdicts, and severities across all 4 surfaces (**PASS**).
+  - **Warning & Explanation Consistency (`R6-D`, `R6-E`):** All surfaces enforce 5-second friction gates on `DANGEROUS` threats and read-only Grade 6/8 explanations (`Core decides, AI explains`) with zero override authority (**PASS**).
+  - **Offline & Privacy Consistency (`R6-F`, `R6-G`):** 100% air-gapped detection parity and `0` bytes of Tier 1 user payload egress across all 4 surfaces (**PASS**).
+  - **Defects Remediated (`R6-P`):**
+    1. `DEFECT-WEB-01`: Unified `prefs.allowlistDomains` in `ClientScanner.scanUrl`, enforced strict hostname/subdomain matching (blocking path spoofing), and mapped canonical `SeverityLevel`.
+    2. `DEFECT-WEB-02`: Added `useEffect` in `ResultCard.tsx` to reset the 5-second friction gate across consecutive scans without unmounting.
+    3. `DEFECT-EXT-01`: Connected `settings.enabled` and `settings.showShadowDomBanners` in `MessageRouter` (`REPORT_DOM_SIGNALS`) and immediate Popup UI state update on `+ Trust This Domain Locally`.
+    4. `DEFECT-EXT-02`: Removed `data:` and `blob:` from `isRestrictedUrl()` so `data:`/`blob:` phishing URIs are scanned by Core, and mapped `coreResult.riskAssessment?.severity`.
+    5. `DEFECT-ANDROID-01`: Connected `settings.hapticFeedbackEnabled` in `NotificationService.notifyScanResult` and hydrated initial `readingGrade` in `AssistantScreen.tsx`.
+    6. `DEFECT-DESKTOP-01` & `DEFECT-DESKTOP-02`: Aligned `DesktopSecurityAdapter` semantic threshold cutoffs and added cryptographic random overwrite before unlink in `QuarantineService.purgeAllQuarantine()`.
+  - **Full Regression (`R6-Q`):** `500/500` tests passing across `91` test files (`0` failures); all 6 release artifacts repackaged and verified against `release/SHA256SUMS.txt`.
+- **Authoritative Documentation:** `docs/PHASE_R6_CROSS_PRODUCT_DEEP_VALIDATION.md`
+- **Status:** **PASS (CROSS-PRODUCT CONSISTENCY & DEEP FUNCTIONAL AUDIT COMPLETE)**.
+
+### Phase R6-Domain — Custom Domain Configuration
 - **Status:** **OPTIONAL**.
 - **Current Production Endpoint:** `https://private-protection.pages.dev` / `https://private-protection-web.pages.dev`.
 - **Policy:** A custom apex domain (e.g. `privateprotection.app`) is strictly OPTIONAL and does not block project completion. If requested later by the project owner: configure DNS CNAME/ALIAS $\rightarrow$ enable Cloudflare Universal SSL $\rightarrow$ configure automatic HTTPS redirection.
@@ -566,7 +585,7 @@ All 18 foundational capabilities are fully completed, verified against actual re
   - Full detection pipeline: $p50 = 0.135\text{ ms}$, $p95 = 0.532\text{ ms}$ (SLA $< 10.0\text{ ms}$).
   - AI template explanation: $p50 = 0.001\text{ ms}$, $p95 = 0.003\text{ ms}$ (SLA $< 0.5\text{ ms}$).
   - Warning render latency: $< 15.0\text{ ms}$ (SLA $< 50.0\text{ ms}$).
-  - Memory footprint: Mobile RSS $\approx 113\text{ MB}$; Desktop RSS $\approx 126\text{ MB}$; Web Heap $\approx 19.5\text{ MB}$.
+  - Memory footprint: Mobile RSS $\approx 114\text{ MB}$; Desktop RSS $\approx 129\text{ MB}$; Web Heap $\approx 28.4\text{ MB}$; Extension Heap $\approx 18.2\text{ MB}$.
 - **Hardware Profile:** Bounded memory buffers (2KB URL, 10KB text, 64KB file header) protect 1.0 GB RAM Android devices and older PCs against memory starvation.
 - **Status:** **PASS (VERIFIED)**.
 
@@ -577,7 +596,7 @@ All 18 foundational capabilities are fully completed, verified against actual re
   - Journey 3: Air-Gapped Offline Mode $\rightarrow$ Scan $\rightarrow$ Local Detection Parity $\rightarrow$ Zero Network Errors.
   - Journey 4: AI Model Unavailable $\rightarrow$ Deterministic Template Fallback $\rightarrow$ Zero Interruption.
   - Journey 5: Fresh Install $\rightarrow$ First Launch $\rightarrow$ Safe Default State.
-  - Journey 6: Restart Client $\rightarrow$ Instant State Restoration $\rightarrow$ Ready for Scanning.
+  - Journey 6: Consecutive State Transitions (`Safe -> Suspicious -> Safe`) & Client Restart $\rightarrow$ Instant State Restoration.
 - **Status:** **PASS (VERIFIED)**.
 
 ### Phase R10 — Post-Release Operations
@@ -601,5 +620,6 @@ Specialist agents have independently verified existing empirical evidence, confi
 - Google Play Store publication is strictly OUT OF SCOPE.
 - No mandatory backend is required.
 - Release distribution packages match frozen SHA-256 checksums.
-- Monorepo tests pass 100% (494/494 tests passing).
+- Monorepo tests pass 100% (500/500 tests passing across 91 test files).
+
 

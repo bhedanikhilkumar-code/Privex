@@ -129,7 +129,17 @@ export class NavigationInterceptor {
 
     let verdict: Verdict = (coreResult.verdict as Verdict) || Verdict.ALLOW;
     let overallScore: number = coreResult.score ?? coreResult.riskScore ?? 0;
-    let severity: SeverityLevel = (coreResult.severity as SeverityLevel) ?? SeverityLevel.NONE;
+    let severity: SeverityLevel =
+      (coreResult.riskAssessment?.severity as SeverityLevel) ??
+      (verdict === Verdict.DANGEROUS
+        ? SeverityLevel.CRITICAL
+        : verdict === Verdict.SUSPICIOUS
+          ? SeverityLevel.HIGH
+          : verdict === Verdict.CAUTION
+            ? SeverityLevel.MEDIUM
+            : verdict === Verdict.INFORM
+              ? SeverityLevel.LOW
+              : SeverityLevel.NONE);
     let confidence: number = coreResult.confidence ?? 0.85;
     let evidence = [...(coreResult.evidence || [])];
     let threatCategory = (coreResult.riskCategory as string) || 'GENERIC';
@@ -146,6 +156,10 @@ export class NavigationInterceptor {
       } else if (overallScore >= 70) {
         verdict = Verdict.SUSPICIOUS;
         severity = SeverityLevel.HIGH;
+        threatCategory = 'SUSPICIOUS_SEMANTIC';
+      } else if (overallScore >= 50) {
+        verdict = Verdict.CAUTION;
+        severity = SeverityLevel.MEDIUM;
         threatCategory = 'SUSPICIOUS_SEMANTIC';
       }
     }

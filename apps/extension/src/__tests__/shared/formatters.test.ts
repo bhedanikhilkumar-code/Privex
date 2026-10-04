@@ -41,11 +41,13 @@ describe('Shared Formatters & Helpers (Extension)', () => {
     expect(extractDomain('http://192.168.1.1:8080/login')).toBe('192.168.1.1');
   });
 
-  it('identifies restricted browser URLs', () => {
+  it('identifies restricted browser URLs while allowing data: and blob: URIs to be scanned', () => {
     expect(isRestrictedUrl('chrome://settings')).toBe(true);
     expect(isRestrictedUrl('about:blank')).toBe(true);
     expect(isRestrictedUrl('edge://flags')).toBe(true);
     expect(isRestrictedUrl('chrome-extension://abcdef/popup.html')).toBe(true);
     expect(isRestrictedUrl('https://google.com')).toBe(false);
+    expect(isRestrictedUrl('data:text/html,<script>alert(1)</script>')).toBe(false);
+    expect(isRestrictedUrl('blob:https://example.com/550e8400-e29b-41d4-a716-446655440000')).toBe(false);
   });
 });

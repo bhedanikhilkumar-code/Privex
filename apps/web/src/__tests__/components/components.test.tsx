@@ -139,6 +139,14 @@ describe('Web UI Components Testing', () => {
       expect(screen.getByText(/Direct IP address host/i)).toBeDefined();
       expect(screen.getAllByText(/Do not enter passwords/i).length).toBeGreaterThan(0);
     });
+
+    it('resets friction gate state when result prop updates across consecutive scans (DEFECT-WEB-02)', () => {
+      const { rerender } = render(<ResultCard result={mockSafeResult} onReset={vi.fn()} />);
+      expect(screen.queryByText(/Safety Friction Gate:/i)).toBeNull();
+
+      rerender(<ResultCard result={{ ...mockDangerousResult, id: 'test-danger-consecutive' }} onReset={vi.fn()} />);
+      expect(screen.getByText(/Safety Friction Gate: Action blocked for 5 seconds/i)).toBeDefined();
+    });
   });
 
   describe('UrlScannerView Component', () => {

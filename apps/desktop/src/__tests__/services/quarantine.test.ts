@@ -171,6 +171,49 @@ describe('QuarantineService (Cryptographic Vault & Safe Remediation)', () => {
     expect(quarantine.listQuarantine().length).toBe(0);
   });
 
+  it('purges all quarantined items with cryptographic overwrite (DEFECT-DESKTOP-02)', async () => {
+    const file1 = path.join(workDir, 'purge1.exe');
+    const file2 = path.join(workDir, 'purge2.scr');
+    fs.writeFileSync(file1, 'Malware payload 1');
+    fs.writeFileSync(file2, 'Malware payload 2');
+
+    const q1 = await quarantine.isolateFile({
+      id: 't-p1',
+      filePath: file1,
+      fileName: 'purge1.exe',
+      fileSize: 17,
+      sha256: crypto.createHash('sha256').update('Malware payload 1').digest('hex'),
+      riskScore: 90,
+      severity: 'critical',
+      verdict: 'BLOCK',
+      threatName: 'MALWARE_1',
+      detectedAt: Date.now(),
+      evidenceFactors: [],
+      quarantined: false
+    });
+
+    const q2 = await quarantine.isolateFile({
+      id: 't-p2',
+      filePath: file2,
+      fileName: 'purge2.scr',
+      fileSize: 17,
+      sha256: crypto.createHash('sha256').update('Malware payload 2').digest('hex'),
+      riskScore: 90,
+      severity: 'critical',
+      verdict: 'BLOCK',
+      threatName: 'MALWARE_2',
+      detectedAt: Date.now(),
+      evidenceFactors: [],
+      quarantined: false
+    });
+
+    expect(quarantine.listQuarantine().length).toBe(2);
+    quarantine.purgeAllQuarantine();
+    expect(fs.existsSync(q1.blobPath)).toBe(false);
+    expect(fs.existsSync(q2.blobPath)).toBe(false);
+    expect(quarantine.listQuarantine().length).toBe(0);
+  });
+
   it('rejects tampered quarantine container when ciphertext is modified', async () => {
     const filePath = path.join(workDir, 'tamper_test.exe');
     fs.writeFileSync(filePath, 'Sensitive untampered malware bytes');

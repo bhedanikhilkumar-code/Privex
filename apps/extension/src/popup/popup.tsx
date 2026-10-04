@@ -89,6 +89,16 @@ export const PopupApp: React.FC = () => {
       allowlistDomains: [...new Set([...settings.allowlistDomains, tabState.domain])]
     };
     setSettings(updated);
+    setTabState({
+      ...tabState,
+      verdict: 'ALLOW' as any,
+      overallScore: 0,
+      severity: 'NONE' as any,
+      threatCategory: 'CUSTOM_ALLOWLIST',
+      evidence: [],
+      aiExplanation: undefined,
+      overridden: true
+    });
     if (typeof chrome !== 'undefined' && chrome.runtime) {
       const msg = createMessage(MessageType.UPDATE_SETTINGS, updated);
       chrome.runtime.sendMessage(msg);

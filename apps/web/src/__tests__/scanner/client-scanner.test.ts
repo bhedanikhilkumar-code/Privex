@@ -69,6 +69,31 @@ describe('ClientScanner (Client-side Detection & AI Assistant Pipeline)', () => 
       expect(overridden.overallScore).toBe(0);
       expect(overridden.aiExplanation?.headline).toContain('Allowlist');
     });
+
+    it('enforces strict hostname/subdomain matching on prefs.allowlistDomains and blocks path spoofing (DEFECT-WEB-01)', async () => {
+      const trustedSubdomain = 'https://portal.corp-trusted.internal/login';
+      const spoofedPathAttack = 'http://192.168.1.1/corp-trusted.internal/paypal/login.php';
+      const spoofedPrefixAttack = 'http://evil-corp-trusted.internal/login';
+
+      const prefs = {
+        cognitiveReadingGrade: 6 as const,
+        enableWorkerOffloading: false,
+        allowlistDomains: ['corp-trusted.internal']
+      };
+
+      const allowedSub = await scanner.scanUrl(trustedSubdomain, prefs);
+      expect(allowedSub.isAllowlisted).toBe(true);
+      expect(allowedSub.verdict).toBe(Verdict.ALLOW);
+      expect(allowedSub.overallScore).toBe(0);
+
+      const blockedPath = await scanner.scanUrl(spoofedPathAttack, prefs);
+      expect(blockedPath.isAllowlisted).toBeUndefined();
+      expect([Verdict.DANGEROUS, Verdict.SUSPICIOUS]).toContain(blockedPath.verdict);
+      expect([SeverityLevel.CRITICAL, SeverityLevel.HIGH]).toContain(blockedPath.severity);
+
+      const blockedPrefix = await scanner.scanUrl(spoofedPrefixAttack, prefs);
+      expect(blockedPrefix.isAllowlisted).toBeUndefined();
+    });
   });
 
   describe('Scam Message Threat Detection', () => {
