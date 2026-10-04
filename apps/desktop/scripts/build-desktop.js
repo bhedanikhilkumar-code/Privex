@@ -100,7 +100,7 @@ function packageWindowsRelease() {
   const appPackageJson = {
     name: 'private-protection-desktop',
     productName: 'Private Protection Desktop Security',
-    version: '1.0.0',
+    version: '0.1.0',
     private: true,
     main: 'dist/main/electron-main.cjs'
   };
