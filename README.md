@@ -143,7 +143,91 @@ Private Protection enforces strict data classification boundaries:
 
 ---
 
-## 8. REPRODUCIBLE QUICK START & DEVELOPMENT
+## 8. USER GUIDE & DIRECT DOWNLOADS (HOW REAL USERS GET & USE IT)
+
+Private Protection is engineered for normal, non-technical users. You do not need developer tools or technical knowledge to install and use it.
+
+### Direct Download Matrix
+
+| Product Surface | Target Platform | Download Package | Format & Size | Cryptographic SHA-256 Checksum |
+|---|---|---|---|---|
+| **Web App** | Modern Browsers | [Launch Live Web App](https://private-protection.pages.dev) | Zero-Install PWA | Same-origin edge verified |
+| **Android Mobile** | Android 8.0+ (API 26–34) | [`private-protection-mobile-0.1.0.apk`](./release/private-protection-mobile-0.1.0.apk) | Direct APK (1.03 MB) | `95ee838e739e69feed4f007c431cb6a7e74304f6751e17a38c6e21269fcdb5b5` |
+| **Windows Desktop (Setup)** | Windows 10/11 x64 | [`PrivateProtection-Setup-0.1.0.exe`](./release/PrivateProtection-Setup-0.1.0.exe) | Single-File Installer (150.7 MB) | `529bee4bc50bb73a0a282575f088099ef264bd0e8a5004be7eba3275eca9e569` |
+| **Windows Desktop (Portable)** | Windows 10/11 x64 | [`PrivateProtection-0.1.0-win-x64.exe`](./release/PrivateProtection-0.1.0-win-x64.exe) | Standalone Portable (234.3 MB) | `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa` |
+| **Browser Extension** | Chrome, Edge, Brave | [`private-protection-extension-0.1.0.zip`](./release/private-protection-extension-0.1.0.zip) | Manifest V3 Zip (100.1 KB) | `d0f42ab50db530b752cffd3b6e39a6f3a1e23f888e145375fe4b8cc5c67b25dc` |
+
+All checksums are authoritatively recorded in [`release/SHA256SUMS.txt`](./release/SHA256SUMS.txt).
+
+---
+
+### Step-by-Step Installation Guides
+
+#### 🌐 1. Web Application (Zero Install)
+1. **Open:** Visit [`https://private-protection.pages.dev`](https://private-protection.pages.dev) in any web browser.
+2. **Use:** Click the **URL Scanner** or **Message Scanner** tab to inspect suspicious links or text.
+3. **Offline PWA:** Click **"Install Web App"** in your browser's address bar to install it as an offline-capable Progressive Web App.
+
+#### 📱 2. Android Mobile (Direct APK Sideload)
+> *Note: Private Protection is distributed via direct APK download. It is **not** published to the Google Play Store.*
+1. **Download:** Save [`private-protection-mobile-0.1.0.apk`](./release/private-protection-mobile-0.1.0.apk) to your Android device.
+2. **Install:** Tap the downloaded file in your browser downloads or Files app. If prompted with *"Install unknown apps"*, toggle **"Allow from this source"**.
+3. **Open:** Tap **Open** or tap the **Private Protection** shield icon on your home screen.
+4. **Permissions:** The app requests standard user-level permissions (`CAMERA` for QR scanning, `NOTIFICATION_LISTENER` for inbound SMS warnings). Dangerous permissions (`READ_SMS`, `READ_CONTACTS`, `LOCATION`) are strictly never requested.
+
+#### 💻 3. Windows Desktop (Installer or Portable)
+1. **Download:** Download [`PrivateProtection-Setup-0.1.0.exe`](./release/PrivateProtection-Setup-0.1.0.exe) (or portable version).
+2. **Install:** Double-click the setup executable. Installation completes in seconds into `%LOCALAPPDATA%\Programs\Private Protection\` without requiring administrator privileges or UAC prompts.
+3. **Launch:** Launch **Private Protection** from your Start Menu or Desktop.
+4. **Real-Time Shield:** The application automatically monitors your Downloads directory and safely moves dangerous executable files into the AES-256-GCM encrypted quarantine vault.
+
+#### 🧩 4. Browser Extension (Chromium: Chrome, Edge, Brave)
+> *Note: Private Protection is distributed as a self-contained unpacked package. It is **not** published to the Chrome Web Store.*
+1. **Download & Extract:** Download [`private-protection-extension-0.1.0.zip`](./release/private-protection-extension-0.1.0.zip) and unzip it into a folder.
+2. **Open Extensions Page:** In your browser, open `chrome://extensions` (or `edge://extensions` / `brave://extensions`).
+3. **Enable Developer Mode:** Turn on the **"Developer mode"** toggle in the top-right corner.
+4. **Load Extension:** Click **"Load unpacked"** in the top-left corner and select the extracted folder.
+5. **Protection Active:** The Private Protection shield will appear in your browser toolbar, automatically blocking deceptive links before pages load.
+
+---
+
+## 9. INTERACTIVE DEMO SCENARIOS (TRY IT YOURSELF)
+
+You can safely test Private Protection using these non-sensitive synthetic test cases:
+
+### Scenario 1: Safe Web Destination
+- **Input:** `https://en.wikipedia.org/wiki/Computer_security`
+- **Expected Verdict:** `SAFE / ALLOWED` (Risk Score: `0 / 100`, Green Badge)
+- **Explanation:** *"Safe web address. No deceptive patterns or spoofed characters detected."*
+
+### Scenario 2: Deceptive Phishing Link (IP-Based Banking Phish)
+- **Input:** `http://192.168.1.100/secure-banking/login`
+- **Expected Verdict:** `DANGEROUS / BLOCK` (Risk Score: `95 / 100`, Red Banner)
+- **Warning:** High-contrast warning banner with 5-second safety friction gate (`Wait 5s (Safety Gate)` $\rightarrow$ `I Understand the Risks`).
+- **AI Briefing:** Plain-language explanation below Grade 8 reading comprehension detailing that the site uses an unencrypted numerical IP address disguised as a banking service.
+
+### Scenario 3: 100% Offline Air-Gapped Test
+- **Action:** Disconnect your device from Wi-Fi and Ethernet (or turn on Airplane Mode).
+- **Input:** `http://paypal-verification-alert.xyz/account`
+- **Expected Verdict:** `DANGEROUS / BLOCK` (Risk Score: `85 / 100`)
+- **Observation:** Full detection, scoring, and explanation execute instantaneously on your device with zero network connection.
+
+---
+
+## 10. PLAIN-LANGUAGE PRIVACY & BACKEND QUESTIONS
+
+- **Does Private Protection require a backend server?**  
+  **NO.** The core security decision engine, Bayesian risk scoring, and AI explanation assistant run 100% locally on your computer or phone.
+- **Does Private Protection require the cloud?**  
+  **NO.** All scanning occurs in volatile device RAM. An optional cloud edge CDN (Cloudflare Pages) is used only to host the zero-install web page and distribute release files.
+- **Does my browsing history, messages, or files ever leave my device?**  
+  **NO.** Raw user payloads never cross the device boundary. Zero user data is transmitted to the cloud, logged on remote servers, or sold.
+- **Can I delete my local scan data?**  
+  **YES.** You can clear all local settings, allowlists, and logs at any time in Settings. The desktop application uses a 3-pass cryptographic shredder (`0x00`, `0xFF`, CSPRNG + `fsync`) to permanently purge quarantined threats.
+
+---
+
+## 11. REPRODUCIBLE QUICK START & DEVELOPMENT
 
 ### Prerequisites
 - Node.js `>= 20.0.0` (LTS v22 recommended)
@@ -178,7 +262,7 @@ npm run package
 
 ---
 
-## 9. RELEASE ARTIFACTS & PACKAGING STATUS
+## 12. RELEASE ARTIFACTS & PACKAGING STATUS
 
 | Surface | Artifact Path | Format | Status | SHA-256 Checksum |
 |---|---|---|---|---|
@@ -193,7 +277,7 @@ Cryptographic checksums are recorded in [`release/SHA256SUMS.txt`](./release/SHA
 
 ---
 
-## 10. HONEST DISCLOSURE OF CURRENT STATUS & KNOWN LIMITATIONS
+## 13. HONEST DISCLOSURE OF CURRENT STATUS & KNOWN LIMITATIONS
 
 In alignment with our engineering constitution:
 - **Browser Extension:** Manifest V3 cannot inspect internal browser schemes (`chrome://`, `edge://`).
@@ -203,9 +287,12 @@ In alignment with our engineering constitution:
 
 ---
 
-## 11. GOVERNANCE & DOCUMENTATION INDEX
+## 14. GOVERNANCE & DOCUMENTATION INDEX
 
 - **Canonical Constitution & Source of Truth:** [`AGENT.md`](./AGENT.md)
+- **Final Human Acceptance & Distribution UX Audit:** [`docs/PHASE_R12_FINAL_HUMAN_ACCEPTANCE.md`](./docs/PHASE_R12_FINAL_HUMAN_ACCEPTANCE.md)
+- **Final Release Candidate Matrix:** [`docs/PHASE_R11_RELEASE_CANDIDATE_MATRIX.md`](./docs/PHASE_R11_RELEASE_CANDIDATE_MATRIX.md)
+- **Final Release Hardening & Security Audit:** [`docs/PHASE_R10_FINAL_SECURITY_RELEASE_HARDENING.md`](./docs/PHASE_R10_FINAL_SECURITY_RELEASE_HARDENING.md)
 - **Final End-to-End Product Acceptance:** [`docs/PHASE_R9_FINAL_END_TO_END_ACCEPTANCE.md`](./docs/PHASE_R9_FINAL_END_TO_END_ACCEPTANCE.md)
 - **Performance, Low-End Device & Offline Deep Validation:** [`docs/PHASE_R8_PERFORMANCE_LOW_END_VALIDATION.md`](./docs/PHASE_R8_PERFORMANCE_LOW_END_VALIDATION.md)
 - **Backend Necessity & Cloud Boundary Architecture:** [`docs/PHASE_R7_BACKEND_CLOUD_ARCHITECTURE.md`](./docs/PHASE_R7_BACKEND_CLOUD_ARCHITECTURE.md)
