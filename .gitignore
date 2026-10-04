@@ -1,19 +1,40 @@
+# Dependencies
 node_modules
+
+# Build & Test Artifacts
 dist
 coverage
-release/*.zip
-release/*.tar.gz
-release/*.exe
-.env
 *.tsbuildinfo
-.DS_Store
-.agents
 .vite
 .vite-temp
 *.log
-.gradle/
-**/build/
-local.properties
+.DS_Store
+.agents
+
+# Environment & Secret Files
+.env
+.env.local
+.env.*.local
+.env.*
+.wrangler
+.wrangler/
+*.pem
+*.key
+*.p8
+*.p12
+*.keystore
+*.jks
+id_rsa*
+
+# Releases & Binary Packages
+release/*.zip
+release/*.tar.gz
+release/*.exe
 *.apk
 *.aab
 apps/desktop/release/
+
+# Mobile / Android Build Files
+.gradle/
+**/build/
+local.properties

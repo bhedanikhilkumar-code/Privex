@@ -28,7 +28,8 @@ jobs:
 
       - name: Verify Secret Absence
         run: |
-          echo "Scanning for accidental secret leaks..."
+          node scripts/audit-secrets.js
+          echo "Scanning code directories for high-risk pattern markers..."
           if grep -rEI "BEGIN (RSA |EC )?PRIVATE KEY|AKIA[0-9A-Z]{16}|ghp_[a-zA-Z0-9]{30,}" packages apps tests; then
             echo "Secret leak detected!"
             exit 1

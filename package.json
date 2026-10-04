@@ -13,7 +13,8 @@
     "test:coverage": "npm run test:coverage --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "package": "node scripts/package-release.js"
+    "package": "node scripts/package-release.js",
+    "audit:secrets": "node scripts/audit-secrets.js"
   },
   "devDependencies": {
     "@types/node": "^26.6.3",
