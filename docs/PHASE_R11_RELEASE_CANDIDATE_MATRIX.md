@@ -4,7 +4,7 @@
 > **PROJECT:** PRIVATE PROTECTION  
 > **PROBLEM STATEMENT CODE:** PS-05 (On-Device Threat, Phishing, and Scam Detection)  
 > **RELEASE VERSION:** `0.1.0` (`v0.1.0`)  
-> **BUILD COMMIT:** `824c0eab6d8932d2489735b01420e6125de66e6f`  
+> **BUILD COMMIT:** `355643acbf0c28329b58e3c6df30df04fa0151c6`  
 > **VALIDATION DATE:** October 4, 2026  
 > **CANONICAL DOCTRINE:** LOCAL-FIRST • PRIVACY-FIRST • DATA-MINIMIZATION • ZERO-KNOWLEDGE • ZERO-CLOUD-DEPENDENCE
 
@@ -18,12 +18,12 @@ Phase R11 is the final release candidate build, distribution packaging, and mult
 
 | Surface | Version | Artifact | Size | SHA-256 | Build Commit | Verified |
 |---|---|---|---|---|---|:---:|
-| **Web** | `0.1.0` | `release/private-protection-web-0.1.0.zip` | 125,553 B | `18d4c35762d0a41d3908aa2f7b8a72420615d67817e70af76cac93757c705b1d` | `824c0ea` | **PASS (100%)** |
-| **Android** | `0.1.0` | `release/private-protection-mobile-0.1.0.apk` | 1,032,677 B | `95ee838e739e69feed4f007c431cb6a7e74304f6751e17a38c6e21269fcdb5b5` | `824c0ea` | **PASS (100%)** |
-| **Desktop** | `0.1.0` | `release/PrivateProtection-Setup-0.1.0.exe` | 158,047,232 B | `529bee4bc50bb73a0a282575f088099ef264bd0e8a5004be7eba3275eca9e569` | `824c0ea` | **PASS (100%)** |
-| **Desktop (Portable)** | `0.1.0` | `release/PrivateProtection-0.1.0-win-x64.exe` | 245,726,208 B | `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa` | `824c0ea` | **PASS (100%)** |
-| **Extension** | `0.1.0` | `release/private-protection-extension-0.1.0.zip` | 100,161 B | `d0f42ab50db530b752cffd3b6e39a6f3a1e23f888e145375fe4b8cc5c67b25dc` | `824c0ea` | **PASS (100%)** |
-| **Companion AAB** | `0.1.0` | `release/private-protection-mobile-0.1.0.aab` | 1,548,180 B | `5f039cc7ce5e8aa3793b1207ebfd74163ef576423a10b96ea08b5177de1dcd24` | `824c0ea` | **PASS (100%)** |
+| **Web** | `0.1.0` | `release/private-protection-web-0.1.0.zip` | 125,553 B | `18d4c35762d0a41d3908aa2f7b8a72420615d67817e70af76cac93757c705b1d` | `355643a` | **PASS (100%)** |
+| **Android** | `0.1.0` | `release/private-protection-mobile-0.1.0.apk` | 1,032,677 B | `95ee838e739e69feed4f007c431cb6a7e74304f6751e17a38c6e21269fcdb5b5` | `355643a` | **PASS (100%)** |
+| **Desktop** | `0.1.0` | `release/PrivateProtection-Setup-0.1.0.exe` | 158,047,232 B | `529bee4bc50bb73a0a282575f088099ef264bd0e8a5004be7eba3275eca9e569` | `355643a` | **PASS (100%)** |
+| **Desktop (Portable)** | `0.1.0` | `release/PrivateProtection-0.1.0-win-x64.exe` | 245,726,208 B | `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa` | `355643a` | **PASS (100%)** |
+| **Extension** | `0.1.0` | `release/private-protection-extension-0.1.0.zip` | 100,161 B | `d0f42ab50db530b752cffd3b6e39a6f3a1e23f888e145375fe4b8cc5c67b25dc` | `355643a` | **PASS (100%)** |
+| **Companion AAB** | `0.1.0` | `release/private-protection-mobile-0.1.0.aab` | 1,548,180 B | `5f039cc7ce5e8aa3793b1207ebfd74163ef576423a10b96ea08b5177de1dcd24` | `355643a` | **PASS (100%)** |
 
 ---
 
