@@ -420,6 +420,145 @@ export const App: React.FC = () => {
               </div>
             </div>
 
+            {/* Supported Platforms & Direct Downloads */}
+            <div style={{ marginBottom: '3rem' }}>
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.8rem',
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  color: 'var(--text-muted)',
+                  marginBottom: '1rem'
+                }}
+              >
+                SUPPORTED PLATFORMS &amp; DIRECT DOWNLOADS
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                  gap: '1rem'
+                }}
+              >
+                <div
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    border: '2px solid var(--border-dark)',
+                    boxShadow: '2px 2px 0px #111111',
+                    padding: '1.25rem'
+                  }}
+                >
+                  <div style={{ fontSize: '1.5rem', marginBottom: '0.35rem' }}>🌐</div>
+                  <h5 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.25rem' }}>
+                    Web Application
+                  </h5>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
+                    Zero-install client PWA. Runs in browser memory with full air-gapped offline support.
+                  </p>
+                  <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--color-safe)' }}>
+                    ● ACTIVE IN BROWSER
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    border: '2px solid var(--border-dark)',
+                    boxShadow: '2px 2px 0px #111111',
+                    padding: '1.25rem'
+                  }}
+                >
+                  <div style={{ fontSize: '1.5rem', marginBottom: '0.35rem' }}>📱</div>
+                  <h5 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.25rem' }}>
+                    Android Mobile
+                  </h5>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
+                    Direct APK sideload for Android 8.0+. Live QR scanning and SMS notification filter.
+                  </p>
+                  <a
+                    href="/downloads/private-protection-mobile-0.1.0.apk"
+                    download="private-protection-mobile-0.1.0.apk"
+                    style={{
+                      display: 'inline-block',
+                      fontSize: '0.75rem',
+                      fontFamily: 'var(--font-mono)',
+                      fontWeight: 800,
+                      color: 'var(--color-brand)',
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    Direct APK (1.0 MB) →
+                  </a>
+                </div>
+
+                <div
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    border: '2px solid var(--border-dark)',
+                    boxShadow: '2px 2px 0px #111111',
+                    padding: '1.25rem'
+                  }}
+                >
+                  <div style={{ fontSize: '1.5rem', marginBottom: '0.35rem' }}>💻</div>
+                  <h5 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.25rem' }}>
+                    Windows Desktop
+                  </h5>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
+                    Windows 10/11 x64 installer &amp; portable. Downloads watcher and quarantine vault.
+                  </p>
+                  <a
+                    href="https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-block',
+                      fontSize: '0.75rem',
+                      fontFamily: 'var(--font-mono)',
+                      fontWeight: 800,
+                      color: 'var(--color-brand)',
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    Desktop Downloads →
+                  </a>
+                </div>
+
+                <div
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    border: '2px solid var(--border-dark)',
+                    boxShadow: '2px 2px 0px #111111',
+                    padding: '1.25rem'
+                  }}
+                >
+                  <div style={{ fontSize: '1.5rem', marginBottom: '0.35rem' }}>🧩</div>
+                  <h5 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.25rem' }}>
+                    Browser Extension
+                  </h5>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
+                    Chromium Manifest V3 zip. Pre-navigation link interceptor and phishing shield.
+                  </p>
+                  <a
+                    href="/downloads/private-protection-extension-0.1.0.zip"
+                    download="private-protection-extension-0.1.0.zip"
+                    style={{
+                      display: 'inline-block',
+                      fontSize: '0.75rem',
+                      fontFamily: 'var(--font-mono)',
+                      fontWeight: 800,
+                      color: 'var(--color-brand)',
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    Extension ZIP (100 KB) →
+                  </a>
+                </div>
+              </div>
+            </div>
+
             {/* Browser Security Status Bar */}
             <div
               style={{

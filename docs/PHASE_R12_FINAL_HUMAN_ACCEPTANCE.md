@@ -67,7 +67,7 @@ Audited via headless automated CDP browser session and manual DOM evaluation (`s
 ### 4.1 Release Package Specifications
 - **Package File**: `release/private-protection-mobile-0.1.0.apk`
 - **Package Size**: 1,032,677 bytes (~1.0 MB)
-- **SHA-256**: `95ee83fa74421b72e1e07b8b26bc659c25f75608ad01e9d1bfb9cb34b5c7f893`
+- **SHA-256**: `95ee838e739e69feed4f007c431cb6a7e74304f6751e17a38c6e21269fcdb5b5`
 - **Application ID**: `com.privateprotection.mobile`
 - **Target SDK**: Android 34 (Android 14)
 - **Min SDK**: Android 26 (Android 8.0 Oreo)
@@ -88,8 +88,8 @@ Audited via headless automated CDP browser session and manual DOM evaluation (`s
 ## 5. DESKTOP INSTALLATION & USER JOURNEY AUDIT
 
 ### 5.1 Release Package Specifications
-- **Installer File**: `release/PrivateProtection-Setup-0.1.0.exe` (158,047,232 bytes, SHA-256: `529bee55cbcebc841bbceb066be337a6b7d2f349cfd4e92b8d0ca2895fcbbd15`)
-- **Portable File**: `release/PrivateProtection-0.1.0-win-x64.exe` (245,726,208 bytes, SHA-256: `49b61a4c9bf6424e4c2ee10915649b5c3ffcfb65b1aa51b1f9fa4277b9d1e34b`)
+- **Installer File**: `release/PrivateProtection-Setup-0.1.0.exe` (158,047,232 bytes, SHA-256: `529bee4bc50bb73a0a282575f088099ef264bd0e8a5004be7eba3275eca9e569`)
+- **Portable File**: `release/PrivateProtection-0.1.0-win-x64.exe` (245,726,208 bytes, SHA-256: `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa`)
 - **Architecture**: Windows x64 (Windows 10 / Windows 11)
 - **Runtime Dependencies**: Bundled Electron 33 runtime; zero developer tools, zero Node.js, zero Git required on client.
 
@@ -109,7 +109,7 @@ Audited via headless automated CDP browser session and manual DOM evaluation (`s
 ### 6.1 Release Package Specifications
 - **Archive File**: `release/private-protection-extension-0.1.0.zip`
 - **Archive Size**: 100,161 bytes (~100 KB)
-- **SHA-256**: `d0f42a5bc65ceac803bda98c5ee6d2e0ea797b5e43a9d45e5461234907107771`
+- **SHA-256**: `d0f42ab50db530b752cffd3b6e39a6f3a1e23f888e145375fe4b8cc5c67b25dc`
 - **Manifest Version**: Manifest V3 (MV3 compliant)
 - **Supported Browsers**: Google Chrome (v110+), Microsoft Edge (v110+), Brave, Opera, and other standard Chromium browsers.
 

@@ -237,8 +237,8 @@ You can safely test Private Protection using these non-sensitive synthetic test 
 ### Setup & Verification
 ```bash
 # Clone repository
-git clone https://github.com/private-protection/private-protection.git
-cd private-protection
+git clone https://github.com/bhedanikhilkumar-code/Private-Protection.git
+cd "Private Protection"
 
 # Hermetic dependency installation
 npm ci

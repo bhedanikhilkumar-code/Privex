@@ -33,6 +33,7 @@ release/*.exe
 *.apk
 *.aab
 apps/desktop/release/
+apps/web/public/downloads/
 
 # Mobile / Android Build Files
 .gradle/
