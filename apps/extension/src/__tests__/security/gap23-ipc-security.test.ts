@@ -147,7 +147,7 @@ describe('GAP-23 & SEC-05: Extension Privileged Origin Validation & CSP Hardenin
     });
   });
 
-  describe('SEC-05: Extension CSP Audit', () => {
+  describe('SEC-05: Extension CSP & Content Script Bundle Audit', () => {
     it('enforces connect-src none and object-src none in manifest.json', () => {
       const manifestPath = path.resolve(__dirname, '../../../manifest.json');
       const manifestContent = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
@@ -157,5 +157,15 @@ describe('GAP-23 & SEC-05: Extension Privileged Origin Validation & CSP Hardenin
       expect(csp).toContain("object-src 'none'");
       expect(csp).not.toContain("object-src 'self'");
     });
+
+    it('bundles dist/content.js as a self-contained classic script without ES module imports', () => {
+      const contentBundlePath = path.resolve(__dirname, '../../../dist/content.js');
+      if (fs.existsSync(contentBundlePath)) {
+        const contentCode = fs.readFileSync(contentBundlePath, 'utf8');
+        expect(contentCode).not.toMatch(/\bimport\s*\{/);
+        expect(contentCode).not.toMatch(/\bexport\s*\{/);
+      }
+    });
   });
 });
+

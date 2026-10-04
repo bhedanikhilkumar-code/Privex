@@ -531,12 +531,22 @@ All 18 foundational capabilities are fully completed, verified against actual re
 - **Status:** **PASS (DIRECT DESKTOP INSTALLER & PORTABLE VALIDATED)**.
 
 ### Phase R5 — Extension Distribution
-- **Objective:** Validate browser extension packaging for Chromium browsers.
-- **Target Browsers:** Google Chrome, Microsoft Edge, Brave Browser.
-- **Release Artifact:** `release/private-protection-extension-0.1.0.zip` (100,771 bytes, SHA-256: `e4fac38b...`).
-- **Packaging:** Validated Manifest V3 with service worker background script, isolated content scripts, 4 PNG icons (16, 32, 48, 128), and strict CSP (`connect-src 'none'`).
-- **Store Publication:** Browser-store publication is **OPTIONAL**. Direct zip loading via developer mode is fully verified and functional.
-- **Status:** **PASS (VERIFIED)**.
+- **Objective:** Validate browser extension packaging and real-browser execution across Chromium browsers.
+- **Tested Browsers (Windows 11 x64, Build 26300):**
+  - Google Chrome: `v154.0.8037.93`
+  - Microsoft Edge: `v154.0.4258.53`
+  - Brave Browser: `v154.1.96.61` (`Chromium 154.0.8037.98`)
+- **Release Artifact:** `release/private-protection-extension-0.1.0.zip` (101,995 bytes, SHA-256: `d4de2c9af0fde12056cae1dac1d593a00a907e3e14676b4a31e39aa75fa54b99`).
+- **Packaging & Functional Validation:**
+  - Validated Manifest V3 (`v0.1.0`) with ESM Service Worker (`background.js`), self-contained classic IIFE content script (`content.js`, `7.93 KB`, zero ES module imports), 4 PNG icons (16, 32, 48, 128), and strict CSP (`connect-src 'none'`).
+  - Popup & Scan Flow: Verified across Chrome, Edge, and Brave (`183–232 ms` popup load; safe URL `ALLOW` in `3.1–10.8 ms`; phishing URL `DANGEROUS` score `95` in `4.4–8.2 ms` with Grade 6 read-only AI explanation).
+  - Pre-Navigation Warning Interstitial: Verified tab redirect to `interstitial.html`, 5-second countdown friction gate (`Wait 5s (Safety Gate)` $\rightarrow$ `I Understand the Risks`), and `"Back to Safety"` navigation.
+  - Page Interaction & Closed Shadow DOM Shield: Verified `content.js` injects `#private-protection-shield-host` (closed `ShadowRoot`) on pages with plaintext HTTP password forms on both initial load and `Page.reload` with `0` console/runtime exceptions.
+  - Offline & Privacy: 100% air-gapped detection parity and `0 bytes` user payload egress.
+  - Performance & Regression: JS Heap `2.15–2.28 MB`; `52/52` extension tests and `495/495` monorepo tests passing.
+- **Store Publication:** Browser-store publication is **OPTIONAL**. Direct zip/unpacked loading via developer mode is fully verified and functional.
+- **Authoritative Documentation:** `docs/PHASE_R5_EXTENSION_DIRECT_DISTRIBUTION.md`
+- **Status:** **PASS (DIRECT EXTENSION PACKAGE VALIDATED ACROSS CHROME, EDGE & BRAVE)**.
 
 ### Phase R6 — Domain Configuration
 - **Status:** **OPTIONAL**.

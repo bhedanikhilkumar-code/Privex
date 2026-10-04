@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, build as viteBuild } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
@@ -8,8 +8,8 @@ export default defineConfig({
   plugins: [
     react(),
     {
-      name: 'flatten-html',
-      closeBundle() {
+      name: 'flatten-html-and-bundle-content',
+      async closeBundle() {
         const outDir = path.resolve(__dirname, 'dist');
         const pairs = [
           ['src/popup/popup.html', 'popup.html'],
@@ -23,6 +23,33 @@ export default defineConfig({
             fs.copyFileSync(srcPath, destPath);
           }
         }
+
+        // Bundle content.ts as a self-contained classic script (IIFE) for MV3 content_scripts
+        await viteBuild({
+          configFile: false,
+          resolve: {
+            alias: {
+              crypto: path.resolve(__dirname, './src/shared/shims/crypto-shim.ts'),
+              buffer: path.resolve(__dirname, './src/shared/shims/buffer-shim.ts'),
+              '@': path.resolve(__dirname, './src')
+            }
+          },
+          build: {
+            outDir: 'dist',
+            emptyOutDir: false,
+            copyPublicDir: false,
+            rollupOptions: {
+              input: {
+                content: path.resolve(__dirname, 'src/content/content.ts')
+              },
+              output: {
+                format: 'iife',
+                entryFileNames: 'content.js',
+                inlineDynamicImports: true
+              }
+            }
+          }
+        });
       }
     }
   ],
@@ -39,14 +66,13 @@ export default defineConfig({
     rollupOptions: {
       input: {
         background: path.resolve(__dirname, 'src/background/background.ts'),
-        content: path.resolve(__dirname, 'src/content/content.ts'),
         popup: path.resolve(__dirname, 'src/popup/popup.html'),
         options: path.resolve(__dirname, 'src/options/options.html'),
         interstitial: path.resolve(__dirname, 'src/warning/interstitial.html')
       },
       output: {
         entryFileNames: (chunkInfo) => {
-          if (chunkInfo.name === 'background' || chunkInfo.name === 'content') {
+          if (chunkInfo.name === 'background') {
             return '[name].js';
           }
           return 'assets/[name]-[hash].js';
@@ -57,3 +83,4 @@ export default defineConfig({
     }
   }
 });
+
