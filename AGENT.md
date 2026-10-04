@@ -610,15 +610,18 @@ All 18 foundational capabilities are fully completed, verified against actual re
 - **Authoritative Documentation:** `docs/PHASE_R8_PERFORMANCE_LOW_END_VALIDATION.md`
 - **Status:** **PASS (PERFORMANCE, LOW-END & OFFLINE DEEP VALIDATION COMPLETE)**.
 
-### Phase R9 — Final User Experience
-- **Validated User Journeys:**
-  - Journey 1: Safe Input $\rightarrow$ Scan $\rightarrow$ Result (`ALLOW`, score 0) $\rightarrow$ Grade 6 Explanation.
-  - Journey 2: Suspicious / Phishing Input $\rightarrow$ Scan $\rightarrow$ Instant Warning (`DANGEROUS`, score 90+) $\rightarrow$ Friction Gate $\rightarrow$ Action.
-  - Journey 3: Air-Gapped Offline Mode $\rightarrow$ Scan $\rightarrow$ Local Detection Parity $\rightarrow$ Zero Network Errors.
-  - Journey 4: AI Model Unavailable $\rightarrow$ Deterministic Template Fallback $\rightarrow$ Zero Interruption.
-  - Journey 5: Fresh Install $\rightarrow$ First Launch $\rightarrow$ Safe Default State.
-  - Journey 6: Consecutive State Transitions (`Safe -> Suspicious -> Safe`) & Client Restart $\rightarrow$ Instant State Restoration.
-- **Status:** **PASS (VERIFIED)**.
+### Phase R9 — Final End-to-End Product Acceptance
+- **Evaluated Surfaces:**
+  - **Web Application:** Live production CDN `https://private-protection.pages.dev` evaluated via Chrome Puppeteer. Scanned safe domain (`https://www.google.com`), suspicious IP phish (`192.168.1.100`), and scam message (`URGENT... bitcoin`). `CLEAR RESULT` and 10x rapid repeat stress tested. 0 outbound scan requests. PWA offline cache verified (`private-protection-shell-v1`).
+  - **Android Application:** Release APK (`private-protection-mobile-0.1.0.apk`) evaluated on Android 17 / API 35 emulator (`sdk_gphone16k_x86_64`). Verified `Intent.ACTION_SEND` and `Intent.ACTION_VIEW` deep links, Airplane mode offline detection (`8.1 ms`), notification channel permissions, and cold restart.
+  - **Desktop Application:** Packaged Windows binary (`PrivateProtection.exe` / `PrivateProtection-0.1.0-win-x64.exe`) evaluated in Windows 11 x64. Verified `DECEPTIVE_DOUBLE_EXTENSION` detection (`3.51 ms`), benign quarantine rejection, AES-256-GCM vault isolation and restoration, real-time ingress folder watcher auto-quarantine, and `connect-src 'none'` CSP.
+  - **Browser Extension:** Manifest V3 package (`private-protection-extension-0.1.0.zip`) verified across Chrome/Edge. Pre-navigation interception, 5-second friction gate, closed Shadow DOM form shield, and least-privilege permissions verified (14 test files, 53 tests passing).
+- **Cross-Surface Consistency:** 100% semantic agreement across Web, Android, Desktop, and Extension for the synthetic test corpus.
+- **AI Authority Boundary:** Strict read-only explainer; adversarial prompt injection payloads contained with zero verdict alteration.
+- **False-Success Audit:** Zero occurrences of UI success without Core execution.
+- **Full Monorepo Regression:** 506/506 tests passing across 92 test files; 0 secret leaks.
+- **Authoritative Documentation:** `docs/PHASE_R9_FINAL_END_TO_END_ACCEPTANCE.md`
+- **Status:** **PASS (FINAL END-TO-END PRODUCT ACCEPTANCE COMPLETE)**.
 
 ### Phase R10 — Post-Release Operations
 - **Repository Maintenance Infrastructure:**

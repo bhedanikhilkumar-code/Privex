@@ -206,9 +206,10 @@ In alignment with our engineering constitution:
 ## 11. GOVERNANCE & DOCUMENTATION INDEX
 
 - **Canonical Constitution & Source of Truth:** [`AGENT.md`](./AGENT.md)
+- **Final End-to-End Product Acceptance:** [`docs/PHASE_R9_FINAL_END_TO_END_ACCEPTANCE.md`](./docs/PHASE_R9_FINAL_END_TO_END_ACCEPTANCE.md)
 - **Performance, Low-End Device & Offline Deep Validation:** [`docs/PHASE_R8_PERFORMANCE_LOW_END_VALIDATION.md`](./docs/PHASE_R8_PERFORMANCE_LOW_END_VALIDATION.md)
 - **Backend Necessity & Cloud Boundary Architecture:** [`docs/PHASE_R7_BACKEND_CLOUD_ARCHITECTURE.md`](./docs/PHASE_R7_BACKEND_CLOUD_ARCHITECTURE.md)
-- **Cross-Product Consistency & Gap Audit:** [`docs/PHASE_R6_CROSS_PRODUCT_CONSISTENCY_AUDIT.md`](./docs/PHASE_R6_CROSS_PRODUCT_CONSISTENCY_AUDIT.md)
+- **Cross-Product Consistency & Gap Audit:** [`docs/PHASE_R6_CROSS_PRODUCT_DEEP_VALIDATION.md`](./docs/PHASE_R6_CROSS_PRODUCT_DEEP_VALIDATION.md)
 - **Deep Product Gap Audit:** [`docs/PHASE_37_DEEP_PRODUCT_GAP_AUDIT.md`](./docs/PHASE_37_DEEP_PRODUCT_GAP_AUDIT.md)
 - **Vulnerability Disclosure Policy:** [`SECURITY.md`](./SECURITY.md)
 - **Contributing Guidelines:** [`CONTRIBUTING.md`](./CONTRIBUTING.md)
