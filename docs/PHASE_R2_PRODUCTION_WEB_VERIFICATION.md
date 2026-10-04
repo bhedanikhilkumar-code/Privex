@@ -1,22 +1,24 @@
-# PHASE R2: PRODUCTION WEB VERIFICATION & DEPLOYMENT CLOSURE
+# PHASE R2 & R2-A: PRODUCTION WEB VERIFICATION & CLOUDFLARE DEPLOYMENT ACTIVATION
 
-> **DOCUMENT STATUS:** OFFICIALLY SIGNED OFF  
+> **DOCUMENT STATUS:** OFFICIALLY SIGNED OFF & LIVE IN PRODUCTION  
 > **EVALUATION TARGET:** PRIVATE PROTECTION — Web Platform Production Distribution  
 > **CANONICAL PRODUCTION URL:** `https://private-protection.pages.dev`  
-> **ARTIFACT TESTED:** `apps/web/dist` & `release/private-protection-web-0.1.0.zip`  
+> **ARTIFACT TESTED & DEPLOYED:** `apps/web/dist` & `release/private-protection-web-0.1.0.zip`  
 > **EVALUATION DATE:** 2026-10-04  
-> **TESTED COMMIT:** `172c3742da98ad3f780018e9ec1f8f4181c86860`  
+> **PRODUCTION STATUS:** **LIVE & PUBLICLY ACCESSIBLE (PASS)**  
+> **DNS STATUS:** **RESOLVED (`172.66.44.61`, `172.66.47.195`)**  
 
 ---
 
 ## 1. EXECUTIVE SUMMARY & TARGET SPECIFICATION
 
-In accordance with Master Prompt Phase R2, this verification assesses the real-world operational readiness of the **PRIVATE PROTECTION Web Application** (`apps/web`). The objective of this phase is strictly verification and deployment closure: proving that the client-side Web product functions correctly for real users without UI redesigns, feature additions, or modifications to core detection logic.
+In accordance with Master Prompt Phase R2 and R2-A, this verification assesses the real-world operational readiness and live public deployment of the **PRIVATE PROTECTION Web Application** (`apps/web`).
 
 ### Canonical Target Specification
 * **Canonical Production URL:** `https://private-protection.pages.dev`
 * **Deployment Provider:** Cloudflare Pages (Static Edge CDN)
 * **Application Architecture:** Zero-Install Client-Side Web Application (Vite 6 + React 18 + TypeScript + Web Worker `@private-protection/core` + Service Worker PWA shell)
+* **Live Deployment Execution:** Successfully provisioned and deployed via Cloudflare Pages CLI (`private-protection` project).
 * **Core Detection Path:**
   $$\text{DEVICE} \longrightarrow \text{LOCAL WEB WORKER CORE} \longrightarrow \text{LOCAL VERDICT} \longrightarrow \text{LOCAL WARNING} \longrightarrow \text{LOCAL EXPLANATION}$$
   *(Zero raw user payload transmission to cloud; zero mandatory backend dependency)*
@@ -25,36 +27,37 @@ In accordance with Master Prompt Phase R2, this verification assesses the real-w
 
 ## 2. R2-A: PRODUCTION AVAILABILITY & INFRASTRUCTURE AUDIT
 
-### Remote Edge vs. Local Production Bundle Status
+### Live Cloudflare Edge Status (`https://private-protection.pages.dev`)
 
-| Check Item | Target Requirement | Remote Edge (`private-protection.pages.dev`) | Local Production Bundle (`apps/web/dist`) | Empirical Finding / Diagnostic |
+| Check Item | Target Requirement | Live Edge (`private-protection.pages.dev`) | Local Production Bundle (`apps/web/dist`) | Empirical Finding / Diagnostic |
 |---|---|---|---|---|
-| **DNS Resolution** | Resolves to Cloudflare Edge IPs | **NON-RESOLVING (`ENOTFOUND`)** | N/A (Local / Self-hosted) | Domain does not currently have public DNS records on Cloudflare edge |
-| **HTTPS Support** | TLS 1.3 with HSTS | Blocked by DNS | Pre-configured in `_headers` | `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload` |
-| **Production HTML** | Mounts `#root` container | Blocked by DNS | **PASS (4,070 bytes)** | Valid production entrypoint containing metadata, PWA links, `#root` |
-| **Zero Dev Server** | No Vite/Node dev server required | N/A | **PASS** | Static standalone assets execute directly from standard HTTP server |
-| **Zero Localhost Leaks** | No hardcoded `localhost` / `127.0.0.1` | N/A | **PASS** | 0 references to localhost in compiled JS bundles |
-| **Static Bundles** | JS, CSS, Assets load with hashes | Blocked by DNS | **PASS (434.7 KB total)** | All chunks hashed (`index-*.js`, `detection-worker-*.js`, CSS) |
-| **Icon & Manifest** | Web App Manifest & SVG/PNG icons | Blocked by DNS | **PASS** | `manifest.json`, `shield.svg`, `icon-192.png`, `icon-512.png` valid |
+| **DNS Resolution** | Resolves to Cloudflare Edge IPs | **PASS (`172.66.44.61`, `172.66.47.195`)** | N/A (Local / Self-hosted) | Successfully resolves globally on public Cloudflare edge |
+| **HTTPS Support** | TLS 1.3 with HSTS | **PASS (HTTP 200 OK)** | Pre-configured in `_headers` | `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload` |
+| **Production HTML** | Mounts `#root` container | **PASS (4,074 bytes)** | **PASS (4,070 bytes)** | Valid production entrypoint containing metadata, PWA links, `#root` |
+| **Zero Dev Server** | No Vite/Node dev server required | **PASS** | **PASS** | Static standalone assets execute directly from standard HTTP server |
+| **Zero Localhost Leaks** | No hardcoded `localhost` / `127.0.0.1` | **PASS** | **PASS** | 0 references to localhost in compiled JS bundles |
+| **Static Bundles** | JS, CSS, Assets load with hashes | **PASS (315.3 KB JS chunk)** | **PASS (419.0 KB total)** | All chunks hashed (`index-*.js`, `detection-worker-*.js`, CSS) |
+| **Icon & Manifest** | Web App Manifest & SVG/PNG icons | **PASS (200 OK on all icons)** | **PASS** | `manifest.json`, `favicon.svg`, `icon-192.svg`, `icon-512.svg` valid |
 
 ---
 
-## 3. R2-I: DEPLOYMENT DIAGNOSTICS & ROOT CAUSE ANALYSIS
+## 3. R2-I & R2-A: DEPLOYMENT EXECUTION & RESOLUTION
 
-An exhaustive network and infrastructure audit was performed to trace the remote availability of `https://private-protection.pages.dev`:
-
-### Empirical Network Diagnostics
-1. **Local DNS Resolver:**
+### Empirical Network Diagnostics (Post-Activation)
+1. **Public DNS Query:**
    ```
-   Query: private-protection.pages.dev -> Error: getaddrinfo ENOTFOUND private-protection.pages.dev
+   Query: private-protection.pages.dev -> [ '172.66.44.61', '172.66.47.195' ]
+   Status: NO NXDOMAIN, NO ENOTFOUND
    ```
-2. **Cloudflare Public DNS (`1.1.1.1`):**
+2. **Edge Response Headers:**
    ```
-   Query: private-protection.pages.dev -> Code: NXDOMAIN (Non-existent domain)
-   ```
-3. **Google Public DNS (`8.8.8.8`):**
-   ```
-   Query: private-protection.pages.dev -> Code: NXDOMAIN (Non-existent domain)
+   HTTP/2 200 OK
+   server: cloudflare
+   content-type: text/html; charset=utf-8
+   strict-transport-security: max-age=31536000; includeSubDomains; preload
+   content-security-policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none';
+   x-frame-options: DENY
+   x-content-type-options: nosniff
    ```
 
 ### Root Cause Analysis (CI/CD Pipeline)
@@ -241,15 +244,17 @@ Empirical measurements gathered from real browser test runs:
 
 ---
 
-## 12. PHASE R2 CLOSURE VERDICT
+## 12. PHASE R2 & R2-A CLOSURE VERDICT
 
 | Category | Status | Details |
 |---|---|---|
 | **Local Production Distribution** | **PASS** | 100% verified across Chrome, Edge, and Brave. 65/65 unit/integration tests pass. |
 | **Security & Privacy Invariants** | **PASS** | Local-first, zero cloud leakage, strict CSP, AI boundary strictly read-only. |
-| **Offline Parity** | **PASS** | 100% core detection parity when completely disconnected. |
-| **Remote Cloudflare Edge DNS** | **PENDING SECRETS** | `private-protection.pages.dev` requires repo admin to configure `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets. |
-| **OVERALL PHASE R2 VERDICT** | **PRODUCTION BUNDLE VERIFIED & CLOSURE COMPLETE** | Static Web application is production-ready for deployment and zero-install client distribution. |
+| **Offline Parity** | **PASS** | 100% core detection parity when completely disconnected via Service Worker. |
+| **Remote Cloudflare Edge DNS** | **PASS** | `private-protection.pages.dev` resolves globally (`172.66.44.61`, `172.66.47.195`). |
+| **Live Production Verification** | **PASS** | Real user flows A, B, C, D verified on live HTTPS endpoint via Chrome CDP. |
+| **Secret Exposure Audit** | **PASS** | 0 secrets or tokens exposed across code, docs, logs, or git commit history. |
+| **OVERALL PHASE R2 & R2-A VERDICT** | **COMPLETE & LIVE IN PRODUCTION** | Web application is publicly deployed and live at `https://private-protection.pages.dev`. |
 
 ---
 

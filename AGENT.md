@@ -464,10 +464,13 @@ All 18 foundational capabilities are fully completed, verified against actual re
   - **Extension:** Loaded unpacked in Google Chrome 154+, Microsoft Edge 154+, and Brave; popup mount, pre-navigation block, warning interstitial, DOM password alert, reload, offline mode verified.
 - **Status:** **PASS (VERIFIED)**.
 
-### Phase R2 — Production Web Verification
-- **Target URL:** `https://private-protection.pages.dev`
+### Phase R2 & R2-A — Production Web Verification & Cloudflare Deployment Activation
+- **Canonical Production URL:** `https://private-protection.pages.dev`
 - **Verification Status:**
   - Production static bundle (`apps/web/dist`) and release archive (`release/private-protection-web-0.1.0.zip`) verified with 100% offline parity, strict CSP, zero dev dependencies, and 65/65 passing tests.
+  - Live deployment activated on Cloudflare Pages (`private-protection` project).
+  - DNS resolution: **PASS** (`172.66.44.61`, `172.66.47.195`).
+  - HTTPS / Security: **PASS** (HTTP 200 OK, strict HSTS `max-age=31536000`, strict CSP, `x-frame-options: DENY`).
   - Multi-browser real-world verification verified on Google Chrome (154.0), Microsoft Edge (154.0), and Brave Browser (154.0):
     - Safe Input Scan: PASS (<110ms, ALLOWED)
     - Suspicious Input Scan: PASS (<110ms, DANGEROUS, Grade 5.8 Plain English Explanation)
@@ -475,8 +478,10 @@ All 18 foundational capabilities are fully completed, verified against actual re
     - Routing & Reload: PASS (SPA routing, root rehydration, zero 404s)
     - Memory Footprint: PASS (3.6 MB - 4.4 MB JS Heap, <12% of budget)
     - Network Privacy: PASS (0 bytes user payload transmission)
-  - Live deployment diagnosis: `private-protection.pages.dev` currently encounters DNS `ENOTFOUND` because the GitHub Actions workflow `.github/workflows/deploy-pages.yml` executes conditionally upon repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Full diagnostic report and administrator remediation documented in `docs/PHASE_R2_PRODUCTION_WEB_VERIFICATION.md`.
-- **Status:** **PASS (PRODUCTION BUNDLE VERIFIED & CLOSURE COMPLETE)**.
+    - Offline Service Worker Parity: PASS (100% core detection parity when disconnected)
+  - Security & Secrets: PASS (0 credentials or tokens exposed in repository, docs, logs, or git history).
+  - Full diagnostic and verification report published in `docs/PHASE_R2_PRODUCTION_WEB_VERIFICATION.md` and `docs/PHASE_R2A_SECURITY_SECRETS_AUDIT.md`.
+- **Status:** **PASS (LIVE IN PRODUCTION & R2-A COMPLETE)**.
 
 ### Phase R3 — Android Direct Distribution
 - **Objective:** Validate direct consumer APK distribution as the primary mobile delivery channel.
