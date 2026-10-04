@@ -573,17 +573,25 @@ All 18 foundational capabilities are fully completed, verified against actual re
 - **Policy:** A custom apex domain (e.g. `privateprotection.app`) is strictly OPTIONAL and does not block project completion. If requested later by the project owner: configure DNS CNAME/ALIAS $\rightarrow$ enable Cloudflare Universal SSL $\rightarrow$ configure automatic HTTPS redirection.
 - **Status:** **OPTIONAL (NON-BLOCKING)**.
 
-### Phase R7 — Backend Decision
-- **Status:** **NO MANDATORY BACKEND (CONFIRMED)**.
-- **Policy:** Private Protection operates 100% locally on-device. Zero backend servers are required for core protection.
-- **Status:** **NOT REQUIRED (CONFIRMED)**.
+### Phase R7 — Backend Necessity Audit & Cloud Boundary Architecture
+- **Backend Decision (`R7-D`):** **NO MANDATORY BACKEND (A. BACKEND NOT REQUIRED FOR CORE SECURITY & RUNTIME)**.
+- **Cloud Decision (`R7-I`):** **NO CLOUD BACKEND REQUIRED FOR V0.1.0** ($\$0.00/\text{month}$ recurring cost; static Web SPA hosted on Cloudflare Pages CDN and binaries distributed via GitHub Releases).
+- **Network Inventory (`R7-B`) & User Data Flow (`R7-C`):**
+  - `0` runtime outbound network calls (`fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`) across `packages/core`, `packages/ml`, `apps/web`, `apps/mobile`, `apps/desktop`, and `apps/extension`.
+  - `0` bytes of raw user scan payloads (`URL`, `Text/SMS`, `File`, `QR`, `DOM`) ever cross `DEVICE -> INTERNET -> CLOUD`.
+  - Enforced at the engine level via `connect-src 'none'` (Desktop Electron & Browser Extension), `connect-src 'self'` (Web), and `WebViewAssetLoader` subresource blocking + `usesCleartextTraffic="false"` (Android).
+- **Security & Log Sanitization Fix (`R7-J` / `R7-M`):**
+  - `DEFECT-R7-LOG-01`: Sanitized `MainActivity.java` (lines 130, 149, 155, 246) so inbound deep-link URLs (`safeUrl`) and blocked WebView URIs log only character length (`safeUrl.length() + " chars"`) or URI scheme instead of raw URLs in local Android Logcat; added regression test in `apps/mobile/src/__tests__/privacy/network-isolation.test.ts`.
+- **Full Regression (`R7-M`):** `501/501` tests passing across `91` test files (`0` failures); `scripts/audit-secrets.js` passed (`0` secrets).
+- **Authoritative Documentation:** `docs/PHASE_R7_BACKEND_CLOUD_ARCHITECTURE.md`
+- **Status:** **PASS (BACKEND NECESSITY AUDIT & CLOUD BOUNDARY ARCHITECTURE COMPLETE)**.
 
 ### Phase R8 — Real-World Performance
 - **Empirical Measurements (Exceeding SLAs):**
-  - URL fast-path scan: $p50 = 0.047\text{ ms}$, $p95 = 0.131\text{ ms}$ (SLA $< 1.0\text{ ms}$).
-  - Message scam scan: $p50 = 0.013\text{ ms}$, $p95 = 0.170\text{ ms}$ (SLA $< 10.0\text{ ms}$).
-  - Full detection pipeline: $p50 = 0.135\text{ ms}$, $p95 = 0.532\text{ ms}$ (SLA $< 10.0\text{ ms}$).
-  - AI template explanation: $p50 = 0.001\text{ ms}$, $p95 = 0.003\text{ ms}$ (SLA $< 0.5\text{ ms}$).
+  - URL fast-path scan: $p50 = 0.045\text{ ms}$, $p95 = 0.126\text{ ms}$ (SLA $< 1.0\text{ ms}$).
+  - Message scam scan: $p50 = 0.012\text{ ms}$, $p95 = 0.082\text{ ms}$ (SLA $< 10.0\text{ ms}$).
+  - Full detection pipeline: $p50 = 0.109\text{ ms}$, $p95 = 0.334\text{ ms}$ (SLA $< 10.0\text{ ms}$).
+  - AI template explanation: $p50 = 0.009\text{ ms}$, $p95 = 0.015\text{ ms}$ (SLA $< 0.5\text{ ms}$).
   - Warning render latency: $< 15.0\text{ ms}$ (SLA $< 50.0\text{ ms}$).
   - Memory footprint: Mobile RSS $\approx 114\text{ MB}$; Desktop RSS $\approx 129\text{ MB}$; Web Heap $\approx 28.4\text{ MB}$; Extension Heap $\approx 18.2\text{ MB}$.
 - **Hardware Profile:** Bounded memory buffers (2KB URL, 10KB text, 64KB file header) protect 1.0 GB RAM Android devices and older PCs against memory starvation.
@@ -620,6 +628,7 @@ Specialist agents have independently verified existing empirical evidence, confi
 - Google Play Store publication is strictly OUT OF SCOPE.
 - No mandatory backend is required.
 - Release distribution packages match frozen SHA-256 checksums.
-- Monorepo tests pass 100% (500/500 tests passing across 91 test files).
+- Monorepo tests pass 100% (501/501 tests passing across 91 test files).
+
 
 

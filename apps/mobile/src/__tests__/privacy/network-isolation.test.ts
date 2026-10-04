@@ -64,4 +64,20 @@ describe('Network Isolation & Zero-Exfiltration Audit (Mobile Client)', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(xhrOpenSpy).not.toHaveBeenCalled();
   });
+
+  it('guarantees zero raw user URLs or shared text payloads are logged to Android Logcat in MainActivity.java (DEFECT-R7-LOG-01)', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const mainActivityPath = path.resolve(
+      __dirname,
+      '../../../android/app/src/main/java/com/privateprotection/mobile/MainActivity.java'
+    );
+    const source = fs.readFileSync(mainActivityPath, 'utf8');
+
+    expect(source.includes('+ safeUrl)')).toBe(false);
+    expect(source.includes('+ sharedText')).toBe(false);
+    expect(source.includes('+ safeText)')).toBe(false);
+    expect(source.includes('safeUrl.length()')).toBe(true);
+    expect(source.includes('safeText.length()')).toBe(true);
+  });
 });

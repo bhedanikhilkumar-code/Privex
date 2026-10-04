@@ -163,7 +163,7 @@ npm ci
 npm run lint
 npm run typecheck
 
-# Execute unified test suite (500 tests across 91 files)
+# Execute unified test suite (501 tests across 91 files)
 npm test
 
 # Generate V8 coverage report

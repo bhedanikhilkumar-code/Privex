@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
                     return assetLoader.shouldInterceptRequest(url);
                 }
                 // Air-gap isolation: block all external subresources completely
-                Log.w(TAG, "Blocked external subresource request in WebView: " + url);
+                Log.w(TAG, "Blocked external subresource request in WebView (scheme=" + url.getScheme() + ")");
                 return new WebResourceResponse(
                         "text/plain",
                         "UTF-8",
@@ -146,13 +146,13 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 // Prevent untrusted external pages from loading inside the privileged container
-                Log.w(TAG, "Blocked navigation to external untrusted URL: " + uri);
+                Log.w(TAG, "Blocked navigation to external untrusted URL (scheme=" + uri.getScheme() + ")");
                 return true; // Cancel navigation
             }
 
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                Log.w(TAG, "WebView error [" + errorCode + "]: " + description + " for " + failingUrl);
+                Log.w(TAG, "WebView error [" + errorCode + "]: " + description);
                 // Fallback to direct asset URL if virtual host has platform limitations
                 if (ASSET_URL.equals(failingUrl)) {
                     Log.i(TAG, "Falling back to file:///android_asset/index.html");
@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
                 if (targetUrl != null && !targetUrl.trim().isEmpty()) {
                     // Cap URL size at 2,048 characters
                     String safeUrl = targetUrl.length() > 2048 ? targetUrl.substring(0, 2048) : targetUrl;
-                    Log.i(TAG, "Received deep link for on-device URL analysis: " + safeUrl);
+                    Log.i(TAG, "Received deep link for on-device URL analysis (" + safeUrl.length() + " chars)");
                     try {
                         intentData = new JSONObject();
                         intentData.put("action", "DEEP_LINK_URL");
