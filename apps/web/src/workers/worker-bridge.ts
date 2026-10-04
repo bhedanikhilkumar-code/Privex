@@ -2,13 +2,19 @@ import { ClientScanner } from '../scanner/client-scanner';
 import { ScanResultViewData, UserPreferences } from '../scanner/types';
 
 export class WorkerBridge {
-  private fallbackScanner: ClientScanner;
+  private fallbackScanner?: ClientScanner;
   private worker?: Worker;
-  private pendingRequests: Map<string, { resolve: (val: ScanResultViewData) => void; reject: (err: any) => void }>;
+  private pendingRequests: Map<
+    string,
+    {
+      resolve: (val: ScanResultViewData) => void;
+      reject: (err: any) => void;
+      timeoutId: ReturnType<typeof setTimeout>;
+    }
+  >;
   private workerAvailable: boolean;
 
   constructor() {
-    this.fallbackScanner = new ClientScanner();
     this.pendingRequests = new Map();
     this.workerAvailable = false;
 
@@ -29,9 +35,16 @@ export class WorkerBridge {
     }
   }
 
+  private getFallbackScanner(): ClientScanner {
+    if (!this.fallbackScanner) {
+      this.fallbackScanner = new ClientScanner();
+    }
+    return this.fallbackScanner;
+  }
+
   public async scanUrl(url: string, prefs?: UserPreferences): Promise<ScanResultViewData> {
     if (!this.workerAvailable || prefs?.enableWorkerOffloading === false) {
-      return this.fallbackScanner.scanUrl(url, prefs);
+      return this.getFallbackScanner().scanUrl(url, prefs);
     }
 
     return this.dispatchToWorker('SCAN_URL', { url, prefs });
@@ -39,7 +52,7 @@ export class WorkerBridge {
 
   public async scanText(text: string, prefs?: UserPreferences): Promise<ScanResultViewData> {
     if (!this.workerAvailable || prefs?.enableWorkerOffloading === false) {
-      return this.fallbackScanner.scanText(text, prefs);
+      return this.getFallbackScanner().scanText(text, prefs);
     }
 
     return this.dispatchToWorker('SCAN_TEXT', { text, prefs });
@@ -54,15 +67,17 @@ export class WorkerBridge {
         if (this.pendingRequests.has(id)) {
           this.pendingRequests.delete(id);
           // Fallback to in-thread scan if worker stalls
+          const fallback = this.getFallbackScanner();
           if (type === 'SCAN_URL') {
-            this.fallbackScanner.scanUrl(payload.url, payload.prefs).then(resolve).catch(reject);
+            fallback.scanUrl(payload.url, payload.prefs).then(resolve).catch(reject);
           } else {
-            this.fallbackScanner.scanText(payload.text, payload.prefs).then(resolve).catch(reject);
+            fallback.scanText(payload.text, payload.prefs).then(resolve).catch(reject);
           }
         }
       }, 5000);
 
       this.pendingRequests.set(id, {
+        timeoutId,
         resolve: (val) => {
           clearTimeout(timeoutId);
           resolve(val);
@@ -94,12 +109,17 @@ export class WorkerBridge {
   private handleWorkerError(err: ErrorEvent): void {
     // Stash error and fail over pending to main thread
     for (const [id, req] of this.pendingRequests.entries()) {
+      clearTimeout(req.timeoutId);
       req.reject(new Error(err.message || 'WorkerCrashedError'));
       this.pendingRequests.delete(id);
     }
   }
 
   public terminate(): void {
+    for (const [, req] of this.pendingRequests.entries()) {
+      clearTimeout(req.timeoutId);
+    }
+    this.pendingRequests.clear();
     if (this.worker) {
       this.worker.terminate();
       this.worker = undefined;

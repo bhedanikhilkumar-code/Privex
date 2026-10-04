@@ -32,31 +32,34 @@ export function calculateEntropy(str: string): number {
 }
 
 export function levenshteinDistance(a: string, b: string): number {
+  if (a === b) return 0;
   if (a.length === 0) return b.length;
   if (b.length === 0) return a.length;
 
-  const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
+  const aLen = a.length;
+  const bLen = b.length;
+  const row = new Uint16Array(aLen + 1);
 
-  for (let i = 0; i <= a.length; i += 1) {
-    matrix[0][i] = i;
+  for (let i = 0; i <= aLen; i += 1) {
+    row[i] = i;
   }
 
-  for (let j = 0; j <= b.length; j += 1) {
-    matrix[j][0] = j;
-  }
-
-  for (let j = 1; j <= b.length; j += 1) {
-    for (let i = 1; i <= a.length; i += 1) {
-      const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
-      matrix[j][i] = Math.min(
-        matrix[j][i - 1] + 1, // insertion
-        matrix[j - 1][i] + 1, // deletion
-        matrix[j - 1][i - 1] + indicator // substitution
-      );
+  for (let j = 1; j <= bLen; j += 1) {
+    let prevDiag = row[0];
+    row[0] = j;
+    const bChar = b.charCodeAt(j - 1);
+    for (let i = 1; i <= aLen; i += 1) {
+      const temp = row[i];
+      const indicator = a.charCodeAt(i - 1) === bChar ? 0 : 1;
+      const ins = row[i - 1] + 1;
+      const del = row[i] + 1;
+      const sub = prevDiag + indicator;
+      row[i] = ins < del ? (ins < sub ? ins : sub) : (del < sub ? del : sub);
+      prevDiag = temp;
     }
   }
 
-  return matrix[b.length][a.length];
+  return row[aLen];
 }
 
 // SPKI header prefix for raw 32-byte Ed25519 public key in DER format

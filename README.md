@@ -163,7 +163,7 @@ npm ci
 npm run lint
 npm run typecheck
 
-# Execute unified test suite (501 tests across 91 files)
+# Execute unified test suite (506 tests across 92 files)
 npm test
 
 # Generate V8 coverage report
@@ -182,8 +182,8 @@ npm run package
 
 | Surface | Artifact Path | Format | Status | SHA-256 Checksum |
 |---|---|---|---|---|
-| **Web App** | `release/private-protection-web-0.1.0.zip` | Static Web Archive | **Packaged & Verified** | `e7278fae666909ea6046d07773120e4944e56964bf1f3bc3f4314f182c3ccbfe` |
-| **Browser Extension** | `release/private-protection-extension-0.1.0.zip` | MV3 Zip Package | **Packaged & Verified** | `271bb89cac731b0151b1681766534f12b05daa25a3be1a42956b611f8f7478cd` |
+| **Web App** | `release/private-protection-web-0.1.0.zip` | Static Web Archive | **Packaged & Verified** | `8a73ba28239565816382bd6f7e89b5669db647f142387a4a59c0fa138f37db88` |
+| **Browser Extension** | `release/private-protection-extension-0.1.0.zip` | MV3 Zip Package | **Packaged & Verified** | `3a2db690f2c33b1bc90d45843fc43df23aa81bd0744cadd49ed6c25f406fa15c` |
 | **Android APK** | `release/private-protection-mobile-0.1.0.apk` | Release APK | **Packaged & Verified** | `95ee838e739e69feed4f007c431cb6a7e74304f6751e17a38c6e21269fcdb5b5` |
 | **Android AAB** | `release/private-protection-mobile-0.1.0.aab` | Release Bundle | **Packaged & Verified** | `5f039cc7ce5e8aa3793b1207ebfd74163ef576423a10b96ea08b5177de1dcd24` |
 | **Desktop Installer**| `release/PrivateProtection-Setup-0.1.0.exe` | Windows Setup | **Packaged & Verified** | `7bf197ff1810d6db0019598bd465e9f309b1321357be80f7c80c568317e0971a` |
@@ -198,7 +198,7 @@ Cryptographic checksums are recorded in [`release/SHA256SUMS.txt`](./release/SHA
 In alignment with our engineering constitution:
 - **Browser Extension:** Manifest V3 cannot inspect internal browser schemes (`chrome://`, `edge://`).
 - **Desktop Software:** Operates purely in user-space without kernel filter drivers; system-locked files (`EACCES`/`EBUSY`) are safely skipped and logged.
-- **Android Client:** Deep SMS background inspection requires standard OS notification listener permissions granted by the user.
+- **Android Client:** Deep SMS background inspection requires standard OS notification listener permissions granted by the user. Physical low-end/legacy Android hardware (`1.0 GB RAM` / API 26 physical device) was not attached during automated CI/local validation (`NOT TESTED` on physical legacy handset; validated under simulated memory/CPU throttling and API 26 static bytecode targets).
 - **Code Signing:** Binary archives are verified via SHA-256 checksums; commercial app store code signing certificates (Authenticode, Google Play Keystore) require end-user/organization provisioning (**SIGNING READY; NOT VERIFIED**).
 
 ---
@@ -206,6 +206,9 @@ In alignment with our engineering constitution:
 ## 11. GOVERNANCE & DOCUMENTATION INDEX
 
 - **Canonical Constitution & Source of Truth:** [`AGENT.md`](./AGENT.md)
+- **Performance, Low-End Device & Offline Deep Validation:** [`docs/PHASE_R8_PERFORMANCE_LOW_END_VALIDATION.md`](./docs/PHASE_R8_PERFORMANCE_LOW_END_VALIDATION.md)
+- **Backend Necessity & Cloud Boundary Architecture:** [`docs/PHASE_R7_BACKEND_CLOUD_ARCHITECTURE.md`](./docs/PHASE_R7_BACKEND_CLOUD_ARCHITECTURE.md)
+- **Cross-Product Consistency & Gap Audit:** [`docs/PHASE_R6_CROSS_PRODUCT_CONSISTENCY_AUDIT.md`](./docs/PHASE_R6_CROSS_PRODUCT_CONSISTENCY_AUDIT.md)
 - **Deep Product Gap Audit:** [`docs/PHASE_37_DEEP_PRODUCT_GAP_AUDIT.md`](./docs/PHASE_37_DEEP_PRODUCT_GAP_AUDIT.md)
 - **Vulnerability Disclosure Policy:** [`SECURITY.md`](./SECURITY.md)
 - **Contributing Guidelines:** [`CONTRIBUTING.md`](./CONTRIBUTING.md)

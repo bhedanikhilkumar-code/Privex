@@ -137,6 +137,9 @@ export class CameraScannerService {
     }
   }
 
+  private captureCanvas: HTMLCanvasElement | null = null;
+  private cachedBarcodeDetector: any = null;
+
   /**
    * Captures a single image frame from a live HTMLVideoElement as a base64 JPEG data URL.
    */
@@ -146,9 +149,16 @@ export class CameraScannerService {
     }
 
     try {
-      const canvas = document.createElement('canvas');
-      canvas.width = videoElement.videoWidth;
-      canvas.height = videoElement.videoHeight;
+      if (!this.captureCanvas) {
+        this.captureCanvas = document.createElement('canvas');
+      }
+      const canvas = this.captureCanvas;
+      if (canvas.width !== videoElement.videoWidth) {
+        canvas.width = videoElement.videoWidth;
+      }
+      if (canvas.height !== videoElement.videoHeight) {
+        canvas.height = videoElement.videoHeight;
+      }
       const ctx = canvas.getContext('2d');
       if (!ctx) return null;
 
@@ -198,12 +208,14 @@ export class CameraScannerService {
     // 2. Try Web BarcodeDetector API (standard Chromium feature in modern WebViews)
     if (typeof window !== 'undefined' && 'BarcodeDetector' in window) {
       try {
-        const barcodeDetector = new (window as any).BarcodeDetector({ formats: ['qr_code'] });
+        if (!this.cachedBarcodeDetector) {
+          this.cachedBarcodeDetector = new (window as any).BarcodeDetector({ formats: ['qr_code'] });
+        }
         const img = new Image();
         img.src = base64Image;
         await new Promise((resolve) => { img.onload = resolve; img.onerror = resolve; });
 
-        const barcodes = await barcodeDetector.detect(img);
+        const barcodes = await this.cachedBarcodeDetector.detect(img);
         if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
           return { detected: true, payload: barcodes[0].rawValue.trim() };
         }

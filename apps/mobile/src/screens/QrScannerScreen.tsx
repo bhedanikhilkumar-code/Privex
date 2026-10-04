@@ -14,6 +14,8 @@ export const QrScannerScreen: React.FC<QrScannerScreenProps> = ({ cameraService,
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const pollingTimerRef = useRef<any>(null);
+  const isMountedRef = useRef<boolean>(true);
+  const isDecodingRef = useRef<boolean>(false);
 
   const [support, setSupport] = useState<CameraSupportStatus | null>(null);
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
@@ -23,8 +25,12 @@ export const QrScannerScreen: React.FC<QrScannerScreenProps> = ({ cameraService,
   const [scanResult, setScanResult] = useState<MobileScanResult | null>(null);
 
   useEffect(() => {
-    cameraService.checkCameraSupport().then(setSupport);
+    isMountedRef.current = true;
+    cameraService.checkCameraSupport().then((s) => {
+      if (isMountedRef.current) setSupport(s);
+    });
     return () => {
+      isMountedRef.current = false;
       stopCamera();
     };
   }, []);
@@ -34,6 +40,7 @@ export const QrScannerScreen: React.FC<QrScannerScreenProps> = ({ cameraService,
     setStatusMessage('Requesting camera access...');
     try {
       const hasPerm = await cameraService.requestCameraPermission();
+      if (!isMountedRef.current) return;
       if (!hasPerm) {
         setError('CAMERA_PERMISSION_DENIED: Please enable Camera permission in Android settings.');
         return;
@@ -41,6 +48,10 @@ export const QrScannerScreen: React.FC<QrScannerScreenProps> = ({ cameraService,
 
       if (!videoRef.current) return;
       const stream = await cameraService.startCameraStream(videoRef.current);
+      if (!isMountedRef.current) {
+        cameraService.stopCameraStream(stream);
+        return;
+      }
       streamRef.current = stream;
       setIsCameraActive(true);
       setStatusMessage('Camera active — Point at a QR code');
@@ -48,6 +59,7 @@ export const QrScannerScreen: React.FC<QrScannerScreenProps> = ({ cameraService,
       // Start frame scanning loop
       startFramePolling();
     } catch (err: any) {
+      if (!isMountedRef.current) return;
       setError(err.message || 'Failed to start camera.');
       setIsCameraActive(false);
     }
@@ -62,6 +74,10 @@ export const QrScannerScreen: React.FC<QrScannerScreenProps> = ({ cameraService,
       cameraService.stopCameraStream(streamRef.current);
       streamRef.current = null;
     }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    isDecodingRef.current = false;
     setIsCameraActive(false);
   };
 
@@ -69,16 +85,19 @@ export const QrScannerScreen: React.FC<QrScannerScreenProps> = ({ cameraService,
     if (pollingTimerRef.current) clearInterval(pollingTimerRef.current);
 
     pollingTimerRef.current = setInterval(async () => {
-      if (!videoRef.current || isProcessing) return;
+      if (!isMountedRef.current || !videoRef.current || isProcessing || isDecodingRef.current) return;
 
+      isDecodingRef.current = true;
       try {
         const result = await cameraService.decodeFrame(videoRef.current);
-        if (result.detected && result.payload) {
+        if (result.detected && result.payload && isMountedRef.current) {
           stopCamera();
           await processDecodedPayload(result.payload);
         }
       } catch (err: any) {
         // Continue scanning
+      } finally {
+        isDecodingRef.current = false;
       }
     }, 300);
   };

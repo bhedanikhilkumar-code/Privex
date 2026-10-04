@@ -80,23 +80,37 @@ export class SecureStorageService {
     return decipher.update(encrypted) + decipher.final('utf8');
   }
 
+  private cachedSettings: DesktopSettings | null = null;
+
   public getSettings(): DesktopSettings {
+    if (this.cachedSettings) {
+      return { ...this.cachedSettings };
+    }
     if (!fs.existsSync(this.settingsPath)) {
-      return { ...SecureStorageService.DEFAULT_SETTINGS };
+      this.cachedSettings = { ...SecureStorageService.DEFAULT_SETTINGS };
+      return { ...this.cachedSettings };
     }
 
     try {
       const rawEnc = fs.readFileSync(this.settingsPath, 'utf8');
       const decrypted = this.decrypt(rawEnc);
-      return { ...SecureStorageService.DEFAULT_SETTINGS, ...JSON.parse(decrypted) };
+      const parsed: DesktopSettings = {
+        ...SecureStorageService.DEFAULT_SETTINGS,
+        ...(JSON.parse(decrypted) as Partial<DesktopSettings>),
+      };
+      this.cachedSettings = parsed;
+      return { ...parsed };
     } catch {
-      return { ...SecureStorageService.DEFAULT_SETTINGS };
+      const defaults: DesktopSettings = { ...SecureStorageService.DEFAULT_SETTINGS };
+      this.cachedSettings = defaults;
+      return { ...defaults };
     }
   }
 
   public saveSettings(settings: Partial<DesktopSettings>): void {
     const current = this.getSettings();
-    const updated = { ...current, ...settings };
+    const updated = { ...current, ...settings } as DesktopSettings;
+    this.cachedSettings = updated;
     const encrypted = this.encrypt(JSON.stringify(updated));
     fs.writeFileSync(this.settingsPath, encrypted, 'utf8');
   }
@@ -105,6 +119,7 @@ export class SecureStorageService {
    * One-click Crypto-Shredder: Wipes all local configuration, settings, and metadata.
    */
   public purgeAllData(): void {
+    this.cachedSettings = null;
     if (fs.existsSync(this.configDir)) {
       try {
         fs.rmSync(this.configDir, { recursive: true, force: true });

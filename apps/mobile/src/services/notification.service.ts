@@ -12,7 +12,15 @@ export interface DispatchedNotification {
 }
 
 export class NotificationService {
+  private static readonly MAX_NOTIFICATIONS = 50;
   private static dispatchedList: DispatchedNotification[] = [];
+
+  private static pushNotification(notif: DispatchedNotification): void {
+    this.dispatchedList.push(notif);
+    if (this.dispatchedList.length > this.MAX_NOTIFICATIONS) {
+      this.dispatchedList = this.dispatchedList.slice(-this.MAX_NOTIFICATIONS);
+    }
+  }
 
   public static async notifyScanResult(result: MobileScanResult): Promise<DispatchedNotification | null> {
     const settings = await SecureStorageService.getSettings();
@@ -43,7 +51,7 @@ export class NotificationService {
         priority: 'HIGH',
         timestamp: Date.now()
       };
-      this.dispatchedList.push(notif);
+      this.pushNotification(notif);
       return notif;
     }
 
@@ -70,7 +78,7 @@ export class NotificationService {
         priority: 'DEFAULT',
         timestamp: Date.now()
       };
-      this.dispatchedList.push(notif);
+      this.pushNotification(notif);
       return notif;
     }
 

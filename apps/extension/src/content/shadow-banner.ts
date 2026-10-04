@@ -4,7 +4,8 @@ export class ShadowBanner {
   private static hostElement: HTMLElement | null = null;
 
   public static showInsecurePasswordWarning(formActionUrl?: string): void {
-    if (this.hostElement) return; // Prevent duplicate banners
+    if (this.hostElement && document.documentElement.contains(this.hostElement)) return;
+    this.hostElement = null;
 
     const host = document.createElement('div');
     host.id = 'private-protection-shield-host';
@@ -97,8 +98,10 @@ export class ShadowBanner {
   }
 
   public static remove(): void {
-    if (this.hostElement && this.hostElement.parentNode) {
-      this.hostElement.parentNode.removeChild(this.hostElement);
+    if (this.hostElement) {
+      if (this.hostElement.parentNode) {
+        this.hostElement.parentNode.removeChild(this.hostElement);
+      }
       this.hostElement = null;
     }
   }

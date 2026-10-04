@@ -70,7 +70,11 @@ public class QrCodeDecoder {
                 return null;
             }
 
-            return decodeBitmap(bitmap);
+            try {
+                return decodeBitmap(bitmap);
+            } finally {
+                bitmap.recycle();
+            }
         } catch (Exception e) {
             Log.w(TAG, "Error decoding QR image from base64: " + e.getMessage());
             return null;

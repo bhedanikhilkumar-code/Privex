@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { SecureStorageService } from '../services/secure-storage.service';
+import { NotificationService } from '../services/notification.service';
 
 export const PrivacyScreen: React.FC = () => {
   const [shredded, setShredded] = useState<boolean>(false);
 
   const handleCryptoShred = async () => {
     await SecureStorageService.purgeAllData();
+    NotificationService.clearNotifications();
     setShredded(true);
     setTimeout(() => setShredded(false), 3000);
   };

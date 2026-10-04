@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { AISecurityAssistant, AssistantInput } from '@private-protection/ml';
 import { Verdict, SeverityLevel, RiskAssessment } from '@private-protection/core';
 import { UserPreferences } from '../../scanner/types';
@@ -13,7 +13,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ preferences }) => 
   const [explanation, setExplanation] = useState<any | null>(null);
   const [isSynthesizing, setIsSynthesizing] = useState<boolean>(false);
 
-  const assistant = new AISecurityAssistant();
+  const assistant = useMemo(() => new AISecurityAssistant(), []);
 
   const handleSynthesize = async (topic: string, snippet?: string) => {
     setIsSynthesizing(true);

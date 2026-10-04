@@ -23,6 +23,10 @@ export default defineConfig({
             fs.copyFileSync(srcPath, destPath);
           }
         }
+        const redundantSrcDir = path.resolve(outDir, 'src');
+        if (fs.existsSync(redundantSrcDir)) {
+          fs.rmSync(redundantSrcDir, { recursive: true, force: true });
+        }
 
         // Bundle content.ts as a self-contained classic script (IIFE) for MV3 content_scripts
         await viteBuild({

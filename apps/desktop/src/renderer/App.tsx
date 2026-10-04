@@ -102,7 +102,18 @@ export const App: React.FC = () => {
   const handleScanComplete = (result: ScanResult) => {
     setFilesScannedTotal((prev) => prev + result.totalFilesScanned);
     if (result.threats.length > 0) {
-      setThreats((prev) => [...result.threats, ...prev]);
+      setThreats((prev) => {
+        const byPath = new Map<string, DetectedThreat>();
+        for (const t of result.threats) {
+          byPath.set(t.filePath, t);
+        }
+        for (const existing of prev) {
+          if (!byPath.has(existing.filePath)) {
+            byPath.set(existing.filePath, existing);
+          }
+        }
+        return Array.from(byPath.values());
+      });
       setActiveTab('results');
     }
   };

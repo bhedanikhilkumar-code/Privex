@@ -56,7 +56,7 @@ export class NavigationInterceptor {
         overridden: false,
         isRestrictedUrl: true
       };
-      await ExtensionStorage.setTabState(tabId, restrictedState);
+      if (tabId >= 0) await ExtensionStorage.setTabState(tabId, restrictedState);
       return { state: restrictedState, action: 'ALLOW' };
     }
 
@@ -81,7 +81,7 @@ export class NavigationInterceptor {
         timestamp: Date.now(),
         overridden: false
       };
-      await ExtensionStorage.setTabState(tabId, disabledState);
+      if (tabId >= 0) await ExtensionStorage.setTabState(tabId, disabledState);
       return { state: disabledState, action: 'ALLOW' };
     }
 
@@ -111,12 +111,12 @@ export class NavigationInterceptor {
         timestamp: Date.now(),
         overridden: true
       };
-      await ExtensionStorage.setTabState(tabId, allowState);
+      if (tabId >= 0) await ExtensionStorage.setTabState(tabId, allowState);
       return { state: allowState, action: 'ALLOW' };
     }
 
     // 4. Check if user already explicitly bypassed warning for this tab
-    const existingState = await ExtensionStorage.getTabState(tabId);
+    const existingState = tabId >= 0 ? await ExtensionStorage.getTabState(tabId) : null;
     if (existingState && existingState.overridden && existingState.url === url) {
       return { state: existingState, action: 'ALLOW' };
     }
@@ -216,7 +216,7 @@ export class NavigationInterceptor {
       overridden: false
     };
 
-    await ExtensionStorage.setTabState(tabId, state);
+    if (tabId >= 0) await ExtensionStorage.setTabState(tabId, state);
 
     // 7. Map canonical verdict to extension action
     if (verdict === Verdict.DANGEROUS) {

@@ -78,7 +78,10 @@ export class FileAnalyzer {
       }
     }
 
-    const sha256 = await this.computeSha256(filePath);
+    const sha256 =
+      bytesToRead === stat.size
+        ? crypto.createHash('sha256').update(headerBuffer).digest('hex')
+        : await this.computeSha256(filePath);
     const coreOut = CoreFileAnalyzer.analyzeBuffer(
       {
         filePath,

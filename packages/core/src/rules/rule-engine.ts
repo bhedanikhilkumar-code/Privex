@@ -325,12 +325,18 @@ export class RuleEngine {
       }
     });
 
-    // Text rules with diacritic & unicode de-obfuscation
+    // Text rules with diacritic & unicode de-obfuscation (single-pass memoized per input)
+    let lastRawText = '';
+    let lastNormalizedText = '';
     const normalizeText = (t: string) => {
-      return t
+      if (t === lastRawText) return lastNormalizedText;
+      const clamped = t.length > 10000 ? t.slice(0, 10000) : t;
+      lastRawText = t;
+      lastNormalizedText = clamped
         .normalize('NFKD')
         .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase();
+      return lastNormalizedText;
     };
 
     this.registerRule({

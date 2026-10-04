@@ -104,4 +104,30 @@ describe('Phase 7 Desktop Performance & Latency Benchmark', () => {
     expect(calcP(headerTimes, 50)).toBeLessThan(100.0);
     expect(heapUsedMb).toBeLessThan(150.0);
   });
+
+  it('R8-F & R8-M: verifies <=64 KB single-open SHA-256 fast-path and in-memory SecureStorageService settings cache', async () => {
+    const { SecureStorageService } = await import('../../services/secure-storage.service');
+    const smallFilePath = path.join(tempDir, 'small_script.pdf.exe');
+    const smallBytes = Buffer.concat([
+      Buffer.from([0x4d, 0x5a, 0x90, 0x00]),
+      crypto.randomBytes(16 * 1024) // 16 KB (<= 64 KB)
+    ]);
+    fs.writeFileSync(smallFilePath, smallBytes);
+
+    const expectedSha256 = crypto.createHash('sha256').update(smallBytes).digest('hex');
+    const res = await FileAnalyzer.analyzeFile(smallFilePath);
+    expect(res.sha256).toBe(expectedSha256);
+    expect(res.verdict).toBe('BLOCK');
+
+    // Verify SecureStorageService.getSettings() in-memory cache avoids disk/crypto on repeat reads
+    const storage = new SecureStorageService(path.join(tempDir, 'cfg'));
+    storage.saveSettings({ scanLargeFilesLimitMb: 75 });
+    const t0 = performance.now();
+    for (let i = 0; i < 100; i++) {
+      const s = storage.getSettings();
+      expect(s.scanLargeFilesLimitMb).toBe(75);
+    }
+    const elapsed100 = performance.now() - t0;
+    expect(elapsed100).toBeLessThan(25);
+  });
 });

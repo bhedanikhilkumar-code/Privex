@@ -112,6 +112,9 @@ export class RealtimeMonitorService extends EventEmitter {
         const fullPath = path.join(canonicalDir, filename);
         this.handleFilesystemEvent(eventType, fullPath);
       });
+      watcher.on('error', () => {
+        // Safely ignore runtime directory watcher errors (e.g. directory removed)
+      });
 
       this.watchers.set(canonicalDir, watcher);
     } catch (err: any) {
@@ -171,6 +174,13 @@ export class RealtimeMonitorService extends EventEmitter {
       const lastEval = this.recentEvaluations.get(dedupeKey);
       if (lastEval && now - lastEval < 1500) {
         return;
+      }
+      if (this.recentEvaluations.size > 500) {
+        for (const [k, ts] of this.recentEvaluations.entries()) {
+          if (now - ts >= 1500) {
+            this.recentEvaluations.delete(k);
+          }
+        }
       }
       this.recentEvaluations.set(dedupeKey, now);
 
