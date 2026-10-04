@@ -1,5 +1,5 @@
 import { DetectionPipeline, Verdict, InputType, ActionRecommendation } from '@private-protection/core';
-import { AISecurityAssistant, AssistantInput } from '@private-protection/ml';
+import { AISecurityAssistant } from '@private-protection/ml';
 
 async function runCrossPlatformCoreConsistencyAudit() {
   console.log('=== CROSS-PLATFORM CORE CONSISTENCY & AI BOUNDARY VERIFICATION ===\n');
@@ -17,7 +17,7 @@ async function runCrossPlatformCoreConsistencyAudit() {
     },
     {
       name: 'Deceptive Phishing Typosquat',
-      input: 'https://paypa1-security-verification.com/login',
+      input: 'http://paypa1.xyz/login',
       type: InputType.URL,
       expectedVerdict: Verdict.DANGEROUS,
       expectedMinScore: 85
