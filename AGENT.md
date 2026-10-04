@@ -509,17 +509,26 @@ All 18 foundational capabilities are fully completed, verified against actual re
 - **Status:** **PASS (DIRECT APK VALIDATED & VERIFIED)**.
 
 ### Phase R4 — Desktop Distribution
-- **Objective:** Validate Windows consumer installation and portable distribution.
+- **Objective:** Validate Windows consumer installation and portable distribution on a real Windows machine.
 - **Release Artifacts:**
-  - Setup Installer: `release/PrivateProtection-Setup-0.1.0.exe` (158,047,232 bytes, SHA-256: `7bf197ff...`)
-  - Portable Executable: `release/PrivateProtection-0.1.0-win-x64.exe` (245,726,208 bytes, SHA-256: `49b61a03...`)
-- **Lifecycle:**
+  - Setup Installer: `release/PrivateProtection-Setup-0.1.0.exe` (158,047,232 bytes, SHA-256: `7bf197ff1810d6db0019598bd465e9f309b1321357be80f7c80c568317e0971a`)
+  - Portable Executable: `release/PrivateProtection-0.1.0-win-x64.exe` (245,726,208 bytes, SHA-256: `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa`)
+- **Tested Environment (Real Machine Coverage: 1 Environment):**
+  - Host OS: Microsoft Windows 11 Home Single Language (`10.0.26300`, Build `26300`, `win32-x64`)
+  - Hardware: 13th Gen Intel Core i5-13420H, 15.6 GB RAM (`BHEDA_NIKHIL`)
+- **Lifecycle & Functional Validation:**
   - Installs silently (`/S`) or interactively to `%LOCALAPPDATA%\Programs\Private Protection\` without admin rights.
   - Grants Chromium AppContainer sandbox ACL permissions (`*S-1-15-2-1:(OI)(CI)(RX)`).
   - Registers Start Menu shortcut, Desktop shortcut, and Add/Remove Programs registry key `HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\PrivateProtection`.
-  - Uninstaller (`Uninstall.exe /S`) cleanly removes files, shortcuts, and registry entries.
+  - Zero-Dependency Execution: Verified standalone execution (`PrivateProtection.exe --headless-verify`) in sanitized minimal `PATH` (`C:\Windows\system32;C:\Windows`) without external Node.js, Python, or repo dependencies.
+  - Core Threat & Quarantine Flow: Safe file preserved (`ALLOW`), deceptive double-extension (`DECEPTIVE_DOUBLE_EXTENSION`, score `95`, `BLOCK`) detected and isolated in AES-256-GCM vault (`PPVAULT1`), real-time watcher auto-quarantined dropped payload, Grade 6 read-only AI explanation rendered.
+  - Offline & Privacy: 100% air-gapped parity (`offlineMode: true`) and 0 bytes user payload egress (`connect-src 'none'`).
+  - Performance: Cold start + full E2E scan in `1,980 ms`, warm invocation `167 ms`, RSS `104.7 MB`, V8 Heap `4.2 MB`.
+  - Uninstaller (`Uninstall.exe /S`) cleanly removes files, shortcuts, and registry entries; clean reinstall verified.
+  - Regression: 87/87 desktop tests passing; 494/494 monorepo tests passing.
 - **Code Signing Status:** Accurately documented as **unsigned test/candidate binaries**. Windows Defender SmartScreen displays the standard unknown publisher prompt ("More info" $\rightarrow$ "Run anyway").
-- **Status:** **PASS (VERIFIED)**.
+- **Authoritative Documentation:** `docs/PHASE_R4_DESKTOP_DIRECT_DISTRIBUTION.md`
+- **Status:** **PASS (DIRECT DESKTOP INSTALLER & PORTABLE VALIDATED)**.
 
 ### Phase R5 — Extension Distribution
 - **Objective:** Validate browser extension packaging for Chromium browsers.
