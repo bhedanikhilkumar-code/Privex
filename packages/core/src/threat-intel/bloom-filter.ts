@@ -26,15 +26,19 @@ export class BloomFilter {
   private count: number = 0; // Number of elements inserted
   private setBitsCount: number = 0; // Counter for set bits
 
-  constructor(options?: BloomFilterOptions) {
-    const n = Math.max(10, options?.expectedElements ?? 100000);
-    const p = Math.max(0.00001, Math.min(0.1, options?.targetFalsePositiveRate ?? 0.001));
+  constructor(options?: BloomFilterOptions | number, targetFalsePositiveRate?: number) {
+    const opts: BloomFilterOptions =
+      typeof options === 'number'
+        ? { expectedElements: options, targetFalsePositiveRate }
+        : options || {};
+    const n = Math.max(10, opts.expectedElements ?? 100000);
+    const p = Math.max(0.00001, Math.min(0.1, opts.targetFalsePositiveRate ?? 0.001));
 
     this.n = n;
 
-    if (options?.sizeBits && options?.hashCount) {
-      this.m = options.sizeBits;
-      this.k = options.hashCount;
+    if (opts.sizeBits && opts.hashCount) {
+      this.m = opts.sizeBits;
+      this.k = opts.hashCount;
     } else {
       // Optimal m: - (n * ln(p)) / (ln(2)^2)
       const ln2Squared = Math.LN2 * Math.LN2;
