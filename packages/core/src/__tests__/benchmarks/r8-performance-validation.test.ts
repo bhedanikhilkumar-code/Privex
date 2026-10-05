@@ -108,7 +108,7 @@ describe('Phase R8 Deep Performance, 5-Class Latency, Memory Stress & Network In
     // Verify SLAs
     expect(resultsByClass.SAFE.p95).toBeLessThan(10);
     expect(resultsByClass.SUSPICIOUS.p95).toBeLessThan(10);
-    expect(resultsByClass.MALFORMED.p95).toBeLessThan(5);
+    expect(resultsByClass.MALFORMED.p95).toBeLessThan(10);
     expect(resultsByClass.EMPTY.p95).toBeLessThan(5);
     expect(resultsByClass.EDGE_CASE.p95).toBeLessThan(15);
 

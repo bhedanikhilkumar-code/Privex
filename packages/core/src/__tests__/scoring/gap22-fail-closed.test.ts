@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { RiskScorer } from '../../scoring/risk-scorer';
 import { DetectionPipeline } from '../../pipeline/detection-pipeline';
 import { Verdict, RiskCategory, InputType } from '../../types';

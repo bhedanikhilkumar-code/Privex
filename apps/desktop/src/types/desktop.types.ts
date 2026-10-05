@@ -10,6 +10,8 @@ export type DetectionDisposition =
   | 'WARN'
   | 'MALICIOUS'
   | 'BLOCK'
+  | 'QUARANTINE'
+  | 'CONTAIN_PROCESS'
   | 'UNKNOWN'
   | 'ANALYSIS_FAILED';
 

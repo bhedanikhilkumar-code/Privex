@@ -2,16 +2,11 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import * as crypto from 'crypto';
-import * as http from 'http';
-import * as https from 'https';
 import * as net from 'net';
-import * as dns from 'dns';
 import { CoreFileAnalyzer } from '@private-protection/core';
 import { FileAnalyzer } from '../../core/file-analyzer';
 import { DesktopSecurityAdapter } from '../../core/desktop-security-adapter';
 import { ScannerService } from '../../services/scanner.service';
-import { QuickScanService } from '../../services/quick-scan.service';
 import { QuarantineService } from '../../services/quarantine.service';
 import { SecureStorageService } from '../../services/secure-storage.service';
 import { IpcValidator } from '../../ipc/ipc-validator';
@@ -328,6 +323,7 @@ describe('Phase A — Desktop Security Core Hardening & Offline Verification Sui
         const restoredPath = await handler.handleRestoreQuarantine(isolated.quarantineId, tempDir);
         expect(fs.existsSync(restoredPath)).toBe(true);
       } finally {
+        connectSpy.mockRestore();
         globalThis.fetch = origFetch;
       }
     });

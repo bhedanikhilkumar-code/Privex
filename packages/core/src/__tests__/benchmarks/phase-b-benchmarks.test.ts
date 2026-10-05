@@ -75,6 +75,10 @@ describe('Phase B — Core Detection Engine Hot-Path Performance Benchmarks', ()
         confidence: 0.95
       }
     ];
+    // Warm up JIT for sample evidence shape
+    for (let i = 0; i < 200; i++) {
+      scorer.calculateScore(sampleEvidence, 0, { inputType: InputType.PROCESS });
+    }
     const scorerStart = performance.now();
     for (let i = 0; i < iterations; i++) {
       scorer.calculateScore(sampleEvidence, 0, { inputType: InputType.PROCESS });
