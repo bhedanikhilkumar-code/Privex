@@ -115,7 +115,15 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from a basic 
 - **Previously Completed:**
   - **`PHASE A — Antivirus Baseline + Security Core Hardening`** (`docs/PHASE_A_COMPLETION.md`, `docs/PHASE_A_PERFORMANCE_BASELINE.md`).
   - **`PHASE B — Core Detection Engine Expansion`** (`docs/PHASE_B_COMPLETION.md`, `docs/PHASE_B_FINAL_INDEPENDENT_AUDIT.md`).
-- **Current Phase Completed:** **`PHASE C — File Protection & 10-Layer Static Malware Engine`** (`docs/PHASE_C_COMPLETION.md`, `docs/PHASE_C_PERFORMANCE_BASELINE.md`).
+- **Current Phase Completed:** **`PHASE C — File Protection & 10-Layer Static Malware Engine`** (`docs/PHASE_C_COMPLETION.md`, `docs/PHASE_C_PERFORMANCE_BASELINE.md`, `docs/PHASE_C_FINAL_INDEPENDENT_AUDIT.md`).
+  - **Phase C Final Independent Audit:** **GO APPROVED** (Independent Audit Report published in `docs/PHASE_C_FINAL_INDEPENDENT_AUDIT.md`).
+  - **Audit Remediation & Hardening (`fe08407` & `c2011ad`):**
+    - Remediated single verdict authority: `DetectionPipeline.scan(FILE)` delegates all scoring to `RiskScorer.calculate()` so `RiskScorer` remains the sole mathematical decision and `EngineVerdict` authority.
+    - Remediated PE bounds & overflow: Optional Header bounds checked, raw section end offsets clamped to file bounds, top-level `try/catch` fail-closed wrapper added, and string decode bounded to $\le 1\text{ MB}$.
+    - Remediated fail-open in `file-analyzer.ts`: Malformed PE evidence preserved; unexpected errors emit `pe-malformed-structure`.
+    - Remediated `CleanFileCache`: Enforced defensive rejection of non-ALLOW or riskScore $> 0$ inputs.
+    - Tagged double extension and disguised executable rules with `DetectorLayer.METADATA_ANALYZER`.
+    - Added dedicated remediation tests (`phase-c-audit-remediation.test.ts`) and adversarial probe suite (`phase-c-adversarial-probes.test.ts`).
   - **Phase C Verified Capabilities (`@private-protection/core` & `apps/desktop`):**
     - **10-Layer Static Detection Engine & 4-Stage Sieve:**
       - `Stage 0 / Layer 1`: `CleanFileCache` bounded LRU cache (50k entries, TTL, path/size/mtime keying) delivering $O(1)$ clean-file triage in **`0.0003 ms`** ($266\times$ faster than $<0.08\text{ ms}$ SLA).
@@ -135,7 +143,7 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from a basic 
       - DetectionPipeline File Scan (Average): **`0.4019 ms`** (SLA: $< 1.000\text{ ms}$)
       - DetectionPipeline File Scan (p95): **`1.8540 ms`** (SLA: $< 5.000\text{ ms}$)
     - **Monorepo Regression Test Rate:**
-      - **606/606 PASS (100%)** across 93 test files in all 6 monorepo workspaces.
+      - **625/625 PASS (100%)** across 107 test files in all 6 monorepo workspaces (0 failures, 0 errors, 0 skips).
 - **Next Phase (Awaiting User Command):**
   - **`PHASE D — Real-Time File Shield & Watcher Architecture`** as defined in `phase.md`.
 
