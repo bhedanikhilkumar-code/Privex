@@ -112,20 +112,31 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from a basic 
 
 ## 9. Current Phase & Next Phase
 
-- **Previously Completed:** **`PHASE A — Antivirus Baseline + Security Core Hardening`** (`docs/PHASE_A_COMPLETION.md`, `docs/PHASE_A_PERFORMANCE_BASELINE.md`).
-- **Current Phase Completed:** **`PHASE B — Core Detection Engine Expansion`** (`docs/PHASE_B_COMPLETION.md`).
-  - **Phase B Verified Capabilities (`@private-protection/core`):**
-    - Canonical Input & Process Foundation (`InputType.PROCESS`, `TargetType.PROCESS`, `PrescribedAction.CONTAIN_PROCESS`, `ProcessInputMetadata`, `ProcessScanRequest`, `ProcessScanResult`, and `ProcessAnalyzer` with automatic CLI credential/JWT/token redaction via `ProcessAnalyzer.sanitizeCommandLine()`, high-risk writable directory detection, and macro/document-reader shell spawn detection).
-    - Canonical Hash Intelligence & $O(1)$ 64-Hex Bloom Filter Fast-Path (`BloomFilter.isSha256Hex()` + unsigned 32-bit integer arithmetic achieving `0.00172 ms` per lookup; `ThreatIntel.lookupHash()` returning `KNOWN_GOOD`, `KNOWN_BAD`, or `UNKNOWN`; seeded `EICAR_SHA256` and synthetic malware hashes; Bloom false-positive safety returning `UNKNOWN` without `badHashes` confirmation; critical malware hash precedence preventing standard user allowlists from overriding critical hashes without `allowCriticalOverride: true`).
-    - Structured `RuleEngine` Signal Emission (`ruleId`, `detectorType`, `detectorLayer`, `reason`, `severityLevel`, `scoreContribution`, `metadata`, `evaluateFile()`, `evaluateProcess()`, and deterministic `FILE` / `PROCESS` rules `file-eicar-signature`, `proc-encoded-command`, `proc-lolbin-cradle`, `proc-defense-evasion`).
-    - 8-Layer `DetectorLayer` Model & 6-Tier `EngineVerdict` Policy (`RiskScorer` calibrated across `HASH_INTEL`, `SIGNATURE_ENGINE`, `CORRELATION_ENGINE`, `BEHAVIORAL_ENGINE`, `STRUCTURAL_PARSER`, `METADATA_ANALYZER`, `REPUTATION_LOCAL`, and `STATIC_HEURISTIC`; Layer 8 cross-layer correlation with `ruleId` deduplication; signal-dilution attack defense so 1 critical signal + 50 benign signals never dilute below `BLOCK`/`QUARANTINE`; strict partial-`NaN`/`Infinity` fail-closed guard; and 6-tier `EngineVerdict`: `ALLOW`, `INFORM`, `WARN`, `BLOCK`, `QUARANTINE`, `CONTAIN_PROCESS`).
-    - Explicit `DetectorLayerState` tracking (`EXECUTED`, `NOT_RUN`, `UNAVAILABLE`, `FAILED` — never misrepresenting unexecuted future layers like `BEHAVIORAL_ENGINE` as `SAFE`).
-  - **Phase B Empirical Hot-Path Benchmarks:**
-    - `BloomFilter.has()` (64-char hex): `0.00172 ms` (Target: `< 0.02000 ms`)
-    - `ThreatIntel.lookupHash()`: `0.00978 ms` (Target: `< 0.05000 ms`)
-    - `RiskScorer.calculateScore()`: `0.02762 ms` (Target: `< 0.05000 ms`)
-    - `DetectionPipeline.scan()` average across `URL`, `TEXT`, `FILE`, `PROCESS`: `0.2713 ms` (Target: `< 1.0000 ms`)
+- **Previously Completed:**
+  - **`PHASE A — Antivirus Baseline + Security Core Hardening`** (`docs/PHASE_A_COMPLETION.md`, `docs/PHASE_A_PERFORMANCE_BASELINE.md`).
+  - **`PHASE B — Core Detection Engine Expansion`** (`docs/PHASE_B_COMPLETION.md`, `docs/PHASE_B_FINAL_INDEPENDENT_AUDIT.md`).
+- **Current Phase Completed:** **`PHASE C — File Protection & 10-Layer Static Malware Engine`** (`docs/PHASE_C_COMPLETION.md`, `docs/PHASE_C_PERFORMANCE_BASELINE.md`).
+  - **Phase C Verified Capabilities (`@private-protection/core` & `apps/desktop`):**
+    - **10-Layer Static Detection Engine & 4-Stage Sieve:**
+      - `Stage 0 / Layer 1`: `CleanFileCache` bounded LRU cache (50k entries, TTL, path/size/mtime keying) delivering $O(1)$ clean-file triage in **`0.0003 ms`** ($266\times$ faster than $<0.08\text{ ms}$ SLA).
+      - `Stage 1 / Layer 2 & 3`: Fast header triage with `SignatureAutomaton` (flattened Aho-Corasick multi-pattern automaton for EICAR, Mimikatz, `vssadmin`, AMSI/ETW bypass, and LOLBins in single $O(N)$ linear pass; instant EICAR short-circuit to `BLOCK`), candidate format routing, double-extension deception detection, and Unicode RTLO directional spoofing detection (`\u202E`).
+      - `Stage 2 / Layer 4`: `EntropyScanner` with precomputed in-memory `ENTROPY_LUT[4097]` lookup table ($p \log_2 p$) for whole-buffer and 4KB sliding-window Shannon entropy scanning in **`0.0485 ms`**.
+      - `Stage 3 / Layer 5 & 6`: Zero-allocation bounds-checked structural parsers:
+        - `PeAnalyzer`: PE32/PE32+ DOS header, `e_lfanew`, section table, W+X permissions (`IMAGE_SCN_MEM_WRITE | IMAGE_SCN_MEM_EXECUTE`, marked `CRITICAL`), known runtime packers (`UPX`, `ASPack`, `Themida`, `VMProtect`), section entropy, IAT injection/credential API triads (`VirtualAllocEx` + `WriteProcessMemory` + `CreateRemoteThread`, `MiniDumpWriteDump`), unauthenticated overlays, and Authenticode directory presence.
+        - `ArchiveAnalyzer`: In-memory ZIP EOCD and Central Directory parser with zero-disk extraction defending against zip bombs (compression ratio $>100:1$ and total size $>100\text{ MB}$), directory path traversal (`../`, `..\`), disguised executables (`.pdf.exe`), double extensions, RTLO, and entry flooding ($>1,000$ entries).
+        - `DocumentAnalyzer`: OOXML modern Office parser (detecting `vbaProject.bin`, disguised `.docx` macros, remote template injection `TargetMode="External"`, and embedded OLE objects), OLE2 compound binary parser (detecting legacy VBA macros and Equation Editor CVE-2017-11882 exploit streams), and PDF parser (detecting `/JavaScript`, process-spawning `/Launch` actions, `/OpenAction`, and embedded attachments).
+        - `ScriptAnalyzer`: Static heuristic analysis of PowerShell, VBScript, Batch, and JavaScript with automated in-memory Base64 decoding (up to 64KB, UTF-16LE and ASCII), remote download cradles (`DownloadString`, `WebClient`), execution bypass flags, in-memory AMSI/ETW tampering (`AmsiUtils`, `amsiInitFailed`), ransomware shadow copy destruction (`vssadmin delete shadows`, `wmic shadowcopy delete`), and LOLBin abuse (`certutil -urlcache`, `bitsadmin`).
+    - **Desktop Adapter Wiring:**
+      - Wired `CleanFileCache.getSharedInstance()` directly into `apps/desktop/src/core/file-analyzer.ts` with automatic clean-file caching.
+    - **Empirical Performance Benchmarks:**
+      - Stage 0 CleanFileCache lookup: **`0.0003 ms`** (SLA: $< 0.080\text{ ms}$)
+      - Stage 1 Fast Header Triage: **`0.0158 ms`** (SLA: $< 0.500\text{ ms}$)
+      - Stage 2/3 Deep Static Analysis (PE + Entropy + Automaton): **`0.4682 ms`** (SLA: $< 5.000\text{ ms}$)
+      - DetectionPipeline File Scan (Average): **`0.4019 ms`** (SLA: $< 1.000\text{ ms}$)
+      - DetectionPipeline File Scan (p95): **`1.8540 ms`** (SLA: $< 5.000\text{ ms}$)
+    - **Monorepo Regression Test Rate:**
+      - **606/606 PASS (100%)** across 93 test files in all 6 monorepo workspaces.
 - **Next Phase (Awaiting User Command):**
-  - **`PHASE C`** as defined in `phase.md`.
+  - **`PHASE D — Real-Time File Shield & Watcher Architecture`** as defined in `phase.md`.
 
 
