@@ -54,6 +54,7 @@ export enum InputType {
   URL = 'URL',
   TEXT = 'TEXT',
   FILE = 'FILE',
+  PROCESS = 'PROCESS',
   QR = 'QR',
   DOM = 'DOM'
 }
@@ -62,6 +63,7 @@ export enum TargetType {
   URL = 'URL',
   MESSAGE = 'MESSAGE',
   FILE_HEADER = 'FILE_HEADER',
+  PROCESS = 'PROCESS',
   DOM_STRUCTURE = 'DOM_STRUCTURE'
 }
 
@@ -76,8 +78,44 @@ export enum PrescribedAction {
   PROCEED = 'PROCEED',
   WARN_USER = 'WARN_USER',
   BLOCK_NAVIGATION = 'BLOCK_NAVIGATION',
-  QUARANTINE_FILE = 'QUARANTINE_FILE'
+  QUARANTINE_FILE = 'QUARANTINE_FILE',
+  CONTAIN_PROCESS = 'CONTAIN_PROCESS'
 }
+
+/**
+ * Canonical 6-Tier Antivirus Engine Verdict Policy (Phase B Step 10)
+ * Strictly decoupled from UI presentation copy.
+ */
+export enum EngineVerdict {
+  ALLOW = 'ALLOW',
+  INFORM = 'INFORM',
+  WARN = 'WARN',
+  BLOCK = 'BLOCK',
+  QUARANTINE = 'QUARANTINE',
+  CONTAIN_PROCESS = 'CONTAIN_PROCESS'
+}
+
+/**
+ * Canonical Detector Layer Categories (Phase B Step 8)
+ */
+export enum DetectorLayer {
+  HASH_INTEL = 'HASH_INTEL',
+  SIGNATURE_ENGINE = 'SIGNATURE_ENGINE',
+  METADATA_ANALYZER = 'METADATA_ANALYZER',
+  STATIC_HEURISTIC = 'STATIC_HEURISTIC',
+  STRUCTURAL_PARSER = 'STRUCTURAL_PARSER',
+  BEHAVIORAL_ENGINE = 'BEHAVIORAL_ENGINE',
+  REPUTATION_LOCAL = 'REPUTATION_LOCAL',
+  CORRELATION_ENGINE = 'CORRELATION_ENGINE'
+}
+
+/**
+ * Explicit execution state for each detector layer.
+ * Unimplemented or unexecuted layers must be reported as UNAVAILABLE or NOT_RUN, never SAFE.
+ */
+export type DetectorLayerState = 'EXECUTED' | 'NOT_RUN' | 'UNAVAILABLE' | 'FAILED';
+
+export type HashDisposition = 'KNOWN_GOOD' | 'KNOWN_BAD' | 'UNKNOWN';
 
 export enum FrictionLevel {
   NONE = 'NONE',
@@ -95,6 +133,8 @@ export type DetectionDisposition =
   | 'WARN'
   | 'MALICIOUS'
   | 'BLOCK'
+  | 'QUARANTINE'
+  | 'CONTAIN_PROCESS'
   | 'UNKNOWN'
   | 'ANALYSIS_FAILED';
 
@@ -103,7 +143,8 @@ export enum DetectorType {
   HEURISTIC = 'HEURISTIC',
   THREAT_INTEL = 'THREAT_INTEL',
   ML_MODEL = 'ML_MODEL',
-  REPUTATION = 'REPUTATION'
+  REPUTATION = 'REPUTATION',
+  CORRELATION = 'CORRELATION'
 }
 
 export enum PlatformType {
@@ -149,6 +190,7 @@ export interface DetectionRequest {
   readonly payload: string | Uint8Array;
   readonly context?: AnalysisContext;
   readonly options?: ScanOptions;
+  readonly processMetadata?: ProcessInputMetadata;
 }
 
 /**
@@ -161,6 +203,7 @@ export interface ScanRequest {
   inputType?: InputType;
   type?: string | InputType | TargetType;
   metadata?: Record<string, string>;
+  processMetadata?: ProcessInputMetadata;
   id?: string;
   timestamp?: number;
   context?: AnalysisContext;
@@ -174,8 +217,11 @@ export interface Evidence {
   // Canonical fields
   ruleId?: string;
   detectorType?: DetectorType | string;
+  detectorLayer?: DetectorLayer | string;
   scoreContribution?: number; // 0-100
   metadata?: Record<string, string>;
+  reason?: string;
+  severityLevel?: SeverityLevel | string;
 
   // Foundational fields
   source: string;
@@ -209,6 +255,7 @@ export interface RiskAssessment {
   readonly primaryThreatFactor: string;
   readonly detectorContributions: Record<string, number>;
   readonly uncertainty?: number;
+  readonly correlationMatches?: string[];
 }
 
 /**
@@ -239,6 +286,7 @@ export interface DetectionResult {
   // Canonical fields (populated by DetectionPipeline)
   requestId?: string;
   verdict?: Verdict | string;
+  engineVerdict?: EngineVerdict;
   riskAssessment?: RiskAssessment;
   threats?: Threat[];
   executionTimeMs?: number;
@@ -260,6 +308,8 @@ export interface DetectionResult {
   action: ActionRecommendation | string;
   analysisStatus?: AnalysisStatus;
   disposition?: DetectionDisposition;
+  detectorLayers?: Record<DetectorLayer, DetectorLayerState>;
+  correlationMatches?: string[];
   error?: string;
 }
 
@@ -312,7 +362,7 @@ export interface UpdateMetadata {
 }
 
 // ==========================================
-// 4. CANONICAL FILE ANALYSIS DOMAIN MODELS
+// 4. CANONICAL FILE & PROCESS ANALYSIS DOMAIN MODELS
 // ==========================================
 
 export interface FileScanRequest {
@@ -335,9 +385,67 @@ export interface FileScanResult {
   readonly riskScore: number;
   readonly severity: SeverityLevel;
   readonly verdict: Verdict;
+  readonly engineVerdict?: EngineVerdict;
   readonly threatName: string;
   readonly evidenceFactors: string[];
   readonly analysisStatus?: AnalysisStatus;
   readonly disposition?: DetectionDisposition;
   readonly errorReason?: string;
 }
+
+/**
+ * Canonical Process Input Metadata (Phase B Step 12)
+ * Command-line strings are sanitized/redacted in memory before evidence emission
+ * so sensitive user tokens/credentials are never persisted.
+ */
+export interface ProcessInputMetadata {
+  readonly pid: number;
+  readonly ppid?: number;
+  readonly processName: string;
+  readonly parentName?: string;
+  readonly executablePath: string;
+  readonly sha256?: string;
+  readonly isSigned?: boolean;
+  readonly signer?: string;
+  readonly commandLine?: string;
+  readonly creationTimestamp?: number;
+}
+
+export type ProcessScanRequest = ProcessInputMetadata;
+
+export interface ProcessScanResult {
+  readonly pid: number;
+  readonly ppid?: number;
+  readonly processName: string;
+  readonly executablePath: string;
+  readonly sha256?: string;
+  readonly sanitizedCommandLine?: string;
+  readonly riskScore: number;
+  readonly confidence: number;
+  readonly severity: SeverityLevel;
+  readonly verdict: Verdict;
+  readonly engineVerdict: EngineVerdict;
+  readonly actionRecommendation: ActionRecommendation;
+  readonly disposition: DetectionDisposition;
+  readonly analysisStatus: AnalysisStatus;
+  readonly threatName: string;
+  readonly evidence: Evidence[];
+  readonly detectorLayers: Record<DetectorLayer, DetectorLayerState>;
+  readonly errorReason?: string;
+}
+
+export interface HashLookupResult {
+  readonly hash: string;
+  readonly status: HashDisposition;
+  readonly disposition: HashDisposition;
+  readonly isMalicious: boolean;
+  readonly isAllowed: boolean;
+  readonly isCritical?: boolean;
+  readonly threatName?: string;
+  readonly category?: RiskCategory | string;
+  readonly severityLevel?: SeverityLevel | string;
+  readonly sourceFeed?: string;
+  readonly confidence: number;
+  readonly bloomFilterHit: boolean;
+}
+

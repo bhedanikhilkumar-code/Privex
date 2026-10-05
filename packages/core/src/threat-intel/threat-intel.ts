@@ -1,9 +1,12 @@
 import { sha256, verifyEd25519Signature } from '../utils/crypto';
 import { BloomFilter } from './bloom-filter';
 import {
+  DetectorLayer,
+  DetectorType,
   Evidence,
+  HashDisposition,
+  HashLookupResult,
   RiskCategory,
-  Severity,
   SeverityLevel,
   ThreatIntelRecord,
   UpdateMetadata
@@ -16,21 +19,73 @@ export interface ThreatIntelEntry {
   severity?: SeverityLevel | string;
   sourceFeed?: string;
   threatType?: 'DOMAIN' | 'URL' | 'IP' | 'HASH';
+  threatName?: string;
+  isCritical?: boolean;
 }
 
 export interface ThreatIntelResult extends Evidence {
   isMalicious: boolean;
   isAllowed?: boolean;
+  status?: HashDisposition;
+  disposition?: HashDisposition;
   threatType?: 'DOMAIN' | 'URL' | 'IP' | 'HASH';
+  threatName?: string;
   category?: RiskCategory | string;
   severityLevel?: SeverityLevel | string;
+  bloomFilterHit?: boolean;
 }
 
 export type StalenessState = 'FRESH' | 'AGED' | 'STALE' | 'EXPIRED_CACHE';
 
+/**
+ * Canonical Phase B Hash Precedence Policy (Step 6):
+ * 1. Critical Malicious Hash Intelligence (`KNOWN_BAD` with `isCritical: true`, e.g. EICAR and confirmed malware SHA-256)
+ *    takes strict precedence over standard user allowlists so critical malware cannot be masked by allowlist abuse,
+ *    UNLESS the caller/policy explicitly grants `allowCriticalOverride: true` (e.g. friction-gated forensic restore).
+ * 2. Verified Domain/URL Allowlists (`goodHashes`) and non-critical file allowlists (`fileAllowlist`) return `KNOWN_GOOD`.
+ * 3. Unrecognized hashes or Bloom-filter-only false positives (where `bloomFilter.has(h)` is true but `badHashes.get(h)` is absent)
+ *    explicitly return `UNKNOWN` (`isMalicious: false, isAllowed: false`) — NEVER `KNOWN_GOOD`.
+ */
 export class ThreatIntel {
+  public static readonly EICAR_SHA256 =
+    '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f';
+
+  public static readonly SYNTHETIC_MALWARE_HASHES: ReadonlyArray<{
+    hash: string;
+    threatName: string;
+    category: RiskCategory;
+    severity: SeverityLevel;
+  }> = [
+    {
+      hash: ThreatIntel.EICAR_SHA256,
+      threatName: 'EICAR_TEST_FILE',
+      category: RiskCategory.MALWARE,
+      severity: SeverityLevel.CRITICAL
+    },
+    {
+      hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b801',
+      threatName: 'SYNTHETIC_TROJAN_DROPPER_A',
+      category: RiskCategory.MALWARE,
+      severity: SeverityLevel.CRITICAL
+    },
+    {
+      hash: 'a1b2c3d4e5f60718293a4b5c6d7e8f90112233445566778899aabbccddeeff02',
+      threatName: 'SYNTHETIC_RANSOMWARE_SIM_B',
+      category: RiskCategory.EXTORTION,
+      severity: SeverityLevel.CRITICAL
+    },
+    {
+      hash: 'deadbeefcafebabe0123456789abcdef0123456789abcdef0123456789abcdef',
+      threatName: 'SYNTHETIC_CREDENTIAL_STEALER_C',
+      category: RiskCategory.MALWARE,
+      severity: SeverityLevel.HIGH
+    }
+  ];
+
   private badHashes: Map<string, ThreatIntelEntry> = new Map();
   private goodHashes: Set<string> = new Set();
+  private fileAllowlist: Set<string> = new Set();
+  private criticalOverrideAllowlist: Set<string> = new Set();
   private bloomFilter: BloomFilter;
   private lastUpdated: number;
   private databaseVersion: number = 101;
@@ -55,7 +110,7 @@ export class ThreatIntel {
       'phishing-bank-login.xyz'
     ];
 
-    badSeeds.forEach(domain => {
+    badSeeds.forEach((domain) => {
       this.addMaliciousDomain(domain, {
         category: RiskCategory.PHISHING,
         severity: SeverityLevel.HIGH
@@ -66,7 +121,7 @@ export class ThreatIntel {
       'http://secure-paypa1.com/login?token=urgent',
       'https://amaz0n-verify.tk/account/billing'
     ];
-    badUrls.forEach(url => {
+    badUrls.forEach((url) => {
       this.addMaliciousUrl(url);
     });
 
@@ -74,9 +129,21 @@ export class ThreatIntel {
       '198.51.100.23', // RFC 5737 TEST-NET-2 known botnet C2 fixture
       '203.0.113.88'
     ];
-    badIps.forEach(ip => {
+    badIps.forEach((ip) => {
       this.addMaliciousIp(ip);
     });
+
+    // Seed canonical EICAR SHA-256 and deterministic synthetic test malware hashes
+    for (const seed of ThreatIntel.SYNTHETIC_MALWARE_HASHES) {
+      this.addMaliciousHash(seed.hash, {
+        category: seed.category,
+        severity: seed.severity,
+        threatType: 'HASH',
+        threatName: seed.threatName,
+        sourceFeed: 'CORE_SEED_MALWARE_DB',
+        isCritical: true
+      });
+    }
 
     const goodSeeds = [
       'google.com',
@@ -88,7 +155,7 @@ export class ThreatIntel {
       'wikipedia.org'
     ];
 
-    goodSeeds.forEach(domain => {
+    goodSeeds.forEach((domain) => {
       this.addAllowedDomain(domain);
     });
   }
@@ -131,7 +198,8 @@ export class ThreatIntel {
       category: options?.category || RiskCategory.PHISHING,
       severity: options?.severity || SeverityLevel.HIGH,
       sourceFeed: options?.sourceFeed || 'SEED_BLOCKLIST',
-      threatType: 'DOMAIN'
+      threatType: 'DOMAIN',
+      isCritical: false
     });
     this.lastUpdated = Date.now();
   }
@@ -160,7 +228,8 @@ export class ThreatIntel {
       category: options?.category || RiskCategory.PHISHING,
       severity: options?.severity || SeverityLevel.CRITICAL,
       sourceFeed: options?.sourceFeed || 'URL_FEED',
-      threatType: 'URL'
+      threatType: 'URL',
+      isCritical: false
     });
     this.lastUpdated = Date.now();
   }
@@ -185,7 +254,8 @@ export class ThreatIntel {
       category: options?.category || RiskCategory.MALWARE,
       severity: options?.severity || SeverityLevel.CRITICAL,
       sourceFeed: options?.sourceFeed || 'IP_C2_FEED',
-      threatType: 'IP'
+      threatType: 'IP',
+      isCritical: true
     });
     this.lastUpdated = Date.now();
   }
@@ -202,9 +272,46 @@ export class ThreatIntel {
     this.goodHashes.add(hash);
   }
 
+  /**
+   * Adds a SHA-256 file hash to the trusted local file allowlist.
+   * By default, user allowlist entries cannot override critical malware signatures (`isCritical: true`)
+   * unless `options.allowCriticalOverride === true` is explicitly passed under documented policy.
+   */
+  public addAllowedHash(
+    hash: string,
+    options?: { allowCriticalOverride?: boolean }
+  ): void {
+    if (!hash || typeof hash !== 'string') return;
+    const normalized = hash.toLowerCase().trim();
+    if (!normalized) return;
+    this.fileAllowlist.add(normalized);
+    this.goodHashes.add(normalized);
+    if (options?.allowCriticalOverride === true) {
+      this.criticalOverrideAllowlist.add(normalized);
+    }
+  }
+
+  public removeAllowedHash(hash: string): void {
+    if (!hash || typeof hash !== 'string') return;
+    const normalized = hash.toLowerCase().trim();
+    this.fileAllowlist.delete(normalized);
+    this.goodHashes.delete(normalized);
+    this.criticalOverrideAllowlist.delete(normalized);
+  }
+
+  public isHashAllowed(hash: string): boolean {
+    if (!hash || typeof hash !== 'string') return false;
+    const normalized = hash.toLowerCase().trim();
+    return this.fileAllowlist.has(normalized) || this.goodHashes.has(normalized);
+  }
+
   public isAllowed(target: string): boolean {
-    if (!target) return false;
-    const hash = sha256(target.toLowerCase().trim());
+    if (!target || typeof target !== 'string') return false;
+    const trimmed = target.toLowerCase().trim();
+    if (BloomFilter.isSha256Hex(trimmed) && this.goodHashes.has(trimmed)) {
+      return true;
+    }
+    const hash = sha256(trimmed);
     return this.goodHashes.has(hash);
   }
 
@@ -221,27 +328,153 @@ export class ThreatIntel {
       category?: RiskCategory | string;
       severity?: SeverityLevel | string;
       threatType?: 'DOMAIN' | 'URL' | 'IP' | 'HASH';
+      threatName?: string;
+      sourceFeed?: string;
+      isCritical?: boolean;
     }
   ): void {
-    if (!hash) return;
+    if (!hash || typeof hash !== 'string') return;
     const normalized = hash.toLowerCase().trim();
+    if (!normalized) return;
     const expiresAt = options?.ttl !== undefined ? Date.now() + options.ttl : undefined;
+    const threatType = options?.threatType || 'HASH';
     this.bloomFilter.add(normalized);
     this.badHashes.set(normalized, {
       hash: normalized,
       expiresAt,
-      category: options?.category || RiskCategory.PHISHING,
-      severity: options?.severity || SeverityLevel.HIGH,
-      threatType: options?.threatType || 'HASH'
+      category:
+        options?.category ||
+        (threatType === 'HASH' ? RiskCategory.MALWARE : RiskCategory.PHISHING),
+      severity:
+        options?.severity ||
+        (threatType === 'HASH' ? SeverityLevel.CRITICAL : SeverityLevel.HIGH),
+      threatType,
+      threatName: options?.threatName,
+      sourceFeed: options?.sourceFeed || 'LOCAL_HASH_INTEL',
+      isCritical: options?.isCritical ?? (threatType === 'HASH')
     });
+    this.lastUpdated = Date.now();
   }
 
-  public checkHash(hash: string): ThreatIntelResult {
-    const normalizedHash = hash.toLowerCase().trim();
-
-    // 1. Explicit verified allowlist has absolute precedence
-    if (this.goodHashes.has(normalizedHash)) {
+  /**
+   * Canonical O(1) SHA-256 Hash Intelligence Lookup (Phase B Steps 4 & 6).
+   * Returns explicit KNOWN_GOOD, KNOWN_BAD, or UNKNOWN state.
+   * Never defaults an unrecognized hash or Bloom-filter-only hit to KNOWN_GOOD or KNOWN_BAD.
+   */
+  public lookupHash(
+    hash: string,
+    options?: { allowUserOverrideOnCritical?: boolean }
+  ): HashLookupResult {
+    if (!hash || typeof hash !== 'string') {
       return {
+        hash: '',
+        status: 'UNKNOWN',
+        disposition: 'UNKNOWN',
+        isMalicious: false,
+        isAllowed: false,
+        confidence: 0,
+        bloomFilterHit: false
+      };
+    }
+
+    const normalizedHash = hash.toLowerCase().trim();
+    if (!normalizedHash) {
+      return {
+        hash: '',
+        status: 'UNKNOWN',
+        disposition: 'UNKNOWN',
+        isMalicious: false,
+        isAllowed: false,
+        confidence: 0,
+        bloomFilterHit: false
+      };
+    }
+
+    const isInGoodList =
+      this.fileAllowlist.has(normalizedHash) || this.goodHashes.has(normalizedHash);
+    const hasCriticalOverrideGrant =
+      options?.allowUserOverrideOnCritical === true ||
+      this.criticalOverrideAllowlist.has(normalizedHash);
+
+    // Check Bloom Filter fast-path
+    const bloomHit = this.bloomFilter.has(normalizedHash);
+    if (bloomHit) {
+      const entry = this.badHashes.get(normalizedHash);
+      if (entry) {
+        if (entry.expiresAt && Date.now() > entry.expiresAt) {
+          this.badHashes.delete(normalizedHash);
+        } else {
+          // Precedence check:
+          // Domain/URL entries or non-critical entries yield to goodHashes allowlist.
+          // Critical HASH entries (isCritical === true) ONLY yield if explicit critical override policy is granted.
+          const isCriticalHashEntry = entry.threatType === 'HASH' && entry.isCritical !== false;
+          if (isInGoodList && (!isCriticalHashEntry || hasCriticalOverrideGrant)) {
+            return {
+              hash: normalizedHash,
+              status: 'KNOWN_GOOD',
+              disposition: 'KNOWN_GOOD',
+              isMalicious: false,
+              isAllowed: true,
+              confidence: 1.0,
+              bloomFilterHit: true
+            };
+          }
+
+          const stalenessPenalty = this.getStalenessPenalty();
+          const effectiveConfidence = Math.max(0.5, 1.0 - stalenessPenalty);
+          return {
+            hash: normalizedHash,
+            status: 'KNOWN_BAD',
+            disposition: 'KNOWN_BAD',
+            isMalicious: true,
+            isAllowed: false,
+            isCritical: isCriticalHashEntry,
+            threatName: entry.threatName || 'KNOWN_MALICIOUS_INDICATOR',
+            category: entry.category || RiskCategory.MALWARE,
+            severityLevel: entry.severity || SeverityLevel.CRITICAL,
+            sourceFeed: entry.sourceFeed,
+            confidence: effectiveConfidence,
+            bloomFilterHit: true
+          };
+        }
+      }
+    }
+
+    if (isInGoodList) {
+      return {
+        hash: normalizedHash,
+        status: 'KNOWN_GOOD',
+        disposition: 'KNOWN_GOOD',
+        isMalicious: false,
+        isAllowed: true,
+        confidence: 1.0,
+        bloomFilterHit: bloomHit
+      };
+    }
+
+    // Explicit UNKNOWN state (including when bloomHit === true due to Bloom filter false positive)
+    return {
+      hash: normalizedHash,
+      status: 'UNKNOWN',
+      disposition: 'UNKNOWN',
+      isMalicious: false,
+      isAllowed: false,
+      confidence: 0.5,
+      bloomFilterHit: bloomHit
+    };
+  }
+
+  public checkHash(
+    hash: string,
+    options?: { allowUserOverrideOnCritical?: boolean }
+  ): ThreatIntelResult {
+    const lookup = this.lookupHash(hash, options);
+
+    if (lookup.status === 'KNOWN_GOOD') {
+      return {
+        ruleId: 'threat-intel-allowlist',
+        detectorType: DetectorType.THREAT_INTEL,
+        detectorLayer: DetectorLayer.HASH_INTEL,
         source: 'THREAT_INTEL',
         name: 'Known Good Domain',
         description: 'Target is on the verified local allowlist',
@@ -249,69 +482,67 @@ export class ThreatIntel {
         scoreContribution: 0,
         confidence: 1.0,
         isMalicious: false,
-        isAllowed: true
+        isAllowed: true,
+        status: 'KNOWN_GOOD',
+        disposition: 'KNOWN_GOOD',
+        bloomFilterHit: lookup.bloomFilterHit
       };
     }
 
-    // 2. High-speed O(1) Bloom filter test: if not in Bloom filter, guaranteed clean (zero false negatives)
-    if (!this.bloomFilter.has(normalizedHash)) {
+    if (lookup.status === 'KNOWN_BAD') {
+      const entry = this.badHashes.get(lookup.hash);
       return {
+        ruleId: 'threat-intel-known-bad',
+        detectorType: DetectorType.THREAT_INTEL,
+        detectorLayer: DetectorLayer.HASH_INTEL,
         source: 'THREAT_INTEL',
-        name: 'Clean Target',
-        description: 'No threat intelligence flags for this target',
-        weight: 0,
-        scoreContribution: 0,
-        confidence: 0.5,
-        isMalicious: false
+        name: 'Known Malicious Indicator',
+        description: `Target matches local threat intelligence blocklist (${entry?.threatType || 'INDICATOR'})`,
+        weight: 100,
+        scoreContribution: 100,
+        confidence: lookup.confidence,
+        isMalicious: true,
+        isAllowed: false,
+        isCriticalOverride: true,
+        status: 'KNOWN_BAD',
+        disposition: 'KNOWN_BAD',
+        threatType: entry?.threatType,
+        threatName: lookup.threatName,
+        category: lookup.category,
+        severityLevel: lookup.severityLevel,
+        bloomFilterHit: true
       };
     }
 
-    // 3. Bloom filter match verification against confirmed local hash index & TTL
-    const entry = this.badHashes.get(normalizedHash);
-    if (entry) {
-      if (entry.expiresAt && Date.now() > entry.expiresAt) {
-        // Expired entry is purged
-        this.badHashes.delete(normalizedHash);
-      } else {
-        const stalenessPenalty = this.getStalenessPenalty();
-        const effectiveConfidence = Math.max(0.5, 1.0 - stalenessPenalty);
-        return {
-          source: 'THREAT_INTEL',
-          name: 'Known Malicious Indicator',
-          description: `Target matches local threat intelligence blocklist (${entry.threatType || 'INDICATOR'})`,
-          weight: 100,
-          scoreContribution: 100,
-          confidence: effectiveConfidence,
-          isMalicious: true,
-          isCriticalOverride: true,
-          threatType: entry.threatType,
-          category: entry.category,
-          severityLevel: entry.severity
-        };
-      }
-    }
-
-    // Bloom filter false positive or removed entry
     return {
+      ruleId: 'threat-intel-unknown',
+      detectorType: DetectorType.THREAT_INTEL,
+      detectorLayer: DetectorLayer.HASH_INTEL,
       source: 'THREAT_INTEL',
       name: 'Clean Target',
       description: 'No threat intelligence flags for this target',
       weight: 0,
       scoreContribution: 0,
       confidence: 0.5,
-      isMalicious: false
+      isMalicious: false,
+      isAllowed: false,
+      status: 'UNKNOWN',
+      disposition: 'UNKNOWN',
+      bloomFilterHit: lookup.bloomFilterHit
     };
   }
 
   public checkDomain(domain: string): ThreatIntelResult {
-    if (!domain) {
+    if (!domain || typeof domain !== 'string' || !domain.trim()) {
       return {
         source: 'THREAT_INTEL',
         name: 'Clean Domain',
         description: 'Empty domain provided',
         weight: 0,
         confidence: 0.5,
-        isMalicious: false
+        isMalicious: false,
+        status: 'UNKNOWN',
+        disposition: 'UNKNOWN'
       };
     }
     const hash = sha256(domain.toLowerCase().trim());
@@ -319,14 +550,16 @@ export class ThreatIntel {
   }
 
   public checkUrl(url: string): ThreatIntelResult {
-    if (!url) {
+    if (!url || typeof url !== 'string' || !url.trim()) {
       return {
         source: 'THREAT_INTEL',
         name: 'Clean URL',
         description: 'Empty URL provided',
         weight: 0,
         confidence: 0.5,
-        isMalicious: false
+        isMalicious: false,
+        status: 'UNKNOWN',
+        disposition: 'UNKNOWN'
       };
     }
     // Check exact URL hash first
@@ -338,7 +571,9 @@ export class ThreatIntel {
 
     // Then check domain component if URL parses
     try {
-      const parsed = new URL(url.startsWith('http://') || url.startsWith('https://') ? url : `http://${url}`);
+      const parsed = new URL(
+        url.startsWith('http://') || url.startsWith('https://') ? url : `http://${url}`
+      );
       return this.checkDomain(parsed.hostname);
     } catch {
       return urlResult;
@@ -346,14 +581,16 @@ export class ThreatIntel {
   }
 
   public checkIp(ip: string): ThreatIntelResult {
-    if (!ip) {
+    if (!ip || typeof ip !== 'string' || !ip.trim()) {
       return {
         source: 'THREAT_INTEL',
         name: 'Clean IP',
         description: 'Empty IP provided',
         weight: 0,
         confidence: 0.5,
-        isMalicious: false
+        isMalicious: false,
+        status: 'UNKNOWN',
+        disposition: 'UNKNOWN'
       };
     }
     const hash = sha256(ip.toLowerCase().trim());

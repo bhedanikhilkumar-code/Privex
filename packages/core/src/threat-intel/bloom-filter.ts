@@ -69,21 +69,21 @@ export class BloomFilter {
   /**
    * Adds an element (string or buffer) to the Bloom filter.
    */
-  public add(item: string | Uint8Array): void {
+   public add(item: string | Uint8Array): void {
     const [h1, h2] = this.hash(item);
-    let newlySet = false;
+    const m = this.m;
+    const bits = this.bits;
 
     for (let i = 0; i < this.k; i++) {
       // Kirsch-Mitzenmacher: (h1 + i * h2) mod m
-      // Use unsigned 32-bit arithmetic
-      const bitIndex = Number((BigInt(h1) + BigInt(i) * BigInt(h2)) % BigInt(this.m));
-      const byteIndex = bitIndex >> 3;
+      // Safe integer arithmetic: h1, h2 < 2^32, k <= 16 -> h1 + i * h2 <= 7.3e10 << Number.MAX_SAFE_INTEGER
+      const bitIndex = (h1 + i * h2) % m;
+      const byteIndex = bitIndex >>> 3;
       const bitMask = 1 << (bitIndex & 7);
 
-      if ((this.bits[byteIndex] & bitMask) === 0) {
-        this.bits[byteIndex] |= bitMask;
+      if ((bits[byteIndex] & bitMask) === 0) {
+        bits[byteIndex] |= bitMask;
         this.setBitsCount++;
-        newlySet = true;
       }
     }
 
@@ -94,16 +94,20 @@ export class BloomFilter {
    * Checks whether an element is probably in the Bloom filter.
    * If returns false: 100% guaranteed NOT in the filter (zero false negatives).
    * If returns true: element is probably in the filter (bounded false positive rate).
+   * NOTE: A Bloom filter positive is a candidate signal only, NOT a final malicious verdict.
    */
   public has(item: string | Uint8Array): boolean {
+    if (item === null || item === undefined) return false;
     const [h1, h2] = this.hash(item);
+    const m = this.m;
+    const bits = this.bits;
 
     for (let i = 0; i < this.k; i++) {
-      const bitIndex = Number((BigInt(h1) + BigInt(i) * BigInt(h2)) % BigInt(this.m));
-      const byteIndex = bitIndex >> 3;
+      const bitIndex = (h1 + i * h2) % m;
+      const byteIndex = bitIndex >>> 3;
       const bitMask = 1 << (bitIndex & 7);
 
-      if ((this.bits[byteIndex] & bitMask) === 0) {
+      if ((bits[byteIndex] & bitMask) === 0) {
         return false;
       }
     }
@@ -222,9 +226,53 @@ export class BloomFilter {
   }
 
   /**
-   * Computes two independent 32-bit unsigned hashes from SHA-256 for Kirsch-Mitzenmacher double hashing.
+   * Fast-path validation that a string is a 64-character hexadecimal SHA-256 digest.
+   */
+  public static isSha256Hex(str: string): boolean {
+    if (typeof str !== 'string' || str.length !== 64) return false;
+    for (let i = 0; i < 64; i++) {
+      const c = str.charCodeAt(i);
+      const isDigit = c >= 48 && c <= 57;
+      const isLowerHex = c >= 97 && c <= 102;
+      const isUpperHex = c >= 65 && c <= 70;
+      if (!isDigit && !isLowerHex && !isUpperHex) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static parseHexByte(str: string, offset: number): number {
+    const c0 = str.charCodeAt(offset);
+    const c1 = str.charCodeAt(offset + 1);
+    const n0 = c0 <= 57 ? c0 - 48 : c0 <= 70 ? c0 - 55 : c0 - 87;
+    const n1 = c1 <= 57 ? c1 - 48 : c1 <= 70 ? c1 - 55 : c1 - 87;
+    return ((n0 << 4) | n1) & 0xff;
+  }
+
+  /**
+   * Computes two independent 32-bit unsigned hashes for Kirsch-Mitzenmacher double hashing.
+   * Phase B Step 5 Optimization: If `item` is already a 64-char SHA-256 hex digest,
+   * extracts [h1, h2] directly from the first 8 digest bytes in O(1) with zero heap allocations
+   * instead of hashing the hex string a second time.
    */
   private hash(item: string | Uint8Array): [number, number] {
+    if (typeof item === 'string' && BloomFilter.isSha256Hex(item)) {
+      const b0 = BloomFilter.parseHexByte(item, 0);
+      const b1 = BloomFilter.parseHexByte(item, 2);
+      const b2 = BloomFilter.parseHexByte(item, 4);
+      const b3 = BloomFilter.parseHexByte(item, 6);
+      const h1 = (b0 | (b1 << 8) | (b2 << 16) | (b3 << 24)) >>> 0;
+
+      const b4 = BloomFilter.parseHexByte(item, 8);
+      const b5 = BloomFilter.parseHexByte(item, 10);
+      const b6 = BloomFilter.parseHexByte(item, 12);
+      const b7 = BloomFilter.parseHexByte(item, 14);
+      const h2 = ((b4 | (b5 << 8) | (b6 << 16) | (b7 << 24)) | 1) >>> 0;
+
+      return [h1, h2];
+    }
+
     const buf = typeof item === 'string' ? Buffer.from(item, 'utf-8') : Buffer.from(item);
     const digest = crypto.createHash('sha256').update(buf).digest();
 
