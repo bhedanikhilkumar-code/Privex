@@ -101,6 +101,11 @@ export class CleanFileCache {
       return;
     }
 
+    // Never cache anything that is not verified clean.
+    if (options?.verdict !== undefined && options.verdict !== Verdict.ALLOW) return;
+    if (options?.engineVerdict !== undefined && options.engineVerdict !== EngineVerdict.ALLOW) return;
+    if (options?.riskScore !== undefined && options.riskScore > 0) return;
+
     const key = this.buildKey(filePath, fileSize, mtimeMs);
 
     // Evict oldest if capacity exceeded

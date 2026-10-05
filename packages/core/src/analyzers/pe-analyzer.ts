@@ -66,7 +66,30 @@ export class PeAnalyzer {
   public static readonly MAX_SECTIONS = 96;
   public static readonly MIN_PE_SIZE = 256;
 
+  /** Maximum bytes decoded into a string for API-name pattern search. */
+  public static readonly MAX_API_SCAN_BYTES = 1024 * 1024;
+
+  /**
+   * Public entry point. Fail-closed: any unexpected error yields a malformed
+   * PE result carrying `pe-malformed-structure` evidence, never a throw.
+   */
   public static analyze(
+    buffer: Uint8Array | number[],
+    actualFileSize?: number
+  ): PeAnalysisResult {
+    try {
+      return PeAnalyzer.analyzeUnsafe(buffer, actualFileSize);
+    } catch (err) {
+      const reason = `pe-parse-failed: ${err instanceof Error ? err.message : 'unknown error'}`;
+      const failed = PeAnalyzer.analyzeUnsafe(new Uint8Array(0));
+      failed.malformedReason = reason;
+      failed.evidence[0].reason = reason;
+      failed.evidence[0].description = `PE binary parsing failed safely: ${reason}`;
+      return failed;
+    }
+  }
+
+  private static analyzeUnsafe(
     buffer: Uint8Array | number[],
     actualFileSize?: number
   ): PeAnalysisResult {
@@ -165,8 +188,15 @@ export class PeAnalyzer {
     let hasTlsCallbacks = false;
 
     if (sizeOfOptionalHeader >= 68) {
+      if (optHeaderOffset + 96 > uint8.length) {
+        return defaultFailResult('Truncated optional header');
+      }
       const optMagic = view.getUint16(optHeaderOffset, true);
       is64Bit = optMagic === 0x20b; // PE32+ (64-bit)
+      const fixedLen = is64Bit ? 112 : 96;
+      if (sizeOfOptionalHeader < fixedLen || optHeaderOffset + fixedLen > uint8.length) {
+        return defaultFailResult('Truncated optional header');
+      }
 
       entryPointRva = view.getUint32(optHeaderOffset + 16, true);
       subsystem = view.getUint16(optHeaderOffset + 68, true);
@@ -247,8 +277,12 @@ export class PeAnalyzer {
         sectionEntropy = EntropyScanner.calculateEntropy(sectionSlice);
       }
 
-      if (rawOffset + rawSize > maxSectionEndOffset) {
-        maxSectionEndOffset = rawOffset + rawSize;
+      const fileLimit = Math.max(uint8.length, actualFileSize ?? 0);
+      if (rawOffset > 0 && rawSize > 0 && rawOffset <= fileLimit) {
+        const sectionEnd = Math.min(rawOffset + rawSize, fileLimit);
+        if (sectionEnd > maxSectionEndOffset) {
+          maxSectionEndOffset = sectionEnd;
+        }
       }
 
       sections.push({
@@ -277,7 +311,9 @@ export class PeAnalyzer {
     // 8. Suspicious API Pattern Search (Process Injection, Credential Theft, Evasion)
     const suspiciousApiPatterns: string[] = [];
     const textDecoder = new TextDecoder('utf-8', { fatal: false });
-    const bufferString = textDecoder.decode(uint8);
+    const bufferString = textDecoder.decode(
+      uint8.subarray(0, Math.min(uint8.length, PeAnalyzer.MAX_API_SCAN_BYTES))
+    );
 
     // Injection cluster
     const hasVirtualAlloc = bufferString.includes('VirtualAlloc') || bufferString.includes('VirtualAllocEx');

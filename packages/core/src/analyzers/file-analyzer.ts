@@ -510,6 +510,7 @@ export class CoreFileAnalyzer {
         evidenceFactors.push(desc);
         evidence.push({
           ruleId: 'file-double-extension',
+              detectorLayer: DetectorLayer.METADATA_ANALYZER,
           detectorType: DetectorType.HEURISTIC,
           source: 'FileHeaderAnalyzer',
           name: 'Deceptive Double Extension',
@@ -613,6 +614,7 @@ export class CoreFileAnalyzer {
         threatName = 'DECEPTIVE_DOUBLE_EXTENSION';
         evidence.push({
           ruleId: 'file-double-extension',
+              detectorLayer: DetectorLayer.METADATA_ANALYZER,
           detectorType: DetectorType.HEURISTIC,
           source: 'FileHeaderAnalyzer',
           name: 'Deceptive Double Extension',
@@ -654,12 +656,13 @@ export class CoreFileAnalyzer {
           evidenceFactors.push(synergyDesc);
           evidence.push({
             ruleId: 'file-double-ext-binary-synergy',
+              detectorLayer: DetectorLayer.METADATA_ANALYZER,
             detectorType: DetectorType.RULE,
             source: 'FileHeaderAnalyzer',
             name: 'Deceptive Double Extension Binary Payload',
             description: synergyDesc,
-            weight: 30,
-            scoreContribution: 30,
+            weight: 95,
+            scoreContribution: 95,
             confidence: 0.99,
             isCriticalOverride: true
           });
@@ -679,6 +682,7 @@ export class CoreFileAnalyzer {
         threatName = 'DISGUISED_EXECUTABLE';
         evidence.push({
           ruleId: 'file-disguised-executable',
+              detectorLayer: DetectorLayer.METADATA_ANALYZER,
           detectorType: DetectorType.RULE,
           source: 'FileHeaderAnalyzer',
           name: 'Disguised Executable Header',
@@ -695,6 +699,7 @@ export class CoreFileAnalyzer {
         riskScore += 15;
         evidence.push({
           ruleId: 'file-executable-extension',
+              detectorLayer: DetectorLayer.METADATA_ANALYZER,
           detectorType: DetectorType.HEURISTIC,
           source: 'FileHeaderAnalyzer',
           name: 'Executable Extension',
@@ -763,19 +768,34 @@ export class CoreFileAnalyzer {
       ) {
         try {
           const peRes = PeAnalyzer.analyze(bytes, request.fileSize);
-          if (peRes.isValidPe) {
-            for (const ev of peRes.evidence) {
-              if (!evidence.some((e) => e.ruleId === ev.ruleId)) {
-                evidence.push(ev);
-                evidenceFactors.push(ev.description);
-                if (ev.scoreContribution) {
-                  riskScore = Math.max(riskScore, ev.scoreContribution);
-                }
+          for (const ev of peRes.evidence) {
+            if (!evidence.some((e) => e.ruleId === ev.ruleId)) {
+              evidence.push(ev);
+              evidenceFactors.push(ev.description);
+              if (ev.scoreContribution) {
+                riskScore = Math.max(riskScore, ev.scoreContribution);
               }
             }
           }
         } catch {
-          // Handled safely
+          // Fail closed: never silently pass an unparseable executable
+          const failEv: Evidence = {
+            ruleId: 'pe-malformed-structure',
+            detectorType: DetectorType.HEURISTIC,
+            detectorLayer: DetectorLayer.STRUCTURAL_PARSER,
+            source: 'PE_ANALYZER',
+            name: 'PE Analysis Failed',
+            description: 'PE analysis failed unexpectedly; file treated as suspicious.',
+            reason: 'pe-parse-failed',
+            severityLevel: SeverityLevel.MEDIUM,
+            weight: 50,
+            scoreContribution: 50,
+            confidence: 0.8,
+            isMalicious: false
+          };
+          evidence.push(failEv);
+          evidenceFactors.push(failEv.description);
+          riskScore = Math.max(riskScore, 50);
         }
       }
 

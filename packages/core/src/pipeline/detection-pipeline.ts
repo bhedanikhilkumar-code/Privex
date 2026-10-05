@@ -400,12 +400,34 @@ export class DetectionPipeline {
           }
         }
 
-        const riskCategory =
-          riskScore >= 50
-            ? RiskCategory.MALWARE
-            : riskScore >= 20
-            ? RiskCategory.SUSPICIOUS
-            : RiskCategory.SAFE;
+        // Canonical decision authority: all file evidence is aggregated by RiskScorer.
+        const fileScore = this.riskScorer.calculate(evidence, this.threatIntel.getStalenessDays(), {
+          inputType: InputType.FILE
+        });
+        riskScore = fileScore.score;
+        verdict = fileScore.verdict || Verdict.ALLOW;
+        engineVerdict = fileScore.engineVerdict;
+        severity = fileScore.severity;
+        recommendation = fileScore.recommendation;
+        disposition =
+          fileScore.recommendation === ActionRecommendation.BLOCK
+            ? 'MALICIOUS'
+            : fileScore.recommendation === ActionRecommendation.WARN ||
+              fileScore.recommendation === ActionRecommendation.INFORM
+            ? 'SUSPICIOUS'
+            : 'SAFE';
+
+        // Fail-closed: a failed analysis can never resolve to ALLOW/SAFE
+        if (fileOut.analysisStatus === 'ANALYSIS_FAILED' && engineVerdict === EngineVerdict.ALLOW) {
+          engineVerdict = EngineVerdict.WARN;
+          verdict = Verdict.CAUTION;
+          recommendation = ActionRecommendation.WARN;
+          disposition = 'ANALYSIS_FAILED';
+          riskScore = Math.max(riskScore, 30);
+          severity = severity === SeverityLevel.NONE ? SeverityLevel.MEDIUM : severity;
+        }
+
+        const riskCategory = fileScore.category;
 
         const riskAssessment: RiskAssessment = {
           overallScore: riskScore,
