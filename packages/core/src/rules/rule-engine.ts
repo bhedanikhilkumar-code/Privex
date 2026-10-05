@@ -672,7 +672,7 @@ export class RuleEngine {
         if (inputType !== InputType.PROCESS && inputType !== InputType.FILE) return null;
         const lower = input.toLowerCase();
         if (
-          /(?:^|\s)-(?:enc|encodedcommand)\s+[a-z0-9+/=]{12,}/i.test(input) ||
+          /(?:^|\s)-(?:e|enc|encodedcommand)\s+[a-z0-9+/=]{8,}/i.test(input) ||
           lower.includes('frombase64string(')
         ) {
           return {

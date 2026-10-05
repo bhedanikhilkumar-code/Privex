@@ -302,7 +302,11 @@ export class RiskScorer {
       (id) => id.includes('threat') || id.includes('extortion') || id.includes('arrest')
     );
     const hasPayment = Array.from(uniqueRuleIds).some(
-      (id) => id.includes('crypto') || id.includes('payment') || id.includes('bitcoin')
+      (id) =>
+        id.includes('crypto') ||
+        id.includes('payment') ||
+        id.includes('bitcoin') ||
+        id.includes('financial')
     );
     if (hasUrgency && (hasThreat || hasPayment) && uniqueRuleIds.size >= 2) {
       const boost = hasThreat && hasPayment ? 30 : 20;

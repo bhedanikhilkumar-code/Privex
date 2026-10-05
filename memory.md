@@ -112,18 +112,20 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from a basic 
 
 ## 9. Current Phase & Next Phase
 
-- **Current Phase Completed:** **`PHASE A — Antivirus Baseline + Security Core Hardening`** (Completed, verified across all monorepo workspaces, and audited).
-  - **Phase A Verified Capabilities:**
-    - Canonical path & IPC validation (`fs.realpathSync.native()` blocking Windows 8.3 short names and directory junctions, NTFS ADS `:` rejection, URL-encoded traversal `%2e%2e` rejection, sender origin validation, per-channel rate limiting, and single-use Friction Gate challenge tokens).
-    - Safe on-disk file inspection (`DesktopFileAnalyzer` single `fd` open + `fd.stat()` eliminating `stat`->`open` TOCTOU races, partial/short read loop slicing exact `totalBytesRead` bytes to prevent zero-padded entropy dilution, 64 KB header slice + 64 KB streaming SHA-256, and fail-closed `analyzeFileSafe()`).
-    - Bounded, fail-closed directory scanning (`ScannerService` `maxDepth = 64`, `NaN` guards, `followSymlinks: false`, `LOCKED_DECEPTIVE_FILE` detection on locked double-extension executables, and fail-closed `overallVerdict = 'WARN'` when scan errors occur).
-    - Deterministic Core verdicts (`DetectionPipeline` `request.timestamp` support, `AnalysisStatus` & `DetectionDisposition` taxonomy, `UNREADABLE_FILE_HEADER` fail-closed handling, trailing dot/space & Unicode RTLO `\u202E` spoofing detection, standard `EICAR` test signature detection, and `FILEHEADERANALYZER` reliability weight calibration).
-    - Hardened Quarantine foundation (`QuarantineService` symlinked vault rejection, `isPathInsideVault()` confinement, atomic `manifest.json.tmp` + `fsync` + `manifest.json.bak` failover recovery, `.blob.tmp` rollback on unlink failure, and trailing dot/space/RTLO stripping before Windows reserved device name checks).
-    - Hardened Configuration & Bounded Security Logging (`SecureStorageService` field-level schema sanitization, atomic `settings.enc.tmp` + `.bak` recovery, key zeroization on `purgeAllData()`, and bounded 250-event ring buffer with zero Tier-1 raw content).
-  - **Phase A Empirical Performance Baseline (`docs/PHASE_A_PERFORMANCE_BASELINE.md`):**
-    - Cold Core init: `2.83 ms` | Full Desktop Service Graph (`IpcHandler`) init: `p50 = 57.93 ms` | Scanner startup: `p50 = 0.024 ms`
-    - `1 KB` file scan: `p50 = 2.10 ms` | `1 MB` file scan: `p50 = 8.87 ms` | `25 MB` file scan: `p50 = 127.72 ms` (`-1.01 MB` heap delta)
-    - `100-file` directory scan (10 nested folders): `p50 = 429.46 ms` (`~4.29 ms/file`) | Baseline RSS: `81.24 MB` (`13.45 MB` heap) | System-normalized CPU: `3.41%`
+- **Previously Completed:** **`PHASE A — Antivirus Baseline + Security Core Hardening`** (`docs/PHASE_A_COMPLETION.md`, `docs/PHASE_A_PERFORMANCE_BASELINE.md`).
+- **Current Phase Completed:** **`PHASE B — Core Detection Engine Expansion`** (`docs/PHASE_B_COMPLETION.md`).
+  - **Phase B Verified Capabilities (`@private-protection/core`):**
+    - Canonical Input & Process Foundation (`InputType.PROCESS`, `TargetType.PROCESS`, `PrescribedAction.CONTAIN_PROCESS`, `ProcessInputMetadata`, `ProcessScanRequest`, `ProcessScanResult`, and `ProcessAnalyzer` with automatic CLI credential/JWT/token redaction via `ProcessAnalyzer.sanitizeCommandLine()`, high-risk writable directory detection, and macro/document-reader shell spawn detection).
+    - Canonical Hash Intelligence & $O(1)$ 64-Hex Bloom Filter Fast-Path (`BloomFilter.isSha256Hex()` + unsigned 32-bit integer arithmetic achieving `0.00172 ms` per lookup; `ThreatIntel.lookupHash()` returning `KNOWN_GOOD`, `KNOWN_BAD`, or `UNKNOWN`; seeded `EICAR_SHA256` and synthetic malware hashes; Bloom false-positive safety returning `UNKNOWN` without `badHashes` confirmation; critical malware hash precedence preventing standard user allowlists from overriding critical hashes without `allowCriticalOverride: true`).
+    - Structured `RuleEngine` Signal Emission (`ruleId`, `detectorType`, `detectorLayer`, `reason`, `severityLevel`, `scoreContribution`, `metadata`, `evaluateFile()`, `evaluateProcess()`, and deterministic `FILE` / `PROCESS` rules `file-eicar-signature`, `proc-encoded-command`, `proc-lolbin-cradle`, `proc-defense-evasion`).
+    - 8-Layer `DetectorLayer` Model & 6-Tier `EngineVerdict` Policy (`RiskScorer` calibrated across `HASH_INTEL`, `SIGNATURE_ENGINE`, `CORRELATION_ENGINE`, `BEHAVIORAL_ENGINE`, `STRUCTURAL_PARSER`, `METADATA_ANALYZER`, `REPUTATION_LOCAL`, and `STATIC_HEURISTIC`; Layer 8 cross-layer correlation with `ruleId` deduplication; signal-dilution attack defense so 1 critical signal + 50 benign signals never dilute below `BLOCK`/`QUARANTINE`; strict partial-`NaN`/`Infinity` fail-closed guard; and 6-tier `EngineVerdict`: `ALLOW`, `INFORM`, `WARN`, `BLOCK`, `QUARANTINE`, `CONTAIN_PROCESS`).
+    - Explicit `DetectorLayerState` tracking (`EXECUTED`, `NOT_RUN`, `UNAVAILABLE`, `FAILED` — never misrepresenting unexecuted future layers like `BEHAVIORAL_ENGINE` as `SAFE`).
+  - **Phase B Empirical Hot-Path Benchmarks:**
+    - `BloomFilter.has()` (64-char hex): `0.00172 ms` (Target: `< 0.02000 ms`)
+    - `ThreatIntel.lookupHash()`: `0.00978 ms` (Target: `< 0.05000 ms`)
+    - `RiskScorer.calculateScore()`: `0.02762 ms` (Target: `< 0.05000 ms`)
+    - `DetectionPipeline.scan()` average across `URL`, `TEXT`, `FILE`, `PROCESS`: `0.2713 ms` (Target: `< 1.0000 ms`)
 - **Next Phase (Awaiting User Command):**
-  - **`PHASE B: Core Antivirus Engine Expansion`** (Expanding the 10-layer malware detection engine with `CleanFileCache`, SHA-256 Bloom/exact malware lookup wiring, Aho-Corasick byte/string signature scanner, zero-allocation `DataView` PE32/PE32+ structural parser, bounded ZIP/archive inspector, and Office macro/script de-obfuscation), followed sequentially by `PHASE C` through `PHASE S` as defined in `phase.md`.
+  - **`PHASE C`** as defined in `phase.md`.
+
 
