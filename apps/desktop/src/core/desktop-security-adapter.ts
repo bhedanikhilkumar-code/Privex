@@ -55,10 +55,22 @@ export class DesktopSecurityAdapter {
     let combinedScore = coreResult.riskScore || 0;
     let verdict = (coreResult.verdict as Verdict) || Verdict.ALLOW;
     let severity = (coreResult.riskAssessment?.severity as SeverityLevel) || SeverityLevel.NONE;
+    let riskAssessment = coreResult.riskAssessment;
     const evidence = [...(coreResult.evidence || [])];
     if (semanticResult.isDeceptive && semanticResult.evidenceToken) {
       evidence.push(semanticResult.evidenceToken);
-      combinedScore = Math.min(100, Math.max(combinedScore, semanticResult.evidenceToken.scoreContribution || semanticResult.evidenceToken.weight || 50));
+      const recalculated = this.pipeline.riskScorer.calculate(
+        evidence,
+        this.pipeline.threatIntel.getStalenessDays()
+      );
+      combinedScore = Math.min(
+        100,
+        Math.max(
+          recalculated.score,
+          coreResult.riskScore || 0,
+          semanticResult.evidenceToken.scoreContribution || semanticResult.evidenceToken.weight || 50
+        )
+      );
       if (combinedScore >= 85) {
         verdict = Verdict.DANGEROUS;
         severity = SeverityLevel.CRITICAL;
@@ -69,12 +81,19 @@ export class DesktopSecurityAdapter {
         verdict = Verdict.CAUTION;
         severity = SeverityLevel.MEDIUM;
       }
+      if (recalculated.riskAssessment) {
+        riskAssessment = {
+          ...recalculated.riskAssessment,
+          overallScore: combinedScore,
+          severity
+        };
+      }
     }
 
     const assistantInput: AssistantInput = {
       requestId: `url-${Date.now()}`,
       verdict,
-      riskAssessment: coreResult.riskAssessment || {
+      riskAssessment: riskAssessment || {
         overallScore: combinedScore,
         confidence: 0.85,
         severity,
@@ -166,7 +185,7 @@ export class DesktopSecurityAdapter {
     let verdict = Verdict.ALLOW;
     if (threat.verdict === 'BLOCK') verdict = Verdict.DANGEROUS;
     else if (threat.verdict === 'WARN') verdict = Verdict.SUSPICIOUS;
-    else if (threat.verdict === 'INFORM') verdict = Verdict.ALLOW;
+    else if (threat.verdict === 'INFORM') verdict = Verdict.INFORM;
 
     let severity = SeverityLevel.NONE;
     if (threat.severity === 'critical') severity = SeverityLevel.CRITICAL;

@@ -50,6 +50,7 @@ export class FileAnalyzer {
     isDeceptive: boolean;
     fakeExt?: string;
     realExt?: string;
+    hasRtloSpoofing?: boolean;
   } {
     return CoreFileAnalyzer.checkDeceptiveExtension(fileName);
   }
@@ -62,32 +63,60 @@ export class FileAnalyzer {
     filePath: string,
     options?: DesktopFileAnalyzeOptions
   ): Promise<FileAnalysisResult> {
-    const stat = await fs.promises.stat(filePath);
+    if (!filePath || typeof filePath !== 'string' || filePath.includes('\0')) {
+      throw new Error('INVALID_FILE_PATH: File path must be a valid non-empty string.');
+    }
+
     const fileName = path.basename(filePath);
+    const fd = await fs.promises.open(filePath, 'r');
+    let stat: fs.Stats;
+    let actualHeaderBuffer: Buffer = Buffer.alloc(0);
 
-    // Read header chunk safely
-    const bytesToRead = Math.min(stat.size, this.MAX_HEADER_READ_BYTES);
-    const headerBuffer = Buffer.alloc(bytesToRead);
+    try {
+      stat = await fd.stat();
+      if (!stat.isFile()) {
+        throw new Error('NOT_A_REGULAR_FILE: Target path is not a regular file.');
+      }
 
-    if (bytesToRead > 0) {
-      const fd = await fs.promises.open(filePath, 'r');
+      const bytesToRead = Math.min(stat.size, this.MAX_HEADER_READ_BYTES);
+      if (bytesToRead > 0) {
+        const rawHeaderBuffer = Buffer.allocUnsafe(bytesToRead);
+        let totalBytesRead = 0;
+        while (totalBytesRead < bytesToRead) {
+          const { bytesRead } = await fd.read(
+            rawHeaderBuffer,
+            totalBytesRead,
+            bytesToRead - totalBytesRead,
+            totalBytesRead
+          );
+          if (bytesRead <= 0) {
+            break;
+          }
+          totalBytesRead += bytesRead;
+        }
+        actualHeaderBuffer = rawHeaderBuffer.subarray(0, totalBytesRead);
+      }
+    } finally {
+      await fd.close();
+    }
+
+    let sha256 = '';
+    if (actualHeaderBuffer.length === stat.size) {
+      sha256 = crypto.createHash('sha256').update(actualHeaderBuffer).digest('hex');
+    } else {
       try {
-        await fd.read(headerBuffer, 0, bytesToRead, 0);
-      } finally {
-        await fd.close();
+        sha256 = await this.computeSha256(filePath);
+      } catch {
+        sha256 = crypto.createHash('sha256').update(actualHeaderBuffer).digest('hex');
       }
     }
 
-    const sha256 =
-      bytesToRead === stat.size
-        ? crypto.createHash('sha256').update(headerBuffer).digest('hex')
-        : await this.computeSha256(filePath);
     const coreOut = CoreFileAnalyzer.analyzeBuffer(
       {
         filePath,
         fileName,
         fileSize: stat.size,
-        headerBytes: headerBuffer
+        headerBytes: actualHeaderBuffer
       },
       {
         sha256,
@@ -109,7 +138,54 @@ export class FileAnalyzer {
       severity: coreOut.desktopSeverity,
       verdict: coreOut.desktopVerdict,
       threatName: coreOut.threatName,
-      evidenceFactors: coreOut.evidenceFactors
+      evidenceFactors: coreOut.evidenceFactors,
+      analysisStatus: coreOut.analysisStatus,
+      disposition: coreOut.disposition,
+      ...(coreOut.errorReason ? { errorReason: coreOut.errorReason } : {})
     };
+  }
+
+  /**
+   * Fail-closed wrapper around analyzeFile that never throws and never converts file
+   * access or analysis errors into SAFE/ALLOW (Step 7).
+   */
+  public static async analyzeFileSafe(
+    filePath: string,
+    options?: DesktopFileAnalyzeOptions
+  ): Promise<FileAnalysisResult> {
+    try {
+      return await this.analyzeFile(filePath, options);
+    } catch (err: any) {
+      const safePath = typeof filePath === 'string' ? filePath : 'unknown';
+      const fileName = typeof filePath === 'string' && filePath ? path.basename(filePath) : 'unknown';
+      const deceptive = this.checkDeceptiveExtension(fileName);
+      const errorCode = err?.code || err?.message || 'ANALYSIS_ERROR';
+      const factors = [
+        `File analysis failed (${errorCode}); fail-closed warning applied.`
+      ];
+      if (deceptive.isDeceptive) {
+        factors.push(
+          `Deceptive extension detected on unreadable file: disguised as '${deceptive.fakeExt}', actual '${deceptive.realExt}'`
+        );
+      }
+      return {
+        filePath: safePath,
+        fileName,
+        fileSize: 0,
+        sha256: '',
+        entropy: 0,
+        magicHeader: null,
+        isExecutable: deceptive.isDeceptive,
+        isDeceptiveExtension: deceptive.isDeceptive,
+        riskScore: deceptive.isDeceptive ? 65 : 50,
+        severity: deceptive.isDeceptive ? 'dangerous' : 'suspicious',
+        verdict: deceptive.isDeceptive ? 'BLOCK' : 'WARN',
+        threatName: deceptive.isDeceptive ? 'LOCKED_DECEPTIVE_EXECUTABLE' : 'ANALYSIS_FAILED',
+        evidenceFactors: factors,
+        analysisStatus: 'ANALYSIS_FAILED',
+        disposition: 'ANALYSIS_FAILED',
+        errorReason: String(errorCode)
+      };
+    }
   }
 }

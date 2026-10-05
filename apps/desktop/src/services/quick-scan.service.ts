@@ -1,6 +1,7 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
+import { CoreFileAnalyzer } from '@private-protection/core';
 import { ScannerService } from './scanner.service';
 import { ScanResult } from '../types/desktop.types';
 
@@ -48,26 +49,30 @@ export class QuickScanService {
   }
 
   /**
-   * Runs the Quick Scan targeting executables and double-extension deceptions.
+   * Runs the Quick Scan targeting executables, scripts, and double-extension/RTLO deceptions.
    */
   public async executeQuickScan(customTargets?: string[]): Promise<ScanResult> {
-    const targets = customTargets && customTargets.length > 0
-      ? customTargets
-      : this.getQuickScanTargets();
-
-    const executableExts = new Set([
-      '.exe', '.dll', '.scr', '.bat', '.cmd', '.ps1', '.vbs', '.js', '.msi', '.pif'
-    ]);
+    const targets =
+      customTargets && customTargets.length > 0
+        ? customTargets
+        : this.getQuickScanTargets();
 
     const isTargetFile = (filePath: string) => {
-      const fileName = path.basename(filePath).toLowerCase();
-      const ext = path.extname(fileName);
+      const rawName = path.basename(filePath);
+      const deceptive = CoreFileAnalyzer.checkDeceptiveExtension(rawName);
+      if (deceptive.isDeceptive) return true;
 
-      // Inspect if declared executable
-      if (executableExts.has(ext)) return true;
+      const normalizedName = rawName
+        .replace(/[\u202A-\u202E\u2066-\u2069]/g, '')
+        .replace(/[. ]+$/, '')
+        .toLowerCase();
+      const ext = path.extname(normalizedName);
+
+      // Inspect if declared executable or script
+      if (CoreFileAnalyzer.EXECUTABLE_EXTENSIONS.has(ext)) return true;
 
       // Inspect if double extension (e.g., invoice.pdf.exe, doc.docx.bat)
-      const parts = fileName.split('.');
+      const parts = normalizedName.split('.').filter((p) => p.length > 0);
       if (parts.length >= 3) return true;
 
       return false;

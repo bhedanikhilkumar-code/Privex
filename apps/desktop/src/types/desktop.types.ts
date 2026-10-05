@@ -2,6 +2,38 @@ export type ScanType = 'quick' | 'full' | 'custom';
 export type ScanStatus = 'idle' | 'running' | 'paused' | 'completed' | 'cancelled' | 'error';
 export type ThreatSeverity = 'safe' | 'low' | 'suspicious' | 'dangerous' | 'critical';
 export type ThreatVerdict = 'ALLOW' | 'INFORM' | 'WARN' | 'BLOCK';
+export type AnalysisStatus = 'COMPLETED' | 'ANALYSIS_FAILED' | 'UNKNOWN';
+export type DetectionDisposition =
+  | 'SAFE'
+  | 'ALLOW'
+  | 'SUSPICIOUS'
+  | 'WARN'
+  | 'MALICIOUS'
+  | 'BLOCK'
+  | 'UNKNOWN'
+  | 'ANALYSIS_FAILED';
+
+export type SecurityLogEventType =
+  | 'SCAN_STARTED'
+  | 'SCAN_COMPLETED'
+  | 'SCAN_FAILED'
+  | 'THREAT_DETECTED'
+  | 'QUARANTINE_ISOLATED'
+  | 'QUARANTINE_RESTORED'
+  | 'QUARANTINE_DELETED'
+  | 'ENGINE_FAILURE'
+  | 'CONFIG_FAILURE'
+  | 'CONFIG_UPDATED'
+  | 'SECURITY_VIOLATION';
+
+export interface SecurityLogEntry {
+  eventId: string;
+  timestamp: number;
+  type: SecurityLogEventType;
+  severity: 'INFO' | 'WARN' | 'ERROR' | 'CRITICAL';
+  summary: string;
+  metadata?: Record<string, string | number | boolean>;
+}
 
 export interface DetectedThreat {
   id: string;
@@ -63,6 +95,8 @@ export interface ScanResult {
   skippedFiles: SkippedItem[];
   errors: ScanErrorItem[];
   overallVerdict: ThreatVerdict;
+  analysisStatus?: AnalysisStatus;
+  disposition?: DetectionDisposition;
   completedAt: number;
 }
 
@@ -94,6 +128,9 @@ export interface FileAnalysisResult {
   verdict: ThreatVerdict;
   threatName: string;
   evidenceFactors: string[];
+  analysisStatus?: AnalysisStatus;
+  disposition?: DetectionDisposition;
+  errorReason?: string;
 }
 
 export interface ProcessInfo {

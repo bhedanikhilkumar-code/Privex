@@ -30,13 +30,37 @@ export class ScannerService extends EventEmitter {
   private maxFileSizeBytes = 50 * 1024 * 1024;
   private entropyDetectionEnabled = true;
   private excludedPaths: Set<string> = new Set();
+  private maxDepth = 64;
+  private followSymlinks = true;
 
   public setMaxFileSizeBytes(bytes: number): void {
+    if (typeof bytes !== 'number' || !Number.isFinite(bytes)) {
+      return;
+    }
     this.maxFileSizeBytes = Math.max(1024 * 1024, Math.floor(bytes));
   }
 
   public getMaxFileSizeBytes(): number {
     return this.maxFileSizeBytes;
+  }
+
+  public setMaxDepth(depth: number): void {
+    if (typeof depth !== 'number' || !Number.isFinite(depth) || depth < 1) {
+      return;
+    }
+    this.maxDepth = Math.min(256, Math.floor(depth));
+  }
+
+  public getMaxDepth(): number {
+    return this.maxDepth;
+  }
+
+  public setFollowSymlinks(follow: boolean): void {
+    this.followSymlinks = Boolean(follow);
+  }
+
+  public isFollowSymlinksEnabled(): boolean {
+    return this.followSymlinks;
   }
 
   public setEntropyDetectionEnabled(enabled: boolean): void {
@@ -48,7 +72,11 @@ export class ScannerService extends EventEmitter {
   }
 
   public setExcludedPaths(paths: string[]): void {
-    this.excludedPaths = new Set((paths || []).map((p) => path.resolve(p)));
+    this.excludedPaths = new Set(
+      (paths || [])
+        .filter((p): p is string => typeof p === 'string' && p.trim().length > 0 && !p.includes('\0'))
+        .map((p) => path.resolve(p))
+    );
   }
 
   public getExcludedPaths(): string[] {
@@ -158,14 +186,29 @@ export class ScannerService extends EventEmitter {
 
     // Tracks visited real paths to prevent symlink recursion cycles
     const visitedRealPaths = new Set<string>();
+    const safeTargets = Array.isArray(targets) ? targets : [];
 
-    this.emit('started', { scanId, scanType, targets });
+    this.emit('started', { scanId, scanType, targets: safeTargets });
 
-    for (const target of targets) {
+    for (const target of safeTargets) {
       if (await this.checkPauseAndCancel()) break;
 
+      if (
+        typeof target !== 'string' ||
+        !target.trim() ||
+        target.includes('\0') ||
+        target.length > 1024
+      ) {
+        errors.push({
+          path: String(target),
+          error: 'INVALID_PATH: Target path is malformed, empty, or exceeds 1024 characters'
+        });
+        this.activeErrorCount = errors.length;
+        continue;
+      }
+
       try {
-        const canonicalTarget = path.resolve(target);
+        const canonicalTarget = path.resolve(target.trim());
         if (this.isPathExcluded(canonicalTarget)) {
           skippedFiles.push({ path: canonicalTarget, reason: 'Excluded by user settings' });
           this.activeSkippedCount = skippedFiles.length;
@@ -205,7 +248,8 @@ export class ScannerService extends EventEmitter {
               totalFilesScanned++;
               this.activeBytesScanned = totalBytesScanned;
               this.activeFilesScanned = totalFilesScanned;
-            }
+            },
+            0
           );
         }
       } catch (err: any) {
@@ -217,14 +261,29 @@ export class ScannerService extends EventEmitter {
     const durationMs = Date.now() - startTime;
     this.currentStatus = this.cancelRequested ? 'cancelled' : 'completed';
 
+    // Step 6 & Step 7: Fail-closed verdict calculation — never silently report ALLOW when scan errors occurred
     let overallVerdict: 'ALLOW' | 'INFORM' | 'WARN' | 'BLOCK' = 'ALLOW';
     if (threats.some((t) => t.verdict === 'BLOCK')) {
       overallVerdict = 'BLOCK';
     } else if (threats.some((t) => t.verdict === 'WARN')) {
       overallVerdict = 'WARN';
+    } else if (errors.length > 0) {
+      overallVerdict = 'WARN';
     } else if (threats.some((t) => t.verdict === 'INFORM')) {
       overallVerdict = 'INFORM';
+    } else if (totalFilesScanned === 0 && skippedFiles.length > 0 && safeTargets.length > 0) {
+      overallVerdict = 'INFORM';
     }
+
+    const analysisStatus = errors.length > 0 ? 'ANALYSIS_FAILED' : 'COMPLETED';
+    const disposition =
+      overallVerdict === 'BLOCK'
+        ? 'MALICIOUS'
+        : errors.length > 0
+        ? 'ANALYSIS_FAILED'
+        : overallVerdict === 'WARN' || overallVerdict === 'INFORM'
+        ? 'SUSPICIOUS'
+        : 'SAFE';
 
     const result: ScanResult = {
       scanId,
@@ -237,6 +296,8 @@ export class ScannerService extends EventEmitter {
       skippedFiles,
       errors,
       overallVerdict,
+      analysisStatus,
+      disposition,
       completedAt: Date.now()
     };
 
@@ -251,9 +312,19 @@ export class ScannerService extends EventEmitter {
     skippedFiles: SkippedItem[],
     errors: ScanErrorItem[],
     fileFilter: ((filePath: string) => boolean) | undefined,
-    onFileProcessed: (bytes: number) => void
+    onFileProcessed: (bytes: number) => void,
+    currentDepth = 0
   ): Promise<void> {
     if (await this.checkPauseAndCancel()) return;
+
+    if (currentDepth > this.maxDepth) {
+      skippedFiles.push({
+        path: dirPath,
+        reason: `Maximum directory recursion depth (${this.maxDepth}) exceeded`
+      });
+      this.activeSkippedCount = skippedFiles.length;
+      return;
+    }
 
     if (this.isPathExcluded(dirPath)) {
       skippedFiles.push({ path: dirPath, reason: 'Excluded by user settings' });
@@ -303,6 +374,11 @@ export class ScannerService extends EventEmitter {
 
       try {
         if (entry.isSymbolicLink()) {
+          if (!this.followSymlinks) {
+            skippedFiles.push({ path: fullPath, reason: 'Symbolic link skipped by policy' });
+            this.activeSkippedCount = skippedFiles.length;
+            continue;
+          }
           try {
             const linkTarget = await fs.promises.realpath(fullPath);
             const targetStat = await fs.promises.stat(linkTarget);
@@ -319,7 +395,8 @@ export class ScannerService extends EventEmitter {
                 skippedFiles,
                 errors,
                 fileFilter,
-                onFileProcessed
+                onFileProcessed,
+                currentDepth + 1
               );
             } else if (targetStat.isFile()) {
               if (!fileFilter || fileFilter(fullPath)) {
@@ -338,7 +415,8 @@ export class ScannerService extends EventEmitter {
             skippedFiles,
             errors,
             fileFilter,
-            onFileProcessed
+            onFileProcessed,
+            currentDepth + 1
           );
         } else if (entry.isFile()) {
           if (!fileFilter || fileFilter(fullPath)) {
@@ -400,6 +478,31 @@ export class ScannerService extends EventEmitter {
       if (err.code === 'EACCES' || err.code === 'EPERM' || err.code === 'EBUSY') {
         skippedFiles.push({ path: filePath, reason: `File locked or permission denied (${err.code})` });
         this.activeSkippedCount = skippedFiles.length;
+
+        // Fail-closed lexical check: if a locked/inaccessible file uses deceptive double extension
+        // or RTLO spoofing, emit a warning threat even though file bytes could not be read!
+        const fileName = path.basename(filePath);
+        const deceptive = FileAnalyzer.checkDeceptiveExtension(fileName);
+        if (deceptive.isDeceptive) {
+          const lockedThreat: DetectedThreat = {
+            id: `threat-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+            filePath,
+            fileName,
+            fileSize: 0,
+            sha256: '',
+            riskScore: 60,
+            severity: 'suspicious',
+            verdict: 'WARN',
+            threatName: 'LOCKED_DECEPTIVE_FILE',
+            detectedAt: Date.now(),
+            evidenceFactors: [
+              `Locked or permission-restricted file (${err.code}) exhibits deceptive extension spoofing (${deceptive.fakeExt} -> ${deceptive.realExt})`
+            ],
+            quarantined: false
+          };
+          threats.push(lockedThreat);
+          this.emit('threatFound', lockedThreat);
+        }
       } else {
         errors.push({ path: filePath, error: err.message || 'File analysis error' });
         this.activeErrorCount = errors.length;
