@@ -320,15 +320,32 @@ export class DetectionPipeline {
       }
 
       // 2. Canonical FILE Modality Path with Binary Header Bytes
-      if (inputType === InputType.FILE && request.payload instanceof Uint8Array) {
+      const fileBytes =
+        request.payload instanceof Uint8Array
+          ? request.payload
+          : (request as any).fileContent instanceof Uint8Array
+          ? (request as any).fileContent
+          : (request as any).content instanceof Uint8Array
+          ? (request as any).content
+          : undefined;
+
+      if (inputType === InputType.FILE && fileBytes) {
         const meta: Record<string, any> = (request as ScanRequest).metadata || {};
+        const filePath =
+          meta.filePath ||
+          (typeof request.payload === 'string' ? request.payload : undefined);
+        const fileName =
+          meta.fileName ||
+          (filePath ? filePath.split(/[/\\]/).pop() : undefined) ||
+          'unknown';
+
         const fileOut = CoreFileAnalyzer.analyzeBuffer(
           {
-            fileName: meta.fileName || 'unknown',
-            filePath: meta.filePath,
+            fileName,
+            filePath,
             fileSize:
-              meta.fileSize !== undefined ? Number(meta.fileSize) : request.payload.length,
-            headerBytes: request.payload,
+              meta.fileSize !== undefined ? Number(meta.fileSize) : fileBytes.length,
+            headerBytes: fileBytes,
             mimeType: meta.mimeType
           },
           {

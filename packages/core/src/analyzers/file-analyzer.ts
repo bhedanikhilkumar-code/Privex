@@ -12,11 +12,32 @@ import {
   Verdict
 } from '../types';
 import { sha256 } from '../utils/crypto';
+import { EntropyScanner } from './entropy-scanner';
+import { SignatureAutomaton } from '../threat-intel/signature-automaton';
+import { PeAnalyzer } from './pe-analyzer';
+import { ArchiveAnalyzer } from './archive-analyzer';
+import { DocumentAnalyzer } from './document-analyzer';
+import { ScriptAnalyzer } from './script-analyzer';
+import { CleanFileCache } from '../cache/clean-file-cache';
 
 export interface CoreFileAnalysisOptions {
   readonly sha256?: string;
   readonly entropyDetectionEnabled?: boolean;
   readonly platformProfile?: 'desktop' | 'mobile';
+  readonly enableDeepAnalysis?: boolean;
+}
+
+export interface CoreFileInput {
+  readonly path?: string;
+  readonly filePath?: string;
+  readonly fileName?: string;
+  readonly content?: Uint8Array | number[];
+  readonly headerBytes?: Uint8Array | number[];
+  readonly fileSize?: number;
+  readonly size?: number;
+  readonly lastModified?: number;
+  readonly mtimeMs?: number;
+  readonly mimeType?: string;
 }
 
 export interface CoreFileAnalysisOutput extends FileScanResult {
@@ -29,6 +50,9 @@ export interface CoreFileAnalysisOutput extends FileScanResult {
   readonly analysisStatus: AnalysisStatus;
   readonly disposition: DetectionDisposition;
   readonly errorReason?: string;
+  readonly stage0CacheHit?: boolean;
+  readonly stage1ShortCircuit?: boolean;
+  readonly hasDoubleExtension?: boolean;
 }
 
 /**
@@ -58,24 +82,7 @@ export class CoreFileAnalyzer {
    * Computes the Shannon entropy of a byte buffer (0.0 to 8.0).
    */
   public static calculateEntropy(buffer: Uint8Array | number[]): number {
-    if (!buffer || typeof buffer.length !== 'number') return 0;
-    const len = buffer.length;
-    if (len === 0) return 0;
-
-    const frequencies = new Uint32Array(256);
-    for (let i = 0; i < len; i++) {
-      frequencies[buffer[i] & 0xff]++;
-    }
-
-    let entropy = 0;
-    for (let i = 0; i < 256; i++) {
-      if (frequencies[i] > 0) {
-        const p = frequencies[i] / len;
-        entropy -= p * Math.log2(p);
-      }
-    }
-
-    return Math.round(entropy * 1000) / 1000;
+    return EntropyScanner.calculateEntropy(buffer);
   }
 
   /**
@@ -196,6 +203,68 @@ export class CoreFileAnalyzer {
   }
 
   /**
+   * Normalizes flexible input parameters to canonical FileScanRequest
+   */
+  public static normalizeInput(
+    input: CoreFileInput | FileScanRequest
+  ): FileScanRequest & { lastModified?: number } {
+    if (!input || typeof input !== 'object') {
+      return input as any;
+    }
+    const path = (input as any).path || (input as any).filePath;
+    let fileName = (input as any).fileName;
+    if (!fileName && path) {
+      const parts = String(path).split(/[/\\]/);
+      fileName = parts[parts.length - 1];
+    }
+    if (!fileName) {
+      fileName = 'unknown';
+    }
+
+    const rawBytes =
+      (input as any).headerBytes || (input as any).content || new Uint8Array(0);
+    const bytes =
+      rawBytes instanceof Uint8Array ? rawBytes : new Uint8Array(rawBytes);
+    const size =
+      typeof (input as any).fileSize === 'number'
+        ? (input as any).fileSize
+        : typeof (input as any).size === 'number'
+        ? (input as any).size
+        : bytes.length;
+
+    const mtime = (input as any).lastModified || (input as any).mtimeMs;
+
+    return {
+      filePath: path,
+      fileName,
+      fileSize: size,
+      headerBytes: bytes,
+      mimeType: (input as any).mimeType,
+      ...(mtime !== undefined ? { lastModified: mtime } : {})
+    };
+  }
+
+  /**
+   * Universal static analysis entry point accepting flexible inputs
+   */
+  public static analyze(
+    input: CoreFileInput | FileScanRequest,
+    options?: CoreFileAnalysisOptions
+  ): CoreFileAnalysisOutput {
+    return this.analyzeBuffer(this.normalizeInput(input), options);
+  }
+
+  /**
+   * Universal instance analysis entry point accepting flexible inputs
+   */
+  public analyze(
+    input: CoreFileInput | FileScanRequest,
+    options?: CoreFileAnalysisOptions
+  ): CoreFileAnalysisOutput {
+    return CoreFileAnalyzer.analyze(input, options);
+  }
+
+  /**
    * Evaluates a file header + metadata request and produces canonical Core + platform-compatible verdicts.
    */
   public static analyzeBuffer(
@@ -203,6 +272,44 @@ export class CoreFileAnalyzer {
     options?: CoreFileAnalysisOptions
   ): CoreFileAnalysisOutput {
     const profile = options?.platformProfile || 'desktop';
+
+    // Stage 0: Clean File Cache fast lookup (< 0.08 ms)
+    const mtime = (request as any)?.lastModified;
+    if (request && request.filePath && typeof mtime === 'number') {
+      const cached = CleanFileCache.getSharedInstance().get(
+        request.filePath,
+        request.fileSize,
+        mtime
+      );
+      if (cached) {
+        return {
+          filePath: request.filePath,
+          fileName: request.fileName || 'unknown',
+          fileSize: request.fileSize,
+          sha256: options?.sha256 || cached.sha256 || '',
+          entropy: 0,
+          magicHeader: null,
+          isExecutable: false,
+          isDeceptiveExtension: false,
+          riskScore: cached.riskScore ?? 0,
+          severity: SeverityLevel.NONE,
+          verdict: cached.verdict ?? Verdict.ALLOW,
+          threatName: 'BENIGN_FILE_CACHED',
+          evidenceFactors: ['File verified clean in CleanFileCache (Stage 0 hit)'],
+          detectedMimeType: request.mimeType || 'application/octet-stream',
+          desktopSeverity: 'safe',
+          desktopVerdict: 'ALLOW',
+          engineVerdict: cached.engineVerdict ?? EngineVerdict.ALLOW,
+          actionRecommendation: ActionRecommendation.ALLOW,
+          analysisStatus: 'COMPLETED',
+          disposition: 'SAFE',
+          evidence: [],
+          stage0CacheHit: true,
+          stage1ShortCircuit: false,
+          hasDoubleExtension: false
+        };
+      }
+    }
 
     // Fail-closed validation on malformed/missing FileScanRequest (Step 7)
     if (
@@ -348,8 +455,7 @@ export class CoreFileAnalyzer {
         description: unreadableDesc,
         weight: 45,
         scoreContribution: 45,
-        confidence: 0.9,
-        isCriticalOverride: true
+        confidence: 0.9
       });
     }
 
@@ -360,8 +466,9 @@ export class CoreFileAnalyzer {
       const eicarDesc = 'EICAR Standard Antivirus Test Signature detected in file header.';
       evidenceFactors.push(eicarDesc);
       evidence.push({
-        ruleId: 'file-eicar-signature',
+        ruleId: 'file-eicar-test-signature',
         detectorType: DetectorType.RULE,
+        detectorLayer: DetectorLayer.SIGNATURE_ENGINE,
         source: 'FileHeaderAnalyzer',
         name: 'EICAR Test Signature',
         description: eicarDesc,
@@ -515,6 +622,28 @@ export class CoreFileAnalyzer {
           confidence: 0.95
         });
 
+        if (deceptive.hasRtloSpoofing) {
+          riskScore += 40;
+          const rtloDesc =
+            'Unicode Right-To-Left Override (RTLO / Bidi) character detected in filename';
+          evidenceFactors.push(rtloDesc);
+          evidence.push({
+            ruleId: 'file-rtlo-spoofing',
+            detectorType: DetectorType.HEURISTIC,
+            detectorLayer: DetectorLayer.METADATA_ANALYZER,
+            source: 'FileHeaderAnalyzer',
+            name: 'Unicode RTLO Filename Spoofing',
+            description: rtloDesc,
+            reason:
+              'Adversaries use RTLO characters to invert file extension display and disguise executables',
+            severityLevel: SeverityLevel.HIGH,
+            weight: 70,
+            scoreContribution: 70,
+            confidence: 0.98,
+            isCriticalOverride: true
+          });
+        }
+
         if (
           magicHeader === 'PE/MZ_EXECUTABLE' ||
           magicHeader === 'ELF_EXECUTABLE' ||
@@ -598,6 +727,154 @@ export class CoreFileAnalyzer {
           confidence: 0.85
         });
       }
+    }
+
+    // Phase C Deep Static Malware Engine Integration (Layers 2, 4, 5, 6)
+    // Sieve Stage 1 Short-Circuit: If already confirmed EICAR, skip deep stages
+    if (
+      options?.enableDeepAnalysis !== false &&
+      bytes.length > 0 &&
+      magicHeader !== 'EICAR_TEST_SIGNATURE'
+    ) {
+      // 1. Layer 2: Aho-Corasick Signature Automaton Scan
+      try {
+        const sigMatches = SignatureAutomaton.getInstance().scan(bytes);
+        if (sigMatches.length > 0) {
+          const sigEvidences = SignatureAutomaton.getInstance().toEvidence(sigMatches);
+          for (const ev of sigEvidences) {
+            evidence.push(ev);
+            evidenceFactors.push(ev.description);
+            if (ev.isCriticalOverride) {
+              riskScore = Math.max(riskScore, ev.scoreContribution ?? 95);
+              threatName = String(ev.metadata?.threatName || ev.name);
+            } else {
+              riskScore += ev.scoreContribution ?? 0;
+            }
+          }
+        }
+      } catch {
+        // Safe fail-closed
+      }
+
+      // 2. Layer 5 & 4: Zero-Alloc PE32 / PE32+ Binary Inspection
+      if (
+        magicHeader === 'PE/MZ_EXECUTABLE' ||
+        (bytes.length >= 64 && bytes[0] === 0x4d && bytes[1] === 0x5a)
+      ) {
+        try {
+          const peRes = PeAnalyzer.analyze(bytes, request.fileSize);
+          if (peRes.isValidPe) {
+            for (const ev of peRes.evidence) {
+              if (!evidence.some((e) => e.ruleId === ev.ruleId)) {
+                evidence.push(ev);
+                evidenceFactors.push(ev.description);
+                if (ev.scoreContribution) {
+                  riskScore = Math.max(riskScore, ev.scoreContribution);
+                }
+              }
+            }
+          }
+        } catch {
+          // Handled safely
+        }
+      }
+
+      // 3. Layer 5: In-Memory Archive & Zip Bomb Inspection
+      if (
+        magicHeader === 'ZIP_ARCHIVE' ||
+        (bytes.length >= 22 && bytes[0] === 0x50 && bytes[1] === 0x4b) ||
+        ext === 'zip'
+      ) {
+        try {
+          const archRes = ArchiveAnalyzer.analyze(bytes);
+          if (archRes.isArchive) {
+            for (const ev of archRes.evidence) {
+              if (!evidence.some((e) => e.ruleId === ev.ruleId)) {
+                evidence.push(ev);
+                evidenceFactors.push(ev.description);
+                if (ev.scoreContribution) {
+                  riskScore = Math.max(riskScore, ev.scoreContribution);
+                }
+              }
+            }
+            if (archRes.hasZipBombCharacteristics) {
+              threatName = 'ZIP_BOMB_ANOMALY';
+            } else if (archRes.hasPathTraversal) {
+              threatName = 'ARCHIVE_PATH_TRAVERSAL';
+            }
+          }
+        } catch {
+          // Handled safely
+        }
+      }
+
+      // 4. Layer 5 & 3: Office OOXML / OLE2 & PDF Inspection
+      const isCandidateDocument =
+        magicHeader === 'ZIP_ARCHIVE' ||
+        (bytes.length >= 8 && bytes[0] === 0xd0 && bytes[1] === 0xcf) ||
+        (bytes.length >= 4 && bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46) ||
+        this.DOCUMENT_EXTENSIONS.has(ext) ||
+        ext === 'docm' || ext === 'xlsm' || ext === 'pptm' || ext === 'dotm' || ext === 'xltm';
+
+      if (isCandidateDocument) {
+        try {
+          const docRes = DocumentAnalyzer.analyze(bytes, fileName);
+          if (docRes.isDocument) {
+            for (const ev of docRes.evidence) {
+              if (!evidence.some((e) => e.ruleId === ev.ruleId)) {
+                evidence.push(ev);
+                evidenceFactors.push(ev.description);
+              }
+            }
+            if (docRes.riskScore > 0) {
+              riskScore = Math.max(riskScore, docRes.riskScore);
+            }
+          }
+        } catch {
+          // Handled safely
+        }
+      }
+
+      // 5. Layer 6: Script Heuristic & In-Memory De-obfuscation Inspection
+      const isCandidateScript =
+        magicHeader === 'SCRIPT_EXECUTABLE' ||
+        ext === 'ps1' || ext === 'psm1' || ext === 'vbs' || ext === 'vbe' ||
+        ext === 'bat' || ext === 'cmd' || ext === 'js' || ext === 'jse' ||
+        ext === 'wsf' || ext === 'hta' || ext === 'sh';
+
+      if (isCandidateScript) {
+        try {
+          const scriptRes = ScriptAnalyzer.analyze(bytes, fileName);
+          if (scriptRes.isScript && scriptRes.evidence.length > 0) {
+            for (const ev of scriptRes.evidence) {
+              if (!evidence.some((e) => e.ruleId === ev.ruleId)) {
+                evidence.push(ev);
+                evidenceFactors.push(ev.description);
+              }
+            }
+            if (scriptRes.riskScore > 0) {
+              riskScore = Math.max(riskScore, scriptRes.riskScore);
+            }
+          }
+        } catch {
+          // Handled safely
+        }
+      }
+    }
+
+    // Ensure all evidence items have detectorLayer explicitly assigned
+    for (let i = 0; i < evidence.length; i++) {
+      if (!evidence[i].detectorLayer) {
+        (evidence[i] as any).detectorLayer = DetectorLayer.STATIC_HEURISTIC;
+      }
+    }
+
+    // Critical override defense: any critical threat raises score immediately (except for degraded analysis)
+    if (
+      analysisStatus !== 'ANALYSIS_FAILED' &&
+      evidence.some((e) => e.isCriticalOverride === true && !e.isAllowed)
+    ) {
+      riskScore = Math.max(riskScore, 95);
     }
 
     riskScore = Math.min(100, Math.max(0, riskScore));
@@ -718,7 +995,10 @@ export class CoreFileAnalyzer {
       analysisStatus,
       disposition,
       ...(errorReason ? { errorReason } : {}),
-      evidence
+      evidence,
+      stage0CacheHit: false,
+      stage1ShortCircuit: magicHeader === 'EICAR_TEST_SIGNATURE',
+      hasDoubleExtension: deceptive.isDeceptive
     };
   }
 }

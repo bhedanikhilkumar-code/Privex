@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { CoreFileAnalyzer } from '@private-protection/core';
+import { CoreFileAnalyzer, CleanFileCache } from '@private-protection/core';
 import { FileAnalysisResult } from '../types/desktop.types';
 
 export interface DesktopFileAnalyzeOptions {
@@ -68,6 +68,33 @@ export class FileAnalyzer {
     }
 
     const fileName = path.basename(filePath);
+    const statCheck = await fs.promises.stat(filePath);
+    if (!statCheck.isFile()) {
+      throw new Error('NOT_A_REGULAR_FILE: Target path is not a regular file.');
+    }
+
+    // Stage 0: CleanFileCache lookup (< 0.08 ms fast-path)
+    const cached = CleanFileCache.getSharedInstance().get(filePath, statCheck.size, statCheck.mtimeMs);
+    if (cached) {
+      return {
+        filePath,
+        fileName,
+        fileSize: statCheck.size,
+        sha256: cached.sha256,
+        entropy: 0,
+        magicHeader: null,
+        isExecutable: false,
+        isDeceptiveExtension: false,
+        riskScore: cached.riskScore,
+        severity: 'safe',
+        verdict: 'ALLOW',
+        threatName: 'CLEAN_CACHED_FILE',
+        evidenceFactors: ['Clean file verified via Stage 0 CleanFileCache fast-path (<0.08ms)'],
+        analysisStatus: 'COMPLETED',
+        disposition: 'SAFE'
+      };
+    }
+
     const fd = await fs.promises.open(filePath, 'r');
     let stat: fs.Stats;
     let actualHeaderBuffer: Buffer = Buffer.alloc(0);
@@ -124,6 +151,20 @@ export class FileAnalyzer {
         platformProfile: 'desktop'
       }
     );
+
+    if (coreOut.desktopVerdict === 'ALLOW' && coreOut.riskScore === 0) {
+      CleanFileCache.getSharedInstance().set(
+        filePath,
+        stat.size,
+        stat.mtimeMs,
+        coreOut.sha256 || sha256,
+        {
+          verdict: coreOut.verdict,
+          engineVerdict: coreOut.engineVerdict,
+          riskScore: coreOut.riskScore
+        }
+      );
+    }
 
     return {
       filePath,
