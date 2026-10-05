@@ -1,5 +1,7 @@
 import {
   ActionRecommendation,
+  AnalysisStatus,
+  DetectionDisposition,
   DetectorType,
   Evidence,
   FileScanRequest,
@@ -7,6 +9,7 @@ import {
   SeverityLevel,
   Verdict
 } from '../types';
+import { sha256 } from '../utils/crypto';
 
 export interface CoreFileAnalysisOptions {
   readonly sha256?: string;
@@ -20,6 +23,9 @@ export interface CoreFileAnalysisOutput extends FileScanResult {
   readonly desktopVerdict: 'ALLOW' | 'INFORM' | 'WARN' | 'BLOCK';
   readonly actionRecommendation: ActionRecommendation;
   readonly evidence: Evidence[];
+  readonly analysisStatus: AnalysisStatus;
+  readonly disposition: DetectionDisposition;
+  readonly errorReason?: string;
 }
 
 /**
@@ -30,10 +36,12 @@ export interface CoreFileAnalysisOutput extends FileScanResult {
 export class CoreFileAnalyzer {
   public static readonly HIGH_ENTROPY_THRESHOLD_DESKTOP = 7.2;
   public static readonly HIGH_ENTROPY_THRESHOLD_MOBILE = 7.5;
+  public static readonly EICAR_SIGNATURE =
+    'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*';
 
   public static readonly EXECUTABLE_EXTENSIONS = new Set([
-    '.exe', '.dll', '.scr', '.bat', '.cmd', '.ps1', '.vbs', '.js',
-    '.wsf', '.cpl', '.com', '.msi', '.pif', '.hta', '.jar', '.apk', '.dex', '.sh'
+    '.exe', '.dll', '.scr', '.bat', '.cmd', '.ps1', '.vbs', '.vbe', '.js', '.jse',
+    '.wsf', '.cpl', '.com', '.msi', '.pif', '.hta', '.jar', '.apk', '.dex', '.sh', '.lnk', '.reg'
   ]);
 
   public static readonly DOCUMENT_EXTENSIONS = new Set([
@@ -41,10 +49,13 @@ export class CoreFileAnalyzer {
     '.txt', '.rtf', '.jpg', '.jpeg', '.png', '.gif', '.zip'
   ]);
 
+  private static readonly RTLO_BIDI_PATTERN = /[\u202A-\u202E\u2066-\u2069]/;
+
   /**
    * Computes the Shannon entropy of a byte buffer (0.0 to 8.0).
    */
   public static calculateEntropy(buffer: Uint8Array | number[]): number {
+    if (!buffer || typeof buffer.length !== 'number') return 0;
     const len = buffer.length;
     if (len === 0) return 0;
 
@@ -68,7 +79,19 @@ export class CoreFileAnalyzer {
    * Inspects magic header bytes from a file buffer without executing the payload.
    */
   public static detectMagicHeader(buffer: Uint8Array | number[]): string | null {
-    if (buffer.length < 2) return null;
+    if (!buffer || typeof buffer.length !== 'number' || buffer.length < 2) return null;
+
+    // EICAR Standard Antivirus Test Signature check (first 128 bytes)
+    if (buffer.length >= 68) {
+      const eicarLen = Math.min(buffer.length, 128);
+      let eicarAscii = '';
+      for (let i = 0; i < eicarLen; i++) {
+        eicarAscii += String.fromCharCode(buffer[i] & 0xff);
+      }
+      if (eicarAscii.includes(this.EICAR_SIGNATURE)) {
+        return 'EICAR_TEST_SIGNATURE';
+      }
+    }
 
     // MZ (Windows Portable Executable / DOS)
     if (buffer[0] === 0x4d && buffer[1] === 0x5a) {
@@ -127,22 +150,45 @@ export class CoreFileAnalyzer {
   }
 
   /**
-   * Detects double-extension deception (e.g. urgent_invoice.pdf.exe or document.pdf.apk).
+   * Detects double-extension deception (e.g. urgent_invoice.pdf.exe, document.pdf.apk,
+   * trailing space/dot spoofing on Windows, or Unicode RTLO spoofing).
    */
   public static checkDeceptiveExtension(fileName: string): {
     isDeceptive: boolean;
     fakeExt?: string;
     realExt?: string;
+    hasRtloSpoofing?: boolean;
   } {
-    const parts = fileName.toLowerCase().split('.');
+    if (!fileName || typeof fileName !== 'string') {
+      return { isDeceptive: false };
+    }
+
+    const hasRtloSpoofing = this.RTLO_BIDI_PATTERN.test(fileName);
+    const normalized = fileName
+      .replace(/[\u202A-\u202E\u2066-\u2069]/g, '')
+      .replace(/[. ]+$/, '')
+      .toLowerCase();
+
+    const parts = normalized.split('.').filter((p) => p.length > 0);
     if (parts.length >= 3) {
       const realExt = '.' + parts[parts.length - 1];
       const fakeExt = '.' + parts[parts.length - 2];
 
       if (this.EXECUTABLE_EXTENSIONS.has(realExt) && this.DOCUMENT_EXTENSIONS.has(fakeExt)) {
-        return { isDeceptive: true, fakeExt, realExt };
+        return { isDeceptive: true, fakeExt, realExt, hasRtloSpoofing };
       }
     }
+
+    if (hasRtloSpoofing) {
+      const lastExt = parts.length >= 2 ? '.' + parts[parts.length - 1] : '.unknown';
+      return {
+        isDeceptive: true,
+        fakeExt: '.rtlo_spoofed',
+        realExt: lastExt,
+        hasRtloSpoofing: true
+      };
+    }
+
     return { isDeceptive: false };
   }
 
@@ -153,17 +199,107 @@ export class CoreFileAnalyzer {
     request: FileScanRequest,
     options?: CoreFileAnalysisOptions
   ): CoreFileAnalysisOutput {
-    const bytes =
-      request.headerBytes instanceof Uint8Array
-        ? request.headerBytes
-        : new Uint8Array(request.headerBytes);
+    const profile = options?.platformProfile || 'desktop';
+
+    // Fail-closed validation on malformed/missing FileScanRequest (Step 7)
+    if (
+      !request ||
+      typeof request !== 'object' ||
+      !request.headerBytes ||
+      typeof request.fileSize !== 'number' ||
+      !Number.isFinite(request.fileSize) ||
+      request.fileSize < 0
+    ) {
+      const failDesc =
+        'Analysis failed: malformed or missing file scan request parameters (fail-closed policy applied)';
+      return {
+        filePath: request?.filePath,
+        fileName: typeof request?.fileName === 'string' && request.fileName ? request.fileName : 'unknown',
+        fileSize: typeof request?.fileSize === 'number' && Number.isFinite(request.fileSize) && request.fileSize >= 0 ? request.fileSize : 0,
+        sha256: options?.sha256 || '',
+        entropy: 0,
+        magicHeader: null,
+        isExecutable: false,
+        isDeceptiveExtension: false,
+        riskScore: 50,
+        severity: SeverityLevel.MEDIUM,
+        verdict: Verdict.CAUTION,
+        threatName: 'ANALYSIS_FAILED_INVALID_INPUT',
+        evidenceFactors: [failDesc],
+        detectedMimeType: 'application/octet-stream',
+        desktopSeverity: 'suspicious',
+        desktopVerdict: 'WARN',
+        actionRecommendation: ActionRecommendation.WARN,
+        analysisStatus: 'ANALYSIS_FAILED',
+        disposition: 'ANALYSIS_FAILED',
+        errorReason: 'INVALID_FILE_SCAN_REQUEST',
+        evidence: [
+          {
+            ruleId: 'file-analysis-failed-input',
+            detectorType: DetectorType.HEURISTIC,
+            source: 'FileHeaderAnalyzer',
+            name: 'File Analysis Failed',
+            description: failDesc,
+            weight: 50,
+            scoreContribution: 50,
+            confidence: 0.9
+          }
+        ]
+      };
+    }
+
+    let bytes: Uint8Array;
+    try {
+      bytes =
+        request.headerBytes instanceof Uint8Array
+          ? request.headerBytes
+          : new Uint8Array(request.headerBytes);
+    } catch {
+      const failDesc = 'Analysis failed: unreadable header byte buffer (fail-closed policy applied)';
+      return {
+        filePath: request.filePath,
+        fileName: request.fileName || 'unknown',
+        fileSize: request.fileSize,
+        sha256: options?.sha256 || '',
+        entropy: 0,
+        magicHeader: null,
+        isExecutable: false,
+        isDeceptiveExtension: false,
+        riskScore: 50,
+        severity: SeverityLevel.MEDIUM,
+        verdict: Verdict.CAUTION,
+        threatName: 'ANALYSIS_FAILED_CORRUPT_BUFFER',
+        evidenceFactors: [failDesc],
+        detectedMimeType: 'application/octet-stream',
+        desktopSeverity: 'suspicious',
+        desktopVerdict: 'WARN',
+        actionRecommendation: ActionRecommendation.WARN,
+        analysisStatus: 'ANALYSIS_FAILED',
+        disposition: 'ANALYSIS_FAILED',
+        errorReason: 'CORRUPT_HEADER_BUFFER',
+        evidence: [
+          {
+            ruleId: 'file-analysis-failed-buffer',
+            detectorType: DetectorType.HEURISTIC,
+            source: 'FileHeaderAnalyzer',
+            name: 'Unreadable File Buffer',
+            description: failDesc,
+            weight: 50,
+            scoreContribution: 50,
+            confidence: 0.9
+          }
+        ]
+      };
+    }
 
     const fileName = request.fileName || 'unknown';
-    const lowerName = fileName.toLowerCase();
-    const lastDotIndex = lowerName.lastIndexOf('.');
-    const ext = lastDotIndex >= 0 ? lowerName.slice(lastDotIndex) : '';
+    const normalizedName = fileName
+      .replace(/[\u202A-\u202E\u2066-\u2069]/g, '')
+      .replace(/[. ]+$/, '')
+      .toLowerCase();
+    const lastDotIndex = normalizedName.lastIndexOf('.');
+    const ext = lastDotIndex >= 0 ? normalizedName.slice(lastDotIndex) : '';
     const entropyEnabled = options?.entropyDetectionEnabled !== false;
-    const profile = options?.platformProfile || 'desktop';
 
     const entropy = this.calculateEntropy(bytes);
     const magicHeader = this.detectMagicHeader(bytes);
@@ -181,6 +317,49 @@ export class CoreFileAnalyzer {
     let riskScore = 0;
     let threatName = profile === 'mobile' ? 'FILE_BENIGN' : 'BENIGN_FILE';
     let detectedMimeType = request.mimeType || 'application/octet-stream';
+    let analysisStatus: AnalysisStatus = 'COMPLETED';
+    let errorReason: string | undefined;
+
+    // Step 5 & Step 7: Non-empty file with 0 header bytes read must fail closed to WARN / ANALYSIS_FAILED
+    if (request.fileSize > 0 && bytes.length === 0) {
+      riskScore += 50;
+      threatName = 'UNREADABLE_FILE_HEADER';
+      analysisStatus = 'ANALYSIS_FAILED';
+      errorReason = 'UNREADABLE_FILE_HEADER';
+      const unreadableDesc =
+        'File has non-zero size but 0 header bytes were readable; fail-closed warning applied.';
+      evidenceFactors.push(unreadableDesc);
+      evidence.push({
+        ruleId: 'file-unreadable-header',
+        detectorType: DetectorType.HEURISTIC,
+        source: 'FileHeaderAnalyzer',
+        name: 'Unreadable File Header',
+        description: unreadableDesc,
+        weight: 50,
+        scoreContribution: 50,
+        confidence: 0.9,
+        isCriticalOverride: true
+      });
+    }
+
+    // EICAR Standard Antivirus Test Signature Detection
+    if (magicHeader === 'EICAR_TEST_SIGNATURE') {
+      riskScore = 100;
+      threatName = 'EICAR_TEST_FILE';
+      const eicarDesc = 'EICAR Standard Antivirus Test Signature detected in file header.';
+      evidenceFactors.push(eicarDesc);
+      evidence.push({
+        ruleId: 'file-eicar-signature',
+        detectorType: DetectorType.RULE,
+        source: 'FileHeaderAnalyzer',
+        name: 'EICAR Test Signature',
+        description: eicarDesc,
+        weight: 100,
+        scoreContribution: 100,
+        confidence: 1.0,
+        isCriticalOverride: true
+      });
+    }
 
     if (magicHeader === 'PE/MZ_EXECUTABLE') {
       detectedMimeType = 'application/x-dosexec';
@@ -199,7 +378,9 @@ export class CoreFileAnalyzer {
       magicHeader === 'DEX_BYTECODE';
 
     const hasExecutableHeader =
-      hasBinaryExecutableHeader || magicHeader === 'SCRIPT_EXECUTABLE';
+      hasBinaryExecutableHeader ||
+      magicHeader === 'SCRIPT_EXECUTABLE' ||
+      magicHeader === 'EICAR_TEST_SIGNATURE';
 
     const isDeclaredExecutable = this.EXECUTABLE_EXTENSIONS.has(ext);
 
@@ -477,13 +658,27 @@ export class CoreFileAnalyzer {
         : isDeclaredExecutable ||
           magicHeader === 'PE/MZ_EXECUTABLE' ||
           magicHeader === 'ELF_EXECUTABLE' ||
-          magicHeader === 'MACHO_EXECUTABLE';
+          magicHeader === 'MACHO_EXECUTABLE' ||
+          magicHeader === 'EICAR_TEST_SIGNATURE';
+
+    let disposition: DetectionDisposition = 'SAFE';
+    if (analysisStatus === 'ANALYSIS_FAILED') {
+      disposition = 'ANALYSIS_FAILED';
+    } else if (desktopVerdict === 'BLOCK') {
+      disposition = 'MALICIOUS';
+    } else if (desktopVerdict === 'WARN' || desktopVerdict === 'INFORM') {
+      disposition = 'SUSPICIOUS';
+    }
+
+    const computedSha256 =
+      options?.sha256 ||
+      (bytes.length === request.fileSize ? sha256(bytes) : '');
 
     return {
       filePath: request.filePath,
       fileName,
       fileSize: request.fileSize,
-      sha256: options?.sha256 || '',
+      sha256: computedSha256,
       entropy,
       magicHeader,
       isExecutable,
@@ -497,6 +692,9 @@ export class CoreFileAnalyzer {
       desktopSeverity,
       desktopVerdict,
       actionRecommendation,
+      analysisStatus,
+      disposition,
+      ...(errorReason ? { errorReason } : {}),
       evidence
     };
   }

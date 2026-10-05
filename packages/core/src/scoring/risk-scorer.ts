@@ -30,6 +30,8 @@ export class RiskScorer {
    */
   private detectorWeights: Record<string, number> = {
     RULE_ENGINE: 1.0,
+    FILEHEADERANALYZER: 1.0,
+    FILE_ANALYZER: 1.0,
     THREAT_INTEL: 0.95,
     DOM_ANALYZER: 0.90,
     URL_ANALYZER: 0.85,

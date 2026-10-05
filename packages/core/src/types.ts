@@ -86,6 +86,18 @@ export enum FrictionLevel {
   HIGH = 'HIGH'
 }
 
+export type AnalysisStatus = 'COMPLETED' | 'ANALYSIS_FAILED' | 'UNKNOWN';
+
+export type DetectionDisposition =
+  | 'SAFE'
+  | 'ALLOW'
+  | 'SUSPICIOUS'
+  | 'WARN'
+  | 'MALICIOUS'
+  | 'BLOCK'
+  | 'UNKNOWN'
+  | 'ANALYSIS_FAILED';
+
 export enum DetectorType {
   RULE = 'RULE',
   HEURISTIC = 'HEURISTIC',
@@ -246,6 +258,8 @@ export interface DetectionResult {
   recommendation: ActionRecommendation | string;
   canonicalRecommendation?: Recommendation;
   action: ActionRecommendation | string;
+  analysisStatus?: AnalysisStatus;
+  disposition?: DetectionDisposition;
   error?: string;
 }
 
@@ -323,4 +337,7 @@ export interface FileScanResult {
   readonly verdict: Verdict;
   readonly threatName: string;
   readonly evidenceFactors: string[];
+  readonly analysisStatus?: AnalysisStatus;
+  readonly disposition?: DetectionDisposition;
+  readonly errorReason?: string;
 }
