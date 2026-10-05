@@ -1,15 +1,22 @@
+import * as fs from 'fs';
 import * as path from 'path';
 import { DesktopSettings, DetectedThreat } from '../types/desktop.types';
 
 export class IpcValidator {
   private static readonly FORBIDDEN_SHELL_CHARS = /[|&;$`><\r\n\0]/;
   private static readonly PARENT_TRAVERSAL_PATTERN = /(?:^|[\\/])\.\.(?:[\\/]|$)/;
+  private static readonly ENCODED_TRAVERSAL_PATTERN = /%2e%2e/i;
   private static readonly UNC_PATH_PATTERN = /^(?:\\\\|\/\/)/;
   private static readonly PROTECTED_SYSTEM_PREFIXES = [
     'c:\\windows',
     'c:\\program files',
     'c:\\program files (x86)',
     'c:\\programdata\\microsoft',
+    'c:\\system volume information',
+    'c:\\recovery',
+    'c:\\$recycle.bin',
+    'c:\\boot',
+    'c:\\efi',
     '/etc',
     '/usr',
     '/bin',
@@ -21,7 +28,7 @@ export class IpcValidator {
 
   /**
    * Validates and normalizes a candidate filesystem path.
-   * Throws on path traversal (..), UNC shares, null bytes, or dangerous shell characters.
+   * Throws on path traversal (..), encoded traversal, NTFS ADS streams, UNC shares, null bytes, or dangerous shell characters.
    */
   public static validatePath(inputPath: unknown): string {
     if (typeof inputPath !== 'string') {
@@ -42,46 +49,97 @@ export class IpcValidator {
     }
 
     if (this.UNC_PATH_PATTERN.test(trimmed)) {
-      throw new Error('SECURITY_VIOLATION: Remote UNC network paths are prohibited.');
+      throw new Error('SECURITY_VIOLATION: Remote UNC network or device namespace paths are prohibited.');
     }
 
-    if (this.PARENT_TRAVERSAL_PATTERN.test(trimmed)) {
+    if (this.PARENT_TRAVERSAL_PATTERN.test(trimmed) || this.ENCODED_TRAVERSAL_PATTERN.test(trimmed)) {
       throw new Error('SECURITY_VIOLATION: Relative parent directory traversal (..) is prohibited.');
+    }
+
+    // Reject NTFS Alternate Data Streams (colon after drive letter index 1, e.g., file.exe:$DATA)
+    const colonIdx = trimmed.indexOf(':', 2);
+    if (colonIdx !== -1 || (trimmed.startsWith(':') || (trimmed.indexOf(':') === 1 && !/^[a-zA-Z]:/.test(trimmed)))) {
+      throw new Error('SECURITY_VIOLATION: NTFS Alternate Data Stream (:) syntax is prohibited.');
     }
 
     const resolved = path.resolve(trimmed);
     return resolved;
   }
 
+  private static resolveNativeRealPathBestEffort(targetPath: string): string {
+    try {
+      if (fs.existsSync(targetPath)) {
+        return fs.realpathSync.native ? fs.realpathSync.native(targetPath) : fs.realpathSync(targetPath);
+      }
+      const parentDir = path.dirname(targetPath);
+      if (parentDir && parentDir !== targetPath && fs.existsSync(parentDir)) {
+        const realParent = fs.realpathSync.native
+          ? fs.realpathSync.native(parentDir)
+          : fs.realpathSync(parentDir);
+        return path.join(realParent, path.basename(targetPath));
+      }
+    } catch {
+      // Fallback to syntactic path.resolve
+    }
+    return path.resolve(targetPath);
+  }
+
   /**
    * Checks whether a canonical path points into a protected OS system directory.
-   * Explicitly permits the system/user temp directory (e.g. C:\Windows\Temp or os.tmpdir())
-   * since temporary directories are active malware ingress points.
+   * Resolves Windows 8.3 short names and directory junctions via realpathSync.native
+   * while explicitly permitting the system/user temp directory (e.g. C:\Windows\Temp or os.tmpdir()).
    */
   public static isProtectedSystemPath(filePath: string): boolean {
-    const rawSlash = filePath.trim().replace(/\\/g, '/').toLowerCase();
-    if (rawSlash === '/tmp' || rawSlash.startsWith('/tmp/')) {
+    if (!filePath || typeof filePath !== 'string') {
       return false;
     }
-    const normalized = path.resolve(filePath).toLowerCase();
-    if (
-      normalized === 'c:\\windows\\temp' ||
-      normalized.startsWith('c:\\windows\\temp\\') ||
-      rawSlash === 'c:/windows/temp' ||
-      rawSlash.startsWith('c:/windows/temp/')
-    ) {
-      return false;
+
+    const candidates = [
+      filePath.trim(),
+      path.resolve(filePath.trim()),
+      this.resolveNativeRealPathBestEffort(filePath.trim())
+    ];
+
+    const dynamicPrefixes = [...this.PROTECTED_SYSTEM_PREFIXES];
+    for (const envVar of ['SystemRoot', 'ProgramFiles', 'ProgramFiles(x86)']) {
+      const val = process.env[envVar];
+      if (val && typeof val === 'string' && val.trim()) {
+        dynamicPrefixes.push(val.trim().toLowerCase());
+      }
     }
-    return this.PROTECTED_SYSTEM_PREFIXES.some((prefix) => {
-      const prefixSlash = prefix.replace(/\\/g, '/');
-      return (
-        normalized === prefix ||
-        normalized.startsWith(prefix + '\\') ||
-        normalized.startsWith(prefix + '/') ||
-        rawSlash === prefixSlash ||
-        rawSlash.startsWith(prefixSlash + '/')
-      );
-    });
+
+    for (const candidate of candidates) {
+      const rawSlash = candidate.replace(/\\/g, '/').toLowerCase();
+      if (rawSlash === '/tmp' || rawSlash.startsWith('/tmp/')) {
+        return false;
+      }
+      const normalized = path.resolve(candidate).toLowerCase();
+      if (
+        normalized === 'c:\\windows\\temp' ||
+        normalized.startsWith('c:\\windows\\temp\\') ||
+        rawSlash === 'c:/windows/temp' ||
+        rawSlash.startsWith('c:/windows/temp/')
+      ) {
+        return false;
+      }
+
+      const isProtected = dynamicPrefixes.some((prefix) => {
+        const prefixSlash = prefix.replace(/\\/g, '/');
+        return (
+          normalized === prefix ||
+          normalized.startsWith(prefix + '\\') ||
+          normalized.startsWith(prefix + '/') ||
+          rawSlash === prefixSlash ||
+          rawSlash.startsWith(prefixSlash + '/')
+        );
+      });
+
+      if (isProtected) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -105,6 +163,9 @@ export class IpcValidator {
       throw new Error('SECURITY_VIOLATION: Missing or untrusted IPC sender origin.');
     }
     const lower = senderUrl.trim().toLowerCase();
+    if (lower.includes('\0')) {
+      throw new Error('SECURITY_VIOLATION: Null byte in IPC sender origin.');
+    }
     const isTrusted =
       lower.startsWith('file://') ||
       lower.startsWith('app://') ||

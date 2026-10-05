@@ -62,6 +62,62 @@ export class IpcHandler {
     this.tempDir = options?.tempDir || os.tmpdir();
     this.autoStartRealtime = options?.autoStartRealtime ?? false;
 
+    // Wire ScannerService lifecycle events into bounded local security log (Step 12)
+    this.scanner.on('started', (info: { scanId: string; scanType: string; targets: string[] }) => {
+      this.storage.recordSecurityEvent(
+        'SCAN_STARTED',
+        'INFO',
+        `Scan started (${info.scanType})`,
+        { scanId: info.scanId, scanType: info.scanType, targetCount: info.targets?.length || 0 }
+      );
+    });
+
+    this.scanner.on('threatFound', (threat: DetectedThreat) => {
+      this.storage.recordSecurityEvent(
+        'THREAT_DETECTED',
+        threat.verdict === 'BLOCK' ? 'CRITICAL' : 'WARN',
+        `Threat detected: ${threat.threatName} (verdict=${threat.verdict}, score=${threat.riskScore})`,
+        {
+          threatId: threat.id,
+          threatName: threat.threatName,
+          verdict: threat.verdict,
+          riskScore: threat.riskScore,
+          sha256: threat.sha256
+        }
+      );
+    });
+
+    this.scanner.on('completed', (res) => {
+      if (res.errors && res.errors.length > 0) {
+        this.storage.recordSecurityEvent(
+          'SCAN_FAILED',
+          'WARN',
+          `Scan completed with ${res.errors.length} error(s) (${res.scanType})`,
+          {
+            scanId: res.scanId,
+            scanType: res.scanType,
+            filesScanned: res.totalFilesScanned,
+            threatsFound: res.threats.length,
+            errorCount: res.errors.length,
+            overallVerdict: res.overallVerdict
+          }
+        );
+      } else {
+        this.storage.recordSecurityEvent(
+          'SCAN_COMPLETED',
+          'INFO',
+          `Scan completed (${res.scanType}): ${res.totalFilesScanned} file(s) scanned`,
+          {
+            scanId: res.scanId,
+            scanType: res.scanType,
+            filesScanned: res.totalFilesScanned,
+            threatsFound: res.threats.length,
+            overallVerdict: res.overallVerdict
+          }
+        );
+      }
+    });
+
     // Subscribe to RealtimeMonitorService detections (GAP-14)
     this.realtimeMonitor.on('threatDetected', (threat: DetectedThreat) => {
       void this.handleRealtimeThreatDetected(threat);
@@ -81,6 +137,14 @@ export class IpcHandler {
 
   public getRealtimeMonitor(): RealtimeMonitorService {
     return this.realtimeMonitor;
+  }
+
+  public getStorage(): SecureStorageService {
+    return this.storage;
+  }
+
+  public getSecurityEvents() {
+    return this.storage.getSecurityEvents();
   }
 
   /**
@@ -122,6 +186,19 @@ export class IpcHandler {
    * if policy requires, and dispatches REALTIME_THREAT_EVENT over IPC to the renderer (GAP-14).
    */
   public async handleRealtimeThreatDetected(threat: DetectedThreat): Promise<RealtimeThreatEvent> {
+    this.storage.recordSecurityEvent(
+      'THREAT_DETECTED',
+      threat.verdict === 'BLOCK' ? 'CRITICAL' : 'WARN',
+      `Real-time threat detected: ${threat.threatName}`,
+      {
+        threatId: threat.id,
+        threatName: threat.threatName,
+        verdict: threat.verdict,
+        riskScore: threat.riskScore,
+        sha256: threat.sha256
+      }
+    );
+
     const settings = this.storage.getSettings();
     const shouldAutoQuarantine =
       settings.autoQuarantineCritical === true &&
@@ -133,13 +210,29 @@ export class IpcHandler {
     if (shouldAutoQuarantine) {
       try {
         const quarantineItem = await this.quarantine.isolateFile(threat);
+        this.storage.recordSecurityEvent(
+          'QUARANTINE_ISOLATED',
+          'INFO',
+          `Auto-quarantined critical threat (${quarantineItem.quarantineId})`,
+          {
+            quarantineId: quarantineItem.quarantineId,
+            threatName: quarantineItem.threatName,
+            sha256: quarantineItem.sha256
+          }
+        );
         eventPayload = {
           threat: { ...threat, quarantined: true },
           actionTaken: 'AUTO_QUARANTINED',
           quarantineItem,
           timestamp: Date.now()
         };
-      } catch {
+      } catch (err: any) {
+        this.storage.recordSecurityEvent(
+          'ENGINE_FAILURE',
+          'ERROR',
+          `Auto-quarantine failed: ${err?.message || 'Unknown error'}`,
+          { threatId: threat.id }
+        );
         eventPayload = {
           threat,
           actionTaken: 'ALERTED',
@@ -207,10 +300,22 @@ export class IpcHandler {
 
     const lstat = await fs.promises.lstat(validatedPath);
     if (lstat.isSymbolicLink()) {
+      this.storage.recordSecurityEvent(
+        'SECURITY_VIOLATION',
+        'WARN',
+        'Blocked attempt to quarantine symbolic link',
+        { action: 'quarantine:isolate' }
+      );
       throw new Error('SECURITY_VIOLATION: Quarantining symbolic links is forbidden to prevent target hijacking.');
     }
 
     if (IpcValidator.isProtectedSystemPath(validatedPath)) {
+      this.storage.recordSecurityEvent(
+        'SECURITY_VIOLATION',
+        'WARN',
+        'Blocked attempt to quarantine protected OS system file',
+        { action: 'quarantine:isolate' }
+      );
       throw new Error('SECURITY_VIOLATION: Quarantining protected OS system files is forbidden.');
     }
 
@@ -246,18 +351,43 @@ export class IpcHandler {
       evidenceFactors: analysis.evidenceFactors,
       quarantined: false
     };
-    return this.quarantine.isolateFile(threat);
+    const item = await this.quarantine.isolateFile(threat);
+    this.storage.recordSecurityEvent(
+      'QUARANTINE_ISOLATED',
+      'INFO',
+      `Quarantined threat ${item.threatName} (${item.quarantineId})`,
+      {
+        quarantineId: item.quarantineId,
+        threatName: item.threatName,
+        sha256: item.sha256,
+        riskScore: item.riskScore
+      }
+    );
+    return item;
   }
 
   public async handleRestoreQuarantine(quarantineId: string, customDir?: string) {
     const validId = IpcValidator.validateId(quarantineId, 'quarantine-');
     const validDest = customDir ? IpcValidator.validatePath(customDir) : undefined;
-    return this.quarantine.restoreItem(validId, validDest);
+    const restoredPath = await this.quarantine.restoreItem(validId, validDest);
+    this.storage.recordSecurityEvent(
+      'QUARANTINE_RESTORED',
+      'INFO',
+      `Restored quarantined item ${validId}`,
+      { quarantineId: validId }
+    );
+    return restoredPath;
   }
 
   public async handleDeleteQuarantine(quarantineId: string) {
     const validId = IpcValidator.validateId(quarantineId, 'quarantine-');
-    return this.quarantine.permanentDelete(validId);
+    await this.quarantine.permanentDelete(validId);
+    this.storage.recordSecurityEvent(
+      'QUARANTINE_DELETED',
+      'INFO',
+      `Permanently deleted quarantined item ${validId}`,
+      { quarantineId: validId }
+    );
   }
 
   public handleGetProtectionStatus(): DesktopProtectionStatus {
@@ -285,6 +415,16 @@ export class IpcHandler {
     this.storage.saveSettings(validatedPatch);
     const updated = this.storage.getSettings();
     this.applySettings(updated, true);
+    this.storage.recordSecurityEvent(
+      'CONFIG_UPDATED',
+      'INFO',
+      'Desktop security configuration updated',
+      {
+        realtimeShieldEnabled: updated.realtimeShieldEnabled,
+        entropyDetectionEnabled: updated.entropyDetectionEnabled,
+        scanLargeFilesLimitMb: updated.scanLargeFilesLimitMb
+      }
+    );
     return updated;
   }
 
