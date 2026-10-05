@@ -49,7 +49,7 @@ export class IpcValidator {
     }
 
     if (this.UNC_PATH_PATTERN.test(trimmed)) {
-      throw new Error('SECURITY_VIOLATION: Remote UNC network or device namespace paths are prohibited.');
+      throw new Error('SECURITY_VIOLATION: Remote UNC network paths are prohibited.');
     }
 
     if (this.PARENT_TRAVERSAL_PATTERN.test(trimmed) || this.ENCODED_TRAVERSAL_PATTERN.test(trimmed)) {

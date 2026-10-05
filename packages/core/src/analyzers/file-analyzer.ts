@@ -322,7 +322,7 @@ export class CoreFileAnalyzer {
 
     // Step 5 & Step 7: Non-empty file with 0 header bytes read must fail closed to WARN / ANALYSIS_FAILED
     if (request.fileSize > 0 && bytes.length === 0) {
-      riskScore += 50;
+      riskScore += 45;
       threatName = 'UNREADABLE_FILE_HEADER';
       analysisStatus = 'ANALYSIS_FAILED';
       errorReason = 'UNREADABLE_FILE_HEADER';
@@ -335,8 +335,8 @@ export class CoreFileAnalyzer {
         source: 'FileHeaderAnalyzer',
         name: 'Unreadable File Header',
         description: unreadableDesc,
-        weight: 50,
-        scoreContribution: 50,
+        weight: 45,
+        scoreContribution: 45,
         confidence: 0.9,
         isCriticalOverride: true
       });
