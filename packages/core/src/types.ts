@@ -232,6 +232,8 @@ export interface Evidence {
   type?: string;
   indicator?: string;
   isCriticalOverride?: boolean;
+  isAllowed?: boolean;
+  isMalicious?: boolean;
 }
 
 /**
@@ -403,7 +405,7 @@ export interface ProcessInputMetadata {
   readonly ppid?: number;
   readonly processName: string;
   readonly parentName?: string;
-  readonly executablePath: string;
+  readonly executablePath?: string;
   readonly sha256?: string;
   readonly isSigned?: boolean;
   readonly signer?: string;
@@ -411,14 +413,19 @@ export interface ProcessInputMetadata {
   readonly creationTimestamp?: number;
 }
 
-export type ProcessScanRequest = ProcessInputMetadata;
+export type ProcessScanRequest =
+  | ProcessInputMetadata
+  | { readonly process: ProcessInputMetadata };
 
 export interface ProcessScanResult {
   readonly pid: number;
   readonly ppid?: number;
   readonly processName: string;
-  readonly executablePath: string;
+  readonly parentName?: string;
+  readonly executablePath?: string;
   readonly sha256?: string;
+  readonly isSigned?: boolean;
+  readonly signer?: string;
   readonly sanitizedCommandLine?: string;
   readonly riskScore: number;
   readonly confidence: number;
@@ -429,6 +436,7 @@ export interface ProcessScanResult {
   readonly disposition: DetectionDisposition;
   readonly analysisStatus: AnalysisStatus;
   readonly threatName: string;
+  readonly evidenceFactors: string[];
   readonly evidence: Evidence[];
   readonly detectorLayers: Record<DetectorLayer, DetectorLayerState>;
   readonly errorReason?: string;
@@ -447,5 +455,6 @@ export interface HashLookupResult {
   readonly sourceFeed?: string;
   readonly confidence: number;
   readonly bloomFilterHit: boolean;
+  readonly evidence?: Evidence;
 }
 

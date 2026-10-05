@@ -2,7 +2,9 @@ import {
   ActionRecommendation,
   AnalysisStatus,
   DetectionDisposition,
+  DetectorLayer,
   DetectorType,
+  EngineVerdict,
   Evidence,
   FileScanRequest,
   FileScanResult,
@@ -21,6 +23,7 @@ export interface CoreFileAnalysisOutput extends FileScanResult {
   readonly detectedMimeType: string;
   readonly desktopSeverity: 'safe' | 'low' | 'suspicious' | 'dangerous' | 'critical';
   readonly desktopVerdict: 'ALLOW' | 'INFORM' | 'WARN' | 'BLOCK';
+  readonly engineVerdict?: EngineVerdict;
   readonly actionRecommendation: ActionRecommendation;
   readonly evidence: Evidence[];
   readonly analysisStatus: AnalysisStatus;
@@ -229,6 +232,7 @@ export class CoreFileAnalyzer {
         detectedMimeType: 'application/octet-stream',
         desktopSeverity: 'suspicious',
         desktopVerdict: 'WARN',
+        engineVerdict: EngineVerdict.WARN,
         actionRecommendation: ActionRecommendation.WARN,
         analysisStatus: 'ANALYSIS_FAILED',
         disposition: 'ANALYSIS_FAILED',
@@ -237,9 +241,12 @@ export class CoreFileAnalyzer {
           {
             ruleId: 'file-analysis-failed-input',
             detectorType: DetectorType.HEURISTIC,
+            detectorLayer: DetectorLayer.METADATA_ANALYZER,
             source: 'FileHeaderAnalyzer',
             name: 'File Analysis Failed',
             description: failDesc,
+            reason: failDesc,
+            severityLevel: SeverityLevel.MEDIUM,
             weight: 50,
             scoreContribution: 50,
             confidence: 0.9
@@ -273,6 +280,7 @@ export class CoreFileAnalyzer {
         detectedMimeType: 'application/octet-stream',
         desktopSeverity: 'suspicious',
         desktopVerdict: 'WARN',
+        engineVerdict: EngineVerdict.WARN,
         actionRecommendation: ActionRecommendation.WARN,
         analysisStatus: 'ANALYSIS_FAILED',
         disposition: 'ANALYSIS_FAILED',
@@ -281,9 +289,12 @@ export class CoreFileAnalyzer {
           {
             ruleId: 'file-analysis-failed-buffer',
             detectorType: DetectorType.HEURISTIC,
+            detectorLayer: DetectorLayer.STRUCTURAL_PARSER,
             source: 'FileHeaderAnalyzer',
             name: 'Unreadable File Buffer',
             description: failDesc,
+            reason: failDesc,
+            severityLevel: SeverityLevel.MEDIUM,
             weight: 50,
             scoreContribution: 50,
             confidence: 0.9
@@ -670,6 +681,17 @@ export class CoreFileAnalyzer {
       disposition = 'SUSPICIOUS';
     }
 
+    let engineVerdict: EngineVerdict = EngineVerdict.ALLOW;
+    if (riskScore >= 85) {
+      engineVerdict = EngineVerdict.QUARANTINE;
+    } else if (riskScore >= 50) {
+      engineVerdict = EngineVerdict.BLOCK;
+    } else if (riskScore >= 30 || analysisStatus === 'ANALYSIS_FAILED') {
+      engineVerdict = EngineVerdict.WARN;
+    } else if (riskScore > 10) {
+      engineVerdict = EngineVerdict.INFORM;
+    }
+
     const computedSha256 =
       options?.sha256 ||
       (bytes.length === request.fileSize ? sha256(bytes) : '');
@@ -691,6 +713,7 @@ export class CoreFileAnalyzer {
       detectedMimeType,
       desktopSeverity,
       desktopVerdict,
+      engineVerdict,
       actionRecommendation,
       analysisStatus,
       disposition,

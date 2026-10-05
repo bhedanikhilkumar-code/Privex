@@ -2,11 +2,17 @@ import {
   ActionRecommendation,
   DetectionRequest,
   DetectionResult,
+  DetectorLayer,
+  DetectorLayerState,
+  EngineVerdict,
   Evidence,
   FileScanRequest,
   FrictionLevel,
   InputType,
   PrescribedAction,
+  ProcessInputMetadata,
+  ProcessScanRequest,
+  ProcessScanResult,
   Recommendation,
   RiskAssessment,
   RiskCategory,
@@ -18,7 +24,12 @@ import {
 import { RuleEngine } from '../rules/rule-engine';
 import { URLAnalyzer } from '../analyzers/url-analyzer';
 import { TextAnalyzer } from '../analyzers/text-analyzer';
-import { CoreFileAnalyzer, CoreFileAnalysisOptions, CoreFileAnalysisOutput } from '../analyzers/file-analyzer';
+import {
+  CoreFileAnalyzer,
+  CoreFileAnalysisOptions,
+  CoreFileAnalysisOutput
+} from '../analyzers/file-analyzer';
+import { ProcessAnalyzer, ProcessAnalysisOptions } from '../analyzers/process-analyzer';
 import { RiskScorer } from '../scoring/risk-scorer';
 import { ExplanationEngine } from '../explanation/explanation-engine';
 import { ThreatIntel } from '../threat-intel/threat-intel';
@@ -57,9 +68,21 @@ export class DetectionPipeline {
     return CoreFileAnalyzer.analyzeBuffer(request, options);
   }
 
+  public scanProcess(
+    request: ProcessScanRequest | ProcessInputMetadata,
+    options?: ProcessAnalysisOptions
+  ): ProcessScanResult {
+    return ProcessAnalyzer.analyze(request, {
+      threatIntel: options?.threatIntel || this.threatIntel,
+      ruleEngine: options?.ruleEngine || this.ruleEngine,
+      riskScorer: options?.riskScorer || this.riskScorer
+    });
+  }
+
   public async scan(request: ScanRequest | DetectionRequest): Promise<DetectionResult> {
     const startTime = Date.now();
-    const scanId = (request && typeof request === 'object' && request.id) ? request.id : uuidv4();
+    const scanId =
+      request && typeof request === 'object' && request.id ? request.id : uuidv4();
     const requestTime =
       request &&
       typeof request === 'object' &&
@@ -88,6 +111,16 @@ export class DetectionPipeline {
         primaryThreatFactor: 'MALFORMED_INPUT',
         detectorContributions: {}
       };
+      const failLayers: Record<DetectorLayer, DetectorLayerState> = {
+        [DetectorLayer.HASH_INTEL]: 'NOT_RUN',
+        [DetectorLayer.SIGNATURE_ENGINE]: 'FAILED',
+        [DetectorLayer.METADATA_ANALYZER]: 'FAILED',
+        [DetectorLayer.STATIC_HEURISTIC]: 'NOT_RUN',
+        [DetectorLayer.STRUCTURAL_PARSER]: 'NOT_RUN',
+        [DetectorLayer.BEHAVIORAL_ENGINE]: 'NOT_RUN',
+        [DetectorLayer.REPUTATION_LOCAL]: 'NOT_RUN',
+        [DetectorLayer.CORRELATION_ENGINE]: 'NOT_RUN'
+      };
 
       return {
         requestId: scanId,
@@ -96,6 +129,7 @@ export class DetectionPipeline {
         timestamp,
         inputType,
         verdict: Verdict.CAUTION,
+        engineVerdict: EngineVerdict.WARN,
         riskCategory: RiskCategory.SUSPICIOUS,
         riskScore: 50,
         score: 50,
@@ -111,6 +145,7 @@ export class DetectionPipeline {
         action: ActionRecommendation.WARN,
         analysisStatus: 'ANALYSIS_FAILED',
         disposition: 'ANALYSIS_FAILED',
+        detectorLayers: failLayers,
         executionTimeMs: elapsed,
         error: errorMsg
       };
@@ -121,11 +156,11 @@ export class DetectionPipeline {
     }
 
     // Map input content and type from flexible request shapes
-    const rawInput =
+    const rawInput: string =
       typeof (request as ScanRequest).input === 'string'
-        ? (request as ScanRequest).input
+        ? (request as ScanRequest).input!
         : typeof (request as ScanRequest).content === 'string'
-        ? (request as ScanRequest).content
+        ? (request as ScanRequest).content!
         : typeof request.payload === 'string'
         ? request.payload
         : '';
@@ -137,13 +172,156 @@ export class DetectionPipeline {
       if (typeStr === 'URL') inputType = InputType.URL;
       else if (typeStr === 'TEXT' || typeStr === 'MESSAGE') inputType = InputType.TEXT;
       else if (typeStr === 'FILE' || typeStr === 'FILE_HEADER') inputType = InputType.FILE;
+      else if (typeStr === 'PROCESS' || typeStr === 'PROCESS_EVENT') inputType = InputType.PROCESS;
       else if (typeStr === 'QR') inputType = InputType.QR;
       else if (typeStr === 'DOM' || typeStr === 'DOM_STRUCTURE') inputType = InputType.DOM;
     }
 
     try {
+      // Type-confusion defense: Reject PROCESS requests that pass raw Uint8Array binary buffers
+      if (inputType === InputType.PROCESS && request.payload instanceof Uint8Array) {
+        return buildFailClosedResult(
+          InputType.PROCESS,
+          'Type confusion rejected: PROCESS input cannot be a raw binary buffer'
+        );
+      }
+
+      // 1. Canonical PROCESS Modality Path (Step 12)
+      if (inputType === InputType.PROCESS) {
+        const meta: Record<string, any> = (request as ScanRequest).metadata || {};
+        const explicitProc = (request as ScanRequest).processMetadata;
+        const procMeta: ProcessInputMetadata = explicitProc || {
+          pid:
+            typeof meta.pid === 'number'
+              ? meta.pid
+              : typeof meta.pid === 'string' && meta.pid.trim() !== ''
+              ? Number(meta.pid)
+              : 0,
+          ppid:
+            typeof meta.ppid === 'number'
+              ? meta.ppid
+              : typeof meta.ppid === 'string' && meta.ppid.trim() !== ''
+              ? Number(meta.ppid)
+              : undefined,
+          processName:
+            typeof meta.processName === 'string' && meta.processName.trim().length > 0
+              ? meta.processName
+              : rawInput.trim(),
+          parentName: typeof meta.parentName === 'string' ? meta.parentName : undefined,
+          executablePath:
+            typeof meta.executablePath === 'string'
+              ? meta.executablePath
+              : typeof meta.filePath === 'string'
+              ? meta.filePath
+              : undefined,
+          sha256: typeof meta.sha256 === 'string' ? meta.sha256 : undefined,
+          isSigned:
+            typeof meta.isSigned === 'boolean'
+              ? meta.isSigned
+              : meta.isSigned === 'true'
+              ? true
+              : meta.isSigned === 'false'
+              ? false
+              : undefined,
+          signer: typeof meta.signer === 'string' ? meta.signer : undefined,
+          commandLine:
+            typeof meta.commandLine === 'string'
+              ? meta.commandLine
+              : rawInput && meta.processName
+              ? rawInput
+              : undefined,
+          creationTimestamp:
+            typeof meta.creationTimestamp === 'number' ? meta.creationTimestamp : undefined
+        };
+
+        const procOut = this.scanProcess(procMeta);
+        if (procOut.analysisStatus === 'ANALYSIS_FAILED') {
+          return buildFailClosedResult(
+            InputType.PROCESS,
+            procOut.errorReason || 'Process metadata validation failed'
+          );
+        }
+
+        const riskCategory =
+          procOut.riskScore >= 50
+            ? RiskCategory.MALWARE
+            : procOut.riskScore >= 20
+            ? RiskCategory.SUSPICIOUS
+            : RiskCategory.SAFE;
+
+        const riskAssessment: RiskAssessment = {
+          overallScore: procOut.riskScore,
+          confidence: procOut.confidence,
+          severity: procOut.severity,
+          primaryThreatFactor: procOut.threatName || 'PROCESS_INSPECTION',
+          detectorContributions: {
+            PROCESS_ANALYZER: procOut.riskScore
+          }
+        };
+
+        const threats: Threat[] = procOut.evidence
+          .filter((e) => !e.isAllowed && (e.scoreContribution ?? e.weight ?? 0) >= 30)
+          .map((e) => ({
+            id: (e.ruleId || e.name || 'proc-threat').toLowerCase().replace(/[^a-z0-9\-]/g, '-'),
+            category: riskCategory,
+            severity: procOut.severity,
+            confidence: e.confidence ?? 0.9,
+            description: e.description
+          }));
+
+        const canonicalAction =
+          procOut.engineVerdict === EngineVerdict.CONTAIN_PROCESS
+            ? PrescribedAction.CONTAIN_PROCESS
+            : procOut.actionRecommendation === ActionRecommendation.BLOCK
+            ? PrescribedAction.BLOCK_NAVIGATION
+            : procOut.actionRecommendation === ActionRecommendation.WARN ||
+              procOut.actionRecommendation === ActionRecommendation.INFORM
+            ? PrescribedAction.WARN_USER
+            : PrescribedAction.PROCEED;
+
+        const elapsed = Math.max(0.01, Date.now() - startTime);
+        return {
+          requestId: scanId,
+          scanId,
+          id: scanId,
+          timestamp,
+          inputType: InputType.PROCESS,
+          verdict: procOut.verdict,
+          engineVerdict: procOut.engineVerdict,
+          riskCategory,
+          riskScore: procOut.riskScore,
+          score: procOut.riskScore,
+          confidence: riskAssessment.confidence,
+          severity: procOut.severity,
+          riskAssessment,
+          threats,
+          evidence: procOut.evidence,
+          explanation: procOut.evidenceFactors.join('; '),
+          recommendation: procOut.actionRecommendation,
+          canonicalRecommendation: {
+            action: canonicalAction,
+            frictionLevel:
+              procOut.riskScore >= 85
+                ? FrictionLevel.HIGH
+                : procOut.riskScore >= 50
+                ? FrictionLevel.MEDIUM
+                : procOut.riskScore >= 20
+                ? FrictionLevel.LOW
+                : FrictionLevel.NONE,
+            suggestedAction: procOut.evidenceFactors.join('; '),
+            bypassPermitted: procOut.riskScore < 85
+          },
+          action: procOut.actionRecommendation,
+          analysisStatus: procOut.analysisStatus,
+          disposition: procOut.disposition,
+          detectorLayers: procOut.detectorLayers,
+          executionTimeMs: elapsed
+        };
+      }
+
+      // 2. Canonical FILE Modality Path with Binary Header Bytes
       if (inputType === InputType.FILE && request.payload instanceof Uint8Array) {
-        const meta = (request as ScanRequest).metadata || {};
+        const meta: Record<string, any> = (request as ScanRequest).metadata || {};
         const fileOut = CoreFileAnalyzer.analyzeBuffer(
           {
             fileName: meta.fileName || 'unknown',
@@ -158,23 +336,47 @@ export class DetectionPipeline {
           }
         );
 
-        const evidence: Evidence[] = [...fileOut.evidence];
+        const detectorLayers: Record<DetectorLayer, DetectorLayerState> = {
+          [DetectorLayer.HASH_INTEL]: fileOut.sha256 ? 'EXECUTED' : 'NOT_RUN',
+          [DetectorLayer.SIGNATURE_ENGINE]: 'EXECUTED',
+          [DetectorLayer.METADATA_ANALYZER]: 'EXECUTED',
+          [DetectorLayer.STATIC_HEURISTIC]: 'EXECUTED',
+          [DetectorLayer.STRUCTURAL_PARSER]: 'EXECUTED',
+          [DetectorLayer.BEHAVIORAL_ENGINE]: 'NOT_RUN',
+          [DetectorLayer.REPUTATION_LOCAL]: fileOut.sha256 ? 'EXECUTED' : 'NOT_RUN',
+          [DetectorLayer.CORRELATION_ENGINE]: 'EXECUTED'
+        };
+
+        let evidence: Evidence[] = [...fileOut.evidence];
         let riskScore = fileOut.riskScore;
         let verdict = fileOut.verdict;
+        let engineVerdict = fileOut.engineVerdict || EngineVerdict.ALLOW;
         let severity = fileOut.severity;
         let recommendation = fileOut.actionRecommendation;
         let disposition = fileOut.disposition;
 
         if (fileOut.sha256) {
           try {
-            const hashIntel = this.threatIntel.checkHash(fileOut.sha256);
-            if (hashIntel && hashIntel.isMalicious) {
-              evidence.push(hashIntel);
+            const hashLookup = this.threatIntel.lookupHash(fileOut.sha256);
+            if (hashLookup.disposition === 'KNOWN_BAD' && hashLookup.evidence) {
+              evidence.push(hashLookup.evidence);
               riskScore = Math.max(riskScore, 95);
               verdict = Verdict.DANGEROUS;
+              engineVerdict = EngineVerdict.QUARANTINE;
               severity = SeverityLevel.CRITICAL;
               recommendation = ActionRecommendation.BLOCK;
               disposition = 'MALICIOUS';
+            } else if (hashLookup.disposition === 'KNOWN_GOOD' && hashLookup.evidence) {
+              const hasCriticalHeaderThreat = evidence.some((e) => e.isCriticalOverride === true);
+              if (!hasCriticalHeaderThreat) {
+                evidence = [hashLookup.evidence];
+                riskScore = 0;
+                verdict = Verdict.ALLOW;
+                engineVerdict = EngineVerdict.ALLOW;
+                severity = SeverityLevel.NONE;
+                recommendation = ActionRecommendation.ALLOW;
+                disposition = 'SAFE';
+              }
             }
           } catch {
             // Continue with local file analysis result
@@ -199,7 +401,7 @@ export class DetectionPipeline {
         };
 
         const threats: Threat[] = evidence
-          .filter((e) => (e.scoreContribution ?? e.weight ?? 0) >= 30)
+          .filter((e) => !e.isAllowed && (e.scoreContribution ?? e.weight ?? 0) >= 30)
           .map((e) => ({
             id: (e.ruleId || e.name || 'file-threat').toLowerCase().replace(/[^a-z0-9\-]/g, '-'),
             category: riskCategory,
@@ -216,6 +418,7 @@ export class DetectionPipeline {
           timestamp,
           inputType: InputType.FILE,
           verdict,
+          engineVerdict,
           riskCategory,
           riskScore,
           score: riskScore,
@@ -229,6 +432,7 @@ export class DetectionPipeline {
           action: recommendation,
           analysisStatus: fileOut.analysisStatus,
           disposition,
+          detectorLayers,
           executionTimeMs: elapsed
         };
       }
@@ -241,6 +445,18 @@ export class DetectionPipeline {
       }
 
       let evidence: Evidence[] = [];
+      const detectorLayers: Record<DetectorLayer, DetectorLayerState> = {
+        [DetectorLayer.HASH_INTEL]: 'NOT_RUN',
+        [DetectorLayer.SIGNATURE_ENGINE]: 'EXECUTED',
+        [DetectorLayer.METADATA_ANALYZER]: 'EXECUTED',
+        [DetectorLayer.STATIC_HEURISTIC]: 'EXECUTED',
+        [DetectorLayer.STRUCTURAL_PARSER]:
+          inputType === InputType.FILE || inputType === InputType.DOM ? 'EXECUTED' : 'UNAVAILABLE',
+        [DetectorLayer.BEHAVIORAL_ENGINE]: 'NOT_RUN',
+        [DetectorLayer.REPUTATION_LOCAL]:
+          inputType === InputType.URL || inputType === InputType.FILE ? 'EXECUTED' : 'NOT_RUN',
+        [DetectorLayer.CORRELATION_ENGINE]: 'EXECUTED'
+      };
 
       // 1. Run Rule Engine
       const ruleEvidence = this.ruleEngine.evaluateAll(rawInput, inputType);
@@ -275,20 +491,38 @@ export class DetectionPipeline {
         const textEvidence = this.textAnalyzer.analyze(rawInput);
         evidence.push(...textEvidence);
       } else if (inputType === InputType.FILE) {
-        const meta = (request as ScanRequest).metadata || {};
+        const meta: Record<string, any> = (request as ScanRequest).metadata || {};
         const headerBytes = new TextEncoder().encode(rawInput);
-        const fileOut = CoreFileAnalyzer.analyzeBuffer({
-          fileName: meta.fileName || rawInput,
-          filePath: meta.filePath,
-          fileSize: Number(meta.fileSize || headerBytes.length),
-          headerBytes
-        });
-        evidence.push(...fileOut.evidence);
+        const fileOut = CoreFileAnalyzer.analyzeBuffer(
+          {
+            fileName: meta.fileName || rawInput,
+            filePath: meta.filePath,
+            fileSize: Number(meta.fileSize || headerBytes.length),
+            headerBytes
+          },
+          {
+            sha256: meta.sha256
+          }
+        );
+        for (const fe of fileOut.evidence) {
+          if (!evidence.some((existing) => existing.ruleId && existing.ruleId === fe.ruleId)) {
+            evidence.push(fe);
+          }
+        }
+        if (fileOut.sha256) {
+          detectorLayers[DetectorLayer.HASH_INTEL] = 'EXECUTED';
+          const hashLookup = this.threatIntel.lookupHash(fileOut.sha256);
+          if (hashLookup.disposition === 'KNOWN_BAD' && hashLookup.evidence) {
+            evidence.push(hashLookup.evidence);
+          }
+        }
       }
 
       // 3. Aggregate and Score
       const stalenessDays = this.threatIntel.getStalenessDays();
-      const scoreResult = this.riskScorer.calculate(evidence, stalenessDays);
+      const scoreResult = this.riskScorer.calculate(evidence, stalenessDays, {
+        inputType
+      });
 
       // 4. Generate Explanation
       const explanation = this.explanationEngine.generate(
@@ -300,7 +534,9 @@ export class DetectionPipeline {
       // 5. Extract Canonical Threats (sorted descending by threat weight)
       const threats: Threat[] = evidence
         .filter((e) => (e.scoreContribution ?? e.weight ?? 0) >= 40)
-        .sort((a, b) => (b.scoreContribution ?? b.weight ?? 0) - (a.scoreContribution ?? a.weight ?? 0))
+        .sort(
+          (a, b) => (b.scoreContribution ?? b.weight ?? 0) - (a.scoreContribution ?? a.weight ?? 0)
+        )
         .map((e) => {
           const weight = e.scoreContribution ?? e.weight ?? 0;
           const sevLevel =
@@ -335,6 +571,7 @@ export class DetectionPipeline {
         timestamp,
         inputType,
         verdict: scoreResult.verdict || Verdict.ALLOW,
+        engineVerdict: scoreResult.engineVerdict,
         riskCategory: scoreResult.category,
         riskScore: scoreResult.score,
         score: scoreResult.score,
@@ -349,6 +586,7 @@ export class DetectionPipeline {
         action: scoreResult.recommendation,
         analysisStatus: 'COMPLETED',
         disposition,
+        detectorLayers,
         executionTimeMs: elapsed
       };
     } catch (err: any) {

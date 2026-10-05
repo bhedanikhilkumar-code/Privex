@@ -416,12 +416,29 @@ export class ThreatIntel {
               isMalicious: false,
               isAllowed: true,
               confidence: 1.0,
-              bloomFilterHit: true
+              bloomFilterHit: true,
+              evidence: {
+                ruleId: 'threat-intel-allowlist',
+                detectorType: DetectorType.THREAT_INTEL,
+                detectorLayer: DetectorLayer.HASH_INTEL,
+                source: 'THREAT_INTEL',
+                name: 'Known Good Indicator',
+                description: 'Target matches verified local allowlist',
+                reason: 'Target matches verified local allowlist',
+                severityLevel: SeverityLevel.NONE,
+                weight: 0,
+                scoreContribution: 0,
+                confidence: 1.0,
+                isAllowed: true,
+                isMalicious: false
+              }
             };
           }
 
           const stalenessPenalty = this.getStalenessPenalty();
           const effectiveConfidence = Math.max(0.5, 1.0 - stalenessPenalty);
+          const threatName = entry.threatName || 'KNOWN_MALICIOUS_INDICATOR';
+          const desc = `Target matches local threat intelligence blocklist (${entry.threatType || 'INDICATOR'}: ${threatName})`;
           return {
             hash: normalizedHash,
             status: 'KNOWN_BAD',
@@ -429,12 +446,28 @@ export class ThreatIntel {
             isMalicious: true,
             isAllowed: false,
             isCritical: isCriticalHashEntry,
-            threatName: entry.threatName || 'KNOWN_MALICIOUS_INDICATOR',
+            threatName,
             category: entry.category || RiskCategory.MALWARE,
             severityLevel: entry.severity || SeverityLevel.CRITICAL,
             sourceFeed: entry.sourceFeed,
             confidence: effectiveConfidence,
-            bloomFilterHit: true
+            bloomFilterHit: true,
+            evidence: {
+              ruleId: 'threat-intel-known-bad',
+              detectorType: DetectorType.THREAT_INTEL,
+              detectorLayer: DetectorLayer.HASH_INTEL,
+              source: 'THREAT_INTEL',
+              name: 'Known Malicious Indicator',
+              description: desc,
+              reason: desc,
+              severityLevel: entry.severity || SeverityLevel.CRITICAL,
+              weight: 100,
+              scoreContribution: 100,
+              confidence: effectiveConfidence,
+              isCriticalOverride: true,
+              isMalicious: true,
+              isAllowed: false
+            }
           };
         }
       }
@@ -448,7 +481,22 @@ export class ThreatIntel {
         isMalicious: false,
         isAllowed: true,
         confidence: 1.0,
-        bloomFilterHit: bloomHit
+        bloomFilterHit: bloomHit,
+        evidence: {
+          ruleId: 'threat-intel-allowlist',
+          detectorType: DetectorType.THREAT_INTEL,
+          detectorLayer: DetectorLayer.HASH_INTEL,
+          source: 'THREAT_INTEL',
+          name: 'Known Good Indicator',
+          description: 'Target matches verified local allowlist',
+          reason: 'Target matches verified local allowlist',
+          severityLevel: SeverityLevel.NONE,
+          weight: 0,
+          scoreContribution: 0,
+          confidence: 1.0,
+          isAllowed: true,
+          isMalicious: false
+        }
       };
     }
 
