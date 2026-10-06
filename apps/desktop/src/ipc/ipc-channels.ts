@@ -43,7 +43,15 @@ export const IPC_CHANNELS = {
   RANSOMWARE_INCIDENTS_GET: 'desktop:ransomware:incidentsGet',
   RANSOMWARE_INCIDENT_ROLLBACK: 'desktop:ransomware:rollback',
   RANSOMWARE_CANARY_RESET: 'desktop:ransomware:canaryReset',
-  RANSOMWARE_EVENT: 'desktop:ransomware:event'
+  RANSOMWARE_EVENT: 'desktop:ransomware:event',
+
+  // Phase H: Notification System & Inbox IPC Channels
+  NOTIFICATIONS_GET: 'desktop:notifications:get',
+  NOTIFICATIONS_INBOX_STATE_GET: 'desktop:notifications:inboxStateGet',
+  NOTIFICATIONS_MARK_READ: 'desktop:notifications:markRead',
+  NOTIFICATIONS_MARK_ALL_READ: 'desktop:notifications:markAllRead',
+  NOTIFICATIONS_CLEAR_ALL: 'desktop:notifications:clearAll',
+  NOTIFICATION_EVENT: 'desktop:notifications:event'
 } as const;
 
 export type IpcChannel = typeof IPC_CHANNELS[keyof typeof IPC_CHANNELS];
@@ -52,7 +60,8 @@ export const IPC_EVENT_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.SCAN_PROGRESS_EVENT,
   IPC_CHANNELS.REALTIME_THREAT_EVENT,
   IPC_CHANNELS.TRIGGER_QUICK_SCAN,
-  IPC_CHANNELS.RANSOMWARE_EVENT
+  IPC_CHANNELS.RANSOMWARE_EVENT,
+  IPC_CHANNELS.NOTIFICATION_EVENT
 ] as const;
 
 export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
@@ -86,6 +95,12 @@ export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.RANSOMWARE_TRUSTED_APPS_REMOVE,
   IPC_CHANNELS.RANSOMWARE_INCIDENTS_GET,
   IPC_CHANNELS.RANSOMWARE_INCIDENT_ROLLBACK,
-  IPC_CHANNELS.RANSOMWARE_CANARY_RESET
+  IPC_CHANNELS.RANSOMWARE_CANARY_RESET,
+  IPC_CHANNELS.NOTIFICATIONS_GET,
+  IPC_CHANNELS.NOTIFICATIONS_INBOX_STATE_GET,
+  IPC_CHANNELS.NOTIFICATIONS_MARK_READ,
+  IPC_CHANNELS.NOTIFICATIONS_MARK_ALL_READ,
+  IPC_CHANNELS.NOTIFICATIONS_CLEAR_ALL
 ] as const;
+
 

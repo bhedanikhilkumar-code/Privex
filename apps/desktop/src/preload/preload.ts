@@ -13,7 +13,9 @@ import {
   ScanProgress,
   RealtimeThreatEvent,
   ContainProcessOptions,
-  ProcessMonitorHealth
+  ProcessMonitorHealth,
+  DesktopNotification,
+  NotificationInboxState
 } from '../types/desktop.types';
 import { NetworkPostureReport } from '../services/network-monitor.service';
 
@@ -47,6 +49,14 @@ export interface DesktopSecurityApi {
   getNetworkPosture: () => Promise<NetworkPostureReport>;
 
   privacyShred: () => Promise<void>;
+
+  // Phase H: Notification API
+  getNotifications: (limit?: number) => Promise<DesktopNotification[]>;
+  getNotificationInboxState: () => Promise<NotificationInboxState>;
+  markNotificationRead: (notificationId: string) => Promise<boolean>;
+  markAllNotificationsRead: () => Promise<number>;
+  clearAllNotifications: () => Promise<void>;
+  onNotificationEvent: (callback: (notification: DesktopNotification) => void) => () => void;
 }
 
 declare global {
@@ -81,6 +91,20 @@ function isValidRealtimeThreatEvent(payload: unknown): payload is RealtimeThreat
     typeof t.verdict === 'string' &&
     typeof t.severity === 'string' &&
     Array.isArray(t.evidenceFactors)
+  );
+}
+
+function isValidNotification(payload: unknown): payload is DesktopNotification {
+  if (!payload || typeof payload !== 'object') return false;
+  const n = payload as Record<string, unknown>;
+  return (
+    typeof n.id === 'string' &&
+    typeof n.timestamp === 'number' &&
+    typeof n.title === 'string' &&
+    typeof n.message === 'string' &&
+    typeof n.severity === 'string' &&
+    typeof n.category === 'string' &&
+    typeof n.isRead === 'boolean'
   );
 }
 
@@ -145,6 +169,24 @@ export function createDesktopSecurityApi(ipcRenderer: {
     getRemovableMedia: () => ipcRenderer.invoke(IPC_CHANNELS.REMOVABLE_MEDIA_GET),
     getNetworkPosture: () => ipcRenderer.invoke(IPC_CHANNELS.NETWORK_POSTURE_GET),
 
-    privacyShred: () => ipcRenderer.invoke(IPC_CHANNELS.PRIVACY_SHRED)
+    privacyShred: () => ipcRenderer.invoke(IPC_CHANNELS.PRIVACY_SHRED),
+
+    // Phase H: Notification API
+    getNotifications: (limit) => ipcRenderer.invoke(IPC_CHANNELS.NOTIFICATIONS_GET, limit),
+    getNotificationInboxState: () => ipcRenderer.invoke(IPC_CHANNELS.NOTIFICATIONS_INBOX_STATE_GET),
+    markNotificationRead: (notificationId) =>
+      ipcRenderer.invoke(IPC_CHANNELS.NOTIFICATIONS_MARK_READ, notificationId),
+    markAllNotificationsRead: () => ipcRenderer.invoke(IPC_CHANNELS.NOTIFICATIONS_MARK_ALL_READ),
+    clearAllNotifications: () => ipcRenderer.invoke(IPC_CHANNELS.NOTIFICATIONS_CLEAR_ALL),
+    onNotificationEvent: (callback) => {
+      const handler = (_event: any, notif: unknown) => {
+        if (isValidNotification(notif)) {
+          callback(notif);
+        }
+      };
+      ipcRenderer.on(IPC_CHANNELS.NOTIFICATION_EVENT, handler);
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.NOTIFICATION_EVENT, handler);
+    }
   };
 }
+

@@ -520,4 +520,94 @@ export interface ShadowVaultStats {
   readonly utilizationPercent: number;
 }
 
+// ============================================================
+// PHASE H: NOTIFICATION SYSTEM & STORM RATE-LIMITER TYPES
+// ============================================================
+
+export type NotificationSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical';
+
+export type NotificationCategory =
+  | 'SECURITY_ALERT'
+  | 'REALTIME_INGRESS'
+  | 'RANSOMWARE_BLOCKED'
+  | 'PROCESS_CONTAINED'
+  | 'QUARANTINE_ACTION'
+  | 'SCAN_COMPLETE'
+  | 'UPDATE_STATUS'
+  | 'SYSTEM_HEALTH';
+
+export interface NotificationThreatMetadata {
+  readonly threatName?: string;
+  readonly filePath?: string;
+  readonly fileName?: string;
+  readonly sha256?: string;
+  readonly riskScore?: number;
+  readonly verdict?: string;
+  readonly incidentId?: string;
+  readonly pid?: number;
+  readonly count?: number;
+  readonly targetSummary?: string;
+}
+
+export interface DesktopNotification {
+  readonly id: string;
+  readonly timestamp: number;
+  readonly title: string;
+  readonly message: string;
+  readonly severity: NotificationSeverity;
+  readonly category: NotificationCategory;
+  readonly isRead: boolean;
+  readonly isCoalesced?: boolean;
+  readonly coalescedCount?: number;
+  readonly metadata?: NotificationThreatMetadata;
+  readonly actionLabel?: string;
+}
+
+export interface CreateNotificationInput {
+  readonly id?: string;
+  readonly title: string;
+  readonly message: string;
+  readonly severity?: NotificationSeverity;
+  readonly category?: NotificationCategory;
+  readonly metadata?: NotificationThreatMetadata;
+  readonly actionLabel?: string;
+  readonly forceToast?: boolean;
+}
+
+export type ToastSuppressedReason =
+  | 'RATE_LIMITED'
+  | 'FULLSCREEN_SUPPRESSED'
+  | 'HEADLESS_FALLBACK'
+  | 'NOTIFICATION_UNSUPPORTED'
+  | 'ERROR';
+
+export interface NotificationDispatchResult {
+  readonly notificationId: string;
+  readonly inboxInserted: boolean;
+  readonly toastDispatched: boolean;
+  readonly toastSuppressedReason?: ToastSuppressedReason;
+  readonly isCoalesced: boolean;
+  readonly totalUnread: number;
+}
+
+export interface NotificationServiceOptions {
+  readonly maxInboxSize?: number;                // default 500
+  readonly maxToastsPerWindow?: number;           // default 3
+  readonly toastWindowMs?: number;                // default 10,000 ms
+  readonly burstCoalesceThreshold?: number;       // default 3
+  readonly burstWindowMs?: number;                // default 5,000 ms
+  readonly isFullscreenFn?: () => boolean;
+  readonly clock?: () => number;
+  readonly toastDispatcher?: (title: string, message: string, severity: NotificationSeverity) => boolean;
+  readonly trayUpdater?: (unreadCount: number, latestThreatTitle?: string) => void;
+  readonly storageDir?: string;
+}
+
+export interface NotificationInboxState {
+  readonly notifications: DesktopNotification[];
+  readonly unreadCount: number;
+  readonly totalCount: number;
+}
+
+
 

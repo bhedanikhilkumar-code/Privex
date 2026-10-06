@@ -5,9 +5,9 @@ import {
   session,
   Tray,
   Menu,
-  nativeImage,
-  Notification
+  nativeImage
 } from 'electron';
+
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -19,9 +19,6 @@ let mainWindow: BrowserWindow | null = null;
 let ipcHandler: IpcHandler | null = null;
 let systemTray: Tray | null = null;
 let isQuitting = false;
-
-// Notification storm rate limiter (max 3 notifications per 10 seconds)
-let lastNotificationTimes: number[] = [];
 
 if (process.argv.includes('--no-sandbox') || process.env.ELECTRON_DISABLE_SANDBOX) {
   app.commandLine.appendSwitch('no-sandbox');
@@ -66,25 +63,15 @@ function createTrayIcon(): Electron.NativeImage {
   return nativeImage.createFromBitmap(buf, { width: size, height: size });
 }
 
-function showThreatToastNotification(title: string, message: string): void {
-  const now = Date.now();
-  lastNotificationTimes = lastNotificationTimes.filter((t) => now - t < 10000);
-  if (lastNotificationTimes.length >= 3) {
-    // Suppress notification storm
-    return;
-  }
-  lastNotificationTimes.push(now);
-
+function updateTrayStatus(unreadCount: number, latestThreatTitle?: string): void {
+  if (!systemTray) return;
   try {
-    if (Notification.isSupported()) {
-      new Notification({
-        title,
-        body: message,
-        silent: false
-      }).show();
-    }
+    const tooltip = unreadCount > 0
+      ? `Private Protection — ${unreadCount} Unread Alert${unreadCount > 1 ? 's' : ''}${latestThreatTitle ? ` (${latestThreatTitle})` : ''}`
+      : 'Private Protection — Real-Time Shield Active';
+    systemTray.setToolTip(tooltip);
   } catch {
-    // Graceful fallback if notifications are disabled by OS
+    // Non-blocking tray update
   }
 }
 
@@ -141,6 +128,7 @@ function setupSystemTray(win: BrowserWindow): void {
     console.warn('[SYSTEM_TRAY_WARN] System tray initialization omitted:', err);
   }
 }
+
 
 function createMainWindow(isHeadlessVerify: boolean): BrowserWindow {
   const preloadPath = path.resolve(__dirname, '../preload/electron-preload.cjs');
@@ -387,14 +375,6 @@ if (hasInstanceLock) {
     });
     ipcHandler.registerElectronHandlers(ipcMain, () => mainWindow?.webContents ?? null);
 
-    // Hook desktop toast notifications on real-time threat detection
-    ipcHandler.getRealtimeMonitor().on('threatDetected', (threat) => {
-      showThreatToastNotification(
-        'Threat Detected & Blocked',
-        `Private Protection quarantined suspicious file: ${threat.fileName}`
-      );
-    });
-
     const isHeadlessVerify = process.argv.includes('--headless-verify');
     mainWindow = createMainWindow(isHeadlessVerify);
 
@@ -402,6 +382,13 @@ if (hasInstanceLock) {
     if (!isHeadlessVerify) {
       setupSystemTray(mainWindow);
     }
+
+    // Connect NotificationService with Tray and Fullscreen status
+    const notifService = ipcHandler.getNotificationService();
+    notifService.on('inboxChanged', (state) => {
+      updateTrayStatus(state.unreadCount);
+    });
+
 
     if (isHeadlessVerify) {
       mainWindow.webContents.once('did-finish-load', () => {

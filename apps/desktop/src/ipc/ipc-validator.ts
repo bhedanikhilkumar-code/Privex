@@ -339,4 +339,38 @@ export class IpcValidator {
     }
     return value;
   }
+
+  /**
+   * Validates a notification ID string.
+   */
+  public static validateNotificationId(value: unknown): string {
+    if (typeof value !== 'string') {
+      throw new Error('INVALID_NOTIFICATION_ID: Expected non-empty string for notification ID.');
+    }
+    const trimmed = value.trim();
+    if (!trimmed || trimmed.length > 128) {
+      throw new Error('INVALID_NOTIFICATION_ID: Notification ID length must be between 1 and 128 characters.');
+    }
+    if (/[|&;$`><\r\n\0]/.test(trimmed)) {
+      throw new Error('SECURITY_VIOLATION: Notification ID contains forbidden characters.');
+    }
+    return trimmed;
+  }
+
+  /**
+   * Validates notification query limit.
+   */
+  public static validateNotificationLimit(value: unknown, defaultLimit = 100): number {
+    if (value === undefined || value === null) {
+      return defaultLimit;
+    }
+    if (typeof value !== 'number' || !Number.isFinite(value) || !Number.isInteger(value)) {
+      throw new Error('INVALID_LIMIT: Expected a valid integer limit.');
+    }
+    if (value <= 0 || value > 1000) {
+      throw new Error('INVALID_LIMIT: Limit must be between 1 and 1000.');
+    }
+    return value;
+  }
 }
+

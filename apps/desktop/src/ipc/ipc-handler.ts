@@ -15,6 +15,7 @@ import { NetworkMonitorService } from '../services/network-monitor.service';
 import { SecureStorageService } from '../services/secure-storage.service';
 import { ShadowVaultService } from '../services/shadow-vault.service';
 import { RansomwareShieldService } from '../services/ransomware-shield.service';
+import { NotificationService } from '../services/notification.service';
 import { DesktopSecurityAdapter } from '../core/desktop-security-adapter';
 import {
   DesktopProtectionStatus,
@@ -29,8 +30,11 @@ import {
   TrustedApplication,
   RansomwareIncident,
   IncidentRollbackResult,
-  CanaryFileRecord
+  CanaryFileRecord,
+  DesktopNotification,
+  NotificationInboxState
 } from '../types/desktop.types';
+
 
 export interface IpcHandlerOptions {
   vaultDir?: string;
@@ -53,6 +57,7 @@ export class IpcHandler {
   private storage: SecureStorageService;
   private shadowVault: ShadowVaultService;
   private ransomwareShield: RansomwareShieldService;
+  private notificationService: NotificationService;
   private adapter: DesktopSecurityAdapter;
   private downloadsDir: string;
   private tempDir: string;
@@ -82,13 +87,29 @@ export class IpcHandler {
       this.processAuditor,
       this.processAuditor.getBehaviorEngine()
     );
+    this.notificationService = new NotificationService({
+      storageDir: options?.configDir
+    });
     this.adapter = new DesktopSecurityAdapter();
 
     this.downloadsDir = options?.downloadsDir || path.join(os.homedir(), 'Downloads');
     this.tempDir = options?.tempDir || os.tmpdir();
     this.autoStartRealtime = options?.autoStartRealtime ?? false;
 
-    // Wire RansomwareShield events to security log and renderer broadcast
+    // Wire NotificationService broadcasts to renderer
+    this.notificationService.on('notification', (notif: DesktopNotification) => {
+      const wc = this.getWebContentsFn?.();
+      if (wc) {
+        wc.send(IPC_CHANNELS.NOTIFICATION_EVENT, notif);
+      }
+    });
+
+    // Wire RealtimeMonitor events to NotificationService
+    this.realtimeMonitor.on('threatDetected', (threat: DetectedThreat) => {
+      this.notificationService.notifySecurityThreat(threat, { source: 'Realtime Protection' });
+    });
+
+    // Wire RansomwareShield events to security log, NotificationService, and renderer broadcast
     this.ransomwareShield.on('ransomwareDetected', (incident: RansomwareIncident) => {
       this.storage.recordSecurityEvent(
         'THREAT_DETECTED',
@@ -96,11 +117,13 @@ export class IpcHandler {
         `Ransomware incident detected: ${incident.reason}`,
         { incidentId: incident.incidentId, threatType: incident.threatType, riskScore: incident.riskScore }
       );
+      this.notificationService.notifyRansomwareIncident(incident);
       const wc = this.getWebContentsFn?.();
       if (wc) {
         wc.send(IPC_CHANNELS.RANSOMWARE_EVENT, incident);
       }
     });
+
 
     // Wire ScannerService lifecycle events into bounded local security log (Step 12)
     this.scanner.on('started', (info: { scanId: string; scanType: string; targets: string[] }) => {
@@ -183,9 +206,14 @@ export class IpcHandler {
     return this.storage;
   }
 
+  public getNotificationService(): NotificationService {
+    return this.notificationService;
+  }
+
   public getSecurityEvents() {
     return this.storage.getSecurityEvents();
   }
+
 
   /**
    * Applies DesktopSettings across ScannerService and RealtimeMonitorService at runtime (GAP-15).
@@ -770,5 +798,58 @@ export class IpcHandler {
       verifyOrigin(event);
       return this.handleResetCanaries();
     });
+
+    // Phase H: Notification System & Inbox Handlers
+    ipcMain.handle(IPC_CHANNELS.NOTIFICATIONS_GET, (event, limit?: unknown) => {
+      verifyOrigin(event);
+      return this.handleGetNotifications(limit);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.NOTIFICATIONS_INBOX_STATE_GET, (event) => {
+      verifyOrigin(event);
+      return this.handleGetNotificationInboxState();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.NOTIFICATIONS_MARK_READ, (event, notificationId: unknown) => {
+      verifyOrigin(event);
+      return this.handleMarkNotificationRead(notificationId);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.NOTIFICATIONS_MARK_ALL_READ, (event) => {
+      verifyOrigin(event);
+      return this.handleMarkAllNotificationsRead();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.NOTIFICATIONS_CLEAR_ALL, (event) => {
+      verifyOrigin(event);
+      return this.handleClearAllNotifications();
+    });
+  }
+
+  // ============================================================
+  // PHASE H NOTIFICATION HANDLERS
+  // ============================================================
+
+  public handleGetNotifications(limit?: unknown): DesktopNotification[] {
+    const validLimit = IpcValidator.validateNotificationLimit(limit, 100);
+    return this.notificationService.getNotifications(validLimit);
+  }
+
+  public handleGetNotificationInboxState(): NotificationInboxState {
+    return this.notificationService.getInboxState();
+  }
+
+  public handleMarkNotificationRead(notificationId: unknown): boolean {
+    const validId = IpcValidator.validateNotificationId(notificationId);
+    return this.notificationService.markRead(validId);
+  }
+
+  public handleMarkAllNotificationsRead(): number {
+    return this.notificationService.markAllRead();
+  }
+
+  public handleClearAllNotifications(): void {
+    this.notificationService.clearAll();
   }
 }
+
