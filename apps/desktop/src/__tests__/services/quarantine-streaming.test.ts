@@ -750,4 +750,127 @@ describe('QuarantineService (PPVAULT2 Streaming & Hardening)', () => {
       expect(restoredStat.size).toBe(largeSize);
     });
   });
+
+  describe('Phase D Audit Remediation Regression Suite (SEC-D-01 to SEC-D-04)', () => {
+    it('SEC-D-01: rejects huge malicious declared ciphertextLen before buffer allocation', async () => {
+      const sourceFile = path.join(workDir, 'sec_d_01_malicious.bin');
+      fs.writeFileSync(sourceFile, Buffer.from('Valid initial payload bytes before corrupting frame'));
+
+      const threat: DetectedThreat = {
+        filePath: sourceFile,
+        fileName: 'sec_d_01_malicious.bin',
+        fileSize: 52,
+        sha256: crypto.createHash('sha256').update(fs.readFileSync(sourceFile)).digest('hex'),
+        riskScore: 90,
+        severity: 'critical',
+        verdict: 'BLOCK',
+        threatName: 'SEC_D_01_TEST',
+        detectedAt: Date.now(),
+        evidenceFactors: ['SEC-D-01 probe'],
+        quarantined: false
+      };
+
+      const qItem = await quarantine.isolateFile(threat);
+      expect(fs.existsSync(qItem.blobPath)).toBe(true);
+
+      // Mutate the chunk frame to declare a malicious 1 GB ciphertext length (0x40000000)
+      const containerBytes = fs.readFileSync(qItem.blobPath);
+      // Header is 48 bytes. Frame starts at 48. CiphertextLen is at offset 48 + 33 = 81
+      containerBytes.writeUInt32BE(0x40000000, 81);
+      fs.chmodSync(qItem.blobPath, 0o666);
+      fs.writeFileSync(qItem.blobPath, containerBytes);
+
+      // Attempt restore; must reject with CORRUPTED_VAULT bounds violation without allocating 1 GB
+      await expect(quarantine.restoreItem(qItem.quarantineId)).rejects.toThrow(
+        /exceeds maximum bounds/i
+      );
+    });
+
+    it('SEC-D-02: prevents concurrent racing operations on the same quarantine ID', async () => {
+      const sourceFile = path.join(workDir, 'sec_d_02_concurrency.bin');
+      fs.writeFileSync(sourceFile, Buffer.from('Concurrency test payload'));
+
+      const threat: DetectedThreat = {
+        filePath: sourceFile,
+        fileName: 'sec_d_02_concurrency.bin',
+        fileSize: 24,
+        sha256: crypto.createHash('sha256').update(fs.readFileSync(sourceFile)).digest('hex'),
+        riskScore: 90,
+        severity: 'critical',
+        verdict: 'BLOCK',
+        threatName: 'SEC_D_02_TEST',
+        detectedAt: Date.now(),
+        evidenceFactors: ['SEC-D-02 probe'],
+        quarantined: false
+      };
+
+      const qItem = await quarantine.isolateFile(threat);
+
+      // Launch two concurrent restore operations simultaneously
+      const results = await Promise.allSettled([
+        quarantine.restoreItem(qItem.quarantineId),
+        quarantine.restoreItem(qItem.quarantineId)
+      ]);
+
+      // Exactly one should succeed, and the other should either be rejected with CONCURRENT_OPERATION or QUARANTINE_NOT_FOUND
+      const fulfilled = results.filter((r) => r.status === 'fulfilled');
+      const rejected = results.filter((r) => r.status === 'rejected');
+
+      expect(fulfilled.length).toBe(1);
+      expect(rejected.length).toBe(1);
+      const errorMsg = (rejected[0] as PromiseRejectedResult).reason.message;
+      expect(errorMsg).toMatch(/CONCURRENT_OPERATION|QUARANTINE_NOT_FOUND/);
+    });
+
+    it('SEC-D-03: cleans up stale temporary staging files on service boot', () => {
+      // Create a stale temporary file in the vault directory with an mtime older than 10 seconds
+      const staleTmpFile = path.join(vaultDir, 'stale_abandoned_staging.blob.tmp');
+      fs.writeFileSync(staleTmpFile, Buffer.from('Stale abandoned staging bytes'));
+      const oldTime = new Date(Date.now() - 20000);
+      fs.utimesSync(staleTmpFile, oldTime, oldTime);
+      expect(fs.existsSync(staleTmpFile)).toBe(true);
+
+      // Re-instantiate QuarantineService; its initVault() must sweep stale temporary files
+      const newService = new QuarantineService(vaultDir);
+      expect(newService).toBeDefined();
+      expect(fs.existsSync(staleTmpFile)).toBe(false);
+    });
+
+    it('SEC-D-04: reconciles and recovers orphaned .blob files absent from manifest', async () => {
+      // 1. Isolate a real file
+      const sourceFile = path.join(workDir, 'sec_d_04_orphan.bin');
+      fs.writeFileSync(sourceFile, Buffer.from('Orphan reconciliation payload'));
+
+      const threat: DetectedThreat = {
+        filePath: sourceFile,
+        fileName: 'sec_d_04_orphan.bin',
+        fileSize: 29,
+        sha256: crypto.createHash('sha256').update(fs.readFileSync(sourceFile)).digest('hex'),
+        riskScore: 90,
+        severity: 'critical',
+        verdict: 'BLOCK',
+        threatName: 'SEC_D_04_TEST',
+        detectedAt: Date.now(),
+        evidenceFactors: ['SEC-D-04 probe'],
+        quarantined: false
+      };
+
+      const qItem = await quarantine.isolateFile(threat);
+      expect(fs.existsSync(qItem.blobPath)).toBe(true);
+
+      // 2. Corrupt or delete the manifest entry to simulate crash before manifest commit
+      (quarantine as any).manifest.delete(qItem.quarantineId);
+      quarantine.saveManifest();
+      expect(quarantine.listQuarantine().find((i) => i.quarantineId === qItem.quarantineId)).toBeUndefined();
+
+      // 3. Re-instantiate service; reconcileOrphanedBlobs must detect and register the orphaned container
+      const recoveredService = new QuarantineService(vaultDir);
+      const recoveredItems = recoveredService.listQuarantine();
+      const orphaned = recoveredItems.find((i) => i.quarantineId === qItem.quarantineId);
+
+      expect(orphaned).toBeDefined();
+      expect(orphaned?.threatName).toBe('RECOVERED_ORPHANED_BLOB');
+      expect(orphaned?.blobPath).toBe(qItem.blobPath);
+    });
+  });
 });

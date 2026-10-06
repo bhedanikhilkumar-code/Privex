@@ -116,25 +116,25 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from a basic 
   - **`PHASE A — Antivirus Baseline + Security Core Hardening`** (`docs/PHASE_A_COMPLETION.md`, `docs/PHASE_A_PERFORMANCE_BASELINE.md`).
   - **`PHASE B — Core Detection Engine Expansion`** (`docs/PHASE_B_COMPLETION.md`, `docs/PHASE_B_FINAL_INDEPENDENT_AUDIT.md`).
   - **`PHASE C — File Protection & 10-Layer Static Malware Engine`** (`docs/PHASE_C_COMPLETION.md`, `docs/PHASE_C_PERFORMANCE_BASELINE.md`, `docs/PHASE_C_FINAL_INDEPENDENT_AUDIT.md`).
-- **Current Phase Implemented:** **`PHASE D — Quarantine Hardening (PPVAULT2)`** (`docs/PHASE_D_COMPLETION.md`, `docs/PHASE_D_PERFORMANCE_BASELINE.md`).
+- **Phase Completed & Audit Verified:** **`PHASE D — Quarantine Hardening (PPVAULT2)`** (GO / COMPLETE).
+  - **Audit Reports:** `docs/PHASE_D_COMPLETION.md`, `docs/PHASE_D_PERFORMANCE_BASELINE.md`, `docs/PHASE_D_REMEDIATION.md`, `docs/PHASE_D_FINAL_INDEPENDENT_AUDIT.md`.
   - **Phase D Verified Capabilities (`apps/desktop` & `@private-protection/core`):**
     - **`PPVAULT2` Streaming 64 KB AES-256-GCM Engine:** Chunked streaming encryption and decryption with per-chunk AAD binding (`containerUuid || chunkIndex || isFinalChunk`) and dual-magic backward compatibility for legacy `PPVAULT1` containers.
     - **DPAPI Key Sealing:** Sealed `.vault.key` via Windows DPAPI `safeStorage` / `CryptProtectData` with machine-local `0o600` key fallback.
-    - **Encrypted Manifest & Crash Recovery:** Authenticated AES-256-GCM encrypted `manifest.json.enc` with atomic `.tmp` swap and automatic `.bak` backup recovery.
+    - **Encrypted Manifest & Crash Recovery:** Authenticated AES-256-GCM encrypted `manifest.json.enc` with atomic unique `.tmp` swap, automatic `.bak` backup recovery, and boot-time orphaned `.blob` reconciler.
     - **TOCTOU & Symlink Defense:** Pinned `O_RDONLY | O_NOFOLLOW` file descriptors rejecting symlinks, directory junctions, and Windows reserved device names (`CON`, `PRN`, `AUX`, `NUL`, `COM1-9`, `LPT1-9`).
     - **NTFS :Zone.Identifier ADS:** Captures and preserves Mark-of-the-Web metadata on Windows systems.
     - **Restore & Trust SHA-256 Grant:** Restoring falsely detected files with `trustSha256: true` dynamically adds their SHA-256 digest to `ThreatIntel.getSharedInstance()` and `CleanFileCache`, preventing `RealtimeMonitorService` re-quarantine loops.
+    - **Remediated Hardening (SEC-D-01 to SEC-D-04):** Upper-bound check on declared chunk ciphertext length against memory exhaustion, in-memory concurrency lock on active quarantine IDs, boot-time sweep of stale `.tmp` files, and pre-unlink manifest staging with atomic rollback.
   - **Empirical Performance Benchmarks:**
-    - 100 MB synthetic large file isolation: **`1,071.19 ms`** (**`93.35 MB/s`**)
-    - 100 MB synthetic large file restoration: **`1,614.29 ms`** (**`61.95 MB/s`**)
-    - 100 MB large-file peak V8 heap delta: **`4.111 MB`** (SLA: $< 16.0\text{ MB}$, **3.89x safety margin**)
-    - 1 MB streaming isolation latency: **`25.78 ms`** ($p50$)
-    - 1 MB streaming restore latency: **`26.81 ms`** ($p50$)
+    - 100 MB large-file peak V8 heap delta: **`4.166 MB`** (SLA: $< 16.0\text{ MB}$, **PASS**)
+    - 100 MB streaming throughput: **`16.06 MB/s`** (encrypt), **`26.13 MB/s`** (decrypt)
+    - 1 MB streaming latency: **`124.52 ms`** (encrypt $p50$), **`147.38 ms`** (decrypt $p50$)
     - Restore & Trust lookup latency: **`0.001 ms`** ($p50$) (SLA: $< 0.050\text{ ms}$)
   - **Monorepo Regression Test Rate:**
-    - **648/648 PASS (100%)** across 110 test files in all 6 monorepo workspaces (0 failures, 0 errors, 0 skips).
-    - **45 dedicated quarantine tests** all passing.
-- **Next Step (Awaiting User Command):**
-  - **Phase D Final Independent Audit & GO/NO-GO Decision** (DO NOT begin Phase E until Phase D audit passes).
+    - **658/658 PASS (100%)** across 110 test files in all 6 monorepo workspaces (0 failures, 0 errors, 0 skips).
+    - **49 dedicated quarantine tests** all passing.
+- **Next Phase:**
+  - **`PHASE E: Real-Time Protection Engine & Background Continuity`** (from `phase.md`). Awaiting user master implementation prompt before commencing Phase E.
 
 

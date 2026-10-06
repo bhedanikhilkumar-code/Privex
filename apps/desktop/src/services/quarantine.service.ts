@@ -20,6 +20,8 @@ export class QuarantineService {
   private manifestPath: string;
   private manifest: Map<string, QuarantineItem> = new Map();
   private vaultKey: Buffer;
+  private activeItemOperations: Set<string> = new Set();
+  private operationQueue: Promise<void> = Promise.resolve();
 
   // Header magic constants
   public static readonly CONTAINER_MAGIC_V1 = Buffer.from('PPVAULT1', 'utf8'); // 8 bytes legacy
@@ -186,7 +188,81 @@ export class QuarantineService {
 
   private initVault(): void {
     this.ensureSafeVaultDir();
+    this.sweepStaleTempFiles();
     this.loadManifest();
+    this.reconcileOrphanedBlobs();
+  }
+
+  /**
+   * Sweeps and unlinks stale temporary staging files left behind by process kills or power loss.
+   */
+  private sweepStaleTempFiles(): void {
+    try {
+      if (!fs.existsSync(this.vaultDir)) return;
+      const entries = fs.readdirSync(this.vaultDir);
+      const now = Date.now();
+      for (const entry of entries) {
+        if (entry.includes('.tmp') || entry.endsWith('.tmp')) {
+          const fullPath = path.join(this.vaultDir, entry);
+          try {
+            const stat = fs.statSync(fullPath);
+            // Reclaim temp files older than 5 seconds
+            if (now - stat.mtimeMs > 5000) {
+              fs.unlinkSync(fullPath);
+            }
+          } catch {
+            // Ignore
+          }
+        }
+      }
+    } catch {
+      // Best-effort sweep
+    }
+  }
+
+  /**
+   * Reconciles physical .blob containers that are absent from manifest.json.enc
+   * due to sudden power loss or process kill between source unlink and manifest commit.
+   */
+  private reconcileOrphanedBlobs(): void {
+    try {
+      if (!fs.existsSync(this.vaultDir)) return;
+      const entries = fs.readdirSync(this.vaultDir);
+      let foundOrphans = false;
+      for (const entry of entries) {
+        if (entry.endsWith('.blob')) {
+          const quarantineId = entry.replace(/\.blob$/, '');
+          if (!this.manifest.has(quarantineId)) {
+            const fullBlobPath = path.join(this.vaultDir, entry);
+            try {
+              const stat = fs.statSync(fullBlobPath);
+              const recoveredItem: QuarantineItem = {
+                quarantineId,
+                fileName: `recovered_${quarantineId}.bin`,
+                originalPath: path.join(this.vaultDir, `recovered_${quarantineId}.bin`),
+                quarantinedAt: stat.mtimeMs,
+                fileSize: stat.size,
+                sha256: '0000000000000000000000000000000000000000000000000000000000000000',
+                threatName: 'RECOVERED_ORPHANED_BLOB',
+                severity: 'dangerous',
+                verdict: 'BLOCK',
+                blobPath: fullBlobPath,
+                vaultVersion: 'PPVAULT2'
+              };
+              this.manifest.set(quarantineId, recoveredItem);
+              foundOrphans = true;
+            } catch {
+              // Ignore
+            }
+          }
+        }
+      }
+      if (foundOrphans) {
+        this.saveManifest();
+      }
+    } catch {
+      // Best-effort reconciliation
+    }
   }
 
   private parseAndValidateManifestRaw(raw: string): Map<string, QuarantineItem> | null {
@@ -355,7 +431,8 @@ export class QuarantineService {
       ciphertext
     ]);
 
-    const tmpPath = `${this.manifestPath}.tmp`;
+    const uniqueNonce = crypto.randomBytes(4).toString('hex');
+    const tmpPath = `${this.manifestPath}.tmp.${process.pid}.${Date.now()}.${uniqueNonce}`;
     const bakPath = `${this.manifestPath}.bak`;
 
     const fd = fs.openSync(tmpPath, 'w', 0o600);
@@ -581,6 +658,13 @@ export class QuarantineService {
           throw new Error('INTEGRITY_CHECK_FAILED: Chunk sequence violation or out of order.');
         }
 
+        if (
+          ciphertextLen > QuarantineService.CHUNK_SIZE + 64 ||
+          currentOffset + ciphertextLen > sourceStat.size
+        ) {
+          throw new Error('CORRUPTED_VAULT: Quarantined container chunk length exceeds maximum bounds.');
+        }
+
         const ciphertext = Buffer.allocUnsafe(ciphertextLen);
         if (ciphertextLen > 0) {
           const cipherRead = fs.readSync(sourceFd, ciphertext, 0, ciphertextLen, currentOffset);
@@ -760,8 +844,11 @@ export class QuarantineService {
         if (chunkIndex !== expectedIndex) {
           throw new Error('INTEGRITY_CHECK_FAILED: Chunk sequence violation or out of order.');
         }
-        if (offset + ciphertextLen > containerBuffer.length) {
-          throw new Error('CORRUPTED_VAULT: Quarantined container truncated chunk ciphertext.');
+        if (
+          ciphertextLen > QuarantineService.CHUNK_SIZE + 64 ||
+          offset + ciphertextLen > containerBuffer.length
+        ) {
+          throw new Error('CORRUPTED_VAULT: Quarantined container chunk length exceeds maximum bounds.');
         }
         const ciphertext = containerBuffer.subarray(offset, offset + ciphertextLen);
         offset += ciphertextLen;
@@ -941,19 +1028,6 @@ export class QuarantineService {
       // Best-effort across platforms
     }
 
-    // 9. Securely unlink the original malicious file from user's filesystem
-    try {
-      await fs.promises.unlink(canonicalSource);
-    } catch (err) {
-      try {
-        fs.chmodSync(blobPath, 0o600);
-        await fs.promises.unlink(blobPath);
-      } catch {
-        // Best-effort cleanup
-      }
-      throw err;
-    }
-
     const safeFileName = QuarantineService.sanitizeFileName(
       threat.fileName || path.basename(canonicalSource)
     );
@@ -979,8 +1053,30 @@ export class QuarantineService {
       ...(zoneIdentifier ? { zoneIdentifier } : {})
     };
 
+    // SEC-D-04: Commit item to manifest BEFORE unlinking source file to guarantee
+    // zero orphaned blobs if power loss or crash occurs mid-quarantine.
     this.manifest.set(quarantineId, item);
     this.saveManifest();
+
+    // 9. Securely unlink the original malicious file from user's filesystem
+    try {
+      await fs.promises.unlink(canonicalSource);
+    } catch (err) {
+      // Rollback manifest and blob if unlinking source file fails
+      this.manifest.delete(quarantineId);
+      try {
+        this.saveManifest();
+      } catch {
+        // Best-effort manifest rollback
+      }
+      try {
+        fs.chmodSync(blobPath, 0o600);
+        await fs.promises.unlink(blobPath);
+      } catch {
+        // Best-effort cleanup
+      }
+      throw err;
+    }
 
     return item;
   }
@@ -995,14 +1091,20 @@ export class QuarantineService {
     optionsOrDestDir?: QuarantineRestoreOptions | string
   ): Promise<string> {
     const validId = IpcValidator.validateId(quarantineId);
-    const item = this.manifest.get(validId);
-    if (!item) {
-      throw new Error(`QUARANTINE_NOT_FOUND: Item '${validId}' does not exist.`);
+    if (this.activeItemOperations.has(validId)) {
+      throw new Error(`CONCURRENT_OPERATION: Operation already in progress for quarantine ID '${validId}'.`);
     }
+    this.activeItemOperations.add(validId);
 
-    if (!this.isPathInsideVault(item.blobPath) || !fs.existsSync(item.blobPath)) {
-      throw new Error(`CORRUPTED_VAULT: Quarantined blob missing or invalid at '${item.blobPath}'.`);
-    }
+    try {
+      const item = this.manifest.get(validId);
+      if (!item) {
+        throw new Error(`QUARANTINE_NOT_FOUND: Item '${validId}' does not exist.`);
+      }
+
+      if (!this.isPathInsideVault(item.blobPath) || !fs.existsSync(item.blobPath)) {
+        throw new Error(`CORRUPTED_VAULT: Quarantined blob missing or invalid at '${item.blobPath}'.`);
+      }
 
     const blobLstat = await fs.promises.lstat(item.blobPath);
     if (blobLstat.isSymbolicLink() || !blobLstat.isFile()) {
@@ -1167,7 +1269,10 @@ export class QuarantineService {
     this.manifest.delete(validId);
     this.saveManifest();
 
-    return destinationPath;
+      return destinationPath;
+    } finally {
+      this.activeItemOperations.delete(validId);
+    }
   }
 
   /**
@@ -1175,43 +1280,52 @@ export class QuarantineService {
    */
   public async permanentDelete(quarantineId: string): Promise<void> {
     const validId = IpcValidator.validateId(quarantineId);
-    const item = this.manifest.get(validId);
-    if (!item) {
-      throw new Error(`QUARANTINE_NOT_FOUND: Item '${validId}' does not exist.`);
+    if (this.activeItemOperations.has(validId)) {
+      throw new Error(`CONCURRENT_OPERATION: Operation already in progress for quarantine ID '${validId}'.`);
     }
+    this.activeItemOperations.add(validId);
 
-    if (this.isPathInsideVault(item.blobPath) && fs.existsSync(item.blobPath)) {
-      const lstat = fs.lstatSync(item.blobPath);
-      if (!lstat.isSymbolicLink() && lstat.isFile()) {
-        try {
-          fs.chmodSync(item.blobPath, 0o666);
-        } catch {
-          // continue
-        }
-        // Multi-pass cryptographic shredder
-        const stat = fs.statSync(item.blobPath);
-        if (stat.size > 0) {
-          const randomNoise = crypto.randomBytes(Math.min(stat.size, 1024 * 1024));
-          const fd = fs.openSync(item.blobPath, 'r+');
-          try {
-            let written = 0;
-            while (written < stat.size) {
-              const toWrite = Math.min(randomNoise.length, stat.size - written);
-              fs.writeSync(fd, randomNoise, 0, toWrite, written);
-              written += toWrite;
-            }
-            fs.fsyncSync(fd);
-          } finally {
-            fs.closeSync(fd);
-          }
-          fs.truncateSync(item.blobPath, 0);
-        }
-        fs.unlinkSync(item.blobPath);
+    try {
+      const item = this.manifest.get(validId);
+      if (!item) {
+        throw new Error(`QUARANTINE_NOT_FOUND: Item '${validId}' does not exist.`);
       }
-    }
 
-    this.manifest.delete(validId);
-    this.saveManifest();
+      if (this.isPathInsideVault(item.blobPath) && fs.existsSync(item.blobPath)) {
+        const lstat = fs.lstatSync(item.blobPath);
+        if (!lstat.isSymbolicLink() && lstat.isFile()) {
+          try {
+            fs.chmodSync(item.blobPath, 0o666);
+          } catch {
+            // continue
+          }
+          // Multi-pass cryptographic shredder
+          const stat = fs.statSync(item.blobPath);
+          if (stat.size > 0) {
+            const randomNoise = crypto.randomBytes(Math.min(stat.size, 1024 * 1024));
+            const fd = fs.openSync(item.blobPath, 'r+');
+            try {
+              let written = 0;
+              while (written < stat.size) {
+                const toWrite = Math.min(randomNoise.length, stat.size - written);
+                fs.writeSync(fd, randomNoise, 0, toWrite, written);
+                written += toWrite;
+              }
+              fs.fsyncSync(fd);
+            } finally {
+              fs.closeSync(fd);
+            }
+            fs.truncateSync(item.blobPath, 0);
+          }
+          fs.unlinkSync(item.blobPath);
+        }
+      }
+
+      this.manifest.delete(validId);
+      this.saveManifest();
+    } finally {
+      this.activeItemOperations.delete(validId);
+    }
   }
 
   /**
