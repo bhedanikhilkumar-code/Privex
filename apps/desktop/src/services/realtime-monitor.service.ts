@@ -44,10 +44,23 @@ export class RealtimeMonitorService extends EventEmitter {
   }
 
   public isPathExcluded(filePath: string): boolean {
+    if (!filePath || typeof filePath !== 'string') return false;
     const canonical = path.resolve(filePath);
-    for (const excluded of this.excludedPaths) {
-      if (canonical === excluded || canonical.startsWith(excluded + path.sep)) {
-        return true;
+    for (const rawExcluded of this.excludedPaths) {
+      if (!rawExcluded) continue;
+      const excluded = path.resolve(rawExcluded);
+      if (process.platform === 'win32') {
+        const lowerCanon = canonical.toLowerCase();
+        const lowerEx = excluded.toLowerCase();
+        const prefix = lowerEx.endsWith(path.sep) ? lowerEx : lowerEx + path.sep;
+        if (lowerCanon === lowerEx || lowerCanon.startsWith(prefix)) {
+          return true;
+        }
+      } else {
+        const prefix = excluded.endsWith(path.sep) ? excluded : excluded + path.sep;
+        if (canonical === excluded || canonical.startsWith(prefix)) {
+          return true;
+        }
       }
     }
     return false;

@@ -102,6 +102,12 @@ export interface ScanResult {
   completedAt: number;
 }
 
+export interface QuarantineRestoreOptions {
+  readonly trustSha256?: boolean;
+  readonly customDestinationDir?: string;
+  readonly restoreZoneIdentifier?: boolean;
+}
+
 export interface QuarantineItem {
   quarantineId: string;
   originalPath: string;
@@ -114,6 +120,9 @@ export interface QuarantineItem {
   quarantinedAt: number;
   evidenceFactors: string[];
   blobPath: string;
+  vaultVersion?: 'PPVAULT1' | 'PPVAULT2';
+  zoneIdentifier?: string;
+  trustedOnRestore?: boolean;
 }
 
 export interface FileAnalysisResult {

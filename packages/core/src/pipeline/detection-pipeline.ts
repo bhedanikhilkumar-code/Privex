@@ -17,6 +17,7 @@ import {
   RiskAssessment,
   RiskCategory,
   ScanRequest,
+  Severity,
   SeverityLevel,
   Threat,
   Verdict
@@ -368,7 +369,7 @@ export class DetectionPipeline {
         let riskScore = fileOut.riskScore;
         let verdict = fileOut.verdict;
         let engineVerdict = fileOut.engineVerdict || EngineVerdict.ALLOW;
-        let severity = fileOut.severity;
+        let severity: Severity | SeverityLevel | string = fileOut.severity;
         let recommendation = fileOut.actionRecommendation;
         let disposition = fileOut.disposition;
 
@@ -432,7 +433,7 @@ export class DetectionPipeline {
         const riskAssessment: RiskAssessment = {
           overallScore: riskScore,
           confidence: fileOut.analysisStatus === 'ANALYSIS_FAILED' ? 0.5 : 0.95,
-          severity,
+          severity: String(severity),
           primaryThreatFactor: fileOut.threatName || 'FILE_INTEGRITY',
           detectorContributions: {
             FileHeaderAnalyzer: riskScore
@@ -444,7 +445,7 @@ export class DetectionPipeline {
           .map((e) => ({
             id: (e.ruleId || e.name || 'file-threat').toLowerCase().replace(/[^a-z0-9\-]/g, '-'),
             category: riskCategory,
-            severity,
+            severity: String(severity),
             confidence: e.confidence ?? 0.9,
             description: e.description
           }));

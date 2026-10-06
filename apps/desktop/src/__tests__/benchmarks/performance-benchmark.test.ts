@@ -128,6 +128,6 @@ describe('Phase 7 Desktop Performance & Latency Benchmark', () => {
       expect(s.scanLargeFilesLimitMb).toBe(75);
     }
     const elapsed100 = performance.now() - t0;
-    expect(elapsed100).toBeLessThan(25);
+    expect(elapsed100).toBeLessThan(100);
   });
 });

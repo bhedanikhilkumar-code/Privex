@@ -82,6 +82,19 @@ export class ThreatIntel {
     }
   ];
 
+  private static sharedInstance: ThreatIntel | null = null;
+
+  public static getSharedInstance(): ThreatIntel {
+    if (!ThreatIntel.sharedInstance) {
+      ThreatIntel.sharedInstance = new ThreatIntel();
+    }
+    return ThreatIntel.sharedInstance;
+  }
+
+  public static resetSharedInstance(): void {
+    ThreatIntel.sharedInstance = null;
+  }
+
   private badHashes: Map<string, ThreatIntelEntry> = new Map();
   private goodHashes: Set<string> = new Set();
   private fileAllowlist: Set<string> = new Set();

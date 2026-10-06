@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { CoreFileAnalyzer, CleanFileCache } from '@private-protection/core';
+import { CoreFileAnalyzer, CleanFileCache, ThreatIntel, Verdict, EngineVerdict } from '@private-protection/core';
 import { FileAnalysisResult } from '../types/desktop.types';
 
 export interface DesktopFileAnalyzeOptions {
@@ -136,6 +136,39 @@ export class FileAnalyzer {
       } catch {
         sha256 = crypto.createHash('sha256').update(actualHeaderBuffer).digest('hex');
       }
+    }
+
+    // Check ThreatIntel allowlist before running heuristic / structural parsers (Restore & Trust grant)
+    const intel = ThreatIntel.getSharedInstance();
+    if (sha256 && intel.isHashAllowed(sha256)) {
+      CleanFileCache.getSharedInstance().set(
+        filePath,
+        stat.size,
+        stat.mtimeMs,
+        sha256,
+        {
+          verdict: Verdict.ALLOW,
+          engineVerdict: EngineVerdict.ALLOW,
+          riskScore: 0
+        }
+      );
+      return {
+        filePath,
+        fileName,
+        fileSize: stat.size,
+        sha256,
+        entropy: 0,
+        magicHeader: null,
+        isExecutable: false,
+        isDeceptiveExtension: false,
+        riskScore: 0,
+        severity: 'safe',
+        verdict: 'ALLOW',
+        threatName: 'TRUSTED_ALLOWLISTED_FILE',
+        evidenceFactors: ['File SHA-256 matches trusted local allowlist (Restore & Trust grant)'],
+        analysisStatus: 'COMPLETED',
+        disposition: 'SAFE'
+      };
     }
 
     const coreOut = CoreFileAnalyzer.analyzeBuffer(

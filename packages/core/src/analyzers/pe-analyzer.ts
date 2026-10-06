@@ -81,11 +81,11 @@ export class PeAnalyzer {
       return PeAnalyzer.analyzeUnsafe(buffer, actualFileSize);
     } catch (err) {
       const reason = `pe-parse-failed: ${err instanceof Error ? err.message : 'unknown error'}`;
-      const failed = PeAnalyzer.analyzeUnsafe(new Uint8Array(0));
-      failed.malformedReason = reason;
-      failed.evidence[0].reason = reason;
-      failed.evidence[0].description = `PE binary parsing failed safely: ${reason}`;
-      return failed;
+      const base = PeAnalyzer.analyzeUnsafe(new Uint8Array(0));
+      const patchedEvidence = base.evidence.map((ev, i) =>
+        i === 0 ? { ...ev, reason, description: `PE binary parsing failed safely: ${reason}` } : ev
+      );
+      return { ...base, malformedReason: reason, evidence: patchedEvidence };
     }
   }
 

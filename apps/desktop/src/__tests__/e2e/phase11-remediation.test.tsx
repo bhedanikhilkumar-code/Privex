@@ -191,19 +191,54 @@ describe('Phase 11 Remediation Suite (GAP-13, GAP-14, GAP-15, GAP-16, GAP-08 & N
     unsubscribe();
   });
 
+function createValidMinimalPeBuffer(extraRandomBytes: number = 0): Buffer {
+  const totalSize = 512 + extraRandomBytes;
+  const buf = Buffer.alloc(totalSize, 0);
+  buf[0] = 0x4d; // 'M'
+  buf[1] = 0x5a; // 'Z'
+  buf.writeUInt32LE(0x40, 0x3c); // e_lfanew = 0x40 (64)
+
+  // PE Signature at 0x40 (64)
+  buf.write('PE\0\0', 0x40, 'ascii');
+
+  // COFF File Header at 0x44 (68)
+  buf.writeUInt16LE(0x8664, 0x44); // Machine = AMD64 (68)
+  buf.writeUInt16LE(1, 0x46);      // NumberOfSections = 1 (70)
+  buf.writeUInt32LE(0x60000000, 0x48); // TimeDateStamp (72)
+  buf.writeUInt16LE(96, 0x54);     // SizeOfOptionalHeader = 96 (84)
+  buf.writeUInt16LE(0x0022, 0x56); // Characteristics (86)
+
+  // Optional Header at 0x58 (88)
+  buf.writeUInt16LE(0x010b, 0x58); // Magic = PE32 (88)
+  buf.writeUInt32LE(0x1000, 0x68); // AddressOfEntryPoint (104)
+  buf.writeUInt16LE(2, 0x9c);      // Subsystem = Windows GUI (156)
+  buf.writeUInt32LE(0, 0xb4);      // NumberOfRvaAndSizes = 0 (180)
+
+  // Section Header at 0xb8 (184)
+  buf.write('.text\0\0\0', 0xb8, 'ascii'); // Section Name (184)
+  buf.writeUInt32LE(0x1000, 0xc0); // VirtualSize (192)
+  buf.writeUInt32LE(0x1000, 0xc4); // VirtualAddress (196)
+  buf.writeUInt32LE(256 + extraRandomBytes, 0xc8); // SizeOfRawData (200)
+  buf.writeUInt32LE(256, 0xcc);    // PointerToRawData = 256 (204)
+  buf.writeUInt32LE(0x60000020, 0xdc); // Characteristics (CODE | EXECUTE | READ) (220)
+
+  if (extraRandomBytes > 0) {
+    // Use a deterministic high-entropy fill pattern
+    for (let i = 0; i < extraRandomBytes; i++) {
+      buf[256 + i] = (i * 173 + 37) & 0xff;
+    }
+  }
+
+  return buf;
+}
+
   // ============================================================
   // GAP-15: SETTINGS VALIDATION, PERSISTENCE & RUNTIME ENFORCEMENT
   // ============================================================
   it('GAP-15: enforces scanLargeFilesLimitMb, entropyDetectionEnabled, excludedPaths, monitorDownloads/monitorTemp, and persists settings across restart', async () => {
     // 1. Create a high-entropy 8KB packed executable (packed_tool.exe: score 25 INFORM when entropyDetectionEnabled=false, score 55 WARN when entropyDetectionEnabled=true)
     const highEntropyPath = path.join(scanDir, 'packed_tool.exe');
-    const randomBytes = Buffer.alloc(8192);
-    for (let i = 0; i < 8192; i++) {
-      randomBytes[i] = i & 0xff;
-    }
-    randomBytes[0] = 0x4d; // 'M'
-    randomBytes[1] = 0x5a; // 'Z'
-    fs.writeFileSync(highEntropyPath, randomBytes);
+    fs.writeFileSync(highEntropyPath, createValidMinimalPeBuffer(8192));
 
     // 2. Create a 2MB file to test scanLargeFilesLimitMb=1
     const largeFilePath = path.join(scanDir, 'large_archive.dat');
@@ -283,10 +318,7 @@ describe('Phase 11 Remediation Suite (GAP-13, GAP-14, GAP-15, GAP-16, GAP-08 & N
   it('GAP-16: refuses to quarantine low/INFORM files (e.g. standard signed-like PE without high risk) and blocks protected OS paths and missing files', async () => {
     // 1. Standard single-extension .exe with low entropy (riskScore=25, severity='low', verdict='INFORM')
     const normalExePath = path.join(scanDir, 'standard_app.exe');
-    fs.writeFileSync(
-      normalExePath,
-      Buffer.concat([Buffer.from('4d5a9000', 'hex'), Buffer.alloc(256, 0x20)])
-    );
+    fs.writeFileSync(normalExePath, createValidMinimalPeBuffer(0));
 
     await expect(window.desktopSecurity!.isolateFile(normalExePath)).rejects.toThrow(
       /QUARANTINE_POLICY_REJECTED/

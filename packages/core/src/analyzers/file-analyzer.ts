@@ -769,6 +769,9 @@ export class CoreFileAnalyzer {
         try {
           const peRes = PeAnalyzer.analyze(bytes, request.fileSize);
           for (const ev of peRes.evidence) {
+            if (!entropyEnabled && (ev.ruleId === 'pe-high-entropy-section' || ev.ruleId === 'file-high-entropy')) {
+              continue;
+            }
             if (!evidence.some((e) => e.ruleId === ev.ruleId)) {
               evidence.push(ev);
               evidenceFactors.push(ev.description);

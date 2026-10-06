@@ -146,9 +146,9 @@ describe('Desktop Native Runtime End-to-End Integration (GAP-04 / PP-017 / PS-05
     expect(fs.existsSync(suspiciousPath)).toBe(false);
     expect(fs.existsSync(qItem.blobPath)).toBe(true);
 
-    // Verify vault file is encrypted with PPVAULT1 header and does not contain raw MZ header at byte 0
+    // Verify vault file is encrypted with PPVAULT2 or PPVAULT1 header and does not contain raw MZ header at byte 0
     const vaultBlob = fs.readFileSync(qItem.blobPath);
-    expect(vaultBlob.subarray(0, 8).toString('ascii')).toBe('PPVAULT1');
+    expect(['PPVAULT1', 'PPVAULT2']).toContain(vaultBlob.subarray(0, 8).toString('ascii'));
 
     const listed = await window.desktopSecurity!.listQuarantine();
     expect(listed.length).toBe(1);

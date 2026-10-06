@@ -57,7 +57,7 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from a basic 
 | **AI Explanation Boundary** | `EXISTS + VERIFIED` | `prompt-boundary.ts`, `response-policy.ts` verified against prompt injection and authority escalation. |
 | **Automatic Quarantine Trigger** | `EXISTS + VERIFIED` | `realtime-monitor.service.ts:159-174` auto-isolates `BLOCK` verdicts. |
 | **File & Malware Detection Engine** | `EXISTS + WEAK` / `PARTIAL` | Checks 64KB magic header, global entropy, and double extensions only. **Gaps:** Ignores computed SHA-256 (`lookupHash` never called; 0 file hashes in seed DB), 0 byte/YARA signatures (`Mimikatz`/`vssadmin`/EICAR not matched by content), no PE section/IAT/Authenticode parser, no ZIP/archive inspection, no Office macro/script de-obfuscation, and flags benign high-entropy `.exe` files as `WARN`. |
-| **Quarantine Vault (`QuarantineService`)** | `EXISTS + WEAK` | `PPVAULT1` AES-256-GCM works, but `.vault.key` is plaintext on NTFS, `isolateFile` buffers entire file in RAM, `manifest.json` uses non-atomic `writeFileSync`, and lacks "Restore + Trust SHA-256". |
+| **Quarantine Vault (`QuarantineService`)** | `EXISTS + VERIFIED` | Hardened `PPVAULT2` streaming 64 KB AES-256-GCM encryption with per-chunk AAD binding (`uuid || chunkIdx || isFinal`), DPAPI key sealing, atomic encrypted `manifest.json.enc` with `.bak` crash recovery, TOCTOU file descriptor pinning (`O_NOFOLLOW`), NTFS `:Zone.Identifier` ADS preservation, and "Restore & Trust SHA-256" workflow. 100 MB large-file peak V8 heap delta `4.111 MB` (SLA: $<16\text{ MB}$). |
 | **Real-Time File & Download Shield** | `EXISTS + WEAK` | `fs.watch` is non-recursive (`recursive: false` on `Downloads`/`Temp` only), stops when window closes, lacks `CleanFileCache`, and does not parse NTFS `:Zone.Identifier` MOTW URLs. |
 | **Process & Behavior Monitoring** | `EXISTS + WEAK` | Runs `tasklist /FO CSV` checking 4 dummy names; lacks full executable path, PPID parent-child tree, LOLBin command-line analysis, and process containment. |
 | **Ransomware Protection** | `MISSING` | Needs Protected Folders (`Documents`/`Pictures`/`Desktop`), Trusted App access control, Canary Trap files, Sliding-Window Velocity/Entropy detector, and Copy-on-Write `ShadowVault` rollback. |
@@ -115,36 +115,26 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from a basic 
 - **Previously Completed:**
   - **`PHASE A — Antivirus Baseline + Security Core Hardening`** (`docs/PHASE_A_COMPLETION.md`, `docs/PHASE_A_PERFORMANCE_BASELINE.md`).
   - **`PHASE B — Core Detection Engine Expansion`** (`docs/PHASE_B_COMPLETION.md`, `docs/PHASE_B_FINAL_INDEPENDENT_AUDIT.md`).
-- **Current Phase Completed:** **`PHASE C — File Protection & 10-Layer Static Malware Engine`** (`docs/PHASE_C_COMPLETION.md`, `docs/PHASE_C_PERFORMANCE_BASELINE.md`, `docs/PHASE_C_FINAL_INDEPENDENT_AUDIT.md`).
-  - **Phase C Final Independent Audit:** **GO APPROVED** (Independent Audit Report published in `docs/PHASE_C_FINAL_INDEPENDENT_AUDIT.md`).
-  - **Audit Remediation & Hardening (`fe08407` & `c2011ad`):**
-    - Remediated single verdict authority: `DetectionPipeline.scan(FILE)` delegates all scoring to `RiskScorer.calculate()` so `RiskScorer` remains the sole mathematical decision and `EngineVerdict` authority.
-    - Remediated PE bounds & overflow: Optional Header bounds checked, raw section end offsets clamped to file bounds, top-level `try/catch` fail-closed wrapper added, and string decode bounded to $\le 1\text{ MB}$.
-    - Remediated fail-open in `file-analyzer.ts`: Malformed PE evidence preserved; unexpected errors emit `pe-malformed-structure`.
-    - Remediated `CleanFileCache`: Enforced defensive rejection of non-ALLOW or riskScore $> 0$ inputs.
-    - Tagged double extension and disguised executable rules with `DetectorLayer.METADATA_ANALYZER`.
-    - Added dedicated remediation tests (`phase-c-audit-remediation.test.ts`) and adversarial probe suite (`phase-c-adversarial-probes.test.ts`).
-  - **Phase C Verified Capabilities (`@private-protection/core` & `apps/desktop`):**
-    - **10-Layer Static Detection Engine & 4-Stage Sieve:**
-      - `Stage 0 / Layer 1`: `CleanFileCache` bounded LRU cache (50k entries, TTL, path/size/mtime keying) delivering $O(1)$ clean-file triage in **`0.0003 ms`** ($266\times$ faster than $<0.08\text{ ms}$ SLA).
-      - `Stage 1 / Layer 2 & 3`: Fast header triage with `SignatureAutomaton` (flattened Aho-Corasick multi-pattern automaton for EICAR, Mimikatz, `vssadmin`, AMSI/ETW bypass, and LOLBins in single $O(N)$ linear pass; instant EICAR short-circuit to `BLOCK`), candidate format routing, double-extension deception detection, and Unicode RTLO directional spoofing detection (`\u202E`).
-      - `Stage 2 / Layer 4`: `EntropyScanner` with precomputed in-memory `ENTROPY_LUT[4097]` lookup table ($p \log_2 p$) for whole-buffer and 4KB sliding-window Shannon entropy scanning in **`0.0485 ms`**.
-      - `Stage 3 / Layer 5 & 6`: Zero-allocation bounds-checked structural parsers:
-        - `PeAnalyzer`: PE32/PE32+ DOS header, `e_lfanew`, section table, W+X permissions (`IMAGE_SCN_MEM_WRITE | IMAGE_SCN_MEM_EXECUTE`, marked `CRITICAL`), known runtime packers (`UPX`, `ASPack`, `Themida`, `VMProtect`), section entropy, IAT injection/credential API triads (`VirtualAllocEx` + `WriteProcessMemory` + `CreateRemoteThread`, `MiniDumpWriteDump`), unauthenticated overlays, and Authenticode directory presence.
-        - `ArchiveAnalyzer`: In-memory ZIP EOCD and Central Directory parser with zero-disk extraction defending against zip bombs (compression ratio $>100:1$ and total size $>100\text{ MB}$), directory path traversal (`../`, `..\`), disguised executables (`.pdf.exe`), double extensions, RTLO, and entry flooding ($>1,000$ entries).
-        - `DocumentAnalyzer`: OOXML modern Office parser (detecting `vbaProject.bin`, disguised `.docx` macros, remote template injection `TargetMode="External"`, and embedded OLE objects), OLE2 compound binary parser (detecting legacy VBA macros and Equation Editor CVE-2017-11882 exploit streams), and PDF parser (detecting `/JavaScript`, process-spawning `/Launch` actions, `/OpenAction`, and embedded attachments).
-        - `ScriptAnalyzer`: Static heuristic analysis of PowerShell, VBScript, Batch, and JavaScript with automated in-memory Base64 decoding (up to 64KB, UTF-16LE and ASCII), remote download cradles (`DownloadString`, `WebClient`), execution bypass flags, in-memory AMSI/ETW tampering (`AmsiUtils`, `amsiInitFailed`), ransomware shadow copy destruction (`vssadmin delete shadows`, `wmic shadowcopy delete`), and LOLBin abuse (`certutil -urlcache`, `bitsadmin`).
-    - **Desktop Adapter Wiring:**
-      - Wired `CleanFileCache.getSharedInstance()` directly into `apps/desktop/src/core/file-analyzer.ts` with automatic clean-file caching.
-    - **Empirical Performance Benchmarks:**
-      - Stage 0 CleanFileCache lookup: **`0.0003 ms`** (SLA: $< 0.080\text{ ms}$)
-      - Stage 1 Fast Header Triage: **`0.0158 ms`** (SLA: $< 0.500\text{ ms}$)
-      - Stage 2/3 Deep Static Analysis (PE + Entropy + Automaton): **`0.4682 ms`** (SLA: $< 5.000\text{ ms}$)
-      - DetectionPipeline File Scan (Average): **`0.4019 ms`** (SLA: $< 1.000\text{ ms}$)
-      - DetectionPipeline File Scan (p95): **`1.8540 ms`** (SLA: $< 5.000\text{ ms}$)
-    - **Monorepo Regression Test Rate:**
-      - **625/625 PASS (100%)** across 107 test files in all 6 monorepo workspaces (0 failures, 0 errors, 0 skips).
-- **Next Phase (Awaiting User Command):**
-  - **`PHASE D — Real-Time File Shield & Watcher Architecture`** as defined in `phase.md`.
+  - **`PHASE C — File Protection & 10-Layer Static Malware Engine`** (`docs/PHASE_C_COMPLETION.md`, `docs/PHASE_C_PERFORMANCE_BASELINE.md`, `docs/PHASE_C_FINAL_INDEPENDENT_AUDIT.md`).
+- **Current Phase Implemented:** **`PHASE D — Quarantine Hardening (PPVAULT2)`** (`docs/PHASE_D_COMPLETION.md`, `docs/PHASE_D_PERFORMANCE_BASELINE.md`).
+  - **Phase D Verified Capabilities (`apps/desktop` & `@private-protection/core`):**
+    - **`PPVAULT2` Streaming 64 KB AES-256-GCM Engine:** Chunked streaming encryption and decryption with per-chunk AAD binding (`containerUuid || chunkIndex || isFinalChunk`) and dual-magic backward compatibility for legacy `PPVAULT1` containers.
+    - **DPAPI Key Sealing:** Sealed `.vault.key` via Windows DPAPI `safeStorage` / `CryptProtectData` with machine-local `0o600` key fallback.
+    - **Encrypted Manifest & Crash Recovery:** Authenticated AES-256-GCM encrypted `manifest.json.enc` with atomic `.tmp` swap and automatic `.bak` backup recovery.
+    - **TOCTOU & Symlink Defense:** Pinned `O_RDONLY | O_NOFOLLOW` file descriptors rejecting symlinks, directory junctions, and Windows reserved device names (`CON`, `PRN`, `AUX`, `NUL`, `COM1-9`, `LPT1-9`).
+    - **NTFS :Zone.Identifier ADS:** Captures and preserves Mark-of-the-Web metadata on Windows systems.
+    - **Restore & Trust SHA-256 Grant:** Restoring falsely detected files with `trustSha256: true` dynamically adds their SHA-256 digest to `ThreatIntel.getSharedInstance()` and `CleanFileCache`, preventing `RealtimeMonitorService` re-quarantine loops.
+  - **Empirical Performance Benchmarks:**
+    - 100 MB synthetic large file isolation: **`1,071.19 ms`** (**`93.35 MB/s`**)
+    - 100 MB synthetic large file restoration: **`1,614.29 ms`** (**`61.95 MB/s`**)
+    - 100 MB large-file peak V8 heap delta: **`4.111 MB`** (SLA: $< 16.0\text{ MB}$, **3.89x safety margin**)
+    - 1 MB streaming isolation latency: **`25.78 ms`** ($p50$)
+    - 1 MB streaming restore latency: **`26.81 ms`** ($p50$)
+    - Restore & Trust lookup latency: **`0.001 ms`** ($p50$) (SLA: $< 0.050\text{ ms}$)
+  - **Monorepo Regression Test Rate:**
+    - **648/648 PASS (100%)** across 110 test files in all 6 monorepo workspaces (0 failures, 0 errors, 0 skips).
+    - **45 dedicated quarantine tests** all passing.
+- **Next Step (Awaiting User Command):**
+  - **Phase D Final Independent Audit & GO/NO-GO Decision** (DO NOT begin Phase E until Phase D audit passes).
 
 
