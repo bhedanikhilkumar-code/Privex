@@ -10,6 +10,7 @@ export class MockProcessEventSource extends EventEmitter implements IProcessEven
   private lastError?: string;
   private eventsObserved = 0;
   private processCreatedCallback?: (event: ProcessCreationEvent) => void;
+  private readonly startupBuffer: ProcessCreationEvent[] = [];
   public startCallCount = 0;
   public stopCallCount = 0;
 
@@ -24,9 +25,13 @@ export class MockProcessEventSource extends EventEmitter implements IProcessEven
 
   public onProcessCreated(callback: (event: ProcessCreationEvent) => void): void {
     this.processCreatedCallback = callback;
+    this.flushStartupBuffer();
   }
 
-  public async start(): Promise<void> {
+  public async start(callback?: (event: ProcessCreationEvent) => void): Promise<void> {
+    if (callback) {
+      this.onProcessCreated(callback);
+    }
     this.startCallCount++;
     this.state = 'ACTIVE';
     this.lastError = undefined;
@@ -36,6 +41,7 @@ export class MockProcessEventSource extends EventEmitter implements IProcessEven
   public async stop(): Promise<void> {
     this.stopCallCount++;
     this.state = 'STOPPED';
+    this.startupBuffer.length = 0;
     this.emit('stopped');
   }
 
@@ -45,14 +51,24 @@ export class MockProcessEventSource extends EventEmitter implements IProcessEven
     this.removeAllListeners();
   }
 
+  private flushStartupBuffer(): void {
+    if (!this.processCreatedCallback) return;
+    while (this.startupBuffer.length > 0) {
+      const buffered = this.startupBuffer.shift()!;
+      this.processCreatedCallback(buffered);
+    }
+  }
+
   /**
    * Simulates an inbound process creation event from the OS.
    */
   public emitEvent(event: ProcessCreationEvent): void {
-    if (this.state !== 'ACTIVE') return;
     this.eventsObserved++;
     if (this.processCreatedCallback) {
+      this.flushStartupBuffer();
       this.processCreatedCallback(event);
+    } else {
+      this.startupBuffer.push(event);
     }
     this.emit('processCreated', event);
   }

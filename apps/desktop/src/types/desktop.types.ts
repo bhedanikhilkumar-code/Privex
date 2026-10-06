@@ -218,7 +218,7 @@ export interface ProcessEventSourceStatus {
 }
 
 export interface IProcessEventSource {
-  start(): Promise<void>;
+  start(callback?: (event: ProcessCreationEvent) => void): Promise<void>;
   stop(): Promise<void>;
   onProcessCreated(callback: (event: ProcessCreationEvent) => void): void;
   getStatus(): ProcessEventSourceStatus;

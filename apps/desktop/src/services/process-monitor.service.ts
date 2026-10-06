@@ -88,7 +88,7 @@ export class ProcessMonitorService extends EventEmitter {
 
     if (options?.eventSource) {
       this.eventSource = options.eventSource;
-      this.eventSourceType = 'WMI_EVENT_SUBSCRIPTION';
+      this.eventSourceType = options.eventSource instanceof MockProcessEventSource ? 'MOCK' : 'WMI_TRACE';
     } else if (options?.eventSourceOverride === 'MOCK') {
       this.eventSource = new MockProcessEventSource();
       this.eventSourceType = 'MOCK';
@@ -96,7 +96,7 @@ export class ProcessMonitorService extends EventEmitter {
       this.eventSourceType = 'POLLING_FALLBACK';
     } else if (process.platform === 'win32') {
       this.eventSource = new WindowsProcessEventSource();
-      this.eventSourceType = 'WMI_EVENT_SUBSCRIPTION';
+      this.eventSourceType = 'WMI_TRACE';
     } else {
       this.eventSourceType = 'POLLING_FALLBACK';
     }
@@ -117,12 +117,13 @@ export class ProcessMonitorService extends EventEmitter {
   /**
    * Starts process monitoring.
    *
-   * STARTUP ORDERING & RACE ELIMINATION:
-   * 1. Subscribes to primary Windows event source FIRST.
-   * 2. Establishes live OS event reception.
+   * STARTUP ORDERING & RACE ELIMINATION (SEC-F-02-B Remediation):
+   * 1. Registers consumer callback BEFORE or ATOMICALLY within eventSource.start().
+   *    Event source internally buffers any events during initialization.
+   * 2. Confirms OS event subscription is ACTIVE.
    * 3. Captures running process snapshot and seeds known process identities.
-   * 4. Any process created during or after subscription is guaranteed captured
-   *    and deduplicated via deterministic instance identity.
+   * 4. Reconciles events + snapshot with deterministic instance keys.
+   * 5. Invariant guaranteed: Zero OS events emitted before consumer callback is registered.
    */
   public async start(): Promise<void> {
     if (this.status === 'RUNNING') return;
@@ -132,11 +133,13 @@ export class ProcessMonitorService extends EventEmitter {
 
     let primaryEventSourceActive = false;
 
-    // STEP 1: Start primary event subscription
+    // STEP 1: Register callback FIRST, then start primary event subscription atomically
     if (this.eventSource && this.eventSourceType !== 'POLLING_FALLBACK') {
       try {
-        await this.eventSource.start();
         this.eventSource.onProcessCreated((event) => {
+          this.enqueueEvent(event);
+        });
+        await this.eventSource.start((event) => {
           this.enqueueEvent(event);
         });
         primaryEventSourceActive = true;
@@ -144,10 +147,10 @@ export class ProcessMonitorService extends EventEmitter {
         if (this.eventSource instanceof MockProcessEventSource) {
           this.eventSourceType = 'MOCK';
         } else {
-          this.eventSourceType = 'WMI_EVENT_SUBSCRIPTION';
+          this.eventSourceType = 'WMI_TRACE';
         }
       } catch (err: any) {
-        // Event source failed to initialize
+        // Event source failed to initialize (e.g. unprivileged standard user or missing provider)
         this.lastError = `Primary process event subscription failed: ${err?.message || String(err)}; falling back to degraded polling`;
         this.status = 'DEGRADED';
         this.isContinuous = false;
@@ -194,6 +197,9 @@ export class ProcessMonitorService extends EventEmitter {
     this.isContinuous = false;
     this.highPriorityQueue.length = 0;
     this.normalPriorityQueue.length = 0;
+    this.seenEventKeys.clear();
+    this.seenEventKeyOrder.length = 0;
+    this.knownPids.clear();
     this.emit('stopped', this.getHealth());
   }
 
@@ -333,7 +339,14 @@ export class ProcessMonitorService extends EventEmitter {
       this.knownPids = new Set(currentProcs.map((p) => p.pid));
       for (const p of currentProcs) {
         const key = `evt:${p.pid}:${p.creationDate || 0}:${p.processName.toLowerCase()}`;
-        this.seenEventKeys.add(key);
+        if (!this.seenEventKeys.has(key)) {
+          this.seenEventKeys.add(key);
+          this.seenEventKeyOrder.push(key);
+          if (this.seenEventKeyOrder.length > this.MAX_SEEN_CACHE) {
+            const oldest = this.seenEventKeyOrder.shift();
+            if (oldest) this.seenEventKeys.delete(oldest);
+          }
+        }
       }
     } catch {
       this.knownPids = new Set();

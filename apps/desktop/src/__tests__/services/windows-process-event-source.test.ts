@@ -33,22 +33,20 @@ describe('WindowsProcessEventSource (Phase F — SEC-F-02 Windows Native Event S
     await startPromise;
 
     expect(source.getStatus().state).toBe('ACTIVE');
-    expect(source.getStatus().sourceName).toBe('WMI_EVENT_SUBSCRIPTION');
+    expect(source.getStatus().sourceName).toBe('WMI_TRACE');
 
     await source.stop();
     expect(source.getStatus().state).toBe('STOPPED');
   });
 
-  it('normalizes inbound JSON line into ProcessCreationEvent with deterministic identity', async () => {
+  it('normalizes inbound JSON line with numeric epoch creation timestamp from Win32_ProcessStartTrace', async () => {
     const { stdout, spawnProvider } = createMockSpawn();
     const source = new WindowsProcessEventSource({ spawnProvider });
 
     let capturedEvent: ProcessCreationEvent | undefined;
-    source.onProcessCreated((ev) => {
+    const startPromise = source.start((ev) => {
       capturedEvent = ev;
     });
-
-    const startPromise = source.start();
     stdout.write('PP_WMI_READY\n');
     await startPromise;
 
@@ -58,7 +56,7 @@ describe('WindowsProcessEventSource (Phase F — SEC-F-02 Windows Native Event S
       name: 'powershell.exe',
       path: 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
       cmd: 'powershell.exe -ep bypass',
-      creation: '20261006210845.563603+330'
+      creation: 1760000000000
     });
 
     stdout.write(eventJson + '\n');
@@ -69,9 +67,36 @@ describe('WindowsProcessEventSource (Phase F — SEC-F-02 Windows Native Event S
     expect(capturedEvent?.processName).toBe('powershell.exe');
     expect(capturedEvent?.executablePath).toBe('C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe');
     expect(capturedEvent?.commandLine).toBe('powershell.exe -ep bypass');
-    expect(capturedEvent?.eventId).toContain('evt:4321:');
-    expect(capturedEvent?.eventId).toContain(':powershell.exe');
+    expect(capturedEvent?.creationTime).toBe(1760000000000);
+    expect(capturedEvent?.eventId).toBe('evt:4321:1760000000000:powershell.exe');
     expect(source.getStatus().eventsObserved).toBe(1);
+
+    await source.stop();
+  });
+
+  it('buffers events that arrive before consumer callback is registered and flushes in order (zero loss)', async () => {
+    const { stdout, spawnProvider } = createMockSpawn();
+    const source = new WindowsProcessEventSource({ spawnProvider });
+
+    const startPromise = source.start();
+    stdout.write('PP_WMI_READY\n');
+    await startPromise;
+
+    // Send events BEFORE registering onProcessCreated
+    const event1 = JSON.stringify({ pid: 101, name: 'proc1.exe', creation: 1000 });
+    const event2 = JSON.stringify({ pid: 102, name: 'proc2.exe', creation: 2000 });
+    stdout.write(event1 + '\n');
+    stdout.write(event2 + '\n');
+
+    const received: ProcessCreationEvent[] = [];
+    // Consumer callback registered afterwards
+    source.onProcessCreated((ev) => {
+      received.push(ev);
+    });
+
+    expect(received.length).toBe(2);
+    expect(received[0].pid).toBe(101);
+    expect(received[1].pid).toBe(102);
 
     await source.stop();
   });
@@ -81,11 +106,11 @@ describe('WindowsProcessEventSource (Phase F — SEC-F-02 Windows Native Event S
     const source = new WindowsProcessEventSource({ spawnProvider });
 
     const startPromise = source.start();
-    stderr.write('PP_WMI_INIT_ERROR: Access Denied to WMI Provider\n');
+    stderr.write('PP_WMI_INIT_ERROR: Access denied (Win32_ProcessStartTrace requires Administrator privileges or Performance Log Users group membership)\n');
 
     await expect(startPromise).rejects.toThrow('WMI event watcher init failed');
     expect(source.getStatus().state).toBe('ERROR');
-    expect(source.getStatus().lastError).toContain('Access Denied');
+    expect(source.getStatus().lastError).toContain('Access denied');
   });
 
   it('safely ignores malformed JSON without crashing the watcher stream', async () => {

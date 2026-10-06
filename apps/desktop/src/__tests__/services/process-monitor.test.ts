@@ -44,7 +44,7 @@ describe('ProcessMonitorService (Phase F — SEC-F-02 Continuous Process Monitor
       expect(health.queueDepth).toBe(0);
       expect(health.processedEvents).toBe(0);
       expect(health.droppedEvents).toBe(0);
-      expect(health.eventSource).toBe('WMI_EVENT_SUBSCRIPTION');
+      expect(health.eventSource).toBe('MOCK');
     });
 
     it('transitions to RUNNING and continuous upon start with active event source', async () => {
@@ -110,15 +110,15 @@ describe('ProcessMonitorService (Phase F — SEC-F-02 Continuous Process Monitor
     });
   });
 
-  describe('3. Startup Race Protection', () => {
+  describe('3. Startup Race Protection (SEC-F-02-B Remediation)', () => {
     it('subscribes to event source before snapshotting running processes', async () => {
       const order: string[] = [];
 
       const orderedSource = new MockProcessEventSource();
       const origStart = orderedSource.start.bind(orderedSource);
-      orderedSource.start = async () => {
+      orderedSource.start = async (cb) => {
         order.push('EVENT_SOURCE_START');
-        return origStart();
+        return origStart(cb);
       };
 
       const customAuditor = new ProcessAuditorService({
@@ -139,6 +139,71 @@ describe('ProcessMonitorService (Phase F — SEC-F-02 Continuous Process Monitor
 
       expect(order).toEqual(['EVENT_SOURCE_START', 'SNAPSHOT_RUNNING_PROCESSES']);
       expect(order[0]).toBe('EVENT_SOURCE_START');
+
+      await raceProofMonitor.stop();
+    });
+
+    it('adversarially proves zero event loss when an event arrives during activation and snapshotting', async () => {
+      // Adversarial test: event generated during event source activation
+      const eventDuringActivation: ProcessCreationEvent = {
+        eventId: 'evt:7777:1760000000000:evil_spawn.exe',
+        pid: 7777,
+        ppid: 1000,
+        processName: 'evil_spawn.exe',
+        executablePath: 'C:\\Users\\Public\\evil_spawn.exe',
+        commandLine: 'powershell.exe -w hidden -enc JABv...',
+        creationTime: 1760000000000,
+        timestamp: Date.now()
+      };
+
+      const dangerousWindowSource = new MockProcessEventSource();
+      const origStart = dangerousWindowSource.start.bind(dangerousWindowSource);
+
+      // Inbound event arrives WHILE start() is executing (dangerous activation window)
+      dangerousWindowSource.start = async (cb) => {
+        if (cb) dangerousWindowSource.onProcessCreated(cb);
+        dangerousWindowSource.emitEvent(eventDuringActivation);
+        return origStart(cb);
+      };
+
+      // Snapshot also captures the process
+      const customAuditor = new ProcessAuditorService({
+        behaviorEngine,
+        processQueryProvider: async () => [
+          {
+            pid: 7777,
+            processName: 'evil_spawn.exe',
+            executablePath: 'C:\\Users\\Public\\evil_spawn.exe',
+            commandLine: 'powershell.exe -w hidden -enc JABv...',
+            creationDate: 1760000000000
+          }
+        ]
+      });
+
+      const raceProofMonitor = new ProcessMonitorService({
+        behaviorEngine,
+        processAuditor: customAuditor,
+        eventSource: dangerousWindowSource
+      });
+
+      let evaluationCount = 0;
+      raceProofMonitor.on('processEvaluated', (ev) => {
+        if (ev.pid === 7777) {
+          evaluationCount++;
+        }
+      });
+
+      await raceProofMonitor.start();
+
+      // Wait for async worker queue processing
+      await new Promise((r) => setTimeout(r, 60));
+
+      // 1. Activation began
+      // 2. Event generated during activation
+      // 3. Event was not lost (buffered and enqueued)
+      // 4. Event reached ProcessMonitorService
+      // 5. Evaluated exactly once (deduplicated against snapshot)
+      expect(evaluationCount).toBe(1);
 
       await raceProofMonitor.stop();
     });
@@ -229,6 +294,33 @@ describe('ProcessMonitorService (Phase F — SEC-F-02 Continuous Process Monitor
       expect(monitor.enqueueEvent(firstProcess)).toBe(true);
       expect(monitor.enqueueEvent(reusedPidProcess)).toBe(true);
     });
+
+    it('deterministically evicts oldest seen entries when cache exceeds MAX_SEEN_CACHE (2,000)', () => {
+      // Add first entry
+      const firstEvent: ProcessCreationEvent = {
+        eventId: 'evt:100:1000:first.exe',
+        pid: 100,
+        processName: 'first.exe',
+        creationTime: 1000,
+        timestamp: 1000
+      };
+      expect(monitor.enqueueEvent(firstEvent)).toBe(true);
+      expect(monitor.enqueueEvent(firstEvent)).toBe(false); // Deduplicated
+
+      // Enqueue 2,001 additional distinct events to force LRU eviction of the first
+      for (let i = 1; i <= 2001; i++) {
+        monitor.enqueueEvent({
+          eventId: `evt:${1000 + i}:${2000 + i}:proc_${i}.exe`,
+          pid: 1000 + i,
+          processName: `proc_${i}.exe`,
+          creationTime: 2000 + i,
+          timestamp: 2000 + i
+        });
+      }
+
+      // First event should now have been evicted and can be enqueued again
+      expect(monitor.enqueueEvent(firstEvent)).toBe(true);
+    });
   });
 
   describe('6. Bounded Queue & Backpressure Shedding', () => {
@@ -288,6 +380,25 @@ describe('ProcessMonitorService (Phase F — SEC-F-02 Continuous Process Monitor
 
       await monitor.stop();
       expect(monitor.getHealth().status).toBe('STOPPED');
+    });
+
+    it('clears and reinitializes state cleanly upon restart', async () => {
+      await monitor.start();
+      const testEvent: ProcessCreationEvent = {
+        eventId: 'evt:999:1234:service.exe',
+        pid: 999,
+        processName: 'service.exe',
+        creationTime: 1234,
+        timestamp: Date.now()
+      };
+      expect(monitor.enqueueEvent(testEvent)).toBe(true);
+      expect(monitor.enqueueEvent(testEvent)).toBe(false); // Deduplicated
+
+      await monitor.stop();
+      await monitor.start();
+
+      // After restart, state is safely reinitialized so the event is processed fresh
+      expect(monitor.enqueueEvent(testEvent)).toBe(true);
     });
 
     it('handles idempotent start() and stop() calls safely', async () => {
