@@ -19,7 +19,8 @@ import {
   ExclusionItem,
   CreateExclusionInput,
   MotwAnalysisResult,
-  EmailAnalysisResult
+  EmailAnalysisResult,
+  RemovableDriveScanResult
 } from '../types/desktop.types';
 import { NetworkPostureReport } from '../services/network-monitor.service';
 
@@ -50,6 +51,8 @@ export interface DesktopSecurityApi {
   getProcessMonitorHealth: () => Promise<ProcessMonitorHealth>;
   auditPersistence: () => Promise<PersistenceItem[]>;
   getRemovableMedia: () => Promise<RemovableDrive[]>;
+  scanRemovableMedia: (mountPath: string) => Promise<RemovableDriveScanResult>;
+  onMediaDriveAttached: (callback: (drive: RemovableDrive) => void) => () => void;
   getNetworkPosture: () => Promise<NetworkPostureReport>;
 
   privacyShred: () => Promise<void>;
@@ -190,6 +193,17 @@ export function createDesktopSecurityApi(ipcRenderer: {
     getProcessMonitorHealth: () => ipcRenderer.invoke(IPC_CHANNELS.PROCESS_MONITOR_HEALTH),
     auditPersistence: () => ipcRenderer.invoke(IPC_CHANNELS.PERSISTENCE_AUDIT),
     getRemovableMedia: () => ipcRenderer.invoke(IPC_CHANNELS.REMOVABLE_MEDIA_GET),
+    scanRemovableMedia: (mountPath) =>
+      ipcRenderer.invoke(IPC_CHANNELS.REMOVABLE_MEDIA_SCAN, mountPath),
+    onMediaDriveAttached: (callback) => {
+      const handler = (_event: any, drive: unknown) => {
+        if (drive && typeof drive === 'object' && 'mountPoint' in drive) {
+          callback(drive as RemovableDrive);
+        }
+      };
+      ipcRenderer.on(IPC_CHANNELS.MEDIA_DRIVE_ATTACHED, handler);
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.MEDIA_DRIVE_ATTACHED, handler);
+    },
     getNetworkPosture: () => ipcRenderer.invoke(IPC_CHANNELS.NETWORK_POSTURE_GET),
 
     privacyShred: () => ipcRenderer.invoke(IPC_CHANNELS.PRIVACY_SHRED),

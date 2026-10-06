@@ -291,12 +291,75 @@ export interface PersistenceItem {
   reason?: string;
 }
 
+export type RemovableDriveType =
+  | 'REMOVABLE'
+  | 'FIXED'
+  | 'CDROM'
+  | 'RAMDISK'
+  | 'NETWORK'
+  | 'UNKNOWN';
+
 export interface RemovableDrive {
   mountPoint: string;
   label: string;
   totalBytes: number;
   freeBytes: number;
+  driveLetter?: string;
+  driveType?: RemovableDriveType;
+  fileSystem?: string;
+  isRemovable?: boolean;
+  volumeSerialNumber?: string;
 }
+
+// ============================================================
+// PHASE M: USB & REMOVABLE MEDIA PROTECTION TYPES
+// ============================================================
+
+export interface AutorunAnalysisResult {
+  readonly hasAutorun: boolean;
+  readonly filePath?: string;
+  readonly openTarget?: string;
+  readonly shellExecuteTarget?: string;
+  readonly iconTarget?: string;
+  readonly action?: string;
+  readonly commands: string[];
+  readonly isSuspicious: boolean;
+  readonly riskScore: number;
+  readonly indicators: string[];
+  readonly evidenceFactors: string[];
+  readonly targetAnalysis?: FileAnalysisResult;
+}
+
+export interface ShortcutWormAnalysisResult {
+  readonly isShortcut: boolean;
+  readonly filePath: string;
+  readonly targetPath?: string;
+  readonly arguments?: string;
+  readonly workingDirectory?: string;
+  readonly iconLocation?: string;
+  readonly description?: string;
+  readonly isSuspicious: boolean;
+  readonly riskScore: number;
+  readonly indicators: string[];
+  readonly evidenceFactors: string[];
+  readonly targetAnalysis?: FileAnalysisResult;
+}
+
+export interface RemovableDriveScanResult {
+  readonly mountPoint: string;
+  readonly scanTimestamp: number;
+  readonly totalRootItemsScanned: number;
+  readonly threatsFound: number;
+  readonly riskScore: number;
+  readonly severity: ThreatSeverity;
+  readonly verdict: ThreatVerdict;
+  readonly autorun?: AutorunAnalysisResult;
+  readonly shortcutWorms: ShortcutWormAnalysisResult[];
+  readonly threats: DetectedThreat[];
+  readonly evidenceFactors: string[];
+  readonly durationMs: number;
+}
+
 
 export interface DesktopProtectionStatus {
   realtimeShieldActive: boolean;

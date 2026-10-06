@@ -275,19 +275,20 @@ Download (MOTW)      Shield & ShadowVault  Persistence Protection  │          
 
 ---
 
-### PHASE M: USB & Removable Media Protection
+### PHASE M: USB & Removable Media Protection (COMPLETE / GO APPROVED)
+- **Status:** **COMPLETE / INDEPENDENT AUDIT GO APPROVED** (`docs/PHASE_M_FINAL_INDEPENDENT_AUDIT.md`, `docs/PHASE_M_COMPLETION.md`, `docs/PHASE_M_ARCHITECTURE.md`)
 - **1. Objective:** Upgrade `RemovableMediaService` (`apps/desktop/src/services/removable-media.service.ts`) to accurately detect removable USB volumes (`DRIVE_REMOVABLE` / `DriveType=2`), report real disk capacity, automatically scan newly mounted USB roots for `autorun.inf` and `.lnk` worms in $<200\text{ ms}`, and wire USB scanning into `IpcHandler` and the UI.
 - **2. Dependencies:** `PHASE C`, `PHASE E`, `PHASE L`.
 - **3. Implementation Tasks:**
   - Query logical volume drive types and free/total bytes via WMI/CIM (`Win32_LogicalDisk Where DriveType=2`) or `fs.statfsSync` fallback.
   - Start `removableMediaService.startMonitoring()` in `IpcHandler` and emit `MEDIA_DRIVE_ATTACHED` events when a USB drive is mounted.
   - Implement `scanRemovableDriveRoot(mountPath)` to immediately inspect `autorun.inf`, hidden directories replaced by same-named `.lnk` shortcut worms, and root executables upon insertion.
-- **4. Unit Tests:** `removable-media.test.ts` testing drive enumeration, `autorun.inf` parsing, and `.lnk` worm detection.
-- **5. Integration Tests:** Simulate mounting a removable drive directory containing `autorun.inf` (`open=worm.vbs`) and a malicious `.lnk` file; verify automatic root threat detection within $<200\text{ ms}`.
-- **6. Security Tests:** Verify drive mount path validation prevents scanning arbitrary UNC paths.
-- **7. Performance Tests:** USB root quick-triage completes in $<200\text{ ms}$ on mount.
+- **4. Unit Tests:** `removable-media.test.ts`, `autorun-parser.test.ts`, `lnk-parser.test.ts` testing drive enumeration, `autorun.inf` parsing, and `.lnk` worm detection (27/27 pass).
+- **5. Integration Tests:** Simulate mounting a removable drive directory containing `autorun.inf` (`open=worm.vbs`) and a malicious `.lnk` file; verify automatic root threat detection within $<200\text{ ms}` (`phase-m-removable-media.integration.test.ts`, 2/2 pass).
+- **6. Security Tests:** Verify drive mount path validation prevents scanning arbitrary UNC paths, fuzz malformed/oversized LNK and autorun files (`phase-m-security.test.ts`, 8/8 pass).
+- **7. Performance Tests:** USB root quick-triage completes in $17.08\text{ ms}$ on mount ($<200\text{ ms}$ SLA) (`phase-m-performance.test.ts`, 4/4 pass).
 - **8. Acceptance Criteria:** Accurate USB drive detection with real byte capacity and automatic `autorun.inf`/worm protection (`AV-REALTIME-004`).
-- **9. Exit Criteria:** All `removable-media.test.ts` tests pass.
+- **9. Exit Criteria:** All Phase M tests pass 100% (41/41 Phase M tests, 719/720 monorepo total).
 - **10. Rollback Strategy:** Users can toggle automatic USB mount scanning on/off in Settings.
 
 ---

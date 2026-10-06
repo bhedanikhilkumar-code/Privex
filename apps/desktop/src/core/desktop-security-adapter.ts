@@ -18,6 +18,7 @@ import {
 } from '../types/desktop.types';
 import { MotwAnalyzer } from './motw-analyzer';
 import { EmailMimeParser } from './email-mime-parser';
+import { RemovableMediaService } from '../services/removable-media.service';
 
 export class DesktopSecurityAdapter {
   private pipeline: DetectionPipeline;
@@ -52,6 +53,22 @@ export class DesktopSecurityAdapter {
    */
   public async analyzeEmail(filePath: string) {
     return EmailMimeParser.analyzeEmailFile(filePath);
+  }
+
+  /**
+   * Performs quick triage of removable media root (< 200 ms).
+   */
+  public async scanRemovableMedia(mountPath: string) {
+    const service = new RemovableMediaService();
+    return service.scanRemovableDriveRoot(mountPath);
+  }
+
+  /**
+   * Discovers mounted removable volumes.
+   */
+  public async getRemovableMedia() {
+    const service = new RemovableMediaService();
+    return service.getMountedDrives();
   }
 
   /**

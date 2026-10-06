@@ -65,7 +65,11 @@ export const IPC_CHANNELS = {
   WEB_PROTECTION_STATUS_GET: 'desktop:webProtection:statusGet',
 
   // Phase K: Practical Email (.eml / .msg) & Network Socket Protection
-  EMAIL_ANALYZE_FILE: 'desktop:email:analyzeFile'
+  EMAIL_ANALYZE_FILE: 'desktop:email:analyzeFile',
+
+  // Phase M: USB & Removable Media Protection
+  REMOVABLE_MEDIA_SCAN: 'desktop:removableMedia:scan',
+  MEDIA_DRIVE_ATTACHED: 'desktop:removableMedia:attached'
 } as const;
 
 export type IpcChannel = typeof IPC_CHANNELS[keyof typeof IPC_CHANNELS];
@@ -75,7 +79,8 @@ export const IPC_EVENT_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.REALTIME_THREAT_EVENT,
   IPC_CHANNELS.TRIGGER_QUICK_SCAN,
   IPC_CHANNELS.RANSOMWARE_EVENT,
-  IPC_CHANNELS.NOTIFICATION_EVENT
+  IPC_CHANNELS.NOTIFICATION_EVENT,
+  IPC_CHANNELS.MEDIA_DRIVE_ATTACHED
 ] as const;
 
 export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
@@ -98,6 +103,7 @@ export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.PROCESS_MONITOR_HEALTH,
   IPC_CHANNELS.PERSISTENCE_AUDIT,
   IPC_CHANNELS.REMOVABLE_MEDIA_GET,
+  IPC_CHANNELS.REMOVABLE_MEDIA_SCAN,
   IPC_CHANNELS.NETWORK_POSTURE_GET,
   IPC_CHANNELS.PRIVACY_SHRED,
   IPC_CHANNELS.RANSOMWARE_STATUS_GET,

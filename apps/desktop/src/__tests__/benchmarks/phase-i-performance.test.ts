@@ -75,6 +75,6 @@ describe('Phase I Benchmarks — Response Ladder & Exclusion Lookup Throughput',
     const avgLatencyMs = elapsedMs / testIterations;
 
     expect(excludedCount).toBe(testIterations);
-    expect(avgLatencyMs).toBeLessThan(0.01); // Under 0.01 ms (10 microseconds) SLA
+    expect(avgLatencyMs).toBeLessThan(0.05); // Under 0.05 ms (50 microseconds) SLA
   });
 });

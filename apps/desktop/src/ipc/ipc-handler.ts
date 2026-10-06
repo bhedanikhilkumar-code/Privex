@@ -39,7 +39,9 @@ import {
   NotificationInboxState,
   ExclusionItem,
   MotwAnalysisResult,
-  EmailAnalysisResult
+  EmailAnalysisResult,
+  RemovableDrive,
+  RemovableDriveScanResult
 } from '../types/desktop.types';
 
 
@@ -136,6 +138,41 @@ export class IpcHandler {
       const wc = this.getWebContentsFn?.();
       if (wc) {
         wc.send(IPC_CHANNELS.RANSOMWARE_EVENT, incident);
+      }
+    });
+
+    // Wire RemovableMedia events to security log, notifications, and renderer broadcast (Phase M)
+    this.removableMedia.on('driveAttached', (drive: RemovableDrive) => {
+      this.storage.recordSecurityEvent(
+        'CONFIG_UPDATED',
+        'INFO',
+        `Removable drive attached: ${drive.label} (${drive.mountPoint})`,
+        { mountPoint: drive.mountPoint, label: drive.label, totalBytes: drive.totalBytes }
+      );
+      const wc = this.getWebContentsFn?.();
+      if (wc) {
+        wc.send(IPC_CHANNELS.MEDIA_DRIVE_ATTACHED, drive);
+      }
+    });
+
+    this.removableMedia.on('scanCompleted', (res: RemovableDriveScanResult) => {
+      if (res.threatsFound > 0) {
+        this.storage.recordSecurityEvent(
+          'THREAT_DETECTED',
+          res.verdict === 'BLOCK' ? 'CRITICAL' : 'WARN',
+          `USB root threat detected on ${res.mountPoint}: ${res.threatsFound} threat(s) found`,
+          {
+            mountPoint: res.mountPoint,
+            threatsFound: res.threatsFound,
+            riskScore: res.riskScore,
+            verdict: res.verdict
+          }
+        );
+        for (const threat of res.threats) {
+          this.notificationService.notifySecurityThreat(threat, {
+            source: `Removable Media (${path.basename(res.mountPoint)})`
+          });
+        }
       }
     });
 
@@ -754,6 +791,11 @@ export class IpcHandler {
       return this.handleGetRemovableMedia();
     });
 
+    ipcMain.handle(IPC_CHANNELS.REMOVABLE_MEDIA_SCAN, async (event, mountPath: unknown) => {
+      verifyOrigin(event);
+      return this.handleScanRemovableMedia(mountPath);
+    });
+
     ipcMain.handle(IPC_CHANNELS.NETWORK_POSTURE_GET, async (event) => {
       verifyOrigin(event);
       return this.handleGetNetworkPosture();
@@ -1006,6 +1048,19 @@ export class IpcHandler {
   public async handleEmailAnalyzeFile(filePath: unknown): Promise<EmailAnalysisResult> {
     const validPath = IpcValidator.validatePath(filePath);
     return EmailMimeParser.analyzeEmailFile(validPath);
+  }
+
+  // ============================================================
+  // PHASE M REMOVABLE MEDIA HANDLERS
+  // ============================================================
+
+  public async handleScanRemovableMedia(mountPath: unknown): Promise<RemovableDriveScanResult> {
+    const validPath = IpcValidator.validatePath(mountPath);
+    return this.removableMedia.scanRemovableDriveRoot(validPath);
+  }
+
+  public getRemovableMediaService(): RemovableMediaService {
+    return this.removableMedia;
   }
 }
 

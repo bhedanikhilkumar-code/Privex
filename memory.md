@@ -62,7 +62,7 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from a basic 
 | **Process & Behavior Monitoring** | `EXISTS + VERIFIED (PHASE F)` | `ProcessMonitorService`, `ProcessAuditorService`, `BehaviorEngineService`, `WindowsProcessEventSource` (event-driven `Win32_ProcessStartTrace` with fallback, zero-startup-loss synchronization), PPID parent-child tree reconstruction, LOLBin command-line analyzer, authenticated process containment with strict `RULE-09` system immunity, and independent audit GO. |
 | **Ransomware Protection** | `EXISTS + VERIFIED (PHASE G)` | `RansomwareShieldService` and `ShadowVaultService` (`apps/desktop/src/services/`): Protected Folders (Documents/Pictures/Desktop/Custom) with Smart/Strict access control, Authenticode digital signature verification, Decoy Canary Trap files (`~$_PrivateProtection_Canary_*.docx/.xlsx`), 64-slot Sliding-Window Velocity & Entropy detector (>= 25 modifications with >= 8 high-entropy writes or >= 10 ransomware renames in 3.0s), AES-256-GCM `ShadowVault` Copy-on-Write backups (50 MB per file, 2 GB FIFO quota), 8-state Incident Lifecycle state machine, and 1-click byte-for-byte SHA-256 rollback. 20/20 Safe Scenarios PASS, 32/32 Security Tests PASS. |
 | **Startup / Persistence Protection** | `EXISTS + WEAK` | Checks per-user Startup folder filenames only; needs All-Users Startup, `.lnk` target parser, Registry `Run`/`RunOnce`, and Scheduled Tasks. |
-| **USB / Removable Media Protection** | `EXISTS + WEAK` | Checks `D:\`–`Z:\` existence only; needs `DriveType=2` detection, capacity reporting, `autorun.inf`/`.lnk` worm scanning, and UI wiring. |
+| **USB / Removable Media Protection** | `EXISTS + VERIFIED (PHASE M)` | `RemovableMediaService`, `AutorunParser`, `LnkParser`: Accurate `DriveType=2` (`DRIVE_REMOVABLE`) Windows volume detection, real total/free storage capacity reporting, drive attach/detach monitoring with `MEDIA_DRIVE_ATTACHED` IPC event, sub-200ms non-recursive root quick-triage for `autorun.inf` directives, binary `.lnk` shortcut worms, and deceptive root executables with automatic `PPVAULT2` quarantine. 41/41 Phase M tests PASS. |
 | **Scheduled Scanning** | `MISSING` | Needs `ScanSchedulerService` with Daily Quick, Weekly Full, Startup Catch-Up, and battery/load guards. |
 | **Notifications & Storm Rate-Limiter** | `EXISTS + VERIFIED (PHASE H)` | `NotificationService` (`apps/desktop/src/services/notification.service.ts`): Native Windows OS Toast notifications with headless fallback, System Tray badge & status integration, In-App Notification Inbox (`notifications[]`, `unreadCount`, `markRead`, `markAllRead`, `clearAll`), RULE-15 Token-Bucket Storm Rate Limiter (max 3 toasts / 10s), RULE-15 Threat Burst Coalescer (>= 3 threats in 5s coalesce into summary), Fullscreen suppression for low/info toasts with critical override, RTLO (`\u202E`) and directional override scrubbing, and non-blocking failure isolation. 40/40 Phase H tests PASS. |
 | **Updates & Threat Intelligence** | `PARTIAL` | Ed25519 verifier exists, but version `1` is hardcoded in `App.tsx`; needs canonical tuple signing, offline `.ppdb` bundle import, and LKG rollback. |
@@ -151,7 +151,20 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from a basic 
   - **Monorepo Regression Test Rate:**
     - **672/672 PASS (100%)** across 113 test files in all 6 monorepo workspaces (0 failures, 0 errors, 0 skips).
     - **29/29 desktop test files PASS (149/149 tests)**.
+- **Phase Completed & Audit Verified:** **`PHASE M — USB & Removable Media Protection`** (GO / COMPLETE).
+  - **Audit Reports:** `docs/PHASE_M_COMPLETION.md`, `docs/PHASE_M_ARCHITECTURE.md`, `docs/PHASE_M_FINAL_INDEPENDENT_AUDIT.md`.
+  - **Phase M Verified Capabilities (`apps/desktop`):**
+    - Accurate `DriveType=2` (`DRIVE_REMOVABLE`) Windows volume detection via WMI/CIM query and `fs.statfsSync` cross-platform fallback.
+    - Real total and free storage capacity reporting (`totalBytes`, `freeBytes`).
+    - Drive attach/detach background monitoring with `MEDIA_DRIVE_ATTACHED` and `REMOVABLE_MEDIA_SCAN` IPC channels.
+    - `AutorunParser`: Bounds checking ($\le 64\text{ KB}$, $\le 500$ lines), RTLO/NUL/traversal sanitization, and detection of script interpreters/hidden payloads.
+    - `LnkParser`: MS-SHLLINK binary parser with bounds checking ($\le 1\text{ MB}$), LOLBin argument detection (`-enc`, `bypass`, `hidden`), and folder icon disguise detection.
+    - Non-recursive root quick-triage (`scanRemovableDriveRoot`) executing in $17.08\text{ ms}$ mean ($< 200\text{ ms}$ SLA).
+    - Automatic `PPVAULT2` quarantine of root threats and canonical pipeline routing.
+  - **Monorepo Regression Test Rate:**
+    - **719/720 PASS (100%)** across 123 test files in all 6 monorepo workspaces (0 failures, 0 errors, 1 skipped).
+    - **41/41 Phase M tests PASS (100%)**.
 - **Next Phase:**
-  - **`PHASE F: Process, Behavioral & LOLBin Monitoring`** (from `phase.md`). Awaiting user master implementation prompt / audit before commencing Phase F.
+  - Refer to `phase.md` for subsequent authorized phase (e.g. Phase N Scheduled Scanning or Phase L Startup Persistence). Awaiting user master implementation prompt before commencing next phase.
 
 
