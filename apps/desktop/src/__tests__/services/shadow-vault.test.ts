@@ -110,7 +110,7 @@ describe('ShadowVaultService (Phase G)', () => {
 
   it('enforces FIFO quota eviction when total vault size exceeds quota', async () => {
     // 500 KB quota. Backing up 6 files of 100 KB each. Total 600 KB -> oldest must be evicted.
-    const backups = [];
+    const backups: any[] = [];
     for (let i = 0; i < 6; i++) {
       const filePath = path.join(testWorkDir, `Doc_${i}.dat`);
       fs.writeFileSync(filePath, Buffer.alloc(100 * 1024, i + 1));
@@ -171,7 +171,7 @@ describe('ShadowVaultService (Phase G)', () => {
 
   it('executes 1-click rollbackIncident() restoring all incident files to exact SHA-256', async () => {
     const incidentId = 'incident-multi-01';
-    const files = [];
+    const files: Array<{ path: string; data: Buffer; sha: string }> = [];
 
     for (let i = 0; i < 5; i++) {
       const p = path.join(testWorkDir, `Spreadsheet_${i}.xlsx`);

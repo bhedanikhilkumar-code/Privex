@@ -449,7 +449,7 @@ describe('Phase G Security Tests (A through AG)', () => {
 
   // AA. Concurrent backup / restore
   it('SEC-G-AA: executes concurrent backup operations safely without collision', async () => {
-    const promises = [];
+    const promises: Array<Promise<any>> = [];
     for (let i = 0; i < 5; i++) {
       const p = path.join(testRoot, `concurrent_${i}.txt`);
       fs.writeFileSync(p, Buffer.from(`CONCURRENT_DATA_${i}`));
