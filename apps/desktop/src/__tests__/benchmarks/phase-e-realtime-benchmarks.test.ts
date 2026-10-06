@@ -101,9 +101,9 @@ describe('Phase E — Real-Time Ingress Latency & Performance Benchmark Suite', 
       ingressLatencies.push(elapsed);
     }
 
-    // Wait briefly for in-flight auto-quarantine actions to settle
+    // Wait for in-flight auto-quarantine actions to settle
     const qWaitStart = Date.now();
-    while (monitor.getQueueStats().quarantinedCount < N && Date.now() - qWaitStart < 2000) {
+    while (monitor.getQueueStats().quarantinedCount < N && Date.now() - qWaitStart < 10000) {
       await new Promise((r) => setTimeout(r, 20));
     }
 

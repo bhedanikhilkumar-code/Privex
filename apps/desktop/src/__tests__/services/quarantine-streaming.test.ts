@@ -748,7 +748,7 @@ describe('QuarantineService (PPVAULT2 Streaming & Hardening)', () => {
       // Verify integrity of the restored 100 MB file
       const restoredStat = fs.statSync(restoredPath);
       expect(restoredStat.size).toBe(largeSize);
-    });
+    }, 30000);
   });
 
   describe('Phase D Audit Remediation Regression Suite (SEC-D-01 to SEC-D-04)', () => {

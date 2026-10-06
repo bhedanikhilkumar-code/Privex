@@ -29,7 +29,7 @@ export interface ProcessMonitorOptions {
  *
  * ARCHITECTURAL TOPOLOGY:
  * 1. Primary: Windows WMI Event Subscription (WindowsProcessEventSource)
- *    Subscribes directly to OS process creation (__InstanceCreationEvent of Win32_Process).
+ *    Subscribes directly to OS process creation (Win32_ProcessStartTrace).
  *    Catches short-lived processes (<20 ms) that exit between traditional polling intervals.
  * 2. Ingress & Normalization:
  *    ProcessCreationEvent -> deterministic deduplication key -> Bounded Priority Queue.

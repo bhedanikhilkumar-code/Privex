@@ -88,17 +88,17 @@ All five findings from `docs/PHASE_F_FINAL_INDEPENDENT_AUDIT.md` have been fully
 
 ## 3. Test Verification & Monorepo Regressions
 
-### Desktop Test Suite (39/39 Files PASS, 250/250 Tests PASS)
-- `apps/desktop/src/__tests__/integration/windows-process-event-source.integration.test.ts` (2/2 PASS) — **NEW Real OS Integration Suite**
-- `apps/desktop/src/__tests__/services/windows-process-event-source.test.ts` (6/6 PASS) — **Updated (Atomic start, Startup Buffer, WMI_TRACE)**
-- `apps/desktop/src/__tests__/services/process-monitor.test.ts` (14/14 PASS) — **Updated (Adversarial Startup Race, LRU Eviction, Re-init)**
+### Desktop Test Suite (39/39 Files PASS, 252/253 Tests PASS, 1 Skipped)
+- `apps/desktop/src/__tests__/integration/windows-process-event-source.integration.test.ts` (2 PASS, 1 Skipped) — **Real OS Integration Suite**
+- `apps/desktop/src/__tests__/services/windows-process-event-source.test.ts` (7/7 PASS) — **Updated (Atomic start, Startup Buffer, WMI_TRACE, Exit Error)**
+- `apps/desktop/src/__tests__/services/process-monitor.test.ts` (15/15 PASS) — **Updated (Adversarial Startup Race, LRU Eviction, Re-init)**
 - `apps/desktop/src/__tests__/benchmarks/phase-f-process-burst.test.ts` (1/1 PASS) — **(100, 1K, 10K events)**
 - `apps/desktop/src/__tests__/services/phase-f-adversarial.test.ts` (20/20 PASS)
 - `apps/desktop/src/__tests__/services/behavior-engine.test.ts` (31/31 PASS)
 - `apps/desktop/src/__tests__/services/process-auditor.test.ts` (11/11 PASS)
+- `apps/desktop/src/__tests__/services/quarantine-streaming.test.ts` (22/22 PASS)
 - `apps/desktop/src/__tests__/benchmarks/phase-d-quarantine-benchmarks.test.ts` (1/1 PASS)
 - `apps/desktop/src/__tests__/benchmarks/phase-e-realtime-benchmarks.test.ts` (1/1 PASS)
-- `apps/desktop/src/__tests__/services/quarantine-streaming.test.ts` (7/7 PASS)
 - `apps/desktop/src/__tests__/services/realtime-monitor-burst.test.ts` (6/6 PASS)
 - All other 28 desktop test suites: **PASS**
 
@@ -107,11 +107,11 @@ All five findings from `docs/PHASE_F_FINAL_INDEPENDENT_AUDIT.md` have been fully
 |---|---|---|---|---|---|
 | `@private-protection/core` | 14 | 87 | **PASS** | 0 | 0 |
 | `@private-protection/ml` | 14 | 87 | **PASS** | 0 | 0 |
-| `@private-protection/desktop` | 39 | 250 | **PASS** | 0 | 0 |
+| `@private-protection/desktop` | 39 | 252 | **PASS** | 0 | 1 |
 | `@private-protection/extension` | 14 | 53 | **PASS** | 0 | 0 |
 | `@private-protection/mobile` | 13 | 65 | **PASS** | 0 | 0 |
 | `@private-protection/web` | 11 | 67 | **PASS** | 0 | 0 |
-| **TOTAL MONOREPO** | **123** (runs) | **609** (monorepo suite) | **100% PASS** | **0** | **0** |
+| **TOTAL MONOREPO** | **123** (runs) | **611** (monorepo suite) | **100% PASS** | **0** | **1** |
 
 - **Typecheck:** `npm run typecheck` across all 6 workspaces: **0 errors**.
 - **Production Build:** `npm run build` across all 6 workspaces: **0 errors**.

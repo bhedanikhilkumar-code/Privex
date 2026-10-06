@@ -148,4 +148,23 @@ describe('WindowsProcessEventSource (Phase F — SEC-F-02 Windows Native Event S
     expect(source.getStatus().state).toBe('STOPPED');
     expect(child.kill).toHaveBeenCalled();
   });
+
+  it('transitions to ERROR when child process exits unexpectedly and restart limit is reached', async () => {
+    const { child, stdout, spawnProvider } = createMockSpawn();
+    const source = new WindowsProcessEventSource({ spawnProvider, maxRestartAttempts: 0 });
+
+    const startPromise = source.start();
+    stdout.write('PP_WMI_READY\n');
+    await startPromise;
+
+    expect(source.getStatus().state).toBe('ACTIVE');
+
+    // Child process unexpectedly exits
+    child.emit('exit', 1);
+
+    expect(source.getStatus().state).toBe('ERROR');
+    expect(source.getStatus().lastError).toContain('exited unexpectedly');
+
+    await source.dispose();
+  });
 });

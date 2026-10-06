@@ -40,81 +40,99 @@ describe('WindowsProcessEventSource (Real Windows OS Integration Suite)', () => 
     }
   }
 
-  it.skipIf(!isWindows)(
-    'exercises the real production event source and verifies Windows privilege & event lifecycle',
+  it.skipIf(!isWindows || !isElevated())(
+    'proves genuine event-driven capture of short-lived process via Win32_ProcessStartTrace when elevated',
     async () => {
-      const elevated = isElevated();
+      console.log('[INTEGRATION] Running in ELEVATED mode: verifying live OS Win32_ProcessStartTrace capture...');
 
-      if (elevated) {
-        console.log('[INTEGRATION] Running in ELEVATED mode: verifying live OS Win32_ProcessStartTrace capture...');
+      eventSource = new WindowsProcessEventSource();
+      let capturedEvent: ProcessCreationEvent | undefined;
 
-        eventSource = new WindowsProcessEventSource();
-        let capturedEvent: ProcessCreationEvent | undefined;
+      // Step 1 & 2: Register callback and activate real production event source atomically
+      await eventSource.start((ev) => {
+        capturedEvent = ev;
+      });
 
-        // Step 1 & 2: Start real production source and register callback atomically
-        await eventSource.start((ev) => {
-          capturedEvent = ev;
-        });
+      expect(eventSource.getStatus().state).toBe('ACTIVE');
+      expect(eventSource.getStatus().sourceName).toBe('WMI_TRACE');
 
-        expect(eventSource.getStatus().state).toBe('ACTIVE');
-        expect(eventSource.getStatus().sourceName).toBe('WMI_TRACE');
+      // Step 3 & 4: Launch a real short-lived child process and explicitly measure its lifetime
+      const tStart = performance.now();
+      const child = child_process.spawn('cmd.exe', ['/c', 'exit 0'], {
+        windowsHide: true,
+        stdio: 'ignore'
+      });
+      const targetPid = child.pid!;
+      expect(targetPid).toBeGreaterThan(0);
 
-        // Step 4 & 5: Launch a real short-lived child process (lives ~15-30ms)
-        const child = child_process.spawn('cmd.exe', ['/c', 'exit 0'], {
-          windowsHide: true,
-          stdio: 'ignore'
-        });
-        const targetPid = child.pid!;
-        expect(targetPid).toBeGreaterThan(0);
+      // Wait for child process to exit completely
+      await new Promise<void>((resolve) => {
+        child.on('exit', () => resolve());
+      });
+      const tExit = performance.now();
+      const processLifetimeMs = tExit - tStart;
 
-        // Wait for child process to exit completely
-        await new Promise<void>((resolve) => {
-          child.on('exit', () => resolve());
-        });
+      console.log(
+        `[INTEGRATION] Measured benign child process PID ${targetPid} lifetime: ${processLifetimeMs.toFixed(2)} ms`
+      );
 
-        // Step 6: Wait for actual OS event from Windows kernel trace provider
-        const timeoutMs = 8000;
-        const startWait = Date.now();
-        while (!capturedEvent && Date.now() - startWait < timeoutMs) {
-          await new Promise((r) => setTimeout(r, 50));
-        }
+      // Explicitly establish that target process exited substantially faster than standard 1,000 ms polling
+      expect(processLifetimeMs).toBeLessThan(1000);
 
-        // Step 7: Verify real event metadata received from Windows
-        expect(capturedEvent).toBeDefined();
-        expect(capturedEvent?.pid).toBe(targetPid);
-        expect(capturedEvent?.processName.toLowerCase()).toBe('cmd.exe');
-        expect(capturedEvent?.ppid).toBe(process.pid);
-        expect(capturedEvent?.creationTime).toBeGreaterThan(0);
-        expect(capturedEvent?.timestamp).toBeGreaterThan(0);
-        expect(capturedEvent?.eventId).toContain(`evt:${targetPid}:`);
-
-        // Step 8: Confirm event was received even though the process has already exited
-        expect(child.exitCode !== null || child.killed).toBe(true);
-      } else {
-        console.log('[INTEGRATION] Running in STANDARD USER mode: verifying truthful access denial & graceful fallback...');
-
-        // Step 1: Real production event source must truthfully reject when unprivileged
-        eventSource = new WindowsProcessEventSource();
-        await expect(eventSource.start()).rejects.toThrow(/Access denied|requires Administrator/);
-        expect(eventSource.getStatus().state).toBe('ERROR');
-        expect(eventSource.getStatus().lastError).toMatch(/Access denied/i);
-
-        // Step 2: ProcessMonitorService must handle this startup failure truthfully
-        monitor = new ProcessMonitorService({
-          eventSource: new WindowsProcessEventSource()
-        });
-
-        await monitor.start();
-        const health = monitor.getHealth();
-
-        // Must report DEGRADED, isContinuous = false, eventSource = POLLING_FALLBACK (no false RUNNING)
-        expect(health.status).toBe('DEGRADED');
-        expect(health.isContinuous).toBe(false);
-        expect(health.eventSource).toBe('POLLING_FALLBACK');
-        expect(health.lastError).toContain('Access denied');
-        expect(health.lastError).toContain('Win32_ProcessStartTrace requires Administrator privileges');
+      // Step 5: Wait for actual OS event from Windows kernel trace provider
+      const timeoutMs = 10000;
+      const startWait = Date.now();
+      while (!capturedEvent && Date.now() - startWait < timeoutMs) {
+        await new Promise((r) => setTimeout(r, 50));
       }
+
+      // Step 6: Verify real event metadata received from Windows OS
+      expect(capturedEvent).toBeDefined();
+      expect(capturedEvent?.pid).toBe(targetPid);
+      expect(capturedEvent?.processName.toLowerCase()).toBe('cmd.exe');
+      expect(capturedEvent?.ppid).toBe(process.pid);
+      expect(capturedEvent?.creationTime).toBeGreaterThan(0);
+      expect(capturedEvent?.timestamp).toBeGreaterThan(0);
+      expect(capturedEvent?.eventId).toContain(`evt:${targetPid}:`);
+
+      // Step 7: Confirm event was received even though the process has already exited
+      expect(child.exitCode !== null || child.killed).toBe(true);
     },
     60000
   );
+
+  it.skipIf(!isWindows || isElevated())(
+    'truthfully detects capability limitations and degrades cleanly to POLLING_FALLBACK when unprivileged',
+    async () => {
+      console.log('[INTEGRATION] Running in STANDARD USER mode: verifying truthful access denial & graceful fallback...');
+
+      // Step 1: Real production event source must truthfully reject when unprivileged
+      eventSource = new WindowsProcessEventSource();
+      await expect(eventSource.start()).rejects.toThrow(/Access denied|requires Administrator/);
+      expect(eventSource.getStatus().state).toBe('ERROR');
+      expect(eventSource.getStatus().lastError).toMatch(/Access denied/i);
+
+      // Step 2: ProcessMonitorService must handle this startup failure truthfully
+      monitor = new ProcessMonitorService({
+        eventSource: new WindowsProcessEventSource()
+      });
+
+      await monitor.start();
+      const health = monitor.getHealth();
+
+      // Must report DEGRADED, isContinuous = false, eventSource = POLLING_FALLBACK (no false RUNNING)
+      expect(health.status).toBe('DEGRADED');
+      expect(health.isContinuous).toBe(false);
+      expect(health.eventSource).toBe('POLLING_FALLBACK');
+      expect(health.lastError).toContain('Access denied');
+      expect(health.lastError).toContain('Win32_ProcessStartTrace requires Administrator privileges');
+    },
+    60000
+  );
+
+  it.skipIf(!isWindows)('verifies OS security token group detection executes without error', () => {
+    const elevated = isElevated();
+    expect(typeof elevated).toBe('boolean');
+    console.log(`[INTEGRATION] Detected Windows security token elevated privilege status: ${elevated}`);
+  });
 });
