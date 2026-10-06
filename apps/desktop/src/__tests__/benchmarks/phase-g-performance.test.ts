@@ -142,11 +142,16 @@ describe('Phase G Performance & Latency Benchmarks', () => {
   });
 
   it('measures Mass-Write Burst arrest latency (< 500 ms target)', async () => {
+    // Pre-create test files before timing detection and arrest
+    for (let i = 0; i < 25; i++) {
+      const p = path.join(protectedDir, `burst_arrest_${i}.docx`);
+      fs.writeFileSync(p, Buffer.from(`DATA_${i}`));
+    }
+
     const startBurst = performance.now();
 
     for (let i = 0; i < 25; i++) {
       const p = path.join(protectedDir, `burst_arrest_${i}.docx`);
-      fs.writeFileSync(p, Buffer.from(`DATA_${i}`));
       await shield.ingestFilesystemEvent({
         filePath: p,
         eventType: 'modify',

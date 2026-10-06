@@ -371,6 +371,57 @@ export class ShadowVaultService {
   }
 
   /**
+   * Batch backup of multiple files with a single atomic manifest save at completion.
+   */
+  public async backupFiles(filePaths: string[], incidentId?: string): Promise<ShadowVaultBackupRecord[]> {
+    const records: ShadowVaultBackupRecord[] = [];
+    for (const filePath of filePaths) {
+      try {
+        const validatedPath = IpcValidator.validatePath(filePath);
+        const canonicalPath = path.resolve(validatedPath);
+        if (!fs.existsSync(canonicalPath)) continue;
+        const stat = fs.statSync(canonicalPath);
+        if (stat.isDirectory() || stat.size > this.maxFileSizeBytes) continue;
+
+        const plainBytes = fs.readFileSync(canonicalPath);
+        const preAttackSha256 = crypto.createHash('sha256').update(plainBytes).digest('hex');
+
+        this.enforceQuota(plainBytes.length);
+
+        const backupId = `bk-${Date.now()}-${crypto.randomBytes(6).toString('hex')}`;
+        const blobPath = path.join(this.vaultDir, `${backupId}.blob`);
+        const { container, ivHex, authTagHex } = this.encryptPayload(plainBytes, canonicalPath, preAttackSha256);
+
+        this.writeAtomicFileSync(blobPath, container, 0o600);
+
+        const record: ShadowVaultBackupRecord = {
+          backupId,
+          incidentId,
+          originalPath: filePath,
+          canonicalPath,
+          preAttackSha256,
+          fileSize: plainBytes.length,
+          blobPath,
+          backupTimestamp: Date.now(),
+          iv: ivHex,
+          authTag: authTagHex
+        };
+
+        this.manifest.set(backupId, record);
+        records.push(record);
+      } catch {
+        // Continue to next file
+      }
+    }
+
+    if (records.length > 0) {
+      this.saveManifest();
+    }
+
+    return records;
+  }
+
+  /**
    * Restores an individual backed up file with mandatory exact SHA-256 re-verification.
    */
   public async rollbackFile(backupId: string, customDestination?: string): Promise<FileRollbackResult> {

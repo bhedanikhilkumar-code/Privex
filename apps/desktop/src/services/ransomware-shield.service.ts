@@ -743,18 +743,9 @@ export class RansomwareShieldService extends EventEmitter {
       );
     }
 
-    // Backup affected files if not yet backed up
-    const backupIds: string[] = [];
-    for (const file of metrics.affectedFiles) {
-      if (fs.existsSync(file)) {
-        try {
-          const rec = await this.shadowVault.backupFile(file, incidentId);
-          backupIds.push(rec.backupId);
-        } catch {
-          // Best effort
-        }
-      }
-    }
+    // Backup affected files in batch with single atomic manifest commit
+    const backedUp = await this.shadowVault.backupFiles(metrics.affectedFiles, incidentId);
+    const backupIds = backedUp.map((r) => r.backupId);
 
     const threatType: RansomwareThreatType =
       metrics.renameCount >= this.extensionRenameThreshold
