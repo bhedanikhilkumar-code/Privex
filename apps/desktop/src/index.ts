@@ -15,6 +15,8 @@ export * from './services/removable-media.service';
 export * from './services/network-monitor.service';
 export * from './services/secure-storage.service';
 export * from './services/update-verifier.service';
+export * from './services/shadow-vault.service';
+export * from './services/ransomware-shield.service';
 export * from './ipc/ipc-channels';
 export * from './ipc/ipc-validator';
 export * from './ipc/ipc-handler';

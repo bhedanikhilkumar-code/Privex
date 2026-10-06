@@ -13,6 +13,8 @@ import { PersistenceAuditorService } from '../services/persistence-auditor.servi
 import { RemovableMediaService } from '../services/removable-media.service';
 import { NetworkMonitorService } from '../services/network-monitor.service';
 import { SecureStorageService } from '../services/secure-storage.service';
+import { ShadowVaultService } from '../services/shadow-vault.service';
+import { RansomwareShieldService } from '../services/ransomware-shield.service';
 import { DesktopSecurityAdapter } from '../core/desktop-security-adapter';
 import {
   DesktopProtectionStatus,
@@ -22,7 +24,12 @@ import {
   ScanProgress,
   RealtimeThreatEvent,
   ContainProcessOptions,
-  ProcessMonitorHealth
+  ProcessMonitorHealth,
+  RansomwareShieldStatus,
+  TrustedApplication,
+  RansomwareIncident,
+  IncidentRollbackResult,
+  CanaryFileRecord
 } from '../types/desktop.types';
 
 export interface IpcHandlerOptions {
@@ -44,6 +51,8 @@ export class IpcHandler {
   private removableMedia: RemovableMediaService;
   private networkMonitor: NetworkMonitorService;
   private storage: SecureStorageService;
+  private shadowVault: ShadowVaultService;
+  private ransomwareShield: RansomwareShieldService;
   private adapter: DesktopSecurityAdapter;
   private downloadsDir: string;
   private tempDir: string;
@@ -64,11 +73,34 @@ export class IpcHandler {
     this.removableMedia = new RemovableMediaService();
     this.networkMonitor = new NetworkMonitorService();
     this.storage = new SecureStorageService(options?.configDir);
+    this.shadowVault = new ShadowVaultService(
+      options?.vaultDir ? { customVaultDir: path.join(options.vaultDir, 'shadow-vault') } : undefined
+    );
+    this.ransomwareShield = new RansomwareShieldService(
+      undefined,
+      this.shadowVault,
+      this.processAuditor,
+      this.processAuditor.getBehaviorEngine()
+    );
     this.adapter = new DesktopSecurityAdapter();
 
     this.downloadsDir = options?.downloadsDir || path.join(os.homedir(), 'Downloads');
     this.tempDir = options?.tempDir || os.tmpdir();
     this.autoStartRealtime = options?.autoStartRealtime ?? false;
+
+    // Wire RansomwareShield events to security log and renderer broadcast
+    this.ransomwareShield.on('ransomwareDetected', (incident: RansomwareIncident) => {
+      this.storage.recordSecurityEvent(
+        'THREAT_DETECTED',
+        'CRITICAL',
+        `Ransomware incident detected: ${incident.reason}`,
+        { incidentId: incident.incidentId, threatType: incident.threatType, riskScore: incident.riskScore }
+      );
+      const wc = this.getWebContentsFn?.();
+      if (wc) {
+        wc.send(IPC_CHANNELS.RANSOMWARE_EVENT, incident);
+      }
+    });
 
     // Wire ScannerService lifecycle events into bounded local security log (Step 12)
     this.scanner.on('started', (info: { scanId: string; scanType: string; targets: string[] }) => {
@@ -494,8 +526,69 @@ export class IpcHandler {
 
   public handlePrivacyShred(): void {
     this.quarantine.purgeAllQuarantine();
+    this.shadowVault.purgeAll();
     this.storage.purgeAllData();
     this.applySettings(this.storage.getSettings(), false);
+  }
+
+  public getRansomwareShield(): RansomwareShieldService {
+    return this.ransomwareShield;
+  }
+
+  public getShadowVault(): ShadowVaultService {
+    return this.shadowVault;
+  }
+
+  public async handleGetRansomwareStatus(): Promise<RansomwareShieldStatus> {
+    return this.ransomwareShield.getStatus();
+  }
+
+  public async handleGetProtectedFolders(): Promise<string[]> {
+    return this.ransomwareShield.getProtectedFolders();
+  }
+
+  public async handleAddProtectedFolder(folderPath: string): Promise<string> {
+    const validated = IpcValidator.validatePath(folderPath);
+    return this.ransomwareShield.addProtectedFolder(validated);
+  }
+
+  public async handleRemoveProtectedFolder(folderPath: string): Promise<boolean> {
+    const validated = IpcValidator.validatePath(folderPath);
+    return this.ransomwareShield.removeProtectedFolder(validated);
+  }
+
+  public async handleGetTrustedApps(): Promise<TrustedApplication[]> {
+    return this.ransomwareShield.getTrustedApplications();
+  }
+
+  public async handleAddTrustedApp(app: {
+    path?: string;
+    canonicalPath?: string;
+    sha256?: string;
+    signer?: string;
+    name?: string;
+  }): Promise<TrustedApplication> {
+    return this.ransomwareShield.registerTrustedApplication(app);
+  }
+
+  public async handleRemoveTrustedApp(executablePath: string): Promise<boolean> {
+    const validated = IpcValidator.validatePath(executablePath);
+    return this.ransomwareShield.removeTrustedApplication(validated);
+  }
+
+  public async handleGetRansomwareIncidents(): Promise<RansomwareIncident[]> {
+    return this.ransomwareShield.getIncidents();
+  }
+
+  public async handleRollbackIncident(incidentId: string): Promise<IncidentRollbackResult> {
+    if (!incidentId || typeof incidentId !== 'string') {
+      throw new Error('INVALID_ARGUMENT: incidentId must be a non-empty string.');
+    }
+    return this.ransomwareShield.rollbackIncident(incidentId);
+  }
+
+  public async handleResetCanaries(): Promise<CanaryFileRecord[]> {
+    return this.ransomwareShield.deployCanaries();
   }
 
   /**
@@ -626,6 +719,56 @@ export class IpcHandler {
     ipcMain.handle(IPC_CHANNELS.PRIVACY_SHRED, (event) => {
       verifyOrigin(event);
       return this.handlePrivacyShred();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.RANSOMWARE_STATUS_GET, (event) => {
+      verifyOrigin(event);
+      return this.handleGetRansomwareStatus();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.RANSOMWARE_PROTECTED_FOLDERS_GET, (event) => {
+      verifyOrigin(event);
+      return this.handleGetProtectedFolders();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.RANSOMWARE_PROTECTED_FOLDERS_ADD, async (event, folderPath: string) => {
+      verifyOrigin(event);
+      return this.handleAddProtectedFolder(folderPath);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.RANSOMWARE_PROTECTED_FOLDERS_REMOVE, async (event, folderPath: string) => {
+      verifyOrigin(event);
+      return this.handleRemoveProtectedFolder(folderPath);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.RANSOMWARE_TRUSTED_APPS_GET, (event) => {
+      verifyOrigin(event);
+      return this.handleGetTrustedApps();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.RANSOMWARE_TRUSTED_APPS_ADD, async (event, app: any) => {
+      verifyOrigin(event);
+      return this.handleAddTrustedApp(app);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.RANSOMWARE_TRUSTED_APPS_REMOVE, async (event, executablePath: string) => {
+      verifyOrigin(event);
+      return this.handleRemoveTrustedApp(executablePath);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.RANSOMWARE_INCIDENTS_GET, (event) => {
+      verifyOrigin(event);
+      return this.handleGetRansomwareIncidents();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.RANSOMWARE_INCIDENT_ROLLBACK, async (event, incidentId: string) => {
+      verifyOrigin(event);
+      return this.handleRollbackIncident(incidentId);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.RANSOMWARE_CANARY_RESET, async (event) => {
+      verifyOrigin(event);
+      return this.handleResetCanaries();
     });
   }
 }
