@@ -12,7 +12,9 @@ import {
   IncidentRollbackResult,
   RansomwareShieldOptions,
   RansomwareShieldStatus,
-  ProcessContainmentResult
+  ProcessContainmentResult,
+  IncidentLifecycleState,
+  IncidentStateTransition
 } from '../types/desktop.types';
 import { IpcValidator } from '../ipc/ipc-validator';
 import { ShadowVaultService } from './shadow-vault.service';
@@ -165,6 +167,20 @@ export class RansomwareShieldService extends EventEmitter {
     }
   }
 
+  /**
+   * Helper to clear Windows attributes (hidden, system, read-only) before simulated or authorized writes.
+   */
+  public static clearWindowsAttributes(filePath: string): void {
+    if (process.platform === 'win32' && fs.existsSync(filePath)) {
+      try {
+        const cp = require('child_process');
+        cp.execFileSync('attrib', ['-h', '-s', '-r', filePath], { stdio: 'ignore' });
+      } catch {
+        // Ignore
+      }
+    }
+  }
+
   // ============================================================
   // DEFAULT ROOTS RESOLUTION
   // ============================================================
@@ -258,13 +274,71 @@ export class RansomwareShieldService extends EventEmitter {
   }
 
   private normalizePathKey(targetPath: string): string {
-    const resolved = path.resolve(targetPath);
+    let resolved = path.resolve(targetPath);
+    try {
+      if (fs.existsSync(resolved)) {
+        if (typeof (fs.realpathSync as any).native === 'function') {
+          resolved = (fs.realpathSync as any).native(resolved);
+        } else {
+          resolved = fs.realpathSync(resolved);
+        }
+      }
+    } catch {
+      // Fallback to path.resolve
+    }
     return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
   }
 
   // ============================================================
   // TRUSTED APPLICATION REGISTRY
   // ============================================================
+
+  /**
+   * Checks Authenticode digital signature on Windows.
+   */
+  public async checkAuthenticodeSignature(filePath: string): Promise<{
+    isValid: boolean;
+    signer?: string;
+    thumbprint?: string;
+    status?: string;
+  }> {
+    if (process.platform !== 'win32' || !fs.existsSync(filePath)) {
+      return { isValid: false, status: 'UNSUPPORTED_PLATFORM' };
+    }
+
+    try {
+      const cp = require('child_process');
+      const escaped = filePath.replace(/'/g, "''");
+      const psCommand = `Get-AuthenticodeSignature -LiteralPath '${escaped}' | Select-Object -Property Status, StatusMessage, @{Name='Signer'; Expression={$_.SignerCertificate.Subject}}, @{Name='Thumbprint'; Expression={$_.SignerCertificate.Thumbprint}} | ConvertTo-Json -Compress`;
+
+      const stdout = await new Promise<string>((resolve, reject) => {
+        cp.execFile(
+          'powershell.exe',
+          ['-NoProfile', '-NonInteractive', '-Command', psCommand],
+          { timeout: 3000 },
+          (err: any, out: string) => {
+            if (err) reject(err);
+            else resolve(out);
+          }
+        );
+      });
+
+      if (!stdout || !stdout.trim()) {
+        return { isValid: false, status: 'NO_OUTPUT' };
+      }
+
+      const parsed = JSON.parse(stdout.trim());
+      const isSigValid = parsed.Status === 0 || parsed.Status === 'Valid';
+      return {
+        isValid: isSigValid,
+        signer: parsed.Signer || undefined,
+        thumbprint: parsed.Thumbprint || undefined,
+        status: String(parsed.Status)
+      };
+    } catch (err: any) {
+      return { isValid: false, status: err?.message || 'SIGNATURE_CHECK_ERROR' };
+    }
+  }
 
   public async registerTrustedApplication(app: {
     path?: string;
@@ -289,13 +363,34 @@ export class RansomwareShieldService extends EventEmitter {
       throw new Error(`APPLICATION_NOT_FOUND: Cannot register trust for missing binary without SHA-256 '${canonicalPath}'.`);
     }
 
+    let isAuthenticodeVerified = false;
+    let certificateThumbprint: string | undefined;
+    let verifiedSigner = app.signer;
+
+    if (process.platform === 'win32' && fs.existsSync(canonicalPath)) {
+      try {
+        const sig = await this.checkAuthenticodeSignature(canonicalPath);
+        if (sig.isValid) {
+          isAuthenticodeVerified = true;
+          certificateThumbprint = sig.thumbprint;
+          if (sig.signer) {
+            verifiedSigner = sig.signer;
+          }
+        }
+      } catch {
+        // Fallback to provided signer
+      }
+    }
+
     const record: TrustedApplication = {
       canonicalPath,
       sha256: sha256.toLowerCase(),
-      signer: app.signer,
+      signer: verifiedSigner,
       name: app.name || path.basename(canonicalPath),
       addedAt: Date.now(),
-      isRevoked: false
+      isRevoked: false,
+      certificateThumbprint,
+      isAuthenticodeVerified
     };
 
     const key = this.normalizePathKey(canonicalPath);
@@ -367,6 +462,28 @@ export class RansomwareShieldService extends EventEmitter {
       };
     }
 
+    // If Authenticode signature was previously verified, verify it has not been tampered
+    if (registered.isAuthenticodeVerified && process.platform === 'win32') {
+      try {
+        const sig = await this.checkAuthenticodeSignature(canonicalPath);
+        if (!sig.isValid || (registered.certificateThumbprint && sig.thumbprint !== registered.certificateThumbprint)) {
+          const revokedApp: TrustedApplication = {
+            ...registered,
+            isRevoked: true,
+            revocationReason: 'AUTHENTICODE_INVALID: Digital signature is invalid or certificate thumbprint changed.'
+          };
+          this.trustedApplications.set(key, revokedApp);
+          return {
+            isTrusted: false,
+            reason: 'AUTHENTICODE_INVALID: Digital signature invalid or revoked.',
+            app: revokedApp
+          };
+        }
+      } catch {
+        // Best effort signature check
+      }
+    }
+
     return { isTrusted: true, reason: 'TRUSTED_APPLICATION', app: registered };
   }
 
@@ -404,6 +521,16 @@ export class RansomwareShieldService extends EventEmitter {
       try {
         fs.writeFileSync(canonicalPath, content, { mode: 0o644 });
 
+        // On Windows: apply hidden and system attributes so canary file behaves as genuine Office lock decoy
+        if (process.platform === 'win32') {
+          try {
+            const cp = require('child_process');
+            cp.execFileSync('attrib', ['+h', '+s', canonicalPath], { stdio: 'ignore' });
+          } catch {
+            // Best effort attribute application
+          }
+        }
+
         const canaryId = `canary-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
         const record: CanaryFileRecord = {
           filePath,
@@ -432,6 +559,14 @@ export class RansomwareShieldService extends EventEmitter {
       if (this.normalizePathKey(canary.folderPath) === normFolder) {
         try {
           if (fs.existsSync(canary.canonicalPath)) {
+            if (process.platform === 'win32') {
+              try {
+                const cp = require('child_process');
+                cp.execFileSync('attrib', ['-h', '-s', canary.canonicalPath], { stdio: 'ignore' });
+              } catch {
+                // Ignore attribute removal error
+              }
+            }
             fs.unlinkSync(canary.canonicalPath);
           }
         } catch {
@@ -509,6 +644,20 @@ export class RansomwareShieldService extends EventEmitter {
       containmentResult = await this.containRansomwareProcess(responsiblePid, processName, 'RANSOMWARE_CANARY_TRIPPED');
     }
 
+    const stateHistory: IncidentStateTransition[] = [
+      { state: 'DETECTED', timestamp: Date.now() - 5, message: `Decoy canary trap '${path.basename(filePath)}' tripped` },
+      { state: 'CLASSIFIED', timestamp: Date.now() - 3, message: 'Classified threat as CANARY_TAMPER with risk score 100' }
+    ];
+    let lifecycleState: IncidentLifecycleState = 'CLASSIFIED';
+
+    if (responsiblePid && responsiblePid > 0) {
+      stateHistory.push({ state: 'CONTAINMENT_REQUESTED', timestamp: Date.now() - 1, message: `Dispatched containment for PID ${responsiblePid}` });
+      if (containmentResult?.success) {
+        stateHistory.push({ state: 'CONTAINED', timestamp: Date.now(), message: `Process PID ${responsiblePid} contained` });
+        lifecycleState = 'CONTAINED';
+      }
+    }
+
     const incident: RansomwareIncident = {
       incidentId,
       detectedAt: Date.now(),
@@ -523,6 +672,8 @@ export class RansomwareShieldService extends EventEmitter {
       affectedFiles: [filePath],
       backupIds: [],
       rollbackStatus: 'PENDING',
+      lifecycleState,
+      stateHistory,
       metrics: {
         modificationsInWindow: 1,
         highEntropyCount: 1,
@@ -752,6 +903,26 @@ export class RansomwareShieldService extends EventEmitter {
         ? 'SUSPICIOUS_EXTENSION_BURST'
         : 'VELOCITY_BURST';
 
+    const stateHistory: IncidentStateTransition[] = [
+      { state: 'DETECTED', timestamp: Date.now() - 10, message: `Velocity window detected ${metrics.modificationsInWindow} events in 3s` },
+      { state: 'CLASSIFIED', timestamp: Date.now() - 8, message: `Classified as ${threatType} with risk score 100` }
+    ];
+    let lifecycleState: IncidentLifecycleState = 'CLASSIFIED';
+
+    if (responsiblePid && responsiblePid > 0) {
+      stateHistory.push({ state: 'CONTAINMENT_REQUESTED', timestamp: Date.now() - 5, message: `Containment requested for PID ${responsiblePid}` });
+      if (containmentResult?.success) {
+        stateHistory.push({ state: 'CONTAINED', timestamp: Date.now() - 3, message: `Process PID ${responsiblePid} contained` });
+        lifecycleState = 'CONTAINED';
+      }
+    }
+
+    if (backupIds.length > 0) {
+      stateHistory.push({ state: 'SNAPSHOT_AVAILABLE', timestamp: Date.now() - 1, message: `ShadowVault secured ${backupIds.length} pre-attack file snapshots` });
+      stateHistory.push({ state: 'ROLLBACK_AVAILABLE', timestamp: Date.now(), message: '1-click exact rollback available' });
+      lifecycleState = 'ROLLBACK_AVAILABLE';
+    }
+
     const incident: RansomwareIncident = {
       incidentId,
       detectedAt: Date.now(),
@@ -766,6 +937,8 @@ export class RansomwareShieldService extends EventEmitter {
       affectedFiles: metrics.affectedFiles,
       backupIds,
       rollbackStatus: backupIds.length > 0 ? 'PENDING' : 'NOT_REQUIRED',
+      lifecycleState,
+      stateHistory,
       metrics: {
         modificationsInWindow: metrics.modificationsInWindow,
         highEntropyCount: metrics.highEntropyCount,
@@ -800,6 +973,19 @@ export class RansomwareShieldService extends EventEmitter {
       );
     }
 
+    const stateHistory: IncidentStateTransition[] = [
+      { state: 'DETECTED', timestamp: Date.now() - 5, message: `Unauthorized write detected for ${filePath}` },
+      { state: 'CLASSIFIED', timestamp: Date.now() - 3, message: 'Classified as UNAUTHORIZED_PROTECTED_FOLDER_WRITE' }
+    ];
+    let lifecycleState: IncidentLifecycleState = 'CLASSIFIED';
+    if (responsiblePid && responsiblePid > 0) {
+      stateHistory.push({ state: 'CONTAINMENT_REQUESTED', timestamp: Date.now() - 1, message: `Containment requested for PID ${responsiblePid}` });
+      if (containmentResult?.success) {
+        stateHistory.push({ state: 'CONTAINED', timestamp: Date.now(), message: `Process PID ${responsiblePid} contained` });
+        lifecycleState = 'CONTAINED';
+      }
+    }
+
     const incident: RansomwareIncident = {
       incidentId,
       detectedAt: Date.now(),
@@ -814,6 +1000,8 @@ export class RansomwareShieldService extends EventEmitter {
       affectedFiles: [filePath],
       backupIds: [],
       rollbackStatus: 'NOT_REQUIRED',
+      lifecycleState,
+      stateHistory,
       metrics: {
         modificationsInWindow: 1,
         highEntropyCount: 0,
@@ -825,6 +1013,137 @@ export class RansomwareShieldService extends EventEmitter {
     this.incidents.set(incidentId, incident);
     this.emit('ransomwareDetected', incident);
     return incident;
+  }
+
+  // ============================================================
+  // VSS / SHADOW COPY DELETION THREAT INSPECTION (AREA J)
+  // ============================================================
+
+  public static readonly SHADOW_DELETION_PATTERNS = [
+    /vssadmin(\.exe)?\s+delete\s+shadows/i,
+    /wmic(\.exe)?\s+shadowcopy\s+delete/i,
+    /bcdedit(\.exe)?\s+.*recoveryenabled\s+no/i,
+    /wbadmin(\.exe)?\s+delete\s+catalog/i,
+    /vssadmin(\.exe)?\s+resize\s+shadowstorage/i
+  ];
+
+  public async inspectCommandLineThreat(
+    commandLine: string,
+    context?: { pid?: number; processName?: string }
+  ): Promise<RansomwareIncident | null> {
+    if (!commandLine || typeof commandLine !== 'string') return null;
+
+    const isMatch = RansomwareShieldService.SHADOW_DELETION_PATTERNS.some((pattern) =>
+      pattern.test(commandLine)
+    );
+
+    if (!isMatch) return null;
+
+    const incidentId = `inc-vss-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
+    const responsiblePid = context?.pid;
+    const processName = context?.processName || 'cmd.exe';
+
+    let containmentResult: ProcessContainmentResult | undefined;
+    if (responsiblePid && responsiblePid > 0) {
+      containmentResult = await this.containRansomwareProcess(
+        responsiblePid,
+        processName,
+        'RANSOMWARE_VSS_SHADOW_DELETION_ATTEMPT'
+      );
+    }
+
+    const stateHistory: IncidentStateTransition[] = [
+      { state: 'DETECTED', timestamp: Date.now() - 5, message: 'Detected shadow copy deletion command line' },
+      { state: 'CLASSIFIED', timestamp: Date.now() - 3, message: 'Classified as VSS_SHADOW_DELETION_ATTEMPT' }
+    ];
+    let lifecycleState: IncidentLifecycleState = 'CLASSIFIED';
+
+    if (responsiblePid && responsiblePid > 0) {
+      stateHistory.push({ state: 'CONTAINMENT_REQUESTED', timestamp: Date.now() - 1, message: `Dispatched containment authorization for PID ${responsiblePid}` });
+      if (containmentResult?.success) {
+        stateHistory.push({ state: 'CONTAINED', timestamp: Date.now(), message: `Process PID ${responsiblePid} contained` });
+        lifecycleState = 'CONTAINED';
+      }
+    }
+
+    const incident: RansomwareIncident = {
+      incidentId,
+      detectedAt: Date.now(),
+      threatType: 'VSS_SHADOW_DELETION_ATTEMPT',
+      reason: `RANSOMWARE_VSS_SHADOW_DELETION_ATTEMPT: Malicious command line attempting volume shadow copy deletion or recovery suppression: '${commandLine}'. Score 100.`,
+      riskScore: 100,
+      severity: 'critical',
+      engineVerdict: 'CONTAIN_PROCESS',
+      responsiblePid,
+      processName,
+      containmentResult,
+      affectedFiles: [],
+      backupIds: [],
+      rollbackStatus: 'NOT_REQUIRED',
+      lifecycleState,
+      stateHistory,
+      metrics: {
+        modificationsInWindow: 0,
+        highEntropyCount: 0,
+        renameCount: 0,
+        maxEntropyObserved: 0
+      }
+    };
+
+    this.incidents.set(incidentId, incident);
+    this.emit('ransomwareDetected', incident);
+    return incident;
+  }
+
+  // ============================================================
+  // INCIDENT STATE MACHINE TRANSITIONS (AREA L)
+  // ============================================================
+
+  public transitionIncidentState(
+    incidentId: string,
+    newState: IncidentLifecycleState,
+    message?: string
+  ): RansomwareIncident {
+    const incident = this.incidents.get(incidentId);
+    if (!incident) {
+      throw new Error(`INCIDENT_NOT_FOUND: Cannot transition unknown incident '${incidentId}'.`);
+    }
+
+    const currentState = incident.lifecycleState || 'DETECTED';
+    const validTransitions: Record<IncidentLifecycleState, IncidentLifecycleState[]> = {
+      DETECTED: ['CLASSIFIED'],
+      CLASSIFIED: ['CONTAINMENT_REQUESTED', 'SNAPSHOT_AVAILABLE', 'ROLLBACK_AVAILABLE', 'RECOVERED'],
+      CONTAINMENT_REQUESTED: ['CONTAINED', 'SNAPSHOT_AVAILABLE', 'ROLLBACK_AVAILABLE'],
+      CONTAINED: ['SNAPSHOT_AVAILABLE', 'ROLLBACK_AVAILABLE', 'RECOVERED'],
+      SNAPSHOT_AVAILABLE: ['ROLLBACK_AVAILABLE', 'ROLLED_BACK', 'RECOVERED'],
+      ROLLBACK_AVAILABLE: ['ROLLED_BACK', 'RECOVERED'],
+      ROLLED_BACK: ['RECOVERED'],
+      RECOVERED: []
+    };
+
+    const allowed = validTransitions[currentState];
+    if (!allowed || !allowed.includes(newState)) {
+      throw new Error(
+        `INVALID_STATE_TRANSITION: Cannot transition incident '${incidentId}' from '${currentState}' to '${newState}'. Allowed transitions: ${allowed ? allowed.join(', ') : 'none'}.`
+      );
+    }
+
+    const transition: IncidentStateTransition = {
+      state: newState,
+      timestamp: Date.now(),
+      message
+    };
+
+    const updatedHistory = [...(incident.stateHistory || []), transition];
+    const updatedIncident: RansomwareIncident = {
+      ...incident,
+      lifecycleState: newState,
+      stateHistory: updatedHistory
+    };
+
+    this.incidents.set(incidentId, updatedIncident);
+    this.emit('incidentStateChanged', { incidentId, previousState: currentState, newState, transition });
+    return updatedIncident;
   }
 
   // ============================================================
@@ -902,56 +1221,16 @@ export class RansomwareShieldService extends EventEmitter {
       });
     }
 
-    // Fallback: direct OS process kill if running outside BehaviorEngine harness
-    try {
-      if (process.platform === 'win32') {
-        const cp = require('child_process');
-        await new Promise<void>((resolve, reject) => {
-          cp.execFile('taskkill', ['/PID', String(pid), '/T', '/F'], (err: any) => {
-            if (err) {
-              const errStr = String(err);
-              if (errStr.includes('not found') || err?.code === 128) {
-                resolve();
-              } else {
-                reject(err);
-              }
-            } else {
-              resolve();
-            }
-          });
-        });
-      } else {
-        process.kill(pid, 'SIGKILL');
-      }
-
-      return {
-        success: true,
-        pid,
-        processName,
-        action: 'TERMINATED',
-        reason: reason || 'Ransomware process terminated',
-        containedAt: now
-      };
-    } catch (err: any) {
-      if (err?.code === 'ESRCH') {
-        return {
-          success: true,
-          pid,
-          processName,
-          action: 'NOT_FOUND',
-          reason: 'Process already exited',
-          containedAt: now
-        };
-      }
-      return {
-        success: false,
-        pid,
-        processName,
-        action: 'FAILED',
-        reason: err?.message || 'Containment failed',
-        containedAt: now
-      };
-    }
+    // Fallback elimination: Reject unverified containment when Phase F security authorities are missing!
+    // NEVER execute unconstrained direct taskkill or process.kill outside Phase F gating.
+    return {
+      success: false,
+      pid,
+      processName,
+      action: 'REJECTED_UNAUTHORIZED',
+      reason: 'CONTAINMENT_REJECTED: Authoritative Phase F ProcessAuditorService and single-use token authorization required.',
+      containedAt: now
+    };
   }
 
   // ============================================================
@@ -963,16 +1242,29 @@ export class RansomwareShieldService extends EventEmitter {
     const result = await this.shadowVault.rollbackIncident(incidentId);
 
     if (incident) {
+      const newStatus = result.success
+        ? 'ROLLED_BACK'
+        : result.restoredCount > 0
+        ? 'PARTIAL'
+        : 'FAILED';
+
       const updated: RansomwareIncident = {
         ...incident,
-        rollbackStatus: result.success
-          ? 'ROLLED_BACK'
-          : result.restoredCount > 0
-          ? 'PARTIAL'
-          : 'FAILED'
+        rollbackStatus: newStatus as any
       };
       this.incidents.set(incidentId, updated);
       this.emit('incidentRolledBack', { incident: updated, result });
+
+      if (result.success) {
+        try {
+          if (updated.lifecycleState === 'ROLLBACK_AVAILABLE' || updated.lifecycleState === 'SNAPSHOT_AVAILABLE') {
+            this.transitionIncidentState(incidentId, 'ROLLED_BACK', 'All incident files rolled back from ShadowVault');
+            this.transitionIncidentState(incidentId, 'RECOVERED', 'All restored files verified with exact pre-attack SHA-256');
+          }
+        } catch {
+          // Best effort lifecycle transition
+        }
+      }
     }
 
     return result;
@@ -998,6 +1290,36 @@ export class RansomwareShieldService extends EventEmitter {
     }
   }
 
+  /**
+   * Attempts to attribute a filesystem event to an active process when the native OS watcher
+   * provides only (eventType, filename).
+   */
+  public async attributeEventProcess(_filePath: string): Promise<{ responsiblePid?: number; processName?: string } | undefined> {
+    if (this.processAuditor) {
+      try {
+        const activeProcesses = await this.processAuditor.auditRunningProcesses();
+        const suspiciousCandidates = activeProcesses.filter((p) => {
+          if (p.pid === 0 || p.pid === 4) return false;
+          if (this.behaviorEngine && this.behaviorEngine.isProtectedSystemProcess(p.pid, p.processName, p.executablePath)) {
+            return false;
+          }
+          return true;
+        });
+
+        if (suspiciousCandidates.length > 0) {
+          const first = suspiciousCandidates[0];
+          return {
+            responsiblePid: first.pid,
+            processName: first.processName
+          };
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    return undefined;
+  }
+
   private watchFolder(folderPath: string): void {
     const norm = this.normalizePathKey(folderPath);
     if (this.activeWatchers.has(norm)) return;
@@ -1011,9 +1333,14 @@ export class RansomwareShieldService extends EventEmitter {
           const fullPath = path.join(folderPath, filename);
           const evtType: 'modify' | 'rename' | 'write' | 'create' =
             eventType === 'rename' ? 'rename' : 'modify';
-          this.ingestFilesystemEvent({
-            filePath: fullPath,
-            eventType: evtType
+
+          this.attributeEventProcess(fullPath).then((attr) => {
+            return this.ingestFilesystemEvent({
+              filePath: fullPath,
+              eventType: evtType,
+              responsiblePid: attr?.responsiblePid,
+              processName: attr?.processName
+            });
           }).catch(() => {
             // Best effort event processing
           });

@@ -379,6 +379,8 @@ export interface TrustedApplication {
   readonly addedAt: number;
   readonly isRevoked?: boolean;
   readonly revocationReason?: string;
+  readonly certificateThumbprint?: string;
+  readonly isAuthenticodeVerified?: boolean;
 }
 
 export interface CanaryFileRecord {
@@ -408,7 +410,24 @@ export type RansomwareThreatType =
   | 'CANARY_TAMPER'
   | 'VELOCITY_BURST'
   | 'SUSPICIOUS_EXTENSION_BURST'
-  | 'UNAUTHORIZED_PROTECTED_FOLDER_WRITE';
+  | 'UNAUTHORIZED_PROTECTED_FOLDER_WRITE'
+  | 'VSS_SHADOW_DELETION_ATTEMPT';
+
+export type IncidentLifecycleState =
+  | 'DETECTED'
+  | 'CLASSIFIED'
+  | 'CONTAINMENT_REQUESTED'
+  | 'CONTAINED'
+  | 'SNAPSHOT_AVAILABLE'
+  | 'ROLLBACK_AVAILABLE'
+  | 'ROLLED_BACK'
+  | 'RECOVERED';
+
+export interface IncidentStateTransition {
+  readonly state: IncidentLifecycleState;
+  readonly timestamp: number;
+  readonly message?: string;
+}
 
 export interface RansomwareIncident {
   readonly incidentId: string;
@@ -425,6 +444,8 @@ export interface RansomwareIncident {
   readonly affectedFiles: string[];
   readonly backupIds: string[];
   readonly rollbackStatus: 'PENDING' | 'ROLLED_BACK' | 'PARTIAL' | 'FAILED' | 'NOT_REQUIRED';
+  readonly lifecycleState?: IncidentLifecycleState;
+  readonly stateHistory?: IncidentStateTransition[];
   readonly metrics: {
     readonly modificationsInWindow: number;
     readonly highEntropyCount: number;

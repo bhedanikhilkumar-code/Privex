@@ -192,6 +192,7 @@ describe('Phase G Security Tests (A through AG)', () => {
   it('SEC-G-J: alerts RANSOMWARE_CANARY_TRIPPED on canary content modification', async () => {
     const canaries = shield.deployCanaries();
     const canary = canaries[0];
+    RansomwareShieldService.clearWindowsAttributes(canary.canonicalPath);
     fs.writeFileSync(canary.canonicalPath, Buffer.from('TAMPERED_DATA_ABC'));
 
     const isTampered = await shield.checkCanaryTamper(canary.canonicalPath);
@@ -202,6 +203,7 @@ describe('Phase G Security Tests (A through AG)', () => {
   it('SEC-G-K: alerts RANSOMWARE_CANARY_TRIPPED when canary file is replaced with different content', async () => {
     const canaries = shield.deployCanaries();
     const canary = canaries[0];
+    RansomwareShieldService.clearWindowsAttributes(canary.canonicalPath);
     fs.unlinkSync(canary.canonicalPath);
     fs.writeFileSync(canary.canonicalPath, crypto.randomBytes(canary.expectedSize));
 

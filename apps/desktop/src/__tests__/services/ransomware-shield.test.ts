@@ -157,6 +157,7 @@ describe('RansomwareShieldService (Phase G)', () => {
       });
 
       // Tamper with canary content
+      RansomwareShieldService.clearWindowsAttributes(targetCanary.canonicalPath);
       fs.writeFileSync(targetCanary.canonicalPath, Buffer.from('TAMPERED_CANARY_BYTES', 'utf8'));
 
       const isTampered = await shield.checkCanaryTamper(targetCanary.canonicalPath, {

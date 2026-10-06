@@ -133,6 +133,8 @@ export class RansomwareSimulationHarness {
 
     this.assertConfinement(targetPath);
 
+    RansomwareShieldService.clearWindowsAttributes(filePath);
+
     if (newExtension) {
       fs.unlinkSync(filePath);
       fs.writeFileSync(targetPath, encryptedBytes, { mode: 0o644 });

@@ -103,7 +103,10 @@ export class ShadowVaultService {
   }
 
   private writeAtomicFileSync(targetPath: string, content: Buffer | string, mode = 0o600): void {
-    this.ensureSafeVaultDir();
+    const targetDir = path.dirname(targetPath);
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
     const tmpPath = `${targetPath}.tmp.${Date.now()}.${Math.random().toString(36).substring(2, 7)}`;
     const fd = fs.openSync(tmpPath, 'w', mode);
     try {
@@ -116,7 +119,33 @@ export class ShadowVaultService {
     } finally {
       fs.closeSync(fd);
     }
-    fs.renameSync(tmpPath, targetPath);
+
+    try {
+      if (fs.existsSync(targetPath)) {
+        if (process.platform === 'win32') {
+          try {
+            const cp = require('child_process');
+            cp.execFileSync('attrib', ['-h', '-s', '-r', targetPath], { stdio: 'ignore' });
+          } catch {
+            // Ignore
+          }
+        }
+        try {
+          fs.unlinkSync(targetPath);
+        } catch {
+          // Best effort unlink
+        }
+      }
+      fs.renameSync(tmpPath, targetPath);
+    } catch {
+      // Fallback on Windows if rename is temporarily locked: copy and unlink tmp
+      try {
+        fs.copyFileSync(tmpPath, targetPath);
+        fs.unlinkSync(tmpPath);
+      } catch (err: any) {
+        throw new Error(`ATOMIC_WRITE_FAILED: Failed to replace '${targetPath}': ${err.message}`);
+      }
+    }
   }
 
   private loadManifest(): void {
@@ -593,6 +622,10 @@ export class ShadowVaultService {
 
   public getBackups(): ShadowVaultBackupRecord[] {
     return Array.from(this.manifest.values());
+  }
+
+  public getBackup(backupId: string): ShadowVaultBackupRecord | undefined {
+    return this.manifest.get(backupId);
   }
 
   public getIncidentBackups(incidentId: string): ShadowVaultBackupRecord[] {

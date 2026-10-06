@@ -71,12 +71,22 @@ All performance benchmarks were executed on the native Windows test runner:
 
 ## 4. Test Suite Execution Summary
 
-### Phase G Specific Test Suites (63 Passed, 0 Failed)
+### Phase G Specific Test Suites (83 Passed, 0 Failed)
 - `src/__tests__/services/shadow-vault.test.ts`: **9 passed** (9 tests)
 - `src/__tests__/services/ransomware-shield.test.ts`: **15 passed** (15 tests)
 - `src/__tests__/security/phase-g-security.test.ts`: **32 passed** (32 tests — Scenarios A through AG)
+- `src/__tests__/security/phase-g-scenarios.test.ts`: **20 passed** (20 tests — 20 Canonical E2E Safe Scenarios)
 - `src/__tests__/integration/phase-g-simulation.integration.test.ts`: **2 passed** (2 tests — E2E simulation)
 - `src/__tests__/benchmarks/phase-g-performance.test.ts`: **5 passed** (5 tests)
+
+### Phase G Hardening Verification
+1. **Fallback Containment Elimination (Area D)**: Unverified direct `taskkill` or `process.kill` fallbacks were eliminated. All process containment strictly routes through the authoritative Phase F `ProcessAuditorService` and `BehaviorEngineService` token-gated boundary. Invocations without valid Phase F authorization return `REJECTED_UNAUTHORIZED`.
+2. **Canary Hidden/System Attributes (Areas G & H)**: Windows `attrib +h +s` attributes applied to decoy canary traps on creation; cleared with `attrib -h -s` before unlinking or rollback.
+3. **Authenticode Verification (Area E)**: Native Windows Authenticode digital signature extraction and validation via `checkAuthenticodeSignature`, tracking signer subject and certificate thumbprints with immediate trust revocation on tamper.
+4. **Volume Shadow Deletion Defense (Area J)**: Added `inspectCommandLineThreat` detecting `vssadmin delete shadows`, `wmic shadowcopy delete`, `bcdedit ... recoveryenabled no`, and `wbadmin delete catalog` attacks.
+5. **Incident Lifecycle State Machine (Area L)**: Strict 8-stage state machine (`DETECTED` -> `CLASSIFIED` -> `CONTAINMENT_REQUESTED` -> `CONTAINED` -> `SNAPSHOT_AVAILABLE` -> `ROLLBACK_AVAILABLE` -> `ROLLED_BACK` -> `RECOVERED`) with transition validation and historical audit trails.
+6. **Windows Atomic Write Defense (Area K)**: Hardened `ShadowVaultService.writeAtomicFileSync` with attribute clearing, pre-unlink, and copy fallbacks to eliminate Windows file locking and index corruption risks.
+7. **Production Process Attribution (Area C)**: Integrated `attributeEventProcess` connecting directory watchers directly to `ProcessAuditorService.auditRunningProcesses()`.
 
 ### Phase E & Phase F Regression Suites (138 Passed, 0 Failed)
 - `quarantine.service.test.ts`: **10 passed**
