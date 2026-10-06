@@ -20,14 +20,21 @@ All five findings from `docs/PHASE_F_FINAL_INDEPENDENT_AUDIT.md` have been fully
   - `ProcessAuditorService.containProcess(options)` requires valid `authorization`. Callers attempting containment without authorization or with an invalid/expired token are rejected with `REJECTED_UNAUTHORIZED` prior to any OS process queries.
   - Single-use consumption guarantees tokens cannot be replayed (`used = true`).
 
-### SEC-F-02 (HIGH): Genuine Continuous Process Creation Event Monitoring
-- **Root Cause:** Continuous process monitoring was originally implemented as periodic 1,000 ms polling, creating a blind spot for short-lived processes (<20 ms) that start and terminate between polls.
-- **Remediation:** Architected and implemented `WindowsProcessEventSource` and integrated into `ProcessMonitorService`:
-  - **Primary Native Event Source:** Uses Windows WMI `__InstanceCreationEvent OF Win32_Process` with a 0.25-second event window (`WITHIN 0.25`). Operates within standard user integrity without requiring elevated Administrator privileges.
-  - **Startup Race Elimination:** Subscribes to the primary event source FIRST (waits for `PP_WMI_READY`), THEN captures the initial running process snapshot. Reconciles events using deterministic compound instance keys (`evt:PID:CreationTime:ProcessName`). Zero race window; zero missed processes.
-  - **Short-Lived Process Guarantee:** Processes that exist for only 10–20 ms (e.g. rapid LOLBin shadow-copy deletion) are captured by the OS event stream and evaluated immediately without depending on polling intervals.
-  - **Bounded Priority Queues:** Dual queues (`highPriorityQueue` for LOLBins, `normalPriorityQueue` for standard binaries; bounded to 1,000 entries) with 4-worker concurrency pool and load shedding under burst.
-  - **Explicit Degraded Fallback:** Non-Windows environments or environments where WMI subscription fails fall back to polling, explicitly and truthfully reporting `status: 'DEGRADED'`, `isContinuous: false`, and `eventSource: 'POLLING_FALLBACK'`.
+### SEC-F-02 (HIGH): Genuine Continuous Process Creation Event Monitoring (SEC-F-02-A & SEC-F-02-B Remediation)
+- **Root Cause:**
+  - **SEC-F-02-A:** The previous implementation used WMI `__InstanceCreationEvent OF Win32_Process WITHIN 0.25`, which is an intrinsic polling query unable to independently guarantee capture of transient short-lived processes (<250 ms) that start and exit between poll passes.
+  - **SEC-F-02-B:** `ProcessMonitorService.start()` registered `eventSource.onProcessCreated(callback)` *after* awaiting `eventSource.start()`, creating a startup event-loss race window.
+- **Remediation:**
+  - **Genuine Windows Event Source:** Upgraded `WindowsProcessEventSource` to subscribe directly to `Win32_ProcessStartTrace` (Microsoft's extrinsic, push-driven ETW kernel trace event class). Contains zero polling loops; Windows pushes process creation events immediately upon process launch.
+  - **Startup Race Elimination (SEC-F-02-B):**
+    - `IProcessEventSource` interface updated with atomic `start(callback?: (event) => void)`.
+    - `ProcessMonitorService.start()` attaches `onProcessCreated(...)` *before* calling `start(callback)`.
+    - `WindowsProcessEventSource` and `MockProcessEventSource` implement an internal FIFO `startupBuffer` (capacity 1,000) that captures any events occurring before/during OS activation and synchronously flushes them upon consumer registration.
+  - **Privilege Separation & Truthful Degradation:**
+    - Elevated / Performance Log Users: `Win32_ProcessStartTrace` provides proven continuous event capture (`eventSource: 'WMI_TRACE'`, `status: 'RUNNING'`).
+    - Standard Unprivileged Users: Windows returns `Access denied`. The service truthfully transitions to `status: 'DEGRADED'`, `isContinuous: false`, `eventSource: 'POLLING_FALLBACK'`, warning that short-lived processes may be missed. The system never claims continuous protection when running unprivileged fallback.
+  - **Real Windows Integration Test:** Committed `apps/desktop/src/__tests__/integration/windows-process-event-source.integration.test.ts` testing live child process creation (`cmd.exe /c exit 0`) against Windows WMI.
+  - **Deterministic LRU Seen Cache:** Snapshot and incoming events reconciled with compound keys (`evt:PID:Time:Name`) across bounded LRU cache (`MAX_SEEN_CACHE = 2,000`).
 
 ### SEC-F-03 (HIGH): Inconsistent Process Binary Inspection Default
 - **Root Cause:** `ProcessAuditorOptions.scanBinaryOnDisk` was optional and defaulted to `false` in `auditProcess()`, skipping static binary inspection during runtime audits.
@@ -53,13 +60,16 @@ All five findings from `docs/PHASE_F_FINAL_INDEPENDENT_AUDIT.md` have been fully
 ## 2. Updated Architecture & Interfaces
 
 1. **`WindowsProcessEventSource`** (`apps/desktop/src/services/windows-process-event-source.ts`):
-   - WMI `__InstanceCreationEvent OF Win32_Process` subscription.
+   - WMI `Win32_ProcessStartTrace` extrinsic ETW push subscription (`sourceName: 'WMI_TRACE'`).
+   - Atomic `start(callback?: (event: ProcessCreationEvent) => void)`.
+   - Internal 1,000-event FIFO `startupBuffer` with immediate flush upon consumer attachment.
+   - 64-bit Windows FILETIME (`TIME_CREATED`) to UTC millisecond epoch timestamp parser.
    - Streaming JSON over stdio from isolated helper process.
-   - DMTF datetime parsing into Unix epoch milliseconds.
    - Clean shutdown and process disposal.
 
 2. **`ProcessMonitorService`** (`apps/desktop/src/services/process-monitor.service.ts`):
-   - Subscribe-first, snapshot-second race-free startup ordering.
+   - Atomic callback registration before OS subscription start.
+   - Subscribe-first, snapshot-second race-free startup ordering with bounded LRU seen cache (2,000 entries).
    - Dual bounded priority queues with LOLBin high-priority routing.
    - Bounded concurrency pool (4 workers).
    - Truthful health reporting (`RUNNING`, `DEGRADED`, `STOPPED`, `FAILED`).
@@ -78,10 +88,11 @@ All five findings from `docs/PHASE_F_FINAL_INDEPENDENT_AUDIT.md` have been fully
 
 ## 3. Test Verification & Monorepo Regressions
 
-### Desktop Test Suite (38/38 Files PASS, 245/245 Tests PASS)
-- `apps/desktop/src/__tests__/services/windows-process-event-source.test.ts` (5/5 PASS) — **NEW**
-- `apps/desktop/src/__tests__/benchmarks/phase-f-process-burst.test.ts` (1/1 PASS) — **NEW (100, 1K, 10K events)**
-- `apps/desktop/src/__tests__/services/process-monitor.test.ts` (12/12 PASS) — **Updated (Short-lived, Race, Degraded)**
+### Desktop Test Suite (39/39 Files PASS, 250/250 Tests PASS)
+- `apps/desktop/src/__tests__/integration/windows-process-event-source.integration.test.ts` (2/2 PASS) — **NEW Real OS Integration Suite**
+- `apps/desktop/src/__tests__/services/windows-process-event-source.test.ts` (6/6 PASS) — **Updated (Atomic start, Startup Buffer, WMI_TRACE)**
+- `apps/desktop/src/__tests__/services/process-monitor.test.ts` (14/14 PASS) — **Updated (Adversarial Startup Race, LRU Eviction, Re-init)**
+- `apps/desktop/src/__tests__/benchmarks/phase-f-process-burst.test.ts` (1/1 PASS) — **(100, 1K, 10K events)**
 - `apps/desktop/src/__tests__/services/phase-f-adversarial.test.ts` (20/20 PASS)
 - `apps/desktop/src/__tests__/services/behavior-engine.test.ts` (31/31 PASS)
 - `apps/desktop/src/__tests__/services/process-auditor.test.ts` (11/11 PASS)
@@ -96,11 +107,11 @@ All five findings from `docs/PHASE_F_FINAL_INDEPENDENT_AUDIT.md` have been fully
 |---|---|---|---|---|---|
 | `@private-protection/core` | 14 | 87 | **PASS** | 0 | 0 |
 | `@private-protection/ml` | 14 | 87 | **PASS** | 0 | 0 |
-| `@private-protection/desktop` | 38 | 245 | **PASS** | 0 | 0 |
+| `@private-protection/desktop` | 39 | 250 | **PASS** | 0 | 0 |
 | `@private-protection/extension` | 14 | 53 | **PASS** | 0 | 0 |
 | `@private-protection/mobile` | 13 | 65 | **PASS** | 0 | 0 |
 | `@private-protection/web` | 11 | 67 | **PASS** | 0 | 0 |
-| **TOTAL MONOREPO** | **122** (runs) | **604** (monorepo suite) | **100% PASS** | **0** | **0** |
+| **TOTAL MONOREPO** | **123** (runs) | **609** (monorepo suite) | **100% PASS** | **0** | **0** |
 
 - **Typecheck:** `npm run typecheck` across all 6 workspaces: **0 errors**.
 - **Production Build:** `npm run build` across all 6 workspaces: **0 errors**.

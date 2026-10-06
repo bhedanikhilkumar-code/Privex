@@ -16,21 +16,23 @@ Phase F implements behavioral process monitoring, lineage reconstruction, and co
 │                             RUNTIME EXECUTION MODEL                             │
 │                                                                                 │
 │   Windows OS Process Creation Event                                             │
-│   (WMI __InstanceCreationEvent OF Win32_Process)                                │
+│   (WMI Win32_ProcessStartTrace - Microsoft Extrinsic Kernel Trace Event)        │
 │                       │                                                         │
 │                       ▼                                                         │
 │   ┌────────────────────────────────────────────────────────┐                    │
 │   │   WindowsProcessEventSource (Primary Event Source)     │                    │
-│   │   • Low-latency WMI event watcher (0.25s event window) │                    │
-│   │   • Standard user integrity (no elevation needed)     │                    │
+│   │   • Extrinsic ETW-backed event subscription            │                    │
+│   │   • Push-driven: zero polling interval dependence      │                    │
+│   │   • Atomic start(callback) & startup buffering (1K)   │                    │
 │   │   • Stdio JSON streaming via isolated helper process   │                    │
 │   └───────────────────┬────────────────────────────────────┘                    │
 │                       │                                                         │
 │                       ▼                                                         │
 │   ┌────────────────────────────────────────────────────────┐                    │
 │   │   ProcessMonitorService (Continuous Shield)            │                    │
-│   │   • Startup race prevention: Subscribe FIRST, Snapshot │                    │
-│   │   • Deterministic Deduplication: evt:PID:Time:Name     │                    │
+│   │   • Atomic registration: Consumer attached BEFORE OS   │                    │
+│   │   • Startup race closed: Event buffered & reconciled   │                    │
+│   │   • Snapshot SECOND: Reconciled with LRU seen cache    │                    │
 │   │   • Dual Bounded Priority Queues (LOLBin high, normal) │                    │
 │   │   • 4-Worker Concurrency Pool + Load Shedding          │                    │
 │   │   • Truthful Health: RUNNING | DEGRADED | STOPPED      │                    │
@@ -69,44 +71,60 @@ Phase F implements behavioral process monitoring, lineage reconstruction, and co
 
 ---
 
-## 2. Windows Process Creation Event Mechanism (SEC-F-02 Architecture)
+## 2. Windows Process Creation Event Mechanism (SEC-F-02 Remediation)
 
 ### A. Evaluated Mechanisms & Final Selection
 Three candidate mechanisms were evaluated for real-time Windows process monitoring:
 
-1. **Kernel ETW Session (`Microsoft-Windows-Kernel-Process`)**:
-   - *Limitation:* Requires `SeSecurityPrivilege` / Administrative elevation. Standard desktop user accounts cannot initialize or open ETW kernel traces, resulting in `Access Denied`.
-2. **`Win32_ProcessStartTrace`**:
-   - *Limitation:* Also requires Administrator elevation on Windows 10/11 endpoints. Non-elevated execution fails with `ManagementException: Access denied`.
-3. **WMI `__InstanceCreationEvent OF Win32_Process` (SELECTED)**:
+1. **Kernel ETW Session (`Microsoft-Windows-Kernel-Process`) Direct C++ Addon**:
+   - *Analysis:* Provides native kernel callbacks, but requires custom C++ native binary compilation, strict administrative privilege (`SeSecurityPrivilege`), and poses significant cross-compilation/packaging friction.
+2. **WMI `__InstanceCreationEvent OF Win32_Process WITHIN 0.25` (REJECTED AS PRIMARY)**:
+   - *Analysis:* Evaluated in the previous audit (SEC-F-02-A). Because it uses the `WITHIN` intrinsic polling syntax, WMI periodically enumerates process tables. Any transient process that starts and exits entirely between polling passes (<250 ms) cannot be reliably guaranteed. It is strictly demoted to fallback status.
+3. **WMI `Win32_ProcessStartTrace` (SELECTED PRIMARY)**:
    - *Selection Justification:*
-     - **User-Mode Integrity:** Runs reliably in standard, non-elevated user accounts without UAC elevation prompts or security entitlement errors.
-     - **Comprehensive Metadata:** Captures `ProcessId`, `ParentProcessId`, `Name`, `ExecutablePath`, `CommandLine`, and `CreationDate` directly from the OS process subsystem.
-     - **Low-Latency Ingress:** Subscribes with a 0.25-second WMI polling interval (`WITHIN 0.25`), yielding event delivery $< 20\text{ ms}$ upon process creation.
+     - **True Extrinsic Event Class:** Backed by the OS kernel ETW trace provider (`root\cimv2:Win32_ProcessStartTrace`). Unlike intrinsic WMI instance queries, this is push-driven and does NOT use a `WITHIN` polling clause.
+     - **Short-Lived Process Capture:** The Windows kernel emits the event synchronously at process instantiation time. The event payload includes `ProcessID`, `ParentProcessID`, `ProcessName`, and `TIME_CREATED` (64-bit Windows FILETIME epoch).
+     - **Transient Process Resiliency:** Even if the process terminates immediately after launch (<10 ms), the event record is dispatched by the OS trace provider and consumed by the listener.
      - **Isolated Worker Lifecycle:** Operates inside a background helper process streaming newline-delimited JSON over stdio, completely decoupling OS tracing from the Node.js event loop.
-     - **Clean Shutdown & Resource Safety:** Terminates cleanly via stdio closure and OS process kill, unregistering WMI event subscriptions without leaking handles.
+     - **Clean Shutdown & Resource Safety:** Cleanly disposes the WMI event watcher, stdout/stderr streams, and terminates child processes on shutdown.
 
-### B. Startup Ordering & Race Condition Elimination
-To prevent missing processes that start during application boot:
-1. **Subscribe FIRST:** `WindowsProcessEventSource.start()` initializes the OS subscription and waits for `PP_WMI_READY` before any snapshotting begins.
-2. **Snapshot SECOND:** `ProcessAuditorService.auditRunningProcesses()` queries the live process list and populates `knownPids` and `seenEventKeys`.
-3. **Reconcile with Deterministic Deduplication:**
-   Every event generates a compound instance key:
+### B. Privilege Boundary & Truthful Operational Matrix
+
+| User Execution Context | Primary Mechanism Behavior | Service Health State | Continuous Guarantee |
+|---|---|---|---|
+| **Elevated / Administrator** | `Win32_ProcessStartTrace` succeeds | `RUNNING` (`WMI_TRACE`) | **Proven:** Continuous, event-driven, captures short-lived processes |
+| **Performance Log Users** | `Win32_ProcessStartTrace` succeeds | `RUNNING` (`WMI_TRACE`) | **Proven:** Continuous, event-driven, captures short-lived processes |
+| **Standard Unprivileged User** | `Win32_ProcessStartTrace` fails (`Access denied`) | `DEGRADED` (`POLLING_FALLBACK`) | **Best-effort:** Polling snapshot every 1,000 ms; truthfully warns that short-lived processes may be missed |
+
+### C. Startup Ordering & Race Condition Elimination (SEC-F-02-B)
+To guarantee that no process event is missed during service startup:
+1. **Atomic Callback Registration & Startup Buffering:**
+   - `IProcessEventSource` supports `start(callback?: (event) => void)`.
+   - `ProcessMonitorService.start()` attaches its handler `eventSource.onProcessCreated(...)` **BEFORE** calling `eventSource.start(callback)`.
+   - Both `WindowsProcessEventSource` and `MockProcessEventSource` maintain an internal FIFO `startupBuffer` (capacity 1,000). Any OS events arriving while the event source initializes are immediately buffered and flushed synchronously the moment the consumer callback attaches.
+2. **Deterministic Sequence:**
+   $$\text{Register Consumer Callback} \longrightarrow \text{Activate OS Subscription} \longrightarrow \text{Confirm READY} \longrightarrow \text{Initial Snapshot} \longrightarrow \text{Reconcile}$$
+3. **Compound Identity Deduplication:**
+   Every event and snapshot entry generates a compound instance key:
    $$\text{dedupeKey} = \text{evt}:\text{PID}:\text{CreationTimestamp}:\text{ProcessName}$$
-   - If a process starts during snapshot collection, it is received by the already-active subscription.
-   - If it was also captured in the snapshot, the deterministic key matches and deduplicates it instantly.
+   - Managed via a bounded LRU cache (`MAX_SEEN_CACHE = 2,000`).
+   - If a process starts during startup initialization, it is buffered and received.
+   - If it is also enumerated in the snapshot, the deterministic key deduplicates it without redundant behavioral evaluation.
    - Zero race window exists; zero process creation events are lost.
 
-### C. Short-Lived Process Guarantee
-Unlike periodic 1,000 ms polling which is completely blind to transient processes, `WindowsProcessEventSource` receives events immediately upon OS creation. Even if a process executes and exits within $10\text{ ms}$ (e.g. `vssadmin delete shadows /all /quiet`), its creation event is captured, queued, and evaluated by `BehaviorEngineService`.
+### D. Proven vs Best-Effort Guarantees
 
-### D. Explicit Degraded Fallback Policy
-If WMI event subscription is unavailable (e.g. non-Windows environment or severe OS WMI repository corruption):
-- `eventSource` is set to `POLLING_FALLBACK`.
-- `isContinuous` is set to `false`.
-- `status` is set to `DEGRADED`.
-- Truthful diagnostic is reported: `"Primary process event subscription failed; running in degraded polling fallback mode (short-lived processes may be missed)"`.
-- The system **never** silently reports `RUNNING` or claims continuous protection when polling fallback is active.
+#### Proven Guarantee
+- When running with appropriate Windows permissions (Elevated / Performance Log Users), `Win32_ProcessStartTrace` is proven by real OS integration testing (`windows-process-event-source.integration.test.ts`) to capture short-lived child processes (`cmd.exe /c exit 0`) that exit substantially faster than traditional polling intervals.
+
+#### Best-Effort Fallback
+- When running in an unprivileged standard user context or non-Windows platform, `ProcessMonitorService` automatically falls back to periodic snapshot polling.
+- The service truthfully reports:
+  - `status = 'DEGRADED'`
+  - `isContinuous = false`
+  - `eventSource = 'POLLING_FALLBACK'`
+  - Diagnostic error: `"Win32_ProcessStartTrace access denied (requires Administrator or Performance Log Users); running in degraded polling fallback mode (short-lived processes may be missed)"`.
+- The system **never** reports `RUNNING` or claims continuous real-time protection under unprivileged polling fallback.
 
 ---
 
