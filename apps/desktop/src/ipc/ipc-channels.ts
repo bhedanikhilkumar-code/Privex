@@ -30,7 +30,20 @@ export const IPC_CHANNELS = {
   PRIVACY_SHRED: 'desktop:privacy:shred',
 
   // System Tray & Background Continuity IPC Events
-  TRIGGER_QUICK_SCAN: 'desktop:scan:trigger-quick'
+  TRIGGER_QUICK_SCAN: 'desktop:scan:trigger-quick',
+
+  // Phase G: Ransomware Shield & Shadow Vault IPC Channels
+  RANSOMWARE_STATUS_GET: 'desktop:ransomware:statusGet',
+  RANSOMWARE_PROTECTED_FOLDERS_GET: 'desktop:ransomware:foldersGet',
+  RANSOMWARE_PROTECTED_FOLDERS_ADD: 'desktop:ransomware:foldersAdd',
+  RANSOMWARE_PROTECTED_FOLDERS_REMOVE: 'desktop:ransomware:foldersRemove',
+  RANSOMWARE_TRUSTED_APPS_GET: 'desktop:ransomware:trustedAppsGet',
+  RANSOMWARE_TRUSTED_APPS_ADD: 'desktop:ransomware:trustedAppsAdd',
+  RANSOMWARE_TRUSTED_APPS_REMOVE: 'desktop:ransomware:trustedAppsRemove',
+  RANSOMWARE_INCIDENTS_GET: 'desktop:ransomware:incidentsGet',
+  RANSOMWARE_INCIDENT_ROLLBACK: 'desktop:ransomware:rollback',
+  RANSOMWARE_CANARY_RESET: 'desktop:ransomware:canaryReset',
+  RANSOMWARE_EVENT: 'desktop:ransomware:event'
 } as const;
 
 export type IpcChannel = typeof IPC_CHANNELS[keyof typeof IPC_CHANNELS];
@@ -38,7 +51,8 @@ export type IpcChannel = typeof IPC_CHANNELS[keyof typeof IPC_CHANNELS];
 export const IPC_EVENT_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.SCAN_PROGRESS_EVENT,
   IPC_CHANNELS.REALTIME_THREAT_EVENT,
-  IPC_CHANNELS.TRIGGER_QUICK_SCAN
+  IPC_CHANNELS.TRIGGER_QUICK_SCAN,
+  IPC_CHANNELS.RANSOMWARE_EVENT
 ] as const;
 
 export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
@@ -62,6 +76,16 @@ export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.PERSISTENCE_AUDIT,
   IPC_CHANNELS.REMOVABLE_MEDIA_GET,
   IPC_CHANNELS.NETWORK_POSTURE_GET,
-  IPC_CHANNELS.PRIVACY_SHRED
+  IPC_CHANNELS.PRIVACY_SHRED,
+  IPC_CHANNELS.RANSOMWARE_STATUS_GET,
+  IPC_CHANNELS.RANSOMWARE_PROTECTED_FOLDERS_GET,
+  IPC_CHANNELS.RANSOMWARE_PROTECTED_FOLDERS_ADD,
+  IPC_CHANNELS.RANSOMWARE_PROTECTED_FOLDERS_REMOVE,
+  IPC_CHANNELS.RANSOMWARE_TRUSTED_APPS_GET,
+  IPC_CHANNELS.RANSOMWARE_TRUSTED_APPS_ADD,
+  IPC_CHANNELS.RANSOMWARE_TRUSTED_APPS_REMOVE,
+  IPC_CHANNELS.RANSOMWARE_INCIDENTS_GET,
+  IPC_CHANNELS.RANSOMWARE_INCIDENT_ROLLBACK,
+  IPC_CHANNELS.RANSOMWARE_CANARY_RESET
 ] as const;
 

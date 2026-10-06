@@ -365,3 +365,138 @@ export interface PendingDownload {
   initialSize: number;
 }
 
+// ============================================================
+// PHASE G: RANSOMWARE SHIELD & SHADOW VAULT TYPES
+// ============================================================
+
+export type RansomwareProtectionMode = 'smart' | 'strict';
+
+export interface TrustedApplication {
+  readonly canonicalPath: string;
+  readonly sha256: string;
+  readonly signer?: string;
+  readonly name?: string;
+  readonly addedAt: number;
+  readonly isRevoked?: boolean;
+  readonly revocationReason?: string;
+}
+
+export interface CanaryFileRecord {
+  readonly filePath: string;
+  readonly canonicalPath: string;
+  readonly expectedSha256: string;
+  readonly expectedSize: number;
+  readonly folderPath: string;
+  readonly deployedAt: number;
+  readonly canaryId: string;
+}
+
+export interface ShadowVaultBackupRecord {
+  readonly backupId: string;
+  readonly incidentId?: string;
+  readonly originalPath: string;
+  readonly canonicalPath: string;
+  readonly preAttackSha256: string;
+  readonly fileSize: number;
+  readonly blobPath: string;
+  readonly backupTimestamp: number;
+  readonly iv: string;
+  readonly authTag: string;
+}
+
+export type RansomwareThreatType =
+  | 'CANARY_TAMPER'
+  | 'VELOCITY_BURST'
+  | 'SUSPICIOUS_EXTENSION_BURST'
+  | 'UNAUTHORIZED_PROTECTED_FOLDER_WRITE';
+
+export interface RansomwareIncident {
+  readonly incidentId: string;
+  readonly detectedAt: number;
+  readonly threatType: RansomwareThreatType;
+  readonly reason: string;
+  readonly riskScore: number;
+  readonly severity: 'critical';
+  readonly engineVerdict: 'CONTAIN_PROCESS' | 'BLOCK';
+  readonly responsiblePid?: number;
+  readonly processName?: string;
+  readonly executablePath?: string;
+  readonly containmentResult?: ProcessContainmentResult;
+  readonly affectedFiles: string[];
+  readonly backupIds: string[];
+  readonly rollbackStatus: 'PENDING' | 'ROLLED_BACK' | 'PARTIAL' | 'FAILED' | 'NOT_REQUIRED';
+  readonly metrics: {
+    readonly modificationsInWindow: number;
+    readonly highEntropyCount: number;
+    readonly renameCount: number;
+    readonly maxEntropyObserved: number;
+  };
+}
+
+export interface FileRollbackResult {
+  readonly success: boolean;
+  readonly filePath: string;
+  readonly originalSha256: string;
+  readonly restoredSha256?: string;
+  readonly bytesRestored?: number;
+  readonly error?: string;
+}
+
+export interface IncidentRollbackResult {
+  readonly incidentId: string;
+  readonly success: boolean;
+  readonly totalFiles: number;
+  readonly restoredCount: number;
+  readonly failedCount: number;
+  readonly restoredFiles: Array<{
+    readonly filePath: string;
+    readonly originalSha256: string;
+    readonly restoredSha256: string;
+    readonly bytesRestored: number;
+  }>;
+  readonly failedFiles: Array<{
+    readonly filePath: string;
+    readonly reason: string;
+  }>;
+  readonly completedAt: number;
+}
+
+export interface RansomwareShieldOptions {
+  readonly mode?: RansomwareProtectionMode;
+  readonly protectedFolders?: string[];
+  readonly trustedApplications?: TrustedApplication[];
+  readonly customVaultDir?: string;
+  readonly dryRunContainment?: boolean;
+  readonly enableCanaries?: boolean;
+  readonly velocityThreshold?: number;       // default 25
+  readonly velocityWindowMs?: number;        // default 3000 ms
+  readonly entropyThreshold?: number;        // default 7.5
+  readonly highEntropyWritesThreshold?: number; // default 8
+  readonly extensionRenameThreshold?: number; // default 10
+}
+
+export interface RansomwareShieldStatus {
+  readonly active: boolean;
+  readonly mode: RansomwareProtectionMode;
+  readonly protectedFolders: string[];
+  readonly trustedAppsCount: number;
+  readonly activeCanariesCount: number;
+  readonly incidentsCount: number;
+  readonly vaultTotalSizeBytes: number;
+  readonly vaultBackupCount: number;
+}
+
+export interface ShadowVaultOptions {
+  readonly customVaultDir?: string;
+  readonly maxFileSizeBytes?: number; // default 50 MB
+  readonly maxVaultQuotaBytes?: number; // default 2 GB
+}
+
+export interface ShadowVaultStats {
+  readonly backupCount: number;
+  readonly totalSizeBytes: number;
+  readonly maxQuotaBytes: number;
+  readonly utilizationPercent: number;
+}
+
+
