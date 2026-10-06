@@ -23,6 +23,7 @@ export interface DesktopSecurityApi {
   resumeScan: () => Promise<void>;
   onScanProgress: (callback: (progress: ScanProgress) => void) => () => void;
   onRealtimeThreat: (callback: (event: RealtimeThreatEvent) => void) => () => void;
+  onTriggerQuickScan: (callback: () => void) => () => void;
 
   listQuarantine: () => Promise<QuarantineItem[]>;
   isolateFile: (filePath: string) => Promise<QuarantineItem>;
@@ -111,6 +112,13 @@ export function createDesktopSecurityApi(ipcRenderer: {
       };
       ipcRenderer.on(IPC_CHANNELS.REALTIME_THREAT_EVENT, handler);
       return () => ipcRenderer.removeListener(IPC_CHANNELS.REALTIME_THREAT_EVENT, handler);
+    },
+    onTriggerQuickScan: (callback) => {
+      const handler = () => {
+        callback();
+      };
+      ipcRenderer.on(IPC_CHANNELS.TRIGGER_QUICK_SCAN, handler);
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.TRIGGER_QUICK_SCAN, handler);
     },
 
     listQuarantine: () => ipcRenderer.invoke(IPC_CHANNELS.QUARANTINE_LIST),

@@ -12,11 +12,13 @@ function computeStats(samples: number[]) {
   const max = sorted[sorted.length - 1] ?? 0;
   const p50 = sorted[Math.floor(sorted.length * 0.5)] ?? 0;
   const p95 = sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95))] ?? 0;
+  const p99 = sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.99))] ?? 0;
   const avg = sorted.reduce((a, b) => a + b, 0) / (sorted.length || 1);
   return {
     min: Number(min.toFixed(3)),
     p50: Number(p50.toFixed(3)),
     p95: Number(p95.toFixed(3)),
+    p99: Number(p99.toFixed(3)),
     max: Number(max.toFixed(3)),
     avg: Number(avg.toFixed(3))
   };
@@ -101,6 +103,10 @@ describe('Phase E — Real-Time Ingress Latency & Performance Benchmark Suite', 
 
     const stats = computeStats(ingressLatencies);
     const queueStats = monitor.getQueueStats();
+    const totalBenchmarkDurationMs = ingressLatencies.reduce((a, b) => a + b, 0);
+    const throughputPerSec = Number((N / (totalBenchmarkDurationMs / 1000)).toFixed(2));
+    const memUsage = process.memoryUsage();
+    const peakRssMb = Number((memUsage.rss / (1024 * 1024)).toFixed(2));
 
     console.log('\n================ PHASE E REAL-TIME INGRESS BENCHMARK ================');
     console.log(
@@ -108,6 +114,8 @@ describe('Phase E — Real-Time Ingress Latency & Performance Benchmark Suite', 
         {
           sampleSize: N,
           ingressLatencyStatsMs: stats,
+          throughputFilesPerSec: throughputPerSec,
+          peakRssMb,
           queueTelemetry: queueStats,
           slaTargetMs: 50.0,
           p95Compliant: queueStats.p95LatencyMs < 50.0

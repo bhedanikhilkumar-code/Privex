@@ -11,6 +11,7 @@
     "start": "electron dist/main/electron-main.cjs",
     "verify:runtime": "electron dist/main/electron-main.cjs --headless-verify",
     "test": "vitest run",
+    "test:benchmarks": "vitest run src/__tests__/benchmarks",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "lint": "tsc --noEmit",

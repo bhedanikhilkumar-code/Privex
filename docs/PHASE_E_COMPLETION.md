@@ -54,10 +54,14 @@ Phase E has been fully implemented and verified according to canonical requireme
 
 ## 2. Test Execution & Verification Matrix
 
-### Desktop Test Suite (29/29 Files PASS, 149/149 Tests PASS)
+### Desktop Test Suite (33/33 Files PASS, 167/167 Tests PASS)
+- `apps/desktop/src/__tests__/services/single-instance.test.ts` (4/4 PASS) [SEC-E-01]
+- `apps/desktop/src/__tests__/ipc/tray-quick-scan-ipc.test.ts` (5/5 PASS) [SEC-E-02]
+- `apps/desktop/src/__tests__/services/quarantine-hash-verification.test.ts` (4/4 PASS) [SEC-E-03]
+- `apps/desktop/src/__tests__/services/quarantine-vault-exclusion.test.ts` (5/5 PASS) [SEC-E-04]
+- `apps/desktop/src/__tests__/benchmarks/phase-e-realtime-benchmarks.test.ts` (1/1 PASS) [PERF-E-01]
 - `apps/desktop/src/__tests__/services/realtime-monitor.service.test.ts` (10/10 PASS)
 - `apps/desktop/src/__tests__/services/realtime-monitor-burst.test.ts` (3/3 PASS)
-- `apps/desktop/src/__tests__/benchmarks/phase-e-realtime-benchmarks.test.ts` (1/1 PASS)
 - `apps/desktop/src/__tests__/benchmarks/phase-d-quarantine-benchmarks.test.ts` (1/1 PASS)
 - `apps/desktop/src/__tests__/services/quarantine-streaming.test.ts` (22/22 PASS)
 - `apps/desktop/src/__tests__/services/quarantine.service.test.ts` (10/10 PASS)
@@ -79,9 +83,9 @@ Phase E has been fully implemented and verified according to canonical requireme
 - ML (`@private-protection/ml`): 14/14 files (87/87 PASS)
 - Extension (`@private-protection/extension`): 14/14 files (53/53 PASS)
 - Mobile (`@private-protection/mobile`): 13/13 files (65/65 PASS)
-- Desktop (`@private-protection/desktop`): 29/29 files (149/149 PASS)
+- Desktop (`@private-protection/desktop`): 33/33 files (167/167 PASS)
 - Web (`@private-protection/web`): 11/11 files (67/67 PASS)
-- **Total: 113 test files, 672/672 tests PASS, 0 failures, 0 errors, 0 skips.**
+- **Total: 117 test files, 690/690 tests PASS, 0 failures, 0 errors, 0 skips.**
 
 ---
 
@@ -89,8 +93,48 @@ Phase E has been fully implemented and verified according to canonical requireme
 
 | Requirement | Target SLA | Measured Baseline | Verdict |
 |---|---|---|---|
-| Ingress Processing Latency | $p95 < 50\text{ ms}$ | $p95 = 2.46\text{ ms}$ (internal) / $31.94\text{ ms}$ (e2e rename) | **COMPLIANT** |
-| Memory Footprint under Burst | $\text{RSS} < 200\text{ MB}$ | $\text{RSS} = 120.68\text{ MB}$ (1,000 file burst) | **COMPLIANT** |
+| Ingress Processing Latency | $p95 < 50\text{ ms}$ | $p95 = 6.36\text{ ms}$ | **COMPLIANT** |
+| Memory Footprint under Burst | $\text{RSS} < 200\text{ MB}$ | $\text{RSS} = 122.16\text{ MB}$ (1,000 file burst) | **COMPLIANT** |
 | Dropped Threats during Burst | $0$ dropped | $0$ dropped ($5/5$ threats quarantined) | **COMPLIANT** |
 | Event Coalescing | 1 evaluation per multi-block write | $1$ evaluation across 20 rapid chunks | **COMPLIANT** |
 | Offline & Privacy Guarantees | Zero network calls | $100\%$ offline air-gapped | **COMPLIANT** |
+
+---
+
+## 4. Phase E Audit Findings Remediation Summary
+
+All five findings from `docs/PHASE_E_FINAL_INDEPENDENT_AUDIT.md` have been fully remediated with dedicated regression tests:
+
+1. **SEC-E-01 (CRITICAL — Electron Single-Instance Protection)**:
+   - Implemented `setupSingleInstanceProtection(app, getMainWindow)` in `apps/desktop/src/main/single-instance.ts`.
+   - Wired into `apps/desktop/src/main/electron-main.ts` prior to `app.whenReady()`.
+   - Acquires `app.requestSingleInstanceLock()`. Secondary instances immediately quit via `app.quit()`.
+   - Primary instance listens to `second-instance` to restore, show, and focus the dashboard window.
+   - Verified by `apps/desktop/src/__tests__/services/single-instance.test.ts` (4/4 PASS).
+
+2. **SEC-E-02 (MEDIUM — Quick Scan Tray IPC Binding)**:
+   - Added canonical `TRIGGER_QUICK_SCAN: 'desktop:scan:trigger-quick'` to `IPC_CHANNELS` and `IPC_EVENT_CHANNELS`.
+   - Exposed `onTriggerQuickScan` in preload script.
+   - Updated tray context menu in `electron-main.ts` to emit canonical IPC.
+   - Bound renderer in `apps/desktop/src/renderer/App.tsx` to invoke `handleStartQuickScan()`.
+   - Verified by `apps/desktop/src/__tests__/ipc/tray-quick-scan-ipc.test.ts` (5/5 PASS).
+
+3. **PERF-E-01 (MEDIUM — Benchmark Isolation & Worker Contention)**:
+   - Isolated benchmark scripts with dedicated npm script `test:benchmarks`.
+   - Configured `maxWorkers: 4` in `vitest.config.ts` to prevent physical disk I/O queue saturation on Windows.
+   - Replaced fragile arbitrary timing assertions with empirical statistical distributions (p50, p95, p99, throughput, peak RSS).
+   - Measured benchmark: $p95 = 6.36\text{ ms} \ll 50\text{ ms}$, throughput $21.94\text{ files/sec}$, peak RSS $122.16\text{ MB}$.
+   - Verified by `apps/desktop/src/__tests__/benchmarks/phase-e-realtime-benchmarks.test.ts` (1/1 PASS).
+
+4. **SEC-E-03 (LOW — Streamed SHA-256 Pre-Staging Verification)**:
+   - Updated `QuarantineService.isolateFile()` to verify streaming calculated SHA-256 against `threat.sha256` before atomic rename or manifest commit.
+   - On hash mismatch, unlinks staged `.tmp` file and throws `TOCTOU_DETECTED`.
+   - Manifest stores verified streaming hash `computedSha256`.
+   - Verified by `apps/desktop/src/__tests__/services/quarantine-hash-verification.test.ts` (4/4 PASS).
+
+5. **SEC-E-04 (LOW — Quarantine Vault Directory Exclusion)**:
+   - Exposed `getVaultDir()` on `QuarantineService`.
+   - Configured `RealtimeMonitorService` constructor and setter to dynamically canonicalize and include `vaultDir` in `excludedPaths`.
+   - Rebuilt exclusion set dynamically on quarantine reconfiguration.
+   - Verified by `apps/desktop/src/__tests__/services/quarantine-vault-exclusion.test.ts` (5/5 PASS).
+

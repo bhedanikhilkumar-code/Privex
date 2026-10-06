@@ -54,7 +54,21 @@ export const App: React.FC = () => {
     excludedPaths: []
   });
 
+  const handleStartQuickScan = async () => {
+    setActiveTab('quick-scan');
+    if (window.desktopSecurity?.startQuickScan) {
+      try {
+        const result = await window.desktopSecurity.startQuickScan();
+        handleScanComplete(result);
+      } catch (err) {
+        console.warn('[TRAY_QUICK_SCAN_ERROR]', err);
+      }
+    }
+  };
+
   useEffect(() => {
+    const cleanupFns: Array<() => void> = [];
+
     // Initial fetch from desktop security bridge if available
     if (window.desktopSecurity?.listQuarantine) {
       window.desktopSecurity.listQuarantine().then(setQuarantineItems).catch(() => {});
@@ -68,7 +82,7 @@ export const App: React.FC = () => {
 
     // Subscribe to real-time ingress threat events (GAP-14)
     if (window.desktopSecurity?.onRealtimeThreat) {
-      const unsubscribe = window.desktopSecurity.onRealtimeThreat((event: RealtimeThreatEvent) => {
+      const unsubscribeRealtime = window.desktopSecurity.onRealtimeThreat((event: RealtimeThreatEvent) => {
         setThreats((prev) => {
           const exists = prev.some(
             (t) => t.id === event.threat.id || t.filePath === event.threat.filePath
@@ -92,11 +106,26 @@ export const App: React.FC = () => {
 
         setRealtimeAlert(event);
       });
-
-      return () => {
-        unsubscribe();
-      };
+      cleanupFns.push(unsubscribeRealtime);
     }
+
+    // Subscribe to System Tray Quick Scan trigger (SEC-E-02)
+    if (window.desktopSecurity?.onTriggerQuickScan) {
+      const unsubscribeTrayQuick = window.desktopSecurity.onTriggerQuickScan(() => {
+        void handleStartQuickScan();
+      });
+      cleanupFns.push(unsubscribeTrayQuick);
+    }
+
+    return () => {
+      cleanupFns.forEach((fn) => {
+        try {
+          fn();
+        } catch {
+          // ignore
+        }
+      });
+    };
   }, []);
 
   const handleScanComplete = (result: ScanResult) => {

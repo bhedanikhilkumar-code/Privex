@@ -51,6 +51,10 @@ export class QuarantineService {
     }
   }
 
+  public getVaultDir(): string {
+    return this.vaultDir;
+  }
+
   private isPathInsideVault(candidatePath: string): boolean {
     if (!candidatePath || typeof candidatePath !== 'string' || candidatePath.includes('\0')) {
       return false;
@@ -1018,6 +1022,24 @@ export class QuarantineService {
       }
     }
 
+    // SEC-E-03: Verify independently computed streaming SHA-256 against expected threat hash (TOCTOU Defense)
+    if (
+      typeof threat.sha256 === 'string' &&
+      /^[a-f0-9]{64}$/i.test(threat.sha256) &&
+      computedSha256.toLowerCase() !== threat.sha256.toLowerCase()
+    ) {
+      try {
+        if (fs.existsSync(tmpBlobPath)) {
+          fs.unlinkSync(tmpBlobPath);
+        }
+      } catch {
+        // ignore
+      }
+      throw new Error(
+        `TOCTOU_DETECTED: File content changed during quarantine staging. Expected SHA-256 ${threat.sha256.toLowerCase()}, computed ${computedSha256.toLowerCase()}`
+      );
+    }
+
     // 7. Atomic rename staged blob to permanent vault container
     fs.renameSync(tmpBlobPath, blobPath);
 
@@ -1032,17 +1054,14 @@ export class QuarantineService {
       threat.fileName || path.basename(canonicalSource)
     );
 
-    const actualSha256 =
-      typeof threat.sha256 === 'string' && /^[a-f0-9]{64}$/i.test(threat.sha256)
-        ? threat.sha256.toLowerCase()
-        : computedSha256;
+    const verifiedSha256 = computedSha256.toLowerCase();
 
     const item: QuarantineItem = {
       quarantineId,
       originalPath: canonicalSource,
       fileName: safeFileName,
       fileSize: totalBytes,
-      sha256: actualSha256,
+      sha256: verifiedSha256,
       threatName: threat.threatName,
       riskScore: threat.riskScore,
       severity: threat.severity,
@@ -1060,22 +1079,26 @@ export class QuarantineService {
 
     // 9. Securely unlink the original malicious file from user's filesystem
     try {
-      await fs.promises.unlink(canonicalSource);
-    } catch (err) {
-      // Rollback manifest and blob if unlinking source file fails
-      this.manifest.delete(quarantineId);
-      try {
-        this.saveManifest();
-      } catch {
-        // Best-effort manifest rollback
+      if (fs.existsSync(canonicalSource)) {
+        await fs.promises.unlink(canonicalSource);
       }
-      try {
-        fs.chmodSync(blobPath, 0o600);
-        await fs.promises.unlink(blobPath);
-      } catch {
-        // Best-effort cleanup
+    } catch (err: any) {
+      if (err?.code !== 'ENOENT') {
+        // Rollback manifest and blob if unlinking source file fails
+        this.manifest.delete(quarantineId);
+        try {
+          this.saveManifest();
+        } catch {
+          // Best-effort manifest rollback
+        }
+        try {
+          fs.chmodSync(blobPath, 0o600);
+          await fs.promises.unlink(blobPath);
+        } catch {
+          // Best-effort cleanup
+        }
+        throw err;
       }
-      throw err;
     }
 
     return item;

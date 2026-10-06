@@ -26,6 +26,7 @@ export class RealtimeMonitorService extends EventEmitter {
   private recentEvaluations: Map<string, number> = new Map();
   private options: Required<RealtimeMonitorOptions>;
   private quarantineService: QuarantineService | null = null;
+  private currentExcludedVaultDir: string | null = null;
 
   // Incomplete / In-progress download tracking (.crdownload, .part, etc.)
   private pendingDownloads: Map<string, PendingDownload> = new Map();
@@ -88,11 +89,15 @@ export class RealtimeMonitorService extends EventEmitter {
       stabilityRetries: Math.max(0, options?.stabilityRetries ?? 3),
       debounceMs: Math.max(0, options?.debounceMs ?? 25),
       autoQuarantineCritical: options?.autoQuarantineCritical ?? false,
-      excludedPaths: options?.excludedPaths ?? [],
+      excludedPaths: (options?.excludedPaths || []).map((p) => path.resolve(p)),
       monitoredPaths: options?.monitoredPaths ?? [],
       entropyDetectionEnabled: options?.entropyDetectionEnabled ?? true,
       maxFileSizeBytes: options?.maxFileSizeBytes ?? 50 * 1024 * 1024
     };
+
+    if (quarantineService) {
+      this.setQuarantineService(quarantineService);
+    }
   }
 
   // ============================================================
@@ -153,7 +158,36 @@ export class RealtimeMonitorService extends EventEmitter {
   }
 
   public setQuarantineService(service: QuarantineService | null): void {
+    // 1. Remove previous quarantine vault exclusion if changing services
+    if (this.currentExcludedVaultDir) {
+      const oldCanonical = this.currentExcludedVaultDir;
+      this.options.excludedPaths = this.options.excludedPaths.filter((p) => {
+        const canonical = path.resolve(p);
+        return process.platform === 'win32'
+          ? canonical.toLowerCase() !== oldCanonical.toLowerCase()
+          : canonical !== oldCanonical;
+      });
+      this.currentExcludedVaultDir = null;
+    }
+
     this.quarantineService = service;
+
+    // 2. SEC-E-04: Automatically obtain canonical vaultDir and add to excludedPaths
+    if (service && typeof service.getVaultDir === 'function') {
+      const canonicalVaultDir = path.resolve(service.getVaultDir());
+      this.currentExcludedVaultDir = canonicalVaultDir;
+
+      const alreadyExcluded = this.options.excludedPaths.some((p) => {
+        const canonical = path.resolve(p);
+        return process.platform === 'win32'
+          ? canonical.toLowerCase() === canonicalVaultDir.toLowerCase()
+          : canonical === canonicalVaultDir;
+      });
+
+      if (!alreadyExcluded) {
+        this.options.excludedPaths.push(canonicalVaultDir);
+      }
+    }
   }
 
   public setAutoQuarantineCritical(enabled: boolean): void {
@@ -178,6 +212,19 @@ export class RealtimeMonitorService extends EventEmitter {
 
   public setExcludedPaths(paths: string[]): void {
     this.options.excludedPaths = (paths || []).map((p) => path.resolve(p));
+    // Ensure active quarantine vault directory remains excluded
+    if (this.currentExcludedVaultDir) {
+      const vaultDir = this.currentExcludedVaultDir;
+      const hasVault = this.options.excludedPaths.some((p) => {
+        const canonical = path.resolve(p);
+        return process.platform === 'win32'
+          ? canonical.toLowerCase() === vaultDir.toLowerCase()
+          : canonical === vaultDir;
+      });
+      if (!hasVault) {
+        this.options.excludedPaths.push(vaultDir);
+      }
+    }
   }
 
   public getOptions(): Readonly<Required<RealtimeMonitorOptions>> {

@@ -12,6 +12,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import { IpcHandler } from '../ipc/ipc-handler';
+import { IPC_CHANNELS } from '../ipc/ipc-channels';
+import { setupSingleInstanceProtection } from './single-instance';
 
 let mainWindow: BrowserWindow | null = null;
 let ipcHandler: IpcHandler | null = null;
@@ -110,7 +112,7 @@ function setupSystemTray(win: BrowserWindow): void {
           if (win && !win.isDestroyed()) {
             win.show();
             win.focus();
-            win.webContents.send('TRIGGER_QUICK_SCAN');
+            win.webContents.send(IPC_CHANNELS.TRIGGER_QUICK_SCAN);
           }
         }
       },
@@ -360,58 +362,63 @@ async function runHeadlessRuntimeVerification(win: BrowserWindow): Promise<void>
   }
 }
 
-app.whenReady().then(() => {
-  // Enforce strict Content-Security-Policy on all local responses
-  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    callback({
-      responseHeaders: {
-        ...details.responseHeaders,
-        'Content-Security-Policy': [
-          "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
-        ]
-      }
+// SEC-E-01: Enforce single-instance protection before background services initialize
+const hasInstanceLock = setupSingleInstanceProtection(app, () => mainWindow);
+
+if (hasInstanceLock) {
+  app.whenReady().then(() => {
+    // Enforce strict Content-Security-Policy on all local responses
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          'Content-Security-Policy': [
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
+          ]
+        }
+      });
     });
-  });
 
-  const storageDir = getStorageDir();
-  ipcHandler = new IpcHandler({
-    vaultDir: path.join(storageDir, 'vault'),
-    configDir: path.join(storageDir, 'config'),
-    autoStartRealtime: true
-  });
-  ipcHandler.registerElectronHandlers(ipcMain, () => mainWindow?.webContents ?? null);
-
-  // Hook desktop toast notifications on real-time threat detection
-  ipcHandler.getRealtimeMonitor().on('threatDetected', (threat) => {
-    showThreatToastNotification(
-      'Threat Detected & Blocked',
-      `Private Protection quarantined suspicious file: ${threat.fileName}`
-    );
-  });
-
-  const isHeadlessVerify = process.argv.includes('--headless-verify');
-  mainWindow = createMainWindow(isHeadlessVerify);
-
-  // Setup Windows System Tray unless in headless test mode
-  if (!isHeadlessVerify) {
-    setupSystemTray(mainWindow);
-  }
-
-  if (isHeadlessVerify) {
-    mainWindow.webContents.once('did-finish-load', () => {
-      runHeadlessRuntimeVerification(mainWindow!);
+    const storageDir = getStorageDir();
+    ipcHandler = new IpcHandler({
+      vaultDir: path.join(storageDir, 'vault'),
+      configDir: path.join(storageDir, 'config'),
+      autoStartRealtime: true
     });
-  }
+    ipcHandler.registerElectronHandlers(ipcMain, () => mainWindow?.webContents ?? null);
 
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      mainWindow = createMainWindow(false);
-      if (!isHeadlessVerify) {
-        setupSystemTray(mainWindow);
-      }
+    // Hook desktop toast notifications on real-time threat detection
+    ipcHandler.getRealtimeMonitor().on('threatDetected', (threat) => {
+      showThreatToastNotification(
+        'Threat Detected & Blocked',
+        `Private Protection quarantined suspicious file: ${threat.fileName}`
+      );
+    });
+
+    const isHeadlessVerify = process.argv.includes('--headless-verify');
+    mainWindow = createMainWindow(isHeadlessVerify);
+
+    // Setup Windows System Tray unless in headless test mode
+    if (!isHeadlessVerify) {
+      setupSystemTray(mainWindow);
     }
+
+    if (isHeadlessVerify) {
+      mainWindow.webContents.once('did-finish-load', () => {
+        runHeadlessRuntimeVerification(mainWindow!);
+      });
+    }
+
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) {
+        mainWindow = createMainWindow(false);
+        if (!isHeadlessVerify) {
+          setupSystemTray(mainWindow);
+        }
+      }
+    });
   });
-});
+}
 
 app.on('before-quit', () => {
   isQuitting = true;

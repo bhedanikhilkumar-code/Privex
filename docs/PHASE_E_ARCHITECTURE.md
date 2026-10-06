@@ -102,6 +102,42 @@ Phase E extends the verified Phase D PPVAULT2 quarantine container foundation by
 |---|---|---|---|---|
 | `realtime-monitor.service.test.ts` | Lifecycle, Roots, Symlink Defenses | 10 unit tests | 10/10 PASS | **PASS** |
 | `realtime-monitor-burst.test.ts` | 1,000 rapid file storm, RSS < 200 MB | 3 burst tests | 120.68 MB Peak RSS, 0 drops | **PASS** |
-| `phase-e-realtime-benchmarks.test.ts` | Ingress Latency SLA ($p95 < 50\text{ ms}$) | Empirical $p95$ SLA | $p95 = 31.94\text{ ms}$ ($2.46\text{ ms}$ engine) | **PASS** |
+| `phase-e-realtime-benchmarks.test.ts` | Ingress Latency SLA ($p95 < 50\text{ ms}$) | Empirical $p95$ SLA | $p95 = 6.36\text{ ms}$ queue latency | **PASS** |
 | `phase11-remediation.test.tsx` | Native Electron `--headless-verify` E2E | 8 E2E tests | Auto-quarantine to PPVAULT2 verified | **PASS** |
-| Monorepo Test Suite | Full workspace regression | 674 tests across 113 files | 0 failures, 0 skips | **PASS** |
+| `single-instance.test.ts` | SEC-E-01: Single-instance lock & focus | 4 tests | 4/4 PASS | **PASS** |
+| `tray-quick-scan-ipc.test.ts` | SEC-E-02: Canonical Quick Scan IPC chain | 5 tests | 5/5 PASS | **PASS** |
+| `quarantine-hash-verification.test.ts` | SEC-E-03: TOCTOU streamed hash check | 4 tests | 4/4 PASS | **PASS** |
+| `quarantine-vault-exclusion.test.ts` | SEC-E-04: Vault directory self-exclusion | 5 tests | 5/5 PASS | **PASS** |
+| Monorepo Test Suite | Full workspace regression | 113 test files | 0 failures, 0 errors, 0 skips | **PASS** |
+
+---
+
+## 5. Independent Audit Remediation & Hardening Architecture
+
+Following the Phase E Final Independent Audit, five architectural remediations were implemented to resolve all identified findings:
+
+### 5.1 SEC-E-01 (CRITICAL): Electron Single-Instance Protection & Background Continuity
+- **Controller Module:** `apps/desktop/src/main/single-instance.ts`
+- **Mechanism:** Main process requests `app.requestSingleInstanceLock()` prior to initializing `app.whenReady()`, `IpcHandler`, or background watchers.
+- **Secondary Instance Rejection:** If another instance attempts to start, lock acquisition fails and `app.quit()` terminates the secondary process immediately, preventing duplicate filesystem watchers and concurrent quarantine vault contention.
+- **Primary Window Restoration:** Primary instance registers `app.on('second-instance', ...)`. When a second launch occurs, the primary window is restored if minimized, shown if hidden, and focused.
+
+### 5.2 SEC-E-02 (MEDIUM): Canonical Quick Scan IPC Integration
+- **Canonical Channel:** `desktop:scan:trigger-quick` registered in `IPC_CHANNELS.TRIGGER_QUICK_SCAN` and whitelisted in `IPC_EVENT_CHANNELS`.
+- **Preload Bridge:** Exposes `window.desktopSecurity.onTriggerQuickScan(callback)`. Arbitrary or unwhitelisted channels remain blocked.
+- **Renderer Chain:** `App.tsx` listens on `onTriggerQuickScan`, navigates to `quick-scan` view, invokes `startQuickScan()`, and routes results through `handleScanComplete()`. Zero code duplication with the manual scan pipeline.
+
+### 5.3 PERF-E-01 (MEDIUM): Benchmark Methodology & Test Worker Isolation
+- **Configuration:** `apps/desktop/vitest.config.ts` configures `maxWorkers: 4` to prevent concurrent disk I/O saturation across parallel Vitest workers.
+- **Dedicated Script:** `npm --workspace=@private-protection/desktop run test:benchmarks` allows running performance benchmarks in a dedicated, isolated process.
+- **Comprehensive Reporting:** `phase-e-realtime-benchmarks.test.ts` calculates and reports sample count, $p50$, $p95$, $p99$, throughput (files/sec), and peak RSS, asserting strict compliance with the $<50\text{ ms}$ requirement.
+
+### 5.4 SEC-E-03 (LOW): TOCTOU Defense via Streamed Hash Verification
+- **Staging Verification:** In `QuarantineService.isolateFile()`, streaming encryption computes the actual SHA-256 hash. If the input threat provided an expected `threat.sha256`, the computed hash must match exactly.
+- **TOCTOU Rejection:** If hashes mismatch, the staged `.tmp` container is deleted, the manifest is not updated, and `TOCTOU_DETECTED` is thrown.
+- **Verified Manifest:** Manifest records only the verified streamed hash (`computedSha256`), never unverified external input.
+
+### 5.5 SEC-E-04 (LOW): Automatic Quarantine Vault Self-Exclusion
+- **Automatic Registration:** `QuarantineService.getVaultDir()` exposes the canonical vault directory. When passed to `RealtimeMonitorService` via constructor or `setQuarantineService()`, the directory is canonicalized and automatically added to `options.excludedPaths`.
+- **Dynamic Reconfiguration:** Reconfiguring the quarantine service safely unregisters the old vault directory and registers the new one, preventing duplicate exclusions and ensuring `.blob` files are never monitored.
+

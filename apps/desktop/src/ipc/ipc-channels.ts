@@ -25,14 +25,18 @@ export const IPC_CHANNELS = {
   REMOVABLE_MEDIA_GET: 'desktop:removableMedia:get',
   NETWORK_POSTURE_GET: 'desktop:networkPosture:get',
 
-  PRIVACY_SHRED: 'desktop:privacy:shred'
+  PRIVACY_SHRED: 'desktop:privacy:shred',
+
+  // System Tray & Background Continuity IPC Events
+  TRIGGER_QUICK_SCAN: 'desktop:scan:trigger-quick'
 } as const;
 
 export type IpcChannel = typeof IPC_CHANNELS[keyof typeof IPC_CHANNELS];
 
 export const IPC_EVENT_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.SCAN_PROGRESS_EVENT,
-  IPC_CHANNELS.REALTIME_THREAT_EVENT
+  IPC_CHANNELS.REALTIME_THREAT_EVENT,
+  IPC_CHANNELS.TRIGGER_QUICK_SCAN
 ] as const;
 
 export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
