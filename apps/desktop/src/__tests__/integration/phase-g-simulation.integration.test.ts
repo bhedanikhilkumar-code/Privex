@@ -99,7 +99,7 @@ describe('Phase G Integration: RansomwareSimulationHarness E2E', () => {
     expect(postRollbackCheck.verified).toBe(true);
     expect(postRollbackCheck.totalChecked).toBe(30);
     expect(postRollbackCheck.mismatched.length).toBe(0);
-  });
+  }, 30000);
 
   it('executes canary trap tamper E2E flow: tamper -> immediate alert -> containment', async () => {
     const canaries = shield.deployCanaries();

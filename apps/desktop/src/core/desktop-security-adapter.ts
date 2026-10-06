@@ -19,6 +19,7 @@ import {
 import { MotwAnalyzer } from './motw-analyzer';
 import { EmailMimeParser } from './email-mime-parser';
 import { RemovableMediaService } from '../services/removable-media.service';
+import { PersistenceAuditorService, AuditPersistenceOptions } from '../services/persistence-auditor.service';
 
 export class DesktopSecurityAdapter {
   private pipeline: DetectionPipeline;
@@ -69,6 +70,22 @@ export class DesktopSecurityAdapter {
   public async getRemovableMedia() {
     const service = new RemovableMediaService();
     return service.getMountedDrives();
+  }
+
+  /**
+   * Audits Windows startup and persistence vectors.
+   */
+  public async auditPersistence(options?: AuditPersistenceOptions) {
+    const auditor = new PersistenceAuditorService();
+    return auditor.auditStartupLocations(options);
+  }
+
+  /**
+   * Remediates a flagged persistence item.
+   */
+  public async remediatePersistence(itemId: string, options?: { frictionToken?: string }) {
+    const auditor = new PersistenceAuditorService();
+    return auditor.remediateItem(itemId, options);
   }
 
   /**

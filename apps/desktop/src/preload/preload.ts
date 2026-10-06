@@ -9,6 +9,8 @@ import {
   ProcessInfo,
   ProcessContainmentResult,
   PersistenceItem,
+  PersistenceRemediationResult,
+  PersistenceChangeEvent,
   RemovableDrive,
   ScanProgress,
   RealtimeThreatEvent,
@@ -50,6 +52,8 @@ export interface DesktopSecurityApi {
   containProcess: (pid: number, options?: ContainProcessOptions) => Promise<ProcessContainmentResult>;
   getProcessMonitorHealth: () => Promise<ProcessMonitorHealth>;
   auditPersistence: () => Promise<PersistenceItem[]>;
+  remediatePersistence: (itemId: string, frictionToken?: string) => Promise<PersistenceRemediationResult>;
+  onPersistenceChanged: (callback: (event: PersistenceChangeEvent) => void) => () => void;
   getRemovableMedia: () => Promise<RemovableDrive[]>;
   scanRemovableMedia: (mountPath: string) => Promise<RemovableDriveScanResult>;
   onMediaDriveAttached: (callback: (drive: RemovableDrive) => void) => () => void;
@@ -192,6 +196,17 @@ export function createDesktopSecurityApi(ipcRenderer: {
     containProcess: (pid, options) => ipcRenderer.invoke(IPC_CHANNELS.PROCESS_CONTAIN, pid, options),
     getProcessMonitorHealth: () => ipcRenderer.invoke(IPC_CHANNELS.PROCESS_MONITOR_HEALTH),
     auditPersistence: () => ipcRenderer.invoke(IPC_CHANNELS.PERSISTENCE_AUDIT),
+    remediatePersistence: (itemId, frictionToken) =>
+      ipcRenderer.invoke(IPC_CHANNELS.PERSISTENCE_REMEDIATE, itemId, { frictionToken }),
+    onPersistenceChanged: (callback) => {
+      const handler = (_event: any, changeEvent: unknown) => {
+        if (changeEvent && typeof changeEvent === 'object' && 'changeType' in changeEvent) {
+          callback(changeEvent as PersistenceChangeEvent);
+        }
+      };
+      ipcRenderer.on(IPC_CHANNELS.PERSISTENCE_CHANGED, handler);
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.PERSISTENCE_CHANGED, handler);
+    },
     getRemovableMedia: () => ipcRenderer.invoke(IPC_CHANNELS.REMOVABLE_MEDIA_GET),
     scanRemovableMedia: (mountPath) =>
       ipcRenderer.invoke(IPC_CHANNELS.REMOVABLE_MEDIA_SCAN, mountPath),

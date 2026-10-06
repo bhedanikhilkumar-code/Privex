@@ -282,14 +282,85 @@ export interface ProcessInfo {
   authorization?: ProcessContainmentAuthorization;
 }
 
+// ============================================================
+// PHASE L: STARTUP & PERSISTENCE PROTECTION TYPES
+// ============================================================
+
+export type PersistenceLocationType =
+  | 'registry_run_hkcu'
+  | 'registry_run_hklm'
+  | 'registry_runonce_hkcu'
+  | 'registry_runonce_hklm'
+  | 'registry_run_wow6432'
+  | 'startup_folder_user'
+  | 'startup_folder_common'
+  | 'scheduled_task'
+  | 'custom_persistence'
+  | 'startup_folder'
+  | 'run_key';
+
 export interface PersistenceItem {
   id: string;
   name: string;
   targetPath: string;
-  locationType: 'startup_folder' | 'run_key' | 'scheduled_task';
+  rawCommand?: string;
+  executablePath?: string;
+  arguments?: string;
+  locationType: PersistenceLocationType;
+  locationPath?: string;
+  registryHive?: 'HKCU' | 'HKLM';
+  registryKey?: string;
+  valueName?: string;
+  isShortcut?: boolean;
+  shortcutDetails?: ShortcutWormAnalysisResult;
+  existsOnDisk?: boolean;
+  isAccessible?: boolean;
+  isSystemBinary?: boolean;
+  isTrusted?: boolean;
   isSuspicious: boolean;
   reason?: string;
+  riskScore?: number;
+  severity?: ThreatSeverity;
+  engineVerdict?: ThreatVerdict;
+  threatName?: string;
+  indicators?: string[];
+  evidenceFactors?: string[];
+  analysisResult?: FileAnalysisResult;
+  timestamp?: number;
 }
+
+export interface PersistenceAuditResult {
+  readonly timestamp: number;
+  readonly totalEntriesAudited: number;
+  readonly threatsFound: number;
+  readonly suspiciousCount: number;
+  readonly cleanCount: number;
+  readonly maxRiskScore: number;
+  readonly items: PersistenceItem[];
+  readonly durationMs: number;
+  readonly scanErrors?: string[];
+}
+
+export interface PersistenceRemediationRequest {
+  readonly itemId: string;
+  readonly frictionToken?: string;
+}
+
+export interface PersistenceRemediationResult {
+  readonly success: boolean;
+  readonly itemId: string;
+  readonly message: string;
+  readonly locationType: PersistenceLocationType;
+  readonly quarantinedFile?: string;
+  readonly deletedRegistryValue?: string;
+}
+
+export interface PersistenceChangeEvent {
+  readonly changeType: 'ADDED' | 'MODIFIED' | 'REMOVED';
+  readonly item: PersistenceItem;
+  readonly timestamp: number;
+}
+
 
 export type RemovableDriveType =
   | 'REMOVABLE'

@@ -10,6 +10,7 @@ import { RealtimeMonitorService } from '../services/realtime-monitor.service';
 import { ProcessAuditorService } from '../services/process-auditor.service';
 import { ProcessMonitorService } from '../services/process-monitor.service';
 import { PersistenceAuditorService } from '../services/persistence-auditor.service';
+import { PersistenceMonitorService } from '../services/persistence-monitor.service';
 import { RemovableMediaService } from '../services/removable-media.service';
 import { NetworkMonitorService } from '../services/network-monitor.service';
 import { SecureStorageService } from '../services/secure-storage.service';
@@ -41,7 +42,11 @@ import {
   MotwAnalysisResult,
   EmailAnalysisResult,
   RemovableDrive,
-  RemovableDriveScanResult
+  RemovableDriveScanResult,
+  PersistenceItem,
+  PersistenceAuditResult,
+  PersistenceRemediationResult,
+  PersistenceChangeEvent
 } from '../types/desktop.types';
 
 
@@ -61,6 +66,7 @@ export class IpcHandler {
   private processAuditor: ProcessAuditorService;
   private processMonitor: ProcessMonitorService;
   private persistenceAuditor: PersistenceAuditorService;
+  private persistenceMonitor: PersistenceMonitorService;
   private removableMedia: RemovableMediaService;
   private networkMonitor: NetworkMonitorService;
   private storage: SecureStorageService;
@@ -91,7 +97,8 @@ export class IpcHandler {
       processAuditor: this.processAuditor,
       behaviorEngine: this.processAuditor.getBehaviorEngine()
     });
-    this.persistenceAuditor = new PersistenceAuditorService();
+    this.persistenceAuditor = new PersistenceAuditorService(this.quarantine);
+    this.persistenceMonitor = new PersistenceMonitorService(this.persistenceAuditor);
     this.removableMedia = new RemovableMediaService();
     this.networkMonitor = new NetworkMonitorService();
     this.storage = new SecureStorageService(options?.configDir);
@@ -176,6 +183,39 @@ export class IpcHandler {
       }
     });
 
+    // Wire PersistenceMonitor events to security log, notifications, and renderer broadcast (Phase L)
+    this.persistenceMonitor.on('persistenceChanged', (change: PersistenceChangeEvent) => {
+      this.storage.recordSecurityEvent(
+        'CONFIG_UPDATED',
+        change.item.isSuspicious ? 'WARN' : 'INFO',
+        `Startup persistence entry ${change.changeType.toLowerCase()}: ${change.item.name}`,
+        { itemId: change.item.id, name: change.item.name, locationType: change.item.locationType, isSuspicious: change.item.isSuspicious }
+      );
+      const wc = this.getWebContentsFn?.();
+      if (wc) {
+        wc.send(IPC_CHANNELS.PERSISTENCE_CHANGED, change);
+      }
+    });
+
+    this.persistenceMonitor.on('threatDetected', (item: PersistenceItem) => {
+      const detectedThreat: DetectedThreat = {
+        id: item.id,
+        filePath: item.targetPath,
+        fileName: item.name,
+        fileSize: 0,
+        sha256: item.analysisResult?.sha256 || '0'.repeat(64),
+        riskScore: item.riskScore || 80,
+        severity: item.severity || 'dangerous',
+        verdict: (item.engineVerdict as any) || 'BLOCK',
+        threatName: item.threatName || 'Startup.Persistence.Threat',
+        detectedAt: Date.now(),
+        evidenceFactors: item.evidenceFactors || ['Startup Persistence Threat'],
+        quarantined: false
+      };
+      this.notificationService.notifySecurityThreat(detectedThreat, {
+        source: 'Startup & Persistence Protection'
+      });
+    });
 
     // Wire ScannerService lifecycle events into bounded local security log (Step 12)
     this.scanner.on('started', (info: { scanId: string; scanType: string; targets: string[] }) => {
@@ -592,8 +632,31 @@ export class IpcHandler {
     return this.processMonitor.getHealth();
   }
 
-  public async handleAuditPersistence() {
+  public async handleAuditPersistence(): Promise<PersistenceItem[]> {
+    const res = await this.persistenceAuditor.auditStartupLocations();
+    return res.items;
+  }
+
+  public async handleAuditPersistenceDetailed(): Promise<PersistenceAuditResult> {
     return this.persistenceAuditor.auditStartupLocations();
+  }
+
+  public async handleRemediatePersistence(
+    itemId: unknown,
+    options?: { frictionToken?: string }
+  ): Promise<PersistenceRemediationResult> {
+    if (!itemId || typeof itemId !== 'string') {
+      throw new Error('INVALID_PERSISTENCE_ID: Persistence itemId must be a non-empty string.');
+    }
+
+    const result = await this.persistenceAuditor.remediateItem(itemId, options);
+    this.storage.recordSecurityEvent(
+      'QUARANTINE_ISOLATED',
+      result.success ? 'INFO' : 'WARN',
+      `Startup persistence remediation evaluated for '${itemId}': ${result.message}`,
+      { itemId, success: result.success, locationType: result.locationType }
+    );
+    return result;
   }
 
   public async handleGetRemovableMedia() {
@@ -784,6 +847,11 @@ export class IpcHandler {
     ipcMain.handle(IPC_CHANNELS.PERSISTENCE_AUDIT, async (event) => {
       verifyOrigin(event);
       return this.handleAuditPersistence();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.PERSISTENCE_REMEDIATE, async (event, itemId: unknown, options?: any) => {
+      verifyOrigin(event);
+      return this.handleRemediatePersistence(itemId, options);
     });
 
     ipcMain.handle(IPC_CHANNELS.REMOVABLE_MEDIA_GET, async (event) => {

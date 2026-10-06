@@ -67,6 +67,10 @@ export const IPC_CHANNELS = {
   // Phase K: Practical Email (.eml / .msg) & Network Socket Protection
   EMAIL_ANALYZE_FILE: 'desktop:email:analyzeFile',
 
+  // Phase L: Startup & Persistence Protection
+  PERSISTENCE_REMEDIATE: 'desktop:persistence:remediate',
+  PERSISTENCE_CHANGED: 'desktop:persistence:changed',
+
   // Phase M: USB & Removable Media Protection
   REMOVABLE_MEDIA_SCAN: 'desktop:removableMedia:scan',
   MEDIA_DRIVE_ATTACHED: 'desktop:removableMedia:attached'
@@ -80,6 +84,7 @@ export const IPC_EVENT_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.TRIGGER_QUICK_SCAN,
   IPC_CHANNELS.RANSOMWARE_EVENT,
   IPC_CHANNELS.NOTIFICATION_EVENT,
+  IPC_CHANNELS.PERSISTENCE_CHANGED,
   IPC_CHANNELS.MEDIA_DRIVE_ATTACHED
 ] as const;
 
@@ -102,6 +107,7 @@ export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.PROCESS_CONTAIN,
   IPC_CHANNELS.PROCESS_MONITOR_HEALTH,
   IPC_CHANNELS.PERSISTENCE_AUDIT,
+  IPC_CHANNELS.PERSISTENCE_REMEDIATE,
   IPC_CHANNELS.REMOVABLE_MEDIA_GET,
   IPC_CHANNELS.REMOVABLE_MEDIA_SCAN,
   IPC_CHANNELS.NETWORK_POSTURE_GET,
