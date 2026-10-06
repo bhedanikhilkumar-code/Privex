@@ -183,19 +183,20 @@ export class ShadowVaultService {
   }
 
   private decryptManifest(data: Buffer): string {
-    const minLen = ShadowVaultService.MANIFEST_MAGIC.length + 12 + 16;
+    const magicLen = ShadowVaultService.MANIFEST_MAGIC.length;
+    const minLen = magicLen + 12 + 16;
     if (data.length < minLen) {
       throw new Error('CORRUPTED_MANIFEST: Manifest file length too short.');
     }
 
-    const magic = data.subarray(0, 8);
+    const magic = data.subarray(0, magicLen);
     if (!magic.equals(ShadowVaultService.MANIFEST_MAGIC)) {
       throw new Error('INVALID_MANIFEST_MAGIC: Header magic mismatch.');
     }
 
-    const iv = data.subarray(8, 20);
-    const tag = data.subarray(20, 36);
-    const cipherText = data.subarray(36);
+    const iv = data.subarray(magicLen, magicLen + 12);
+    const tag = data.subarray(magicLen + 12, magicLen + 28);
+    const cipherText = data.subarray(magicLen + 28);
 
     const decipher = crypto.createDecipheriv('aes-256-gcm', this.vaultKey, iv);
     decipher.setAuthTag(tag);
@@ -239,19 +240,20 @@ export class ShadowVaultService {
    * Decrypts an authenticated PPSHADOW1 container and verifies AAD and authentication tag.
    */
   private decryptPayload(container: Buffer, canonicalPath: string, expectedSha256: string): Buffer {
-    const minLen = ShadowVaultService.CONTAINER_MAGIC.length + 12 + 16;
+    const magicLen = ShadowVaultService.CONTAINER_MAGIC.length;
+    const minLen = magicLen + 12 + 16;
     if (container.length < minLen) {
       throw new Error('CORRUPTED_BACKUP: Backup blob length too short.');
     }
 
-    const magic = container.subarray(0, 8);
+    const magic = container.subarray(0, magicLen);
     if (!magic.equals(ShadowVaultService.CONTAINER_MAGIC)) {
       throw new Error('INVALID_BACKUP_MAGIC: ShadowVault container magic mismatch.');
     }
 
-    const iv = container.subarray(8, 20);
-    const authTag = container.subarray(20, 36);
-    const cipherText = container.subarray(36);
+    const iv = container.subarray(magicLen, magicLen + 12);
+    const authTag = container.subarray(magicLen + 12, magicLen + 28);
+    const cipherText = container.subarray(magicLen + 28);
 
     const decipher = crypto.createDecipheriv('aes-256-gcm', this.vaultKey, iv);
     const aad = Buffer.from(`${canonicalPath}|${expectedSha256}`, 'utf8');
