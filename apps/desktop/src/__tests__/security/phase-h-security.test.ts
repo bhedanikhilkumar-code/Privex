@@ -137,7 +137,7 @@ describe('Phase H Security & Adversarial Test Suite (SEC-H-01 to SEC-H-10)', () 
   describe('SEC-H-06: IPC Validator Boundary & Schema Hardening', () => {
     it('validates notification ID rejecting control characters and path traversal', () => {
       expect(IpcValidator.validateNotificationId('notif-12345')).toBe('notif-12345');
-      expect(() => IpcValidator.validateNotificationId('../../../etc/passwd')).not.toThrow(); // ID validator allows alphanumeric & dashes
+      expect(() => IpcValidator.validateNotificationId('../../../etc/passwd')).toThrow(/SECURITY_VIOLATION/);
       expect(() => IpcValidator.validateNotificationId('notif\0evil')).toThrow(/SECURITY_VIOLATION/);
       expect(() => IpcValidator.validateNotificationId('notif|evil')).toThrow(/SECURITY_VIOLATION/);
       expect(() => IpcValidator.validateNotificationId('')).toThrow(/INVALID_NOTIFICATION_ID/);

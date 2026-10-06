@@ -351,8 +351,8 @@ export class IpcValidator {
     if (!trimmed || trimmed.length > 128) {
       throw new Error('INVALID_NOTIFICATION_ID: Notification ID length must be between 1 and 128 characters.');
     }
-    if (/[|&;$`><\r\n\0]/.test(trimmed)) {
-      throw new Error('SECURITY_VIOLATION: Notification ID contains forbidden characters.');
+    if (/[|&;$`><\r\n\0]/.test(trimmed) || trimmed.includes('..') || trimmed.includes('/') || trimmed.includes('\\')) {
+      throw new Error('SECURITY_VIOLATION: Notification ID contains forbidden characters or path traversal.');
     }
     return trimmed;
   }
