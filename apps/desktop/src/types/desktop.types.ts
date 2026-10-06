@@ -203,10 +203,32 @@ export interface ProcessContainmentResult {
 
 export type ProcessMonitorStatus = 'RUNNING' | 'DEGRADED' | 'STOPPED' | 'FAILED';
 
+export type ProcessEventSourceType =
+  | 'WMI_EVENT_SUBSCRIPTION'
+  | 'WMI_TRACE'
+  | 'CIM_EVENT'
+  | 'POLLING_FALLBACK'
+  | 'MOCK';
+
+export interface ProcessEventSourceStatus {
+  readonly state: 'INITIALIZING' | 'ACTIVE' | 'ERROR' | 'STOPPED';
+  readonly sourceName: string;
+  readonly lastError?: string;
+  readonly eventsObserved: number;
+}
+
+export interface IProcessEventSource {
+  start(): Promise<void>;
+  stop(): Promise<void>;
+  onProcessCreated(callback: (event: ProcessCreationEvent) => void): void;
+  getStatus(): ProcessEventSourceStatus;
+  dispose(): Promise<void>;
+}
+
 export interface ProcessMonitorHealth {
   readonly status: ProcessMonitorStatus;
   readonly isContinuous: boolean;
-  readonly eventSource: 'WMI_TRACE' | 'CIM_EVENT' | 'POLLING_FALLBACK' | 'MOCK';
+  readonly eventSource: ProcessEventSourceType;
   readonly queueDepth: number;
   readonly processedEvents: number;
   readonly droppedEvents: number;

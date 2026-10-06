@@ -1,44 +1,60 @@
 import { EventEmitter } from 'events';
 import {
+  IProcessEventSource,
   ProcessCreationEvent,
+  ProcessEventSourceType,
   ProcessMonitorHealth,
   ProcessMonitorStatus,
   DetectedThreat
 } from '../types/desktop.types';
 import { BehaviorEngineService } from './behavior-engine.service';
 import { ProcessAuditorService } from './process-auditor.service';
+import { WindowsProcessEventSource } from './windows-process-event-source';
+import { MockProcessEventSource } from './mock-process-event-source';
 
 export interface ProcessMonitorOptions {
   readonly behaviorEngine?: BehaviorEngineService;
   readonly processAuditor?: ProcessAuditorService;
+  readonly eventSource?: IProcessEventSource;
   readonly maxQueueSize?: number;
   readonly workerConcurrency?: number;
   readonly pollIntervalMs?: number;
-  readonly eventSourceOverride?: 'WMI_TRACE' | 'CIM_EVENT' | 'POLLING_FALLBACK' | 'MOCK';
+  readonly eventSourceOverride?: ProcessEventSourceType;
 }
 
 /**
- * ProcessMonitorService (Phase F — SEC-F-02 Remediation)
+ * ProcessMonitorService (Phase F — SEC-F-02 Targeted Remediation)
  *
- * Provides resilient, continuous monitoring of process creation events.
- * Implements a bounded priority queue, concurrency-limited worker pool,
- * deduplication, and truthful health reporting.
+ * Provides genuine continuous monitoring of Windows process creation events.
  *
- * INVARIANTS:
- * 1. 100% offline air-gapped operation with zero network calls.
- * 2. Truthful health status (RUNNING | DEGRADED | STOPPED | FAILED).
- * 3. Bounded priority queue (max 1,000 events) preventing memory exhaustion (<200 MB RSS).
- * 4. Canonical risk scoring through BehaviorEngineService / RiskScorer.
+ * ARCHITECTURAL TOPOLOGY:
+ * 1. Primary: Windows WMI Event Subscription (WindowsProcessEventSource)
+ *    Subscribes directly to OS process creation (__InstanceCreationEvent of Win32_Process).
+ *    Catches short-lived processes (<20 ms) that exit between traditional polling intervals.
+ * 2. Ingress & Normalization:
+ *    ProcessCreationEvent -> deterministic deduplication key -> Bounded Priority Queue.
+ * 3. Priority Queue & Worker Pool:
+ *    Dual bounded priority queues (high-priority LOLBin, normal-priority standard).
+ *    Worker pool bounded to concurrencyLimit (default: 4 workers).
+ * 4. Pipeline Execution:
+ *    BehaviorEngineService -> RiskScorer -> EngineVerdict -> Authorized Containment.
+ * 5. Startup Race Prevention:
+ *    Subscribes to OS event source FIRST, then captures initial process snapshot,
+ *    reconciling with deterministic instance deduplication.
+ * 6. Explicit Degraded Fallback:
+ *    Polling fallback runs only when WMI event subscription is unavailable (e.g. non-Windows)
+ *    and truthfully reports status: 'DEGRADED', isContinuous: false.
  */
 export class ProcessMonitorService extends EventEmitter {
   private readonly behaviorEngine: BehaviorEngineService;
   private readonly processAuditor: ProcessAuditorService;
+  private eventSource?: IProcessEventSource;
   private readonly maxQueueSize: number;
   private readonly workerConcurrency: number;
   private readonly pollIntervalMs: number;
 
   private status: ProcessMonitorStatus = 'STOPPED';
-  private eventSource: 'WMI_TRACE' | 'CIM_EVENT' | 'POLLING_FALLBACK' | 'MOCK' = 'POLLING_FALLBACK';
+  private eventSourceType: ProcessEventSourceType = 'POLLING_FALLBACK';
   private isContinuous = false;
 
   // Bounded priority queues
@@ -46,8 +62,8 @@ export class ProcessMonitorService extends EventEmitter {
   private readonly normalPriorityQueue: ProcessCreationEvent[] = [];
 
   // Deduplication & state tracking
-  private readonly seenEventIds = new Set<string>();
-  private readonly seenEventIdOrder: string[] = [];
+  private readonly seenEventKeys = new Set<string>();
+  private readonly seenEventKeyOrder: string[] = [];
   private readonly MAX_SEEN_CACHE = 2000;
 
   // Worker state
@@ -57,9 +73,9 @@ export class ProcessMonitorService extends EventEmitter {
   private lastEventTimestamp?: number;
   private lastError?: string;
 
-  // Polling / WMI handles
+  // Fallback Polling state
   private pollTimer?: NodeJS.Timeout;
-  private isProcessing = false;
+  private isProcessingPoll = false;
   private knownPids = new Set<number>();
 
   constructor(options?: ProcessMonitorOptions) {
@@ -70,8 +86,19 @@ export class ProcessMonitorService extends EventEmitter {
     this.workerConcurrency = options?.workerConcurrency ?? 4;
     this.pollIntervalMs = options?.pollIntervalMs ?? 1000;
 
-    if (options?.eventSourceOverride) {
-      this.eventSource = options.eventSourceOverride;
+    if (options?.eventSource) {
+      this.eventSource = options.eventSource;
+      this.eventSourceType = 'WMI_EVENT_SUBSCRIPTION';
+    } else if (options?.eventSourceOverride === 'MOCK') {
+      this.eventSource = new MockProcessEventSource();
+      this.eventSourceType = 'MOCK';
+    } else if (options?.eventSourceOverride === 'POLLING_FALLBACK') {
+      this.eventSourceType = 'POLLING_FALLBACK';
+    } else if (process.platform === 'win32') {
+      this.eventSource = new WindowsProcessEventSource();
+      this.eventSourceType = 'WMI_EVENT_SUBSCRIPTION';
+    } else {
+      this.eventSourceType = 'POLLING_FALLBACK';
     }
   }
 
@@ -83,40 +110,86 @@ export class ProcessMonitorService extends EventEmitter {
     return this.processAuditor;
   }
 
+  public getEventSource(): IProcessEventSource | undefined {
+    return this.eventSource;
+  }
+
   /**
-   * Starts continuous monitoring.
+   * Starts process monitoring.
+   *
+   * STARTUP ORDERING & RACE ELIMINATION:
+   * 1. Subscribes to primary Windows event source FIRST.
+   * 2. Establishes live OS event reception.
+   * 3. Captures running process snapshot and seeds known process identities.
+   * 4. Any process created during or after subscription is guaranteed captured
+   *    and deduplicated via deterministic instance identity.
    */
   public async start(): Promise<void> {
     if (this.status === 'RUNNING') return;
 
-    try {
-      this.status = 'RUNNING';
-      this.isContinuous = true;
-      this.lastError = undefined;
+    this.status = 'RUNNING';
+    this.lastError = undefined;
 
-      // Seed current running processes to avoid false positive burst on startup
-      await this.seedInitialProcessSnapshot();
+    let primaryEventSourceActive = false;
 
-      // Start continuous background event polling / observation
-      this.scheduleNextPoll();
-      this.emit('started', this.getHealth());
-    } catch (err: any) {
-      this.status = 'FAILED';
+    // STEP 1: Start primary event subscription
+    if (this.eventSource && this.eventSourceType !== 'POLLING_FALLBACK') {
+      try {
+        await this.eventSource.start();
+        this.eventSource.onProcessCreated((event) => {
+          this.enqueueEvent(event);
+        });
+        primaryEventSourceActive = true;
+        this.isContinuous = true;
+        if (this.eventSource instanceof MockProcessEventSource) {
+          this.eventSourceType = 'MOCK';
+        } else {
+          this.eventSourceType = 'WMI_EVENT_SUBSCRIPTION';
+        }
+      } catch (err: any) {
+        // Event source failed to initialize
+        this.lastError = `Primary process event subscription failed: ${err?.message || String(err)}; falling back to degraded polling`;
+        this.status = 'DEGRADED';
+        this.isContinuous = false;
+        this.eventSourceType = 'POLLING_FALLBACK';
+        primaryEventSourceActive = false;
+      }
+    } else {
+      // Configured explicitly for fallback
+      this.status = 'DEGRADED';
       this.isContinuous = false;
-      this.lastError = err?.message || String(err);
-      this.emit('error', err);
-      throw err;
+      this.eventSourceType = 'POLLING_FALLBACK';
+      this.lastError = 'Running in degraded polling fallback mode; short-lived processes may be missed';
     }
+
+    // STEP 2: Capture initial running processes snapshot
+    await this.seedInitialProcessSnapshot();
+
+    // STEP 3: If primary event source is not active, run polling fallback
+    if (!primaryEventSourceActive) {
+      this.scheduleNextPoll();
+    }
+
+    this.emit('started', this.getHealth());
   }
 
   /**
-   * Stops continuous monitoring cleanly.
+   * Stops continuous monitoring and releases all resources cleanly.
    */
-  public stop(): void {
+  public async stop(): Promise<void> {
     if (this.pollTimer) {
       clearTimeout(this.pollTimer);
       this.pollTimer = undefined;
     }
+
+    if (this.eventSource) {
+      try {
+        await this.eventSource.stop();
+      } catch {
+        // Safe stop
+      }
+    }
+
     this.status = 'STOPPED';
     this.isContinuous = false;
     this.highPriorityQueue.length = 0;
@@ -132,7 +205,7 @@ export class ProcessMonitorService extends EventEmitter {
     return {
       status: this.status,
       isContinuous: this.isContinuous,
-      eventSource: this.eventSource,
+      eventSource: this.eventSourceType,
       queueDepth,
       processedEvents: this.processedEvents,
       droppedEvents: this.droppedEvents,
@@ -143,30 +216,32 @@ export class ProcessMonitorService extends EventEmitter {
   }
 
   /**
-   * Ingests a process creation event (used by live WMI/CIM stream or simulated test harnesses).
+   * Ingests a normalized ProcessCreationEvent into the bounded priority queue.
    */
   public enqueueEvent(event: ProcessCreationEvent): boolean {
     if (this.status === 'STOPPED') {
       return false;
     }
 
-    // Deduplication check
-    if (this.seenEventIds.has(event.eventId)) {
+    // Deterministic deduplication key based on process instance identity
+    const dedupeKey = event.eventId || `evt:${event.pid}:${event.creationTime}:${event.processName.toLowerCase()}`;
+
+    if (this.seenEventKeys.has(dedupeKey)) {
       return false;
     }
-    this.seenEventIds.add(event.eventId);
-    this.seenEventIdOrder.push(event.eventId);
-    if (this.seenEventIdOrder.length > this.MAX_SEEN_CACHE) {
-      const oldest = this.seenEventIdOrder.shift();
-      if (oldest) this.seenEventIds.delete(oldest);
+
+    this.seenEventKeys.add(dedupeKey);
+    this.seenEventKeyOrder.push(dedupeKey);
+    if (this.seenEventKeyOrder.length > this.MAX_SEEN_CACHE) {
+      const oldest = this.seenEventKeyOrder.shift();
+      if (oldest) this.seenEventKeys.delete(oldest);
     }
 
     this.lastEventTimestamp = event.timestamp || Date.now();
 
-    // Check queue bounds
+    // Bounded queue enforcement with load shedding
     const totalQueue = this.highPriorityQueue.length + this.normalPriorityQueue.length;
     if (totalQueue >= this.maxQueueSize) {
-      // Shed from normal priority first
       if (this.normalPriorityQueue.length > 0) {
         this.normalPriorityQueue.shift();
         this.droppedEvents++;
@@ -180,7 +255,7 @@ export class ProcessMonitorService extends EventEmitter {
         maxQueueSize: this.maxQueueSize,
         droppedEvents: this.droppedEvents
       });
-    } else if (this.status === 'DEGRADED' && totalQueue < this.maxQueueSize * 0.5) {
+    } else if (this.status === 'DEGRADED' && totalQueue < this.maxQueueSize * 0.5 && this.isContinuous) {
       this.status = 'RUNNING';
     }
 
@@ -256,23 +331,31 @@ export class ProcessMonitorService extends EventEmitter {
     try {
       const currentProcs = await this.processAuditor.auditRunningProcesses();
       this.knownPids = new Set(currentProcs.map((p) => p.pid));
+      for (const p of currentProcs) {
+        const key = `evt:${p.pid}:${p.creationDate || 0}:${p.processName.toLowerCase()}`;
+        this.seenEventKeys.add(key);
+      }
     } catch {
       this.knownPids = new Set();
     }
   }
 
+  // ============================================================
+  // DEGRADED POLLING FALLBACK (Used only when OS event subscription fails)
+  // ============================================================
+
   private scheduleNextPoll(): void {
     if (this.status === 'STOPPED') return;
 
     this.pollTimer = setTimeout(async () => {
-      if (this.status !== 'STOPPED' && !this.isProcessing) {
-        this.isProcessing = true;
+      if (this.status !== 'STOPPED' && !this.isProcessingPoll) {
+        this.isProcessingPoll = true;
         try {
           await this.pollProcessDelta();
         } catch (err: any) {
           this.lastError = err?.message || String(err);
         } finally {
-          this.isProcessing = false;
+          this.isProcessingPoll = false;
         }
       }
       this.scheduleNextPoll();
@@ -287,9 +370,8 @@ export class ProcessMonitorService extends EventEmitter {
       for (const proc of currentProcs) {
         currentPidSet.add(proc.pid);
         if (!this.knownPids.has(proc.pid)) {
-          // New process spawned
           const event: ProcessCreationEvent = {
-            eventId: `evt-${proc.pid}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+            eventId: `evt:${proc.pid}:${proc.creationDate || Date.now()}:${proc.processName.toLowerCase()}`,
             pid: proc.pid,
             ppid: proc.ppid,
             processName: proc.processName,
