@@ -58,7 +58,11 @@ export const IPC_CHANNELS = {
   EXCLUSION_ADD: 'desktop:exclusions:add',
   EXCLUSION_REMOVE: 'desktop:exclusions:remove',
   EXCLUSION_TOGGLE: 'desktop:exclusions:toggle',
-  EXCLUSIONS_CLEAR_ALL: 'desktop:exclusions:clearAll'
+  EXCLUSIONS_CLEAR_ALL: 'desktop:exclusions:clearAll',
+
+  // Phase J: Web & Download MOTW Protection
+  MOTW_ANALYZE_FILE: 'desktop:motw:analyzeFile',
+  WEB_PROTECTION_STATUS_GET: 'desktop:webProtection:statusGet'
 } as const;
 
 export type IpcChannel = typeof IPC_CHANNELS[keyof typeof IPC_CHANNELS];
@@ -112,7 +116,9 @@ export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.EXCLUSION_ADD,
   IPC_CHANNELS.EXCLUSION_REMOVE,
   IPC_CHANNELS.EXCLUSION_TOGGLE,
-  IPC_CHANNELS.EXCLUSIONS_CLEAR_ALL
+  IPC_CHANNELS.EXCLUSIONS_CLEAR_ALL,
+  IPC_CHANNELS.MOTW_ANALYZE_FILE,
+  IPC_CHANNELS.WEB_PROTECTION_STATUS_GET
 ] as const;
 
 

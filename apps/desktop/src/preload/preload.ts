@@ -17,7 +17,8 @@ import {
   DesktopNotification,
   NotificationInboxState,
   ExclusionItem,
-  CreateExclusionInput
+  CreateExclusionInput,
+  MotwAnalysisResult
 } from '../types/desktop.types';
 import { NetworkPostureReport } from '../services/network-monitor.service';
 
@@ -66,6 +67,15 @@ export interface DesktopSecurityApi {
   removeExclusion: (id: string) => Promise<boolean>;
   toggleExclusion: (id: string, enabled: boolean) => Promise<boolean>;
   clearAllExclusions: () => Promise<number>;
+
+  // Phase J: Web & Download MOTW API
+  analyzeMotw: (filePath: string) => Promise<MotwAnalysisResult>;
+  getWebProtectionStatus: () => Promise<{
+    enabled: boolean;
+    motwInspectionEnabled: boolean;
+    threatIntelRulesLoaded: number;
+    platform: string;
+  }>;
 }
 
 declare global {
@@ -204,7 +214,11 @@ export function createDesktopSecurityApi(ipcRenderer: {
     removeExclusion: (id) => ipcRenderer.invoke(IPC_CHANNELS.EXCLUSION_REMOVE, id),
     toggleExclusion: (id, enabled) =>
       ipcRenderer.invoke(IPC_CHANNELS.EXCLUSION_TOGGLE, id, enabled),
-    clearAllExclusions: () => ipcRenderer.invoke(IPC_CHANNELS.EXCLUSIONS_CLEAR_ALL)
+    clearAllExclusions: () => ipcRenderer.invoke(IPC_CHANNELS.EXCLUSIONS_CLEAR_ALL),
+
+    // Phase J: Web & Download MOTW API
+    analyzeMotw: (filePath) => ipcRenderer.invoke(IPC_CHANNELS.MOTW_ANALYZE_FILE, filePath),
+    getWebProtectionStatus: () => ipcRenderer.invoke(IPC_CHANNELS.WEB_PROTECTION_STATUS_GET)
   };
 }
 

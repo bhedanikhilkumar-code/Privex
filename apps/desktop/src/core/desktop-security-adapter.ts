@@ -13,8 +13,10 @@ import { FileAnalyzer } from './file-analyzer';
 import {
   FileAnalysisResult,
   DetectedThreat,
-  DesktopAssistantExplanation
+  DesktopAssistantExplanation,
+  MotwAnalysisResult
 } from '../types/desktop.types';
+import { MotwAnalyzer } from './motw-analyzer';
 
 export class DesktopSecurityAdapter {
   private pipeline: DetectionPipeline;
@@ -32,9 +34,16 @@ export class DesktopSecurityAdapter {
    */
   public async analyzeFile(
     filePath: string,
-    options?: { entropyDetectionEnabled?: boolean }
+    options?: { entropyDetectionEnabled?: boolean; inspectMotw?: boolean }
   ): Promise<FileAnalysisResult> {
     return FileAnalyzer.analyzeFile(filePath, options);
+  }
+
+  /**
+   * Performs Mark-of-the-Web (MOTW) NTFS ADS inspection on a file.
+   */
+  public analyzeMotw(filePath: string): MotwAnalysisResult {
+    return MotwAnalyzer.analyzeFile(filePath);
   }
 
   /**

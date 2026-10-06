@@ -56,6 +56,7 @@ export interface DetectedThreat {
   detectedAt: number;
   evidenceFactors: string[];
   quarantined: boolean;
+  motw?: MotwAnalysisResult;
 }
 
 export type RealtimeThreatAction = 'AUTO_QUARANTINED' | 'ALERTED';
@@ -148,6 +149,7 @@ export interface FileAnalysisResult {
   analysisStatus?: AnalysisStatus;
   disposition?: DetectionDisposition;
   errorReason?: string;
+  motw?: MotwAnalysisResult;
 }
 
 export interface ProcessContainmentAuthorization {
@@ -701,3 +703,49 @@ export interface ExclusionCheckContext {
   readonly threatName?: string;
   readonly now?: number;
 }
+
+// ============================================================
+// PHASE J: WEB & DOWNLOAD MARK-OF-THE-WEB (MOTW) PROTECTION TYPES
+// ============================================================
+
+export type MotwZoneId = 0 | 1 | 2 | 3 | 4 | -1;
+
+export type MotwZoneName =
+  | 'LOCAL_MACHINE'
+  | 'INTRANET'
+  | 'TRUSTED'
+  | 'INTERNET'
+  | 'RESTRICTED'
+  | 'UNKNOWN';
+
+export interface MotwMetadata {
+  readonly hasMotw: boolean;
+  readonly zoneId?: number;
+  readonly zoneName?: MotwZoneName;
+  readonly hostUrl?: string;
+  readonly referrerUrl?: string;
+  readonly hostIpAddress?: string;
+  readonly rawAdsContent?: string;
+}
+
+export interface MotwUrlAnalysis {
+  readonly url: string;
+  readonly riskScore: number;
+  readonly indicators: string[];
+  readonly isMalicious: boolean;
+  readonly threatName?: string;
+  readonly host?: string;
+}
+
+export interface MotwAnalysisResult {
+  readonly hasMotw: boolean;
+  readonly metadata: MotwMetadata;
+  readonly originRiskScore: number;
+  readonly originSeverity: 'safe' | 'low' | 'suspicious' | 'dangerous' | 'critical';
+  readonly isOriginMalicious: boolean;
+  readonly threatIndicators: string[];
+  readonly evidenceFactors: string[];
+  readonly hostUrlAnalysis?: MotwUrlAnalysis;
+  readonly referrerUrlAnalysis?: MotwUrlAnalysis;
+}
+

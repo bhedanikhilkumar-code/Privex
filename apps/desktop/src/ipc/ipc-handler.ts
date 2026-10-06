@@ -18,6 +18,8 @@ import { RansomwareShieldService } from '../services/ransomware-shield.service';
 import { NotificationService } from '../services/notification.service';
 import { ExclusionManagerService } from '../services/exclusion-manager.service';
 import { DesktopSecurityAdapter } from '../core/desktop-security-adapter';
+import { MotwAnalyzer } from '../core/motw-analyzer';
+import { ThreatIntel } from '@private-protection/core';
 import {
   DesktopProtectionStatus,
   DesktopSettings,
@@ -34,7 +36,8 @@ import {
   CanaryFileRecord,
   DesktopNotification,
   NotificationInboxState,
-  ExclusionItem
+  ExclusionItem,
+  MotwAnalysisResult
 } from '../types/desktop.types';
 
 
@@ -860,6 +863,17 @@ export class IpcHandler {
       verifyOrigin(event);
       return this.handleClearAllExclusions();
     });
+
+    // Phase J: Web & Download MOTW Handlers
+    ipcMain.handle(IPC_CHANNELS.MOTW_ANALYZE_FILE, (event, filePath: unknown) => {
+      verifyOrigin(event);
+      return this.handleMotwAnalyzeFile(filePath);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.WEB_PROTECTION_STATUS_GET, (event) => {
+      verifyOrigin(event);
+      return this.handleGetWebProtectionStatus();
+    });
   }
 
   // ============================================================
@@ -952,6 +966,29 @@ export class IpcHandler {
 
   public getExclusionManager(): ExclusionManagerService {
     return this.exclusionManager;
+  }
+
+  // ============================================================
+  // PHASE J WEB & MOTW HANDLERS
+  // ============================================================
+
+  public handleMotwAnalyzeFile(filePath: unknown): MotwAnalysisResult {
+    const validPath = IpcValidator.validatePath(filePath);
+    return MotwAnalyzer.analyzeFile(validPath);
+  }
+
+  public handleGetWebProtectionStatus(): {
+    enabled: boolean;
+    motwInspectionEnabled: boolean;
+    threatIntelRulesLoaded: number;
+    platform: string;
+  } {
+    return {
+      enabled: true,
+      motwInspectionEnabled: true,
+      threatIntelRulesLoaded: ThreatIntel.getSharedInstance().snapshot().badCount,
+      platform: process.platform
+    };
   }
 }
 

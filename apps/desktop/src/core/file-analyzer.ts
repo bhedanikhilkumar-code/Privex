@@ -2,10 +2,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import { CoreFileAnalyzer, CleanFileCache, ThreatIntel, Verdict, EngineVerdict } from '@private-protection/core';
-import { FileAnalysisResult } from '../types/desktop.types';
+import { FileAnalysisResult, MotwAnalysisResult } from '../types/desktop.types';
+import { MotwAnalyzer } from './motw-analyzer';
 
 export interface DesktopFileAnalyzeOptions {
   readonly entropyDetectionEnabled?: boolean;
+  readonly inspectMotw?: boolean;
 }
 
 /**
@@ -180,7 +182,69 @@ export class FileAnalyzer {
       }
     );
 
-    if (coreOut.desktopVerdict === 'ALLOW' && coreOut.riskScore === 0) {
+    // Phase J: Mark-of-the-Web (Zone.Identifier) & Download Origin Security Inspection
+    let motwResult: MotwAnalysisResult | undefined;
+    let finalRiskScore = coreOut.riskScore;
+    let finalSeverity = coreOut.desktopSeverity;
+    let finalVerdict = coreOut.desktopVerdict;
+    let finalThreatName = coreOut.threatName;
+    const finalEvidenceFactors = [...coreOut.evidenceFactors];
+
+    if (options?.inspectMotw !== false) {
+      motwResult = MotwAnalyzer.analyzeFile(filePath);
+      if (motwResult.hasMotw) {
+        finalEvidenceFactors.push(...motwResult.evidenceFactors);
+
+        if (motwResult.originRiskScore > 0) {
+          // Check whether the file has binary/executable characteristics
+          const isExec =
+            coreOut.isExecutable ||
+            coreOut.isDeceptiveExtension ||
+            CoreFileAnalyzer.EXECUTABLE_EXTENSIONS.has(path.extname(filePath).toLowerCase()) ||
+            coreOut.magicHeader === 'PE/MZ_EXECUTABLE' ||
+            coreOut.magicHeader === 'ELF_EXECUTABLE' ||
+            coreOut.magicHeader === 'MACHO_EXECUTABLE' ||
+            coreOut.magicHeader === 'SCRIPT_EXECUTABLE';
+
+          if (isExec) {
+            // High correlation: Downloaded executable from suspicious/malicious origin (+35 to +85)
+            finalRiskScore = Math.min(
+              100,
+              Math.max(coreOut.riskScore + motwResult.originRiskScore, motwResult.originRiskScore)
+            );
+          } else {
+            // Downloaded document/other file from suspicious origin
+            finalRiskScore = Math.min(
+              100,
+              coreOut.riskScore + Math.floor(motwResult.originRiskScore * 0.7)
+            );
+          }
+
+          if (finalRiskScore >= 90 || motwResult.originRiskScore >= 85) {
+            finalVerdict = 'BLOCK';
+            finalSeverity = 'critical';
+            if (finalThreatName === 'BENIGN_FILE' || finalThreatName === 'UNKNOWN') {
+              finalThreatName = 'MALICIOUS_DOWNLOAD_ORIGIN';
+            }
+          } else if (finalRiskScore >= 70 || motwResult.originRiskScore >= 70) {
+            if (finalVerdict !== 'BLOCK') {
+              finalVerdict = 'WARN';
+              finalSeverity = 'dangerous';
+            }
+            if (finalThreatName === 'BENIGN_FILE' || finalThreatName === 'UNKNOWN') {
+              finalThreatName = 'SUSPICIOUS_DOWNLOAD_ORIGIN';
+            }
+          } else if (finalRiskScore >= 40) {
+            if (finalVerdict === 'ALLOW') {
+              finalVerdict = 'WARN';
+              finalSeverity = 'suspicious';
+            }
+          }
+        }
+      }
+    }
+
+    if (finalVerdict === 'ALLOW' && finalRiskScore === 0) {
       CleanFileCache.getSharedInstance().set(
         filePath,
         stat.size,
@@ -203,13 +267,14 @@ export class FileAnalyzer {
       magicHeader: coreOut.magicHeader,
       isExecutable: coreOut.isExecutable,
       isDeceptiveExtension: coreOut.isDeceptiveExtension,
-      riskScore: coreOut.riskScore,
-      severity: coreOut.desktopSeverity,
-      verdict: coreOut.desktopVerdict,
-      threatName: coreOut.threatName,
-      evidenceFactors: coreOut.evidenceFactors,
+      riskScore: finalRiskScore,
+      severity: finalSeverity,
+      verdict: finalVerdict,
+      threatName: finalThreatName,
+      evidenceFactors: finalEvidenceFactors,
       analysisStatus: coreOut.analysisStatus,
       disposition: coreOut.disposition,
+      ...(motwResult ? { motw: motwResult } : {}),
       ...(coreOut.errorReason ? { errorReason: coreOut.errorReason } : {})
     };
   }
