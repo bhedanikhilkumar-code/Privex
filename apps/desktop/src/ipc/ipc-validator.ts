@@ -372,5 +372,92 @@ export class IpcValidator {
     }
     return value;
   }
+
+  // ============================================================
+  // PHASE I: EXCLUSION VALIDATORS
+  // ============================================================
+
+  /**
+   * Validates an exclusion ID string.
+   */
+  public static validateExclusionId(value: unknown): string {
+    if (typeof value !== 'string') {
+      throw new Error('INVALID_EXCLUSION_ID: Expected non-empty string for exclusion ID.');
+    }
+    const trimmed = value.trim();
+    if (!trimmed || trimmed.length > 128) {
+      throw new Error('INVALID_EXCLUSION_ID: Exclusion ID length must be between 1 and 128 characters.');
+    }
+    if (/[|&;$`><\r\n\0]/.test(trimmed) || trimmed.includes('..') || trimmed.includes('/') || trimmed.includes('\\')) {
+      throw new Error('SECURITY_VIOLATION: Exclusion ID contains forbidden characters or path traversal.');
+    }
+    return trimmed;
+  }
+
+  /**
+   * Validates create exclusion payload.
+   */
+  public static validateExclusionInput(input: unknown): {
+    type: 'HASH' | 'PATH' | 'DOMAIN';
+    value: string;
+    ttl?: '24h' | '7d' | '30d' | 'permanent' | number;
+    reason?: string;
+    frictionToken?: string;
+  } {
+    if (!input || typeof input !== 'object') {
+      throw new Error('INVALID_EXCLUSION_PAYLOAD: Expected object payload for exclusion.');
+    }
+    const obj = input as Record<string, unknown>;
+
+    if (obj.type !== 'HASH' && obj.type !== 'PATH' && obj.type !== 'DOMAIN') {
+      throw new Error('INVALID_EXCLUSION_TYPE: Exclusion type must be HASH, PATH, or DOMAIN.');
+    }
+
+    if (typeof obj.value !== 'string' || !obj.value.trim()) {
+      throw new Error('INVALID_EXCLUSION_VALUE: Exclusion value must be a non-empty string.');
+    }
+
+    let ttl: '24h' | '7d' | '30d' | 'permanent' | number | undefined;
+    if (obj.ttl !== undefined && obj.ttl !== null) {
+      if (obj.ttl === '24h' || obj.ttl === '7d' || obj.ttl === '30d' || obj.ttl === 'permanent') {
+        ttl = obj.ttl;
+      } else if (typeof obj.ttl === 'number' && Number.isFinite(obj.ttl) && obj.ttl > 0) {
+        ttl = obj.ttl;
+      } else {
+        throw new Error('INVALID_EXCLUSION_TTL: TTL must be 24h, 7d, 30d, permanent, or positive integer ms.');
+      }
+    }
+
+    let reason: string | undefined;
+    if (obj.reason !== undefined && obj.reason !== null) {
+      if (typeof obj.reason !== 'string') {
+        throw new Error('INVALID_EXCLUSION_REASON: Reason must be a string.');
+      }
+      reason = obj.reason.slice(0, 255);
+    }
+
+    let frictionToken: string | undefined;
+    if (obj.frictionToken !== undefined && obj.frictionToken !== null) {
+      if (typeof obj.frictionToken !== 'string') {
+        throw new Error('INVALID_FRICTION_TOKEN: Expected string friction token.');
+      }
+      frictionToken = obj.frictionToken.trim();
+    }
+
+    return {
+      type: obj.type,
+      value: obj.value.trim(),
+      ttl,
+      reason,
+      frictionToken
+    };
+  }
+
+  public static validateFrictionToken(token: unknown): string {
+    if (typeof token !== 'string' || !token.trim()) {
+      throw new Error('INVALID_FRICTION_TOKEN: Friction token must be a non-empty string.');
+    }
+    return token.trim();
+  }
 }
 

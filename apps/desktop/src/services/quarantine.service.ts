@@ -5,6 +5,7 @@ import * as os from 'os';
 import { QuarantineItem, DetectedThreat, QuarantineRestoreOptions } from '../types/desktop.types';
 import { IpcValidator } from '../ipc/ipc-validator';
 import { ThreatIntel, CleanFileCache, Verdict, EngineVerdict } from '@private-protection/core';
+import { ExclusionManagerService } from './exclusion-manager.service';
 
 /**
  * QuarantineService (PPVAULT2 Hardened)
@@ -21,6 +22,7 @@ export class QuarantineService {
   private manifest: Map<string, QuarantineItem> = new Map();
   private vaultKey: Buffer;
   private activeItemOperations: Set<string> = new Set();
+  private exclusionManager: ExclusionManagerService | null = null;
 
   // Header magic constants
   public static readonly CONTAINER_MAGIC_V1 = Buffer.from('PPVAULT1', 'utf8'); // 8 bytes legacy
@@ -31,14 +33,19 @@ export class QuarantineService {
   public static readonly CHUNK_SIZE = 64 * 1024; // 64 KB (65,536 bytes)
   public static readonly UUID_LENGTH = 36;       // 36 characters ASCII
 
-  constructor(customVaultDir?: string) {
+  constructor(customVaultDir?: string, exclusionManager?: ExclusionManagerService | null) {
     this.vaultDir = path.resolve(
       customVaultDir || path.join(os.homedir(), '.private-protection', 'quarantine')
     );
+    this.exclusionManager = exclusionManager || null;
     this.manifestPath = path.join(this.vaultDir, 'manifest.json.enc');
     this.ensureSafeVaultDir();
     this.vaultKey = this.initVaultKey();
     this.initVault();
+  }
+
+  public setExclusionManager(manager: ExclusionManagerService | null): void {
+    this.exclusionManager = manager;
   }
 
   private ensureSafeVaultDir(): void {
@@ -1263,6 +1270,17 @@ export class QuarantineService {
     // Restore & Trust SHA-256 workflow
     if (options.trustSha256 === true) {
       ThreatIntel.getSharedInstance().addAllowedHash(item.sha256, { allowCriticalOverride: true });
+      if (this.exclusionManager) {
+        try {
+          this.exclusionManager.addRestoreAndTrustExclusion(
+            item.sha256,
+            destinationPath,
+            item.sha256
+          );
+        } catch {
+          // Best-effort exclusion persistence
+        }
+      }
       try {
         const restoredStat = fs.statSync(destinationPath);
         CleanFileCache.getSharedInstance().set(

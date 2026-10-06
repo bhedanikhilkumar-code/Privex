@@ -51,7 +51,14 @@ export const IPC_CHANNELS = {
   NOTIFICATIONS_MARK_READ: 'desktop:notifications:markRead',
   NOTIFICATIONS_MARK_ALL_READ: 'desktop:notifications:markAllRead',
   NOTIFICATIONS_CLEAR_ALL: 'desktop:notifications:clearAll',
-  NOTIFICATION_EVENT: 'desktop:notifications:event'
+  NOTIFICATION_EVENT: 'desktop:notifications:event',
+
+  // Phase I: Automatic Response Ladder & False-Positive Exclusions
+  EXCLUSIONS_GET: 'desktop:exclusions:get',
+  EXCLUSION_ADD: 'desktop:exclusions:add',
+  EXCLUSION_REMOVE: 'desktop:exclusions:remove',
+  EXCLUSION_TOGGLE: 'desktop:exclusions:toggle',
+  EXCLUSIONS_CLEAR_ALL: 'desktop:exclusions:clearAll'
 } as const;
 
 export type IpcChannel = typeof IPC_CHANNELS[keyof typeof IPC_CHANNELS];
@@ -100,7 +107,12 @@ export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.NOTIFICATIONS_INBOX_STATE_GET,
   IPC_CHANNELS.NOTIFICATIONS_MARK_READ,
   IPC_CHANNELS.NOTIFICATIONS_MARK_ALL_READ,
-  IPC_CHANNELS.NOTIFICATIONS_CLEAR_ALL
+  IPC_CHANNELS.NOTIFICATIONS_CLEAR_ALL,
+  IPC_CHANNELS.EXCLUSIONS_GET,
+  IPC_CHANNELS.EXCLUSION_ADD,
+  IPC_CHANNELS.EXCLUSION_REMOVE,
+  IPC_CHANNELS.EXCLUSION_TOGGLE,
+  IPC_CHANNELS.EXCLUSIONS_CLEAR_ALL
 ] as const;
 
 

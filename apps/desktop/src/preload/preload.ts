@@ -15,7 +15,9 @@ import {
   ContainProcessOptions,
   ProcessMonitorHealth,
   DesktopNotification,
-  NotificationInboxState
+  NotificationInboxState,
+  ExclusionItem,
+  CreateExclusionInput
 } from '../types/desktop.types';
 import { NetworkPostureReport } from '../services/network-monitor.service';
 
@@ -57,6 +59,13 @@ export interface DesktopSecurityApi {
   markAllNotificationsRead: () => Promise<number>;
   clearAllNotifications: () => Promise<void>;
   onNotificationEvent: (callback: (notification: DesktopNotification) => void) => () => void;
+
+  // Phase I: Exclusion API
+  getExclusions: () => Promise<ExclusionItem[]>;
+  addExclusion: (input: CreateExclusionInput, frictionToken?: string) => Promise<ExclusionItem>;
+  removeExclusion: (id: string) => Promise<boolean>;
+  toggleExclusion: (id: string, enabled: boolean) => Promise<boolean>;
+  clearAllExclusions: () => Promise<number>;
 }
 
 declare global {
@@ -186,7 +195,16 @@ export function createDesktopSecurityApi(ipcRenderer: {
       };
       ipcRenderer.on(IPC_CHANNELS.NOTIFICATION_EVENT, handler);
       return () => ipcRenderer.removeListener(IPC_CHANNELS.NOTIFICATION_EVENT, handler);
-    }
+    },
+
+    // Phase I: Exclusion API
+    getExclusions: () => ipcRenderer.invoke(IPC_CHANNELS.EXCLUSIONS_GET),
+    addExclusion: (input, frictionToken) =>
+      ipcRenderer.invoke(IPC_CHANNELS.EXCLUSION_ADD, input, frictionToken),
+    removeExclusion: (id) => ipcRenderer.invoke(IPC_CHANNELS.EXCLUSION_REMOVE, id),
+    toggleExclusion: (id, enabled) =>
+      ipcRenderer.invoke(IPC_CHANNELS.EXCLUSION_TOGGLE, id, enabled),
+    clearAllExclusions: () => ipcRenderer.invoke(IPC_CHANNELS.EXCLUSIONS_CLEAR_ALL)
   };
 }
 

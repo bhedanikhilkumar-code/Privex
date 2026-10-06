@@ -16,6 +16,7 @@ import { SecureStorageService } from '../services/secure-storage.service';
 import { ShadowVaultService } from '../services/shadow-vault.service';
 import { RansomwareShieldService } from '../services/ransomware-shield.service';
 import { NotificationService } from '../services/notification.service';
+import { ExclusionManagerService } from '../services/exclusion-manager.service';
 import { DesktopSecurityAdapter } from '../core/desktop-security-adapter';
 import {
   DesktopProtectionStatus,
@@ -32,7 +33,8 @@ import {
   IncidentRollbackResult,
   CanaryFileRecord,
   DesktopNotification,
-  NotificationInboxState
+  NotificationInboxState,
+  ExclusionItem
 } from '../types/desktop.types';
 
 
@@ -58,6 +60,7 @@ export class IpcHandler {
   private shadowVault: ShadowVaultService;
   private ransomwareShield: RansomwareShieldService;
   private notificationService: NotificationService;
+  private exclusionManager: ExclusionManagerService;
   private adapter: DesktopSecurityAdapter;
   private downloadsDir: string;
   private tempDir: string;
@@ -67,8 +70,15 @@ export class IpcHandler {
   constructor(options?: IpcHandlerOptions) {
     this.scanner = new ScannerService();
     this.quickScanner = new QuickScanService(this.scanner);
-    this.quarantine = new QuarantineService(options?.vaultDir);
-    this.realtimeMonitor = new RealtimeMonitorService(undefined, this.quarantine);
+    this.exclusionManager = new ExclusionManagerService(
+      options?.configDir ? { configDir: options.configDir } : undefined
+    );
+    this.quarantine = new QuarantineService(options?.vaultDir, this.exclusionManager);
+    this.realtimeMonitor = new RealtimeMonitorService(
+      undefined,
+      this.quarantine,
+      this.exclusionManager
+    );
     this.processAuditor = new ProcessAuditorService();
     this.processMonitor = new ProcessMonitorService({
       processAuditor: this.processAuditor,
@@ -824,6 +834,32 @@ export class IpcHandler {
       verifyOrigin(event);
       return this.handleClearAllNotifications();
     });
+
+    // Phase I: False-Positive Exclusion Handlers
+    ipcMain.handle(IPC_CHANNELS.EXCLUSIONS_GET, (event) => {
+      verifyOrigin(event);
+      return this.handleGetExclusions();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.EXCLUSION_ADD, (event, input: unknown, frictionToken?: unknown) => {
+      verifyOrigin(event);
+      return this.handleAddExclusion(input, frictionToken);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.EXCLUSION_REMOVE, (event, id: unknown) => {
+      verifyOrigin(event);
+      return this.handleRemoveExclusion(id);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.EXCLUSION_TOGGLE, (event, id: unknown, enabled: unknown) => {
+      verifyOrigin(event);
+      return this.handleToggleExclusion(id, enabled);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.EXCLUSIONS_CLEAR_ALL, (event) => {
+      verifyOrigin(event);
+      return this.handleClearAllExclusions();
+    });
   }
 
   // ============================================================
@@ -850,6 +886,72 @@ export class IpcHandler {
 
   public handleClearAllNotifications(): void {
     this.notificationService.clearAll();
+  }
+
+  // ============================================================
+  // PHASE I EXCLUSION HANDLERS
+  // ============================================================
+
+  public handleGetExclusions(): ExclusionItem[] {
+    return this.exclusionManager.getExclusions();
+  }
+
+  public handleAddExclusion(input: unknown, frictionToken?: unknown): ExclusionItem {
+    const validatedInput = IpcValidator.validateExclusionInput(input);
+    const validatedToken =
+      frictionToken !== undefined ? IpcValidator.validateFrictionToken(frictionToken) : undefined;
+    const item = this.exclusionManager.addExclusion(validatedInput, validatedToken);
+    this.storage.recordSecurityEvent(
+      'EXCLUSION_ADDED',
+      'INFO',
+      `Exclusion added: ${item.type} = ${item.value}`,
+      { exclusionId: item.id, type: item.type, value: item.value }
+    );
+    return item;
+  }
+
+  public handleRemoveExclusion(id: unknown): boolean {
+    const validId = IpcValidator.validateExclusionId(id);
+    const removed = this.exclusionManager.removeExclusion(validId);
+    if (removed) {
+      this.storage.recordSecurityEvent(
+        'EXCLUSION_REMOVED',
+        'INFO',
+        `Exclusion removed: ${validId}`,
+        { exclusionId: validId }
+      );
+    }
+    return removed;
+  }
+
+  public handleToggleExclusion(id: unknown, enabled: unknown): boolean {
+    const validId = IpcValidator.validateExclusionId(id);
+    const validEnabled = Boolean(enabled);
+    const updated = this.exclusionManager.toggleExclusion(validId, validEnabled);
+    if (updated) {
+      this.storage.recordSecurityEvent(
+        'EXCLUSION_TOGGLED',
+        'INFO',
+        `Exclusion ${validId} enabled state set to ${validEnabled}`,
+        { exclusionId: validId, enabled: validEnabled }
+      );
+    }
+    return updated !== null;
+  }
+
+  public handleClearAllExclusions(): number {
+    const clearedCount = this.exclusionManager.clearAll();
+    this.storage.recordSecurityEvent(
+      'EXCLUSION_CLEARED',
+      'INFO',
+      `Cleared all exclusions (${clearedCount} items)`,
+      { count: clearedCount }
+    );
+    return clearedCount;
+  }
+
+  public getExclusionManager(): ExclusionManagerService {
+    return this.exclusionManager;
   }
 }
 

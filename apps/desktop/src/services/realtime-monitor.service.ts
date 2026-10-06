@@ -11,6 +11,8 @@ import {
   PendingDownload
 } from '../types/desktop.types';
 import { QuarantineService } from './quarantine.service';
+import { ExclusionManagerService } from './exclusion-manager.service';
+import { ResponsePolicyEngine } from './response-policy-engine';
 
 interface QueueItem {
   readonly filePath: string;
@@ -26,6 +28,7 @@ export class RealtimeMonitorService extends EventEmitter {
   private recentEvaluations: Map<string, number> = new Map();
   private options: Required<RealtimeMonitorOptions>;
   private quarantineService: QuarantineService | null = null;
+  private exclusionManager: ExclusionManagerService | null = null;
   private currentExcludedVaultDir: string | null = null;
 
   // Incomplete / In-progress download tracking (.crdownload, .part, etc.)
@@ -77,9 +80,14 @@ export class RealtimeMonitorService extends EventEmitter {
     '.pif'
   ]);
 
-  constructor(options?: RealtimeMonitorOptions, quarantineService?: QuarantineService | null) {
+  constructor(
+    options?: RealtimeMonitorOptions,
+    quarantineService?: QuarantineService | null,
+    exclusionManager?: ExclusionManagerService | null
+  ) {
     super();
     this.quarantineService = quarantineService || null;
+    this.exclusionManager = exclusionManager || null;
 
     this.options = {
       recursive: options?.recursive ?? (process.platform === 'win32'),
@@ -98,6 +106,14 @@ export class RealtimeMonitorService extends EventEmitter {
     if (quarantineService) {
       this.setQuarantineService(quarantineService);
     }
+  }
+
+  public setExclusionManager(manager: ExclusionManagerService | null): void {
+    this.exclusionManager = manager;
+  }
+
+  public getExclusionManager(): ExclusionManagerService | null {
+    return this.exclusionManager;
   }
 
   // ============================================================
@@ -233,6 +249,14 @@ export class RealtimeMonitorService extends EventEmitter {
 
   public isPathExcluded(filePath: string): boolean {
     if (!filePath || typeof filePath !== 'string') return false;
+    if (this.exclusionManager) {
+      try {
+        const check = this.exclusionManager.checkPath(filePath);
+        if (check.isExcluded) return true;
+      } catch {
+        // Fallback to static path exclusion list
+      }
+    }
     const canonical = path.resolve(filePath);
     for (const rawExcluded of this.options.excludedPaths) {
       if (!rawExcluded) continue;
@@ -689,6 +713,33 @@ export class RealtimeMonitorService extends EventEmitter {
       });
 
       if (analysis.verdict === 'BLOCK' || analysis.verdict === 'WARN') {
+        // Phase I: Evaluate Response Policy Engine
+        const responseEval = ResponsePolicyEngine.evaluate({
+          riskScore: analysis.riskScore,
+          severity: analysis.severity,
+          verdict: analysis.verdict,
+          confidence: 1.0,
+          isProtectedSystemBinary: false
+        });
+
+        // Phase I: Check Exclusion Manager for SHA-256 exclusion
+        if (this.exclusionManager) {
+          const hashCheck = this.exclusionManager.checkHash(analysis.sha256, {
+            isRansomware: responseEval.tier === 'RANSOMWARE_BEHAVIOR',
+            riskScore: analysis.riskScore,
+            verdict: analysis.verdict
+          });
+          if (hashCheck.isExcluded) {
+            this.emit('fileExcluded', {
+              filePath: canonicalPath,
+              sha256: analysis.sha256,
+              reason: hashCheck.reason,
+              exclusionId: hashCheck.matchedExclusion?.id
+            });
+            return;
+          }
+        }
+
         const threat: DetectedThreat = {
           id: `rt-threat-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
           filePath: analysis.filePath,
@@ -704,11 +755,14 @@ export class RealtimeMonitorService extends EventEmitter {
           quarantined: false
         };
 
-        // Automatic quarantine execution if enabled and critical
+        // Automatic quarantine execution if enabled and policy/verdict warrants isolation
         if (
           this.options.autoQuarantineCritical &&
           this.quarantineService &&
-          analysis.verdict === 'BLOCK'
+          (analysis.verdict === 'BLOCK' ||
+            responseEval.autoQuarantine ||
+            responseEval.tier === 'CRITICAL' ||
+            responseEval.tier === 'RANSOMWARE_BEHAVIOR')
         ) {
           try {
             const qItem = await this.quarantineService.isolateFile(threat);

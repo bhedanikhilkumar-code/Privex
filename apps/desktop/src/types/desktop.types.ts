@@ -27,6 +27,11 @@ export type SecurityLogEventType =
   | 'ENGINE_FAILURE'
   | 'CONFIG_FAILURE'
   | 'CONFIG_UPDATED'
+  | 'EXCLUSION_ADDED'
+  | 'EXCLUSION_REMOVED'
+  | 'EXCLUSION_TOGGLED'
+  | 'EXCLUSION_CLEARED'
+  | 'EXCLUSION_REJECTED'
   | 'SECURITY_VIOLATION';
 
 export interface SecurityLogEntry {
@@ -602,12 +607,97 @@ export interface NotificationServiceOptions {
   readonly trayUpdater?: (unreadCount: number, latestThreatTitle?: string) => void;
   readonly storageDir?: string;
 }
-
 export interface NotificationInboxState {
   readonly notifications: DesktopNotification[];
   readonly unreadCount: number;
   readonly totalCount: number;
 }
 
+// ============================================================
+// PHASE I: AUTOMATIC RESPONSE LADDER & EXCLUSIONS TYPES
+// ============================================================
 
+export type ResponseTier =
+  | 'LOW'
+  | 'MEDIUM'
+  | 'HIGH'
+  | 'CRITICAL'
+  | 'RANSOMWARE_BEHAVIOR';
 
+export type ResponseAction =
+  | 'LOG_ONLY'
+  | 'WARN_USER'
+  | 'HOLD_QUARANTINE'
+  | 'AUTO_QUARANTINE'
+  | 'CONTAIN_AND_ROLLBACK';
+
+export interface ResponseEvaluationInput {
+  readonly riskScore: number;
+  readonly severity: ThreatSeverity;
+  readonly verdict: ThreatVerdict | DetectionDisposition;
+  readonly confidence?: 'low' | 'medium' | 'high' | number;
+  readonly isProtectedSystemBinary?: boolean;
+  readonly isRansomwareIncident?: boolean;
+  readonly isCanaryTamper?: boolean;
+  readonly threatName?: string;
+  readonly evidenceFactors?: readonly string[];
+  readonly isExcluded?: boolean;
+  readonly exclusionReason?: string;
+}
+
+export interface ResponseEvaluationResult {
+  readonly tier: ResponseTier;
+  readonly action: ResponseAction;
+  readonly reason: string;
+  readonly requiresConfirmation: boolean;
+  readonly autoQuarantine: boolean;
+  readonly containProcess: boolean;
+  readonly promptRollback: boolean;
+  readonly isProtectedSystemBinary: boolean;
+  readonly isExcluded: boolean;
+  readonly exclusionId?: string;
+  readonly effectiveScore: number;
+  readonly effectiveVerdict: ThreatVerdict | DetectionDisposition;
+}
+
+export type ExclusionType = 'HASH' | 'PATH' | 'DOMAIN';
+
+export type ExclusionTtl = '24h' | '7d' | '30d' | 'permanent';
+
+export interface ExclusionItem {
+  readonly id: string;
+  readonly type: ExclusionType;
+  readonly value: string;
+  readonly canonicalValue: string;
+  readonly createdAt: number;
+  readonly expiresAt?: number;
+  readonly reason?: string;
+  readonly enabled: boolean;
+  readonly createdBy: 'USER' | 'RESTORE_AND_TRUST' | 'SYSTEM';
+  readonly metadata?: Record<string, string | number | boolean>;
+}
+
+export interface CreateExclusionInput {
+  readonly type: ExclusionType;
+  readonly value: string;
+  readonly ttl?: ExclusionTtl | number;
+  readonly reason?: string;
+  readonly frictionToken?: string;
+  readonly createdBy?: 'USER' | 'RESTORE_AND_TRUST' | 'SYSTEM';
+  readonly metadata?: Record<string, string | number | boolean>;
+}
+
+export interface ExclusionCheckResult {
+  readonly isExcluded: boolean;
+  readonly matchedExclusion?: ExclusionItem;
+  readonly reason?: string;
+}
+
+export interface ExclusionCheckContext {
+  readonly isRansomware?: boolean;
+  readonly isProtectedSystemBinary?: boolean;
+  readonly verdict?: ThreatVerdict | DetectionDisposition;
+  readonly riskScore?: number;
+  readonly threatName?: string;
+  readonly now?: number;
+}
