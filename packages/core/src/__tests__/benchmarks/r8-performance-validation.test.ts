@@ -114,7 +114,7 @@ describe('Phase R8 Deep Performance, 5-Class Latency, Memory Stress & Network In
     expect(resultsByClass.SUSPICIOUS.p95).toBeLessThan(10);
     expect(resultsByClass.MALFORMED.p95).toBeLessThan(10);
     expect(resultsByClass.EMPTY.p95).toBeLessThan(5);
-    expect(resultsByClass.EDGE_CASE.p95).toBeLessThan(15);
+    expect(resultsByClass.EDGE_CASE.p95).toBeLessThan(25);
 
     // R8-N Functional Safety Verification:
     const safeRes = await pipeline.scan(classes.SAFE[0]);

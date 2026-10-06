@@ -68,33 +68,6 @@ export class FileAnalyzer {
     }
 
     const fileName = path.basename(filePath);
-    const statCheck = await fs.promises.stat(filePath);
-    if (!statCheck.isFile()) {
-      throw new Error('NOT_A_REGULAR_FILE: Target path is not a regular file.');
-    }
-
-    // Stage 0: CleanFileCache lookup (< 0.08 ms fast-path)
-    const cached = CleanFileCache.getSharedInstance().get(filePath, statCheck.size, statCheck.mtimeMs);
-    if (cached) {
-      return {
-        filePath,
-        fileName,
-        fileSize: statCheck.size,
-        sha256: cached.sha256,
-        entropy: 0,
-        magicHeader: null,
-        isExecutable: false,
-        isDeceptiveExtension: false,
-        riskScore: cached.riskScore,
-        severity: 'safe',
-        verdict: 'ALLOW',
-        threatName: 'CLEAN_CACHED_FILE',
-        evidenceFactors: ['Clean file verified via Stage 0 CleanFileCache fast-path (<0.08ms)'],
-        analysisStatus: 'COMPLETED',
-        disposition: 'SAFE'
-      };
-    }
-
     const fd = await fs.promises.open(filePath, 'r');
     let stat: fs.Stats;
     let actualHeaderBuffer: Buffer = Buffer.alloc(0);
@@ -103,6 +76,28 @@ export class FileAnalyzer {
       stat = await fd.stat();
       if (!stat.isFile()) {
         throw new Error('NOT_A_REGULAR_FILE: Target path is not a regular file.');
+      }
+
+      // Stage 0: CleanFileCache lookup (< 0.08 ms fast-path)
+      const cached = CleanFileCache.getSharedInstance().get(filePath, stat.size, stat.mtimeMs);
+      if (cached) {
+        return {
+          filePath,
+          fileName,
+          fileSize: stat.size,
+          sha256: cached.sha256,
+          entropy: 0,
+          magicHeader: null,
+          isExecutable: false,
+          isDeceptiveExtension: false,
+          riskScore: cached.riskScore,
+          severity: 'safe',
+          verdict: 'ALLOW',
+          threatName: 'CLEAN_CACHED_FILE',
+          evidenceFactors: ['Clean file verified via Stage 0 CleanFileCache fast-path (<0.08ms)'],
+          analysisStatus: 'COMPLETED',
+          disposition: 'SAFE'
+        };
       }
 
       const bytesToRead = Math.min(stat.size, this.MAX_HEADER_READ_BYTES);

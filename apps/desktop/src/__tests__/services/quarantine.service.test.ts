@@ -123,6 +123,7 @@ describe('QuarantineService (Core Service API & Vault Lifecycle)', () => {
     try {
       const dpapiVaultDir = path.join(workDir, 'dpapi_vault');
       const s1 = new QuarantineService(dpapiVaultDir);
+      expect(s1).toBeDefined();
       const dpapiFile = path.join(dpapiVaultDir, '.vault.key.dpapi');
       expect(fs.existsSync(dpapiFile)).toBe(true);
 
@@ -137,6 +138,7 @@ describe('QuarantineService (Core Service API & Vault Lifecycle)', () => {
       fs.writeFileSync(path.join(upgradeVaultDir, '.vault.key'), rawKey);
 
       const s3 = new QuarantineService(upgradeVaultDir);
+      expect(s3).toBeDefined();
       expect(fs.existsSync(path.join(upgradeVaultDir, '.vault.key.dpapi'))).toBe(true);
       expect(fs.existsSync(path.join(upgradeVaultDir, '.vault.key'))).toBe(false);
     } finally {

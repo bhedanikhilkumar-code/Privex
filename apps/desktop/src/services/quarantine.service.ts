@@ -21,7 +21,6 @@ export class QuarantineService {
   private manifest: Map<string, QuarantineItem> = new Map();
   private vaultKey: Buffer;
   private activeItemOperations: Set<string> = new Set();
-  private operationQueue: Promise<void> = Promise.resolve();
 
   // Header magic constants
   public static readonly CONTAINER_MAGIC_V1 = Buffer.from('PPVAULT1', 'utf8'); // 8 bytes legacy
@@ -244,8 +243,9 @@ export class QuarantineService {
                 fileSize: stat.size,
                 sha256: '0000000000000000000000000000000000000000000000000000000000000000',
                 threatName: 'RECOVERED_ORPHANED_BLOB',
+                riskScore: 85,
                 severity: 'dangerous',
-                verdict: 'BLOCK',
+                evidenceFactors: ['RECOVERED_ORPHANED_BLOB'],
                 blobPath: fullBlobPath,
                 vaultVersion: 'PPVAULT2'
               };
@@ -1333,6 +1333,13 @@ export class QuarantineService {
    */
   public listQuarantine(): QuarantineItem[] {
     return Array.from(this.manifest.values());
+  }
+
+  /**
+   * Retrieves a quarantined item by its quarantine ID.
+   */
+  public getQuarantinedItem(quarantineId: string): QuarantineItem | undefined {
+    return this.manifest.get(quarantineId);
   }
 
   /**

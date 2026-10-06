@@ -757,6 +757,7 @@ describe('QuarantineService (PPVAULT2 Streaming & Hardening)', () => {
       fs.writeFileSync(sourceFile, Buffer.from('Valid initial payload bytes before corrupting frame'));
 
       const threat: DetectedThreat = {
+        id: 'threat-sec-d-01',
         filePath: sourceFile,
         fileName: 'sec_d_01_malicious.bin',
         fileSize: 52,
@@ -791,6 +792,7 @@ describe('QuarantineService (PPVAULT2 Streaming & Hardening)', () => {
       fs.writeFileSync(sourceFile, Buffer.from('Concurrency test payload'));
 
       const threat: DetectedThreat = {
+        id: 'threat-sec-d-02',
         filePath: sourceFile,
         fileName: 'sec_d_02_concurrency.bin',
         fileSize: 24,
@@ -842,6 +844,7 @@ describe('QuarantineService (PPVAULT2 Streaming & Hardening)', () => {
       fs.writeFileSync(sourceFile, Buffer.from('Orphan reconciliation payload'));
 
       const threat: DetectedThreat = {
+        id: 'threat-sec-d-04',
         filePath: sourceFile,
         fileName: 'sec_d_04_orphan.bin',
         fileSize: 29,
@@ -860,7 +863,7 @@ describe('QuarantineService (PPVAULT2 Streaming & Hardening)', () => {
 
       // 2. Corrupt or delete the manifest entry to simulate crash before manifest commit
       (quarantine as any).manifest.delete(qItem.quarantineId);
-      quarantine.saveManifest();
+      (quarantine as any).saveManifest();
       expect(quarantine.listQuarantine().find((i) => i.quarantineId === qItem.quarantineId)).toBeUndefined();
 
       // 3. Re-instantiate service; reconcileOrphanedBlobs must detect and register the orphaned container

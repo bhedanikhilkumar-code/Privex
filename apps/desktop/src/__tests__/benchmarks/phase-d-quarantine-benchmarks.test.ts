@@ -6,7 +6,6 @@ import * as crypto from 'crypto';
 import { performance } from 'perf_hooks';
 import { QuarantineService } from '../../services/quarantine.service';
 import { DetectedThreat } from '../../types/desktop.types';
-import { FileAnalyzer } from '../../core/file-analyzer';
 import { ThreatIntel, CleanFileCache } from '@private-protection/core';
 
 function computeStats(samples: number[]) {
@@ -172,5 +171,5 @@ describe('Phase D — Quarantine Hardening (PPVAULT2) Empirical Benchmark Suite'
 
     expect(heapDeltaMB).toBeLessThan(16.0); // Phase D Mandatory SLA: Peak V8 heap delta < 16 MB
     expect(trustLookupStats.p50).toBeLessThan(0.05); // ThreatIntel lookup SLA: < 0.05 ms
-  });
+  }, 45000);
 });

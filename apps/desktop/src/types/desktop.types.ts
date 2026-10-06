@@ -201,3 +201,45 @@ export interface DesktopAssistantExplanation {
   recommendedActions: string[];
   cognitiveLevel: 'grade6' | 'grade8';
 }
+
+export interface RealtimeMonitorOptions {
+  recursive?: boolean;
+  maxQueueSize?: number;
+  concurrencyLimit?: number;
+  stabilityCheckMs?: number;
+  stabilityRetries?: number;
+  debounceMs?: number;
+  autoQuarantineCritical?: boolean;
+  excludedPaths?: string[];
+  monitoredPaths?: string[];
+  entropyDetectionEnabled?: boolean;
+  maxFileSizeBytes?: number;
+}
+
+export interface RealtimeQueueStats {
+  queuedCount: number;
+  inFlightCount: number;
+  processedCount: number;
+  droppedEventsCount: number;
+  threatsDetectedCount: number;
+  quarantinedCount: number;
+  averageLatencyMs: number;
+  p95LatencyMs: number;
+}
+
+export interface RealtimeFilesystemEvent {
+  eventType: 'create' | 'modify' | 'rename' | 'delete' | 'burst';
+  filePath: string;
+  timestamp: number;
+  isDownload?: boolean;
+  previousPath?: string;
+}
+
+export interface PendingDownload {
+  tempPath: string;
+  targetFinalName: string;
+  firstSeenAt: number;
+  lastModifiedAt: number;
+  initialSize: number;
+}
+

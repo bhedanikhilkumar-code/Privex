@@ -38,6 +38,11 @@ describe('Phase B — Core Detection Engine Hot-Path Performance Benchmarks', ()
 
     const iterations = 2000;
 
+    // Warmup BloomFilter.has()
+    for (let i = 0; i < 200; i++) {
+      filter.has(sampleHex);
+    }
+
     // 1. BloomFilter.has() benchmark (target < 0.02 ms)
     const bloomStart = performance.now();
     for (let i = 0; i < iterations; i++) {

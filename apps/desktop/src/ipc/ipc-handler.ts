@@ -50,7 +50,7 @@ export class IpcHandler {
     this.scanner = new ScannerService();
     this.quickScanner = new QuickScanService(this.scanner);
     this.quarantine = new QuarantineService(options?.vaultDir);
-    this.realtimeMonitor = new RealtimeMonitorService();
+    this.realtimeMonitor = new RealtimeMonitorService(undefined, this.quarantine);
     this.processAuditor = new ProcessAuditorService();
     this.persistenceAuditor = new PersistenceAuditorService();
     this.removableMedia = new RemovableMediaService();
@@ -156,6 +156,7 @@ export class IpcHandler {
     this.realtimeMonitor.setEntropyDetectionEnabled(settings.entropyDetectionEnabled);
     this.realtimeMonitor.setMaxFileSizeBytes(settings.scanLargeFilesLimitMb * 1024 * 1024);
     this.realtimeMonitor.setExcludedPaths(settings.excludedPaths || []);
+    this.realtimeMonitor.setAutoQuarantineCritical(Boolean(settings.autoQuarantineCritical));
 
     if (!updateWatchers) {
       return;
@@ -207,7 +208,18 @@ export class IpcHandler {
 
     let eventPayload: RealtimeThreatEvent;
 
-    if (shouldAutoQuarantine) {
+    if (threat.quarantined) {
+      let qItem: any = null;
+      if ((threat as any).quarantineId) {
+        qItem = this.quarantine.getQuarantinedItem((threat as any).quarantineId);
+      }
+      eventPayload = {
+        threat,
+        actionTaken: 'AUTO_QUARANTINED',
+        quarantineItem: qItem,
+        timestamp: Date.now()
+      };
+    } else if (shouldAutoQuarantine) {
       try {
         const quarantineItem = await this.quarantine.isolateFile(threat);
         this.storage.recordSecurityEvent(

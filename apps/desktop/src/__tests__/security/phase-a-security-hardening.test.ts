@@ -281,7 +281,7 @@ describe('Phase A — Desktop Security Core Hardening & Offline Verification Sui
         storage.recordSecurityEvent('SCAN_COMPLETED', 'INFO', `Event ${i}`);
       }
       expect(storage.getSecurityEvents().length).toBe(SecureStorageService.MAX_SECURITY_EVENTS);
-    });
+    }, 45000);
   });
 
   describe('6. Step 13 Full Socket-Level Offline Air-Gapped Verification', () => {

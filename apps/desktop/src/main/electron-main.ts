@@ -1,4 +1,13 @@
-import { app, BrowserWindow, ipcMain, session } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  session,
+  Tray,
+  Menu,
+  nativeImage,
+  Notification
+} from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -6,6 +15,11 @@ import { IpcHandler } from '../ipc/ipc-handler';
 
 let mainWindow: BrowserWindow | null = null;
 let ipcHandler: IpcHandler | null = null;
+let systemTray: Tray | null = null;
+let isQuitting = false;
+
+// Notification storm rate limiter (max 3 notifications per 10 seconds)
+let lastNotificationTimes: number[] = [];
 
 if (process.argv.includes('--no-sandbox') || process.env.ELECTRON_DISABLE_SANDBOX) {
   app.commandLine.appendSwitch('no-sandbox');
@@ -22,6 +36,108 @@ function getStorageDir(): string {
     return customArg.split('=')[1];
   }
   return path.join(app.getPath('userData'), 'security-vault');
+}
+
+/**
+ * Creates an embedded 16x16 RGBA shield icon for Windows System Tray
+ * without external asset dependencies.
+ */
+function createTrayIcon(): Electron.NativeImage {
+  const size = 16;
+  const buf = Buffer.alloc(size * size * 4);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const idx = (y * size + x) * 4;
+      // Emerald shield glyph outline
+      const inShieldTop = y >= 2 && y <= 9 && x >= 2 && x <= 13;
+      const inShieldBottom = y > 9 && y <= 14 && x >= 2 + (y - 9) && x <= 13 - (y - 9);
+      if (inShieldTop || inShieldBottom) {
+        buf[idx] = 16;      // R
+        buf[idx + 1] = 185;  // G
+        buf[idx + 2] = 129;  // B (Emerald Green)
+        buf[idx + 3] = 255;  // Alpha
+      } else {
+        buf[idx + 3] = 0;    // Transparent
+      }
+    }
+  }
+  return nativeImage.createFromBitmap(buf, { width: size, height: size });
+}
+
+function showThreatToastNotification(title: string, message: string): void {
+  const now = Date.now();
+  lastNotificationTimes = lastNotificationTimes.filter((t) => now - t < 10000);
+  if (lastNotificationTimes.length >= 3) {
+    // Suppress notification storm
+    return;
+  }
+  lastNotificationTimes.push(now);
+
+  try {
+    if (Notification.isSupported()) {
+      new Notification({
+        title,
+        body: message,
+        silent: false
+      }).show();
+    }
+  } catch {
+    // Graceful fallback if notifications are disabled by OS
+  }
+}
+
+function setupSystemTray(win: BrowserWindow): void {
+  if (systemTray !== null) return;
+
+  try {
+    const icon = createTrayIcon();
+    systemTray = new Tray(icon);
+    systemTray.setToolTip('Private Protection — Real-Time Shield Active');
+
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: 'Open Dashboard',
+        click: () => {
+          if (win && !win.isDestroyed()) {
+            win.show();
+            win.focus();
+          }
+        }
+      },
+      {
+        label: 'Run Quick Scan',
+        click: () => {
+          if (win && !win.isDestroyed()) {
+            win.show();
+            win.focus();
+            win.webContents.send('TRIGGER_QUICK_SCAN');
+          }
+        }
+      },
+      {
+        label: 'Protection Status: Protected',
+        enabled: false
+      },
+      { type: 'separator' },
+      {
+        label: 'Exit Private Protection',
+        click: () => {
+          isQuitting = true;
+          app.quit();
+        }
+      }
+    ]);
+
+    systemTray.setContextMenu(contextMenu);
+    systemTray.on('double-click', () => {
+      if (win && !win.isDestroyed()) {
+        win.show();
+        win.focus();
+      }
+    });
+  } catch (err) {
+    console.warn('[SYSTEM_TRAY_WARN] System tray initialization omitted:', err);
+  }
 }
 
 function createMainWindow(isHeadlessVerify: boolean): BrowserWindow {
@@ -59,6 +175,14 @@ function createMainWindow(isHeadlessVerify: boolean): BrowserWindow {
 
   const rendererHtmlPath = path.resolve(__dirname, '../renderer/index.html');
   win.loadFile(rendererHtmlPath);
+
+  // Background continuity: closing window hides to System Tray unless application is quitting
+  win.on('close', (event) => {
+    if (!isQuitting && !isHeadlessVerify) {
+      event.preventDefault();
+      win.hide();
+    }
+  });
 
   win.on('closed', () => {
     mainWindow = null;
@@ -176,10 +300,22 @@ async function runHeadlessRuntimeVerification(win: BrowserWindow): Promise<void>
     `);
 
     // Re-point RealtimeMonitorService to watchDir after saveSettings and drop a synthetic critical file to verify GAP-14
+    await win.webContents.executeJavaScript(`window.__realtimeEvents = [];`);
     ipcHandler!.getRealtimeMonitor().start([watchDir]);
     const droppedThreatPath = path.join(watchDir, 'dropped_payroll_bonus.pdf.exe');
     fs.writeFileSync(droppedThreatPath, Buffer.concat([mzHeader, suspiciousPayload]));
-    await new Promise((r) => setTimeout(r, 450));
+
+    // Intelligent polling wait for realtime ingress threat event
+    const waitStartTime = Date.now();
+    while (Date.now() - waitStartTime < 4000) {
+      const hasEvents = await win.webContents.executeJavaScript(
+        `Boolean(window.__realtimeEvents && window.__realtimeEvents.length > 0)`
+      );
+      if (hasEvents) {
+        break;
+      }
+      await new Promise((r) => setTimeout(r, 40));
+    }
 
     const realtimeProof = await win.webContents.executeJavaScript(`
       (() => {
@@ -245,8 +381,21 @@ app.whenReady().then(() => {
   });
   ipcHandler.registerElectronHandlers(ipcMain, () => mainWindow?.webContents ?? null);
 
+  // Hook desktop toast notifications on real-time threat detection
+  ipcHandler.getRealtimeMonitor().on('threatDetected', (threat) => {
+    showThreatToastNotification(
+      'Threat Detected & Blocked',
+      `Private Protection quarantined suspicious file: ${threat.fileName}`
+    );
+  });
+
   const isHeadlessVerify = process.argv.includes('--headless-verify');
   mainWindow = createMainWindow(isHeadlessVerify);
+
+  // Setup Windows System Tray unless in headless test mode
+  if (!isHeadlessVerify) {
+    setupSystemTray(mainWindow);
+  }
 
   if (isHeadlessVerify) {
     mainWindow.webContents.once('did-finish-load', () => {
@@ -257,16 +406,33 @@ app.whenReady().then(() => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       mainWindow = createMainWindow(false);
+      if (!isHeadlessVerify) {
+        setupSystemTray(mainWindow);
+      }
     }
   });
 });
 
+app.on('before-quit', () => {
+  isQuitting = true;
+});
+
 app.on('will-quit', () => {
   ipcHandler?.getRealtimeMonitor().stop();
+  if (systemTray) {
+    try {
+      systemTray.destroy();
+    } catch {
+      // Ignore
+    }
+    systemTray = null;
+  }
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+  // When running headless verification or explicitly quitting, exit process
+  if (isQuitting || process.argv.includes('--headless-verify')) {
     app.quit();
   }
+  // Otherwise remain running in the background Windows System Tray
 });
