@@ -8,6 +8,7 @@ import { QuickScanService } from '../services/quick-scan.service';
 import { QuarantineService } from '../services/quarantine.service';
 import { RealtimeMonitorService } from '../services/realtime-monitor.service';
 import { ProcessAuditorService } from '../services/process-auditor.service';
+import { ProcessMonitorService } from '../services/process-monitor.service';
 import { PersistenceAuditorService } from '../services/persistence-auditor.service';
 import { RemovableMediaService } from '../services/removable-media.service';
 import { NetworkMonitorService } from '../services/network-monitor.service';
@@ -19,7 +20,9 @@ import {
   DetectedThreat,
   DesktopAssistantExplanation,
   ScanProgress,
-  RealtimeThreatEvent
+  RealtimeThreatEvent,
+  ContainProcessOptions,
+  ProcessMonitorHealth
 } from '../types/desktop.types';
 
 export interface IpcHandlerOptions {
@@ -36,6 +39,7 @@ export class IpcHandler {
   private quarantine: QuarantineService;
   private realtimeMonitor: RealtimeMonitorService;
   private processAuditor: ProcessAuditorService;
+  private processMonitor: ProcessMonitorService;
   private persistenceAuditor: PersistenceAuditorService;
   private removableMedia: RemovableMediaService;
   private networkMonitor: NetworkMonitorService;
@@ -52,6 +56,10 @@ export class IpcHandler {
     this.quarantine = new QuarantineService(options?.vaultDir);
     this.realtimeMonitor = new RealtimeMonitorService(undefined, this.quarantine);
     this.processAuditor = new ProcessAuditorService();
+    this.processMonitor = new ProcessMonitorService({
+      processAuditor: this.processAuditor,
+      behaviorEngine: this.processAuditor.getBehaviorEngine()
+    });
     this.persistenceAuditor = new PersistenceAuditorService();
     this.removableMedia = new RemovableMediaService();
     this.networkMonitor = new NetworkMonitorService();
@@ -456,16 +464,20 @@ export class IpcHandler {
     return this.processAuditor.auditRunningProcesses();
   }
 
-  public async handleContainProcess(pid: number, options?: { force?: boolean; dryRun?: boolean; reason?: string }) {
+  public async handleContainProcess(pid: number, options?: ContainProcessOptions) {
     const validPid = IpcValidator.validateNumber(pid, 0, 9999999);
     const result = await this.processAuditor.containProcess(validPid, options);
     this.storage.recordSecurityEvent(
       'PROCESS_CONTAINED',
       result.success ? 'INFO' : 'WARN',
       `Process containment evaluated for PID ${validPid}: ${result.action} (${result.reason})`,
-      { pid: validPid, action: result.action, success: result.success }
+      { pid: validPid, action: result.action, success: result.success, authorizationId: options?.authorizationId || 'none' }
     );
     return result;
+  }
+
+  public handleGetProcessMonitorHealth(): ProcessMonitorHealth {
+    return this.processMonitor.getHealth();
   }
 
   public async handleAuditPersistence() {
@@ -589,6 +601,11 @@ export class IpcHandler {
     ipcMain.handle(IPC_CHANNELS.PROCESS_CONTAIN, async (event, pid: number, options?: any) => {
       verifyOrigin(event);
       return this.handleContainProcess(pid, options);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.PROCESS_MONITOR_HEALTH, async (event) => {
+      verifyOrigin(event);
+      return this.handleGetProcessMonitorHealth();
     });
 
     ipcMain.handle(IPC_CHANNELS.PERSISTENCE_AUDIT, async (event) => {

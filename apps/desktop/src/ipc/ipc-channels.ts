@@ -22,6 +22,7 @@ export const IPC_CHANNELS = {
 
   PROCESSES_AUDIT: 'desktop:processes:audit',
   PROCESS_CONTAIN: 'desktop:process:contain',
+  PROCESS_MONITOR_HEALTH: 'desktop:processMonitor:health',
   PERSISTENCE_AUDIT: 'desktop:persistence:audit',
   REMOVABLE_MEDIA_GET: 'desktop:removableMedia:get',
   NETWORK_POSTURE_GET: 'desktop:networkPosture:get',
@@ -57,6 +58,7 @@ export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.ASSISTANT_EXPLAIN,
   IPC_CHANNELS.PROCESSES_AUDIT,
   IPC_CHANNELS.PROCESS_CONTAIN,
+  IPC_CHANNELS.PROCESS_MONITOR_HEALTH,
   IPC_CHANNELS.PERSISTENCE_AUDIT,
   IPC_CHANNELS.REMOVABLE_MEDIA_GET,
   IPC_CHANNELS.NETWORK_POSTURE_GET,

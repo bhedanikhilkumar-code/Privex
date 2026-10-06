@@ -450,7 +450,7 @@ describe('BehaviorEngineService (Phase F — Process Lineage + LOLBin Monitoring
     });
   });
 
-  describe('8. Sensitive Credential & Password Masking', () => {
+  describe('8. Sensitive Credential & Password Masking (SEC-F-04)', () => {
     it('masks passwords and secrets in command line telemetry', () => {
       const raw = 'mytool.exe --user admin --password SuperSecretPass123! --token ghp_1234567890abcdef';
       const sanitized = engine.sanitizeCommandLine(raw);
@@ -458,6 +458,85 @@ describe('BehaviorEngineService (Phase F — Process Lineage + LOLBin Monitoring
       expect(sanitized).not.toContain('SuperSecretPass123!');
       expect(sanitized).not.toContain('ghp_1234567890abcdef');
       expect(sanitized).toContain('[REDACTED]');
+    });
+
+    it('ensures ProcessLineageNode stores only sanitizedCommandLine and zero raw secrets in memory (SEC-F-04)', () => {
+      const rawSecret = 'curl.exe --token my_ultra_secret_jwt_token_12345 --password SecretPass123';
+      const node = engine.registerProcess({
+        pid: 7777,
+        processName: 'curl.exe',
+        commandLine: rawSecret
+      });
+
+      expect((node as any).commandLine).toBeUndefined();
+      expect(node.sanitizedCommandLine).not.toContain('my_ultra_secret_jwt_token_12345');
+      expect(node.sanitizedCommandLine).not.toContain('SecretPass123');
+      expect(node.sanitizedCommandLine).toContain('[REDACTED]');
+
+      const retrieved = engine.getLineage(7777)[0];
+      expect((retrieved as any).commandLine).toBeUndefined();
+      expect(retrieved.sanitizedCommandLine).not.toContain('my_ultra_secret_jwt_token_12345');
+    });
+  });
+
+  describe('9. Authoritative Containment Token Lifecycle (SEC-F-01)', () => {
+    it('issues single-use authorization token ONLY when engineVerdict is CONTAIN_PROCESS', () => {
+      // Benign process
+      const benign = engine.evaluateProcess({
+        pid: 8888,
+        processName: 'calc.exe',
+        commandLine: 'calc.exe'
+      });
+      expect(benign.engineVerdict).toBe('ALLOW');
+      expect(benign.authorization).toBeUndefined();
+
+      // Malicious process
+      const mal = engine.evaluateProcess({
+        pid: 8889,
+        processName: 'vssadmin.exe',
+        commandLine: 'vssadmin.exe delete shadows /all /quiet'
+      });
+      expect(mal.engineVerdict).toBe('CONTAIN_PROCESS');
+      expect(mal.authorization).toBeDefined();
+      expect(mal.authorization?.pid).toBe(8889);
+      expect(mal.authorization?.singleUseToken).toBeDefined();
+
+      // Validate and consume single-use token
+      const auth = mal.authorization!;
+      const firstConsumption = engine.validateAndConsumeAuthorization(
+        auth.authorizationId,
+        auth.singleUseToken,
+        8889
+      );
+      expect(firstConsumption.valid).toBe(true);
+
+      // Second consumption must fail (single-use guarantee)
+      const secondConsumption = engine.validateAndConsumeAuthorization(
+        auth.authorizationId,
+        auth.singleUseToken,
+        8889
+      );
+      expect(secondConsumption.valid).toBe(false);
+      expect(secondConsumption.reason).toContain('already consumed');
+    });
+
+    it('rejects expired containment authorizations', () => {
+      const mal = engine.evaluateProcess({
+        pid: 8890,
+        processName: 'vssadmin.exe',
+        commandLine: 'vssadmin.exe delete shadows /all /quiet'
+      });
+      const auth = mal.authorization!;
+      // Artificially expire the token in registry
+      (auth as any).expiresAt = Date.now() - 1000;
+
+      const res = engine.validateAndConsumeAuthorization(
+        auth.authorizationId,
+        auth.singleUseToken,
+        8890
+      );
+      expect(res.valid).toBe(false);
+      expect(res.reason).toContain('expired');
     });
   });
 });

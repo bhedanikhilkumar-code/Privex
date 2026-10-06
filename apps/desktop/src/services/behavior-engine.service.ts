@@ -7,7 +7,12 @@ import {
   RiskScorer,
   ProcessAnalyzer
 } from '@private-protection/core';
-import { ProcessInfo, ProcessLineageNode, ThreatSeverity } from '../types/desktop.types';
+import {
+  ProcessInfo,
+  ProcessLineageNode,
+  ThreatSeverity,
+  ProcessContainmentAuthorization
+} from '../types/desktop.types';
 
 export interface BehaviorEngineOptions {
   readonly maxTrackedProcesses?: number;
@@ -20,7 +25,7 @@ export interface ProcessBehaviorEvaluation {
   readonly processName: string;
   readonly executablePath: string;
   readonly commandLine?: string;
-  readonly sanitizedCommandLine?: string;
+  readonly sanitizedCommandLine: string;
   readonly riskScore: number;
   readonly confidence: number;
   readonly severity: ThreatSeverity;
@@ -32,6 +37,7 @@ export interface ProcessBehaviorEvaluation {
   readonly isLolbin: boolean;
   readonly isProtectedSystemProcess: boolean;
   readonly lineageChain: string[];
+  readonly authorization?: ProcessContainmentAuthorization;
 }
 
 /**
@@ -57,6 +63,11 @@ export class BehaviorEngineService {
   private readonly processGraph = new Map<string, ProcessLineageNode>();
   // Active PID -> latest instanceKey mapping (PID reuse protection)
   private readonly pidToInstanceKey = new Map<number, string>();
+
+  // Bounded authorization registry for process containment (SEC-F-01)
+  private readonly authorizationRegistry = new Map<string, ProcessContainmentAuthorization>();
+  private readonly maxAuthorizations = 256;
+  private readonly authorizationTtlMs = 30000;
 
   private instanceCounter = 0;
   private readonly riskScorer: RiskScorer;
@@ -333,7 +344,7 @@ export class BehaviorEngineService {
     this.instanceCounter++;
     const instanceKey = `${pid}:${now}:${this.instanceCounter}`;
 
-    const sanitizedCommandLine = ProcessAnalyzer.sanitizeCommandLine(info.commandLine);
+    const sanitizedCommandLine = ProcessAnalyzer.sanitizeCommandLine(info.commandLine) || '';
     const lowerName = processName.toLowerCase();
     const isLolbin = BehaviorEngineService.KNOWN_LOLBINS.has(lowerName);
     const isProtected = this.isProtectedSystemProcess(pid, lowerName, info.executablePath);
@@ -343,7 +354,6 @@ export class BehaviorEngineService {
       ppid: info.ppid,
       processName,
       executablePath: info.executablePath,
-      commandLine: info.commandLine,
       sanitizedCommandLine,
       creationTime: now,
       sha256: info.sha256,
@@ -563,7 +573,7 @@ export class BehaviorEngineService {
 
     const lowerProcName = node.processName.toLowerCase();
     const executablePath = node.executablePath || '';
-    const cli = node.commandLine || '';
+    const cli = info.commandLine || node.sanitizedCommandLine || '';
     const isProtected = node.isProtectedSystemProcess ?? false;
 
     // Lineage lookup
@@ -806,11 +816,20 @@ export class BehaviorEngineService {
       evidenceFactors.push('Process execution inspected; no anomalous behavior or suspicious arguments detected.');
     }
 
+    let authorization: ProcessContainmentAuthorization | undefined;
+    if (engineVerdict === 'CONTAIN_PROCESS' && !isProtected) {
+      authorization = this.issueContainmentAuthorization(
+        node,
+        finalScore,
+        evidenceFactors.slice(0, 3).join('; ')
+      );
+    }
+
     return {
       pid: node.pid,
       processName: node.processName,
       executablePath,
-      commandLine: node.commandLine,
+      commandLine: node.sanitizedCommandLine,
       sanitizedCommandLine: node.sanitizedCommandLine,
       riskScore: finalScore,
       confidence: scoreResult.confidence,
@@ -822,7 +841,159 @@ export class BehaviorEngineService {
       evidence,
       isLolbin: node.isLolbin ?? false,
       isProtectedSystemProcess: isProtected,
-      lineageChain: [...lineageNames].reverse()
+      lineageChain: [...lineageNames].reverse(),
+      authorization
     };
+  }
+
+  /**
+   * Issues a single-use authorization token for process containment.
+   * STRICT INVARIANT (RULE-09 & Canonical Authority):
+   * Issued ONLY when EngineVerdict === 'CONTAIN_PROCESS' and process is not protected.
+   */
+  public issueContainmentAuthorization(
+    node: ProcessLineageNode,
+    riskScore: number,
+    reason: string
+  ): ProcessContainmentAuthorization {
+    this.pruneExpiredAuthorizations();
+    const authorizationId = `auth-contain-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const singleUseToken = `tok-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    const now = Date.now();
+    const auth: ProcessContainmentAuthorization = {
+      authorizationId,
+      pid: node.pid,
+      processName: node.processName,
+      executablePath: node.executablePath,
+      observedCreationTime: node.creationTime,
+      sha256: node.sha256,
+      engineVerdict: 'CONTAIN_PROCESS',
+      riskScore,
+      issuedAt: now,
+      expiresAt: now + this.authorizationTtlMs,
+      reason,
+      singleUseToken
+    };
+
+    if (this.authorizationRegistry.size >= this.maxAuthorizations) {
+      const oldestKey = this.authorizationRegistry.keys().next().value;
+      if (oldestKey) this.authorizationRegistry.delete(oldestKey);
+    }
+    this.authorizationRegistry.set(authorizationId, auth);
+    return auth;
+  }
+
+  /**
+   * Validates and consumes a single-use containment authorization token.
+   * Performs TOCTOU revalidation of process identity (PID, creation time, process name).
+   */
+  public validateAndConsumeAuthorization(
+    authorizationId?: string,
+    token?: string,
+    pid?: number,
+    currentCreationTime?: number,
+    currentProcessName?: string
+  ): {
+    valid: boolean;
+    reason: string;
+    action:
+      | 'TERMINATED'
+      | 'REJECTED_UNAUTHORIZED'
+      | 'REJECTED_PID_REUSE'
+      | 'REJECTED_IDENTITY_MISMATCH';
+    authorization?: ProcessContainmentAuthorization;
+  } {
+    if (!authorizationId || !token) {
+      return {
+        valid: false,
+        reason: 'Containment authorization required: missing authorizationId or single-use token.',
+        action: 'REJECTED_UNAUTHORIZED'
+      };
+    }
+
+    this.pruneExpiredAuthorizations();
+    const auth = this.authorizationRegistry.get(authorizationId);
+    if (!auth) {
+      return {
+        valid: false,
+        reason: 'Containment authorization not found or already consumed / expired.',
+        action: 'REJECTED_UNAUTHORIZED'
+      };
+    }
+
+    if (auth.singleUseToken !== token) {
+      return {
+        valid: false,
+        reason: 'Invalid containment authorization token.',
+        action: 'REJECTED_UNAUTHORIZED'
+      };
+    }
+
+    if (Date.now() > auth.expiresAt) {
+      this.authorizationRegistry.delete(authorizationId);
+      return {
+        valid: false,
+        reason: 'Containment authorization has expired.',
+        action: 'REJECTED_UNAUTHORIZED'
+      };
+    }
+
+    if (pid !== undefined && auth.pid !== pid) {
+      return {
+        valid: false,
+        reason: `Target PID mismatch: authorization was issued for PID ${auth.pid}, got ${pid}.`,
+        action: 'REJECTED_UNAUTHORIZED'
+      };
+    }
+
+    // TOCTOU PID reuse check (SEC-F-05):
+    if (
+      currentCreationTime !== undefined &&
+      auth.observedCreationTime !== undefined &&
+      Math.abs(currentCreationTime - auth.observedCreationTime) > 1000
+    ) {
+      this.authorizationRegistry.delete(authorizationId);
+      return {
+        valid: false,
+        reason: `TOCTOU PID Reuse detected: target process creation time (${currentCreationTime}) differs from authorized observation (${auth.observedCreationTime}). PID was recycled by the operating system.`,
+        action: 'REJECTED_PID_REUSE'
+      };
+    }
+
+    if (
+      currentProcessName &&
+      auth.processName &&
+      currentProcessName.toLowerCase() !== auth.processName.toLowerCase()
+    ) {
+      this.authorizationRegistry.delete(authorizationId);
+      return {
+        valid: false,
+        reason: `Process identity mismatch: target process name '${currentProcessName}' differs from authorized process '${auth.processName}'.`,
+        action: 'REJECTED_IDENTITY_MISMATCH'
+      };
+    }
+
+    // Single-use guarantee: consume immediately
+    this.authorizationRegistry.delete(authorizationId);
+    return {
+      valid: true,
+      reason: 'Authorization valid and consumed.',
+      action: 'TERMINATED',
+      authorization: auth
+    };
+  }
+
+  public getActiveAuthorizations(): ProcessContainmentAuthorization[] {
+    this.pruneExpiredAuthorizations();
+    return Array.from(this.authorizationRegistry.values());
+  }
+
+  private pruneExpiredAuthorizations(): void {
+    const now = Date.now();
+    for (const [id, auth] of this.authorizationRegistry.entries()) {
+      if (now > auth.expiresAt) {
+        this.authorizationRegistry.delete(id);
+      }
+    }
   }
 }

@@ -6,6 +6,8 @@ export * from './services/quick-scan.service';
 export * from './services/quarantine.service';
 export * from './services/realtime-monitor.service';
 export * from './services/process-auditor.service';
+export * from './services/behavior-engine.service';
+export * from './services/process-monitor.service';
 export * from './services/persistence-auditor.service';
 export * from './services/removable-media.service';
 export * from './services/network-monitor.service';

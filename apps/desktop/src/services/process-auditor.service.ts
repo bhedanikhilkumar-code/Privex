@@ -1,6 +1,6 @@
 import * as child_process from 'child_process';
 import * as fs from 'fs';
-import { ProcessInfo, ProcessContainmentResult } from '../types/desktop.types';
+import { ProcessInfo, ProcessContainmentResult, ContainProcessOptions } from '../types/desktop.types';
 import { BehaviorEngineService } from './behavior-engine.service';
 import { FileAnalyzer } from '../core/file-analyzer';
 
@@ -9,12 +9,6 @@ export interface ProcessAuditorOptions {
   readonly scanBinaryOnDisk?: boolean;
   readonly dryRunContainment?: boolean;
   readonly processQueryProvider?: () => Promise<Array<Partial<ProcessInfo> & { pid: number; processName: string }>>;
-}
-
-export interface ContainProcessOptions {
-  readonly force?: boolean;
-  readonly dryRun?: boolean;
-  readonly reason?: string;
 }
 
 /**
@@ -32,7 +26,7 @@ export class ProcessAuditorService {
 
   constructor(options?: ProcessAuditorOptions) {
     this.behaviorEngine = options?.behaviorEngine || new BehaviorEngineService();
-    this.scanBinaryOnDisk = options?.scanBinaryOnDisk ?? false;
+    this.scanBinaryOnDisk = options?.scanBinaryOnDisk ?? true;
     this.dryRunContainment = options?.dryRunContainment ?? false;
     this.customQueryProvider = options?.processQueryProvider;
   }
@@ -115,7 +109,8 @@ export class ProcessAuditorService {
         evidenceFactors: evaluation.evidenceFactors,
         isLolbin: evaluation.isLolbin,
         lineageChain: evaluation.lineageChain,
-        isProtectedSystemProcess: evaluation.isProtectedSystemProcess
+        isProtectedSystemProcess: evaluation.isProtectedSystemProcess,
+        authorization: evaluation.authorization
       });
     }
 
@@ -127,8 +122,100 @@ export class ProcessAuditorService {
   // ============================================================
 
   /**
+   * Queries the live operating system for process existence and identity (SEC-F-05 TOCTOU revalidation).
+   */
+  public async getProcessIdentity(pid: number): Promise<{
+    exists: boolean;
+    processName?: string;
+    creationTime?: number;
+    executablePath?: string;
+  }> {
+    if (this.customQueryProvider) {
+      try {
+        const list = await this.customQueryProvider();
+        const match = list.find((p) => p.pid === pid);
+        if (!match) return { exists: false };
+        return {
+          exists: true,
+          processName: match.processName,
+          creationTime: match.creationDate
+            ? typeof match.creationDate === 'number'
+              ? match.creationDate
+              : (match.creationDate as any).getTime?.()
+            : undefined,
+          executablePath: match.executablePath
+        };
+      } catch {
+        return { exists: false };
+      }
+    }
+
+    if (process.platform === 'win32') {
+      return new Promise((resolve) => {
+        const psCommand = `Get-CimInstance Win32_Process -Filter "ProcessId = ${pid}" | Select-Object ProcessId,Name,ExecutablePath,CreationDate | ConvertTo-Json -Compress`;
+        child_process.execFile(
+          'powershell',
+          ['-NoProfile', '-NonInteractive', '-Command', psCommand],
+          { timeout: 2000 },
+          (err, stdout) => {
+            if (err || !stdout || !stdout.trim().startsWith('{')) {
+              // Tasklist fallback
+              child_process.execFile('tasklist', ['/FI', `PID eq ${pid}`, '/FO', 'CSV', '/NH'], { timeout: 1500 }, (tErr, tStdout) => {
+                if (tErr || !tStdout || !tStdout.includes(String(pid))) {
+                  resolve({ exists: false });
+                  return;
+                }
+                const parts = tStdout.split('","').map((p) => p.replace(/^"|"$/g, ''));
+                resolve({
+                  exists: true,
+                  processName: parts[0] || undefined
+                });
+              });
+              return;
+            }
+
+            try {
+              const data = JSON.parse(stdout);
+              let creationTime: number | undefined;
+              if (data.CreationDate) {
+                const parsed = new Date(data.CreationDate).getTime();
+                if (!isNaN(parsed)) creationTime = parsed;
+              }
+              resolve({
+                exists: true,
+                processName: data.Name,
+                creationTime,
+                executablePath: data.ExecutablePath
+              });
+            } catch {
+              resolve({ exists: false });
+            }
+          }
+        );
+      });
+    }
+
+    // POSIX fallback
+    return new Promise((resolve) => {
+      child_process.execFile('ps', ['-p', String(pid), '-o', 'comm='], { timeout: 1500 }, (err, stdout) => {
+        if (err || !stdout || stdout.trim().length === 0) {
+          resolve({ exists: false });
+          return;
+        }
+        resolve({
+          exists: true,
+          processName: stdout.trim()
+        });
+      });
+    });
+  }
+
+  /**
    * Safely contains/terminates a confirmed malicious non-system process.
-   * STRICT INVARIANT (RULE-09): Hard-rejects PID 0, PID 4, and critical OS processes.
+   * STRICT INVARIANTS:
+   * 1. RULE-09: Hard-rejects PID 0, PID 4, and critical OS processes.
+   * 2. SEC-F-01: Requires authoritative ProcessContainmentAuthorization issued by BehaviorEngine.
+   * 3. SEC-F-05: Revalidates process identity & creation timestamp immediately before kill.
    */
   public async containProcess(
     pid: number,
@@ -158,14 +245,46 @@ export class ProcessAuditorService {
       };
     }
 
-    // 2. Query process details from lineage graph or live OS
+    // 2. Query process details from lineage graph
     const lineage = this.behaviorEngine.getLineage(pid, 1);
     const procNode = lineage[0];
-    const procName = procNode?.processName || '';
-    const execPath = procNode?.executablePath || '';
+    const procNameFromGraph = procNode?.processName || '';
+    const execPathFromGraph = procNode?.executablePath || '';
 
+    // Check system process protection from lineage graph FIRST (RULE-09)
+    if (this.behaviorEngine.isProtectedSystemProcess(pid, procNameFromGraph, execPathFromGraph)) {
+      const isMasquerade = this.behaviorEngine.isPathMasquerading(procNameFromGraph, execPathFromGraph);
+      if (!isMasquerade) {
+        return {
+          success: false,
+          pid,
+          processName: procNameFromGraph,
+          action: 'REJECTED_PROTECTED',
+          reason: `RULE-09: Process '${procNameFromGraph}' (PID ${pid}) is a protected Windows operating system component.`,
+          containedAt: now
+        };
+      }
+    }
+
+    // 3. SEC-F-01: Reject calls without authorization token immediately
+    if (!options?.authorizationId || !options?.token) {
+      return {
+        success: false,
+        pid,
+        processName: procNameFromGraph,
+        action: 'REJECTED_UNAUTHORIZED',
+        reason: 'Containment authorization required: missing authorizationId or single-use token.',
+        containedAt: now
+      };
+    }
+
+    // 4. Query live OS identity for TOCTOU revalidation
+    const liveIdentity = await this.getProcessIdentity(pid);
+    const procName = liveIdentity.processName || procNameFromGraph;
+    const execPath = liveIdentity.executablePath || execPathFromGraph;
+
+    // Check system process protection again with live identity
     if (this.behaviorEngine.isProtectedSystemProcess(pid, procName, execPath)) {
-      // Allow kill only if path is confirmed masquerading outside System32
       const isMasquerade = this.behaviorEngine.isPathMasquerading(procName, execPath);
       if (!isMasquerade) {
         return {
@@ -179,7 +298,41 @@ export class ProcessAuditorService {
       }
     }
 
-    // 3. Dry-run containment check
+    // 5. SEC-F-01 & SEC-F-05: Enforce mandatory authorization and revalidate identity
+    const authValidation = this.behaviorEngine.validateAndConsumeAuthorization(
+      options?.authorizationId,
+      options?.token,
+      pid,
+      liveIdentity.creationTime ?? options?.expectedCreationTime,
+      procName
+    );
+
+    if (!authValidation.valid) {
+      return {
+        success: false,
+        pid,
+        processName: procName,
+        action: authValidation.action as any,
+        reason: authValidation.reason,
+        containedAt: now,
+        authorizationId: options?.authorizationId
+      };
+    }
+
+    // 6. Pre-containment TOCTOU OS existence check
+    if (!liveIdentity.exists && !options?.dryRun && !this.dryRunContainment) {
+      return {
+        success: true,
+        pid,
+        processName: procName,
+        action: 'NOT_FOUND',
+        reason: `Process PID ${pid} not found: process has already terminated.`,
+        containedAt: now,
+        authorizationId: options?.authorizationId
+      };
+    }
+
+    // 4. Dry-run containment check
     if (this.dryRunContainment || options?.dryRun) {
       return {
         success: true,
@@ -187,17 +340,17 @@ export class ProcessAuditorService {
         processName: procName,
         action: 'TERMINATED',
         reason: 'Dry-run containment: termination simulated successfully.',
-        containedAt: now
+        containedAt: now,
+        authorizationId: options?.authorizationId
       };
     }
 
-    // 4. Terminate target process safely
+    // 5. Terminate target process safely
     try {
       if (process.platform === 'win32') {
         await new Promise<void>((resolve, reject) => {
           child_process.execFile('taskkill', ['/PID', String(pid), '/T', '/F'], (err) => {
             if (err) {
-              // Taskkill error code 128 indicates process not found
               const errStr = String(err);
               if (errStr.includes('not found') || (err as any).code === 128) {
                 resolve();
@@ -219,7 +372,8 @@ export class ProcessAuditorService {
         processName: procName,
         action: 'TERMINATED',
         reason: options?.reason || 'Malicious process terminated per EngineVerdict containment policy',
-        containedAt: now
+        containedAt: now,
+        authorizationId: options?.authorizationId
       };
     } catch (err: any) {
       if (err?.code === 'ESRCH') {
@@ -229,7 +383,8 @@ export class ProcessAuditorService {
           processName: procName,
           action: 'NOT_FOUND',
           reason: 'Process already exited prior to termination signal',
-          containedAt: now
+          containedAt: now,
+          authorizationId: options?.authorizationId
         };
       }
 
@@ -240,7 +395,8 @@ export class ProcessAuditorService {
           processName: procName,
           action: 'FAILED',
           reason: 'Access denied: insufficient administrative privilege to terminate process',
-          containedAt: now
+          containedAt: now,
+          authorizationId: options?.authorizationId
         };
       }
 
@@ -250,7 +406,8 @@ export class ProcessAuditorService {
         processName: procName,
         action: 'FAILED',
         reason: err?.message || 'Process termination failed',
-        containedAt: now
+        containedAt: now,
+        authorizationId: options?.authorizationId
       };
     }
   }

@@ -145,13 +145,27 @@ export interface FileAnalysisResult {
   errorReason?: string;
 }
 
+export interface ProcessContainmentAuthorization {
+  readonly authorizationId: string;
+  readonly pid: number;
+  readonly processName: string;
+  readonly executablePath?: string;
+  readonly observedCreationTime: number;
+  readonly sha256?: string;
+  readonly engineVerdict: 'CONTAIN_PROCESS';
+  readonly riskScore: number;
+  readonly issuedAt: number;
+  readonly expiresAt: number;
+  readonly reason: string;
+  readonly singleUseToken: string;
+}
+
 export interface ProcessLineageNode {
   pid: number;
   ppid?: number;
   processName: string;
   executablePath?: string;
-  commandLine?: string;
-  sanitizedCommandLine?: string;
+  sanitizedCommandLine: string;
   creationTime: number;
   sha256?: string;
   isSigned?: boolean;
@@ -161,13 +175,55 @@ export interface ProcessLineageNode {
   instanceKey: string;
 }
 
+export interface ContainProcessOptions {
+  readonly force?: boolean;
+  readonly reason?: string;
+  readonly dryRun?: boolean;
+  readonly authorizationId?: string;
+  readonly token?: string;
+  readonly expectedCreationTime?: number;
+}
+
 export interface ProcessContainmentResult {
-  success: boolean;
-  pid: number;
-  processName?: string;
-  action: 'TERMINATED' | 'REJECTED_PROTECTED' | 'NOT_FOUND' | 'FAILED';
-  reason: string;
-  containedAt: number;
+  readonly success: boolean;
+  readonly pid: number;
+  readonly processName?: string;
+  readonly action:
+    | 'TERMINATED'
+    | 'REJECTED_PROTECTED'
+    | 'REJECTED_UNAUTHORIZED'
+    | 'REJECTED_PID_REUSE'
+    | 'REJECTED_IDENTITY_MISMATCH'
+    | 'NOT_FOUND'
+    | 'FAILED';
+  readonly reason: string;
+  readonly containedAt: number;
+  readonly authorizationId?: string;
+}
+
+export type ProcessMonitorStatus = 'RUNNING' | 'DEGRADED' | 'STOPPED' | 'FAILED';
+
+export interface ProcessMonitorHealth {
+  readonly status: ProcessMonitorStatus;
+  readonly isContinuous: boolean;
+  readonly eventSource: 'WMI_TRACE' | 'CIM_EVENT' | 'POLLING_FALLBACK' | 'MOCK';
+  readonly queueDepth: number;
+  readonly processedEvents: number;
+  readonly droppedEvents: number;
+  readonly activeWorkers: number;
+  readonly lastEventTimestamp?: number;
+  readonly lastError?: string;
+}
+
+export interface ProcessCreationEvent {
+  readonly eventId: string;
+  readonly pid: number;
+  readonly ppid?: number;
+  readonly processName: string;
+  readonly executablePath?: string;
+  readonly commandLine?: string;
+  readonly creationTime: number;
+  readonly timestamp: number;
 }
 
 export interface ProcessInfo {
@@ -193,6 +249,7 @@ export interface ProcessInfo {
   isLolbin?: boolean;
   lineageChain?: string[];
   isProtectedSystemProcess?: boolean;
+  authorization?: ProcessContainmentAuthorization;
 }
 
 export interface PersistenceItem {

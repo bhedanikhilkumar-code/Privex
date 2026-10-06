@@ -106,9 +106,9 @@ Flags processes mimicking critical Windows system components when located outsid
 
 ---
 
-## 3. Process Containment Protocol & RULE-09
+## 3. Process Containment Protocol & RULE-09 Hardening (SEC-F-01 & SEC-F-05)
 
-Process containment is invoked via `containProcess(pid, options)`.
+Process containment is strictly gated by `containProcess(pid, options)`:
 
 ```
                   ┌───────────────────────────────┐
@@ -119,12 +119,24 @@ Process containment is invoked via `containProcess(pid, options)`.
                  ├────────── YES ──────────► REJECTED_PROTECTED
                  │
                  ▼
-         Is protected system process?
+         Is protected system process in lineage?
          (smss, csrss, wininit, services,
           lsass, lsm, winlogon, svchost)
                  ├────────── YES ──────────► Is Path Masquerading?
                  │                               ├──── NO  ──► REJECTED_PROTECTED
                  │                               └──── YES ──► Continue
+                 ▼
+         Is caller authorized? (SEC-F-01)
+         (Requires valid authorizationId + token issued by BehaviorEngine)
+                 ├────────── NO ───────────► REJECTED_UNAUTHORIZED
+                 │
+                 ▼
+         TOCTOU Pre-Containment Identity Query (SEC-F-05)
+         (Queries live OS for existence, creation timestamp, proc name)
+                 │
+                 ├───── PID recycled? (>1000ms drift) ──► REJECTED_PID_REUSE
+                 ├───── Name mismatch? ──────────────────► REJECTED_IDENTITY_MISMATCH
+                 ├───── Process exited? ─────────────────► NOT_FOUND
                  ▼
           Is dryRun enabled?
                  ├────────── YES ──────────► TERMINATED (Simulated)
@@ -138,13 +150,41 @@ Process containment is invoked via `containProcess(pid, options)`.
                  └────────── EPERM ────────► FAILED (Access Denied)
 ```
 
+### Authorization Token Invariant
+1. Tokens are single-use, bounded (TTL 30s), issued exclusively when `EngineVerdict === 'CONTAIN_PROCESS'` on non-protected processes.
+2. Tokens are bound to `(authorizationId, singleUseToken, pid, creationTime, processName)`.
+3. Consumed tokens are evicted immediately; expired tokens are pruned periodically.
+
 ---
 
-## 4. Privacy & Command-Line Sanitization
+## 4. Privacy & Command-Line Sanitization (SEC-F-04)
 
-Per Privacy Rules and Step 12:
-- Passwords, access tokens, API keys, and bearer tokens are redacted prior to memory storage or security logging:
+Per Privacy Rules and SEC-F-04:
+- `ProcessLineageNode` stores only `sanitizedCommandLine: string`.
+- Raw `commandLine` is never retained in graph memory.
+- Passwords, access tokens, API keys, and bearer tokens are redacted prior to storage:
   - `--password <secret>` $\rightarrow$ `--password [REDACTED]`
   - `token=<secret>` $\rightarrow$ `token=[REDACTED]`
   - `Bearer eyJ...` $\rightarrow$ `Bearer [REDACTED_JWT]`
 - Scanned process telemetry is retained exclusively in volatile memory; zero raw telemetry or command arguments are persisted unencrypted or sent over network sockets.
+
+---
+
+## 5. Continuous Process Creation Monitoring (SEC-F-02)
+
+Implemented in `ProcessMonitorService`:
+1. **Bounded Priority Queues**: Max 1,000 events (`highPriorityQueue` for LOLBins / shell scripts, `normalPriorityQueue` for benign apps).
+2. **Backpressure Shedding**: When queue capacity is reached, normal priority events are dropped first, and status transitions truthfully to `DEGRADED`.
+3. **Bounded Worker Pool**: Concurrency limited to 4 workers.
+4. **Deduplication LRU**: Bounded ring cache of 2,000 recent `eventId` hashes preventing redundant evaluations and memory leaks (<200 MB RSS).
+5. **Truthful Health Reporting**: Emits `ProcessMonitorHealth` reporting exact operational state (`RUNNING`, `DEGRADED`, `STOPPED`, `FAILED`), queue depth, active workers, dropped events, and event source (`WMI_TRACE`, `CIM_EVENT`, `POLLING_FALLBACK`, `MOCK`).
+
+---
+
+## 6. Process Binary Inspection Defaults (SEC-F-03)
+
+In `ProcessAuditorService`:
+- `scanBinaryOnDisk` defaults to `true`.
+- On-disk executables are passed through `FileAnalyzer.analyzeFile()`.
+- Reuses `CleanFileCache` ($O(1)$ fast path) to prevent redundant disk I/O and maintain latency SLAs (<500 ms).
+

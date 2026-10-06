@@ -11,7 +11,9 @@ import {
   PersistenceItem,
   RemovableDrive,
   ScanProgress,
-  RealtimeThreatEvent
+  RealtimeThreatEvent,
+  ContainProcessOptions,
+  ProcessMonitorHealth
 } from '../types/desktop.types';
 import { NetworkPostureReport } from '../services/network-monitor.service';
 
@@ -38,7 +40,8 @@ export interface DesktopSecurityApi {
   explainThreat: (threat: DetectedThreat, level: 'grade6' | 'grade8') => Promise<DesktopAssistantExplanation>;
 
   auditProcesses: () => Promise<ProcessInfo[]>;
-  containProcess: (pid: number, options?: { force?: boolean; dryRun?: boolean; reason?: string }) => Promise<ProcessContainmentResult>;
+  containProcess: (pid: number, options?: ContainProcessOptions) => Promise<ProcessContainmentResult>;
+  getProcessMonitorHealth: () => Promise<ProcessMonitorHealth>;
   auditPersistence: () => Promise<PersistenceItem[]>;
   getRemovableMedia: () => Promise<RemovableDrive[]>;
   getNetworkPosture: () => Promise<NetworkPostureReport>;
@@ -137,6 +140,7 @@ export function createDesktopSecurityApi(ipcRenderer: {
 
     auditProcesses: () => ipcRenderer.invoke(IPC_CHANNELS.PROCESSES_AUDIT),
     containProcess: (pid, options) => ipcRenderer.invoke(IPC_CHANNELS.PROCESS_CONTAIN, pid, options),
+    getProcessMonitorHealth: () => ipcRenderer.invoke(IPC_CHANNELS.PROCESS_MONITOR_HEALTH),
     auditPersistence: () => ipcRenderer.invoke(IPC_CHANNELS.PERSISTENCE_AUDIT),
     getRemovableMedia: () => ipcRenderer.invoke(IPC_CHANNELS.REMOVABLE_MEDIA_GET),
     getNetworkPosture: () => ipcRenderer.invoke(IPC_CHANNELS.NETWORK_POSTURE_GET),

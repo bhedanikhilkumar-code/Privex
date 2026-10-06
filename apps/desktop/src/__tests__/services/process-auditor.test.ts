@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import * as child_process from 'child_process';
+import * as path from 'path';
 import { ProcessAuditorService } from '../../services/process-auditor.service';
 import { BehaviorEngineService } from '../../services/behavior-engine.service';
 
@@ -136,26 +137,47 @@ describe('ProcessAuditorService (Phase F — Process Auditing & Containment)', (
       }
     });
 
-    it('returns NOT_FOUND or TERMINATED when attempting to contain non-existent PID', async () => {
-      // 999999 is extraordinarily unlikely to exist
-      const res = await auditor.containProcess(999999);
+    it('returns NOT_FOUND or TERMINATED when attempting to contain non-existent PID with valid authorization', async () => {
+      const evalResult = behaviorEngine.evaluateProcess({
+        pid: 999999,
+        processName: 'fake_process.exe',
+        commandLine: 'vssadmin.exe delete shadows /all /quiet'
+      });
+      expect(evalResult.authorization).toBeDefined();
+
+      const res = await auditor.containProcess(999999, {
+        authorizationId: evalResult.authorization!.authorizationId,
+        token: evalResult.authorization!.singleUseToken
+      });
       expect(['NOT_FOUND', 'TERMINATED']).toContain(res.action);
     });
 
-    it('supports dryRun containment without killing processes', async () => {
-      // Register a mock non-system process
-      behaviorEngine.recordProcess({
-        pid: 65432,
-        processName: 'test_miner.exe',
-        executablePath: 'C:\\temp\\test_miner.exe'
-      });
+    it('rejects unauthorized containment calls without valid authorization token (SEC-F-01)', async () => {
+      const res = await auditor.containProcess(65432);
+      expect(res.action).toBe('REJECTED_UNAUTHORIZED');
+      expect(res.success).toBe(false);
+    });
 
-      const res = await auditor.containProcess(65432, { dryRun: true });
+    it('supports dryRun containment with valid authorization token without killing processes', async () => {
+      // Evaluate a malicious process to obtain an authoritative authorization token
+      const evalResult = behaviorEngine.evaluateProcess({
+        pid: 65432,
+        processName: 'vssadmin.exe',
+        commandLine: 'vssadmin.exe delete shadows /all /quiet'
+      });
+      expect(evalResult.engineVerdict).toBe('CONTAIN_PROCESS');
+      expect(evalResult.authorization).toBeDefined();
+
+      const res = await auditor.containProcess(65432, {
+        dryRun: true,
+        authorizationId: evalResult.authorization!.authorizationId,
+        token: evalResult.authorization!.singleUseToken
+      });
       expect(res.action).toBe('TERMINATED');
       expect(res.reason).toContain('Dry-run');
     });
 
-    it('successfully terminates a real non-system child process', async () => {
+    it('successfully terminates a real non-system child process with valid authorization', async () => {
       // Spawn a lightweight idle process
       const child = child_process.spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], {
         stdio: 'ignore'
@@ -163,9 +185,22 @@ describe('ProcessAuditorService (Phase F — Process Auditing & Containment)', (
 
       expect(child.pid).toBeDefined();
       const pid = child.pid!;
+      const procName = path.basename(process.execPath);
+
+      // Evaluate the child with a malicious payload to issue authorization
+      const evalResult = behaviorEngine.evaluateProcess({
+        pid,
+        processName: procName,
+        executablePath: process.execPath,
+        commandLine: 'vssadmin.exe delete shadows /all /quiet'
+      });
+      expect(evalResult.authorization).toBeDefined();
 
       try {
-        const res = await auditor.containProcess(pid);
+        const res = await auditor.containProcess(pid, {
+          authorizationId: evalResult.authorization!.authorizationId,
+          token: evalResult.authorization!.singleUseToken
+        });
         expect(res.action).toBe('TERMINATED');
         expect(res.pid).toBe(pid);
 
@@ -184,6 +219,40 @@ describe('ProcessAuditorService (Phase F — Process Auditing & Containment)', (
           // already dead
         }
       }
+    });
+
+    it('revalidates process identity and rejects containment on PID reuse (SEC-F-05)', async () => {
+      const mockAuditor = new ProcessAuditorService({
+        behaviorEngine,
+        processQueryProvider: async () => [
+          {
+            pid: 65433,
+            processName: 'temp_threat.exe',
+            creationDate: 2000000
+          }
+        ]
+      });
+
+      const evalResult = behaviorEngine.evaluateProcess({
+        pid: 65433,
+        processName: 'temp_threat.exe',
+        commandLine: 'vssadmin.exe delete shadows /all /quiet',
+        creationTime: 1000000
+      });
+      expect(evalResult.authorization).toBeDefined();
+
+      // Attempt containment where live process creation time differs by > 1000ms
+      const res = await mockAuditor.containProcess(65433, {
+        authorizationId: evalResult.authorization!.authorizationId,
+        token: evalResult.authorization!.singleUseToken
+      });
+      expect(res.action).toBe('REJECTED_PID_REUSE');
+      expect(res.success).toBe(false);
+    });
+
+    it('defaults scanBinaryOnDisk to true (SEC-F-03)', () => {
+      const defaultAuditor = new ProcessAuditorService();
+      expect((defaultAuditor as any).scanBinaryOnDisk).toBe(true);
     });
   });
 
