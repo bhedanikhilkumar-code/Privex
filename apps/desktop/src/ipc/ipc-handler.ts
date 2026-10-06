@@ -19,6 +19,7 @@ import { NotificationService } from '../services/notification.service';
 import { ExclusionManagerService } from '../services/exclusion-manager.service';
 import { DesktopSecurityAdapter } from '../core/desktop-security-adapter';
 import { MotwAnalyzer } from '../core/motw-analyzer';
+import { EmailMimeParser } from '../core/email-mime-parser';
 import { ThreatIntel } from '@private-protection/core';
 import {
   DesktopProtectionStatus,
@@ -37,7 +38,8 @@ import {
   DesktopNotification,
   NotificationInboxState,
   ExclusionItem,
-  MotwAnalysisResult
+  MotwAnalysisResult,
+  EmailAnalysisResult
 } from '../types/desktop.types';
 
 
@@ -874,6 +876,12 @@ export class IpcHandler {
       verifyOrigin(event);
       return this.handleGetWebProtectionStatus();
     });
+
+    // Phase K: Practical Email Threat Handlers
+    ipcMain.handle(IPC_CHANNELS.EMAIL_ANALYZE_FILE, async (event, filePath: unknown) => {
+      verifyOrigin(event);
+      return this.handleEmailAnalyzeFile(filePath);
+    });
   }
 
   // ============================================================
@@ -989,6 +997,15 @@ export class IpcHandler {
       threatIntelRulesLoaded: ThreatIntel.getSharedInstance().snapshot().badCount,
       platform: process.platform
     };
+  }
+
+  // ============================================================
+  // PHASE K EMAIL THREAT HANDLERS
+  // ============================================================
+
+  public async handleEmailAnalyzeFile(filePath: unknown): Promise<EmailAnalysisResult> {
+    const validPath = IpcValidator.validatePath(filePath);
+    return EmailMimeParser.analyzeEmailFile(validPath);
   }
 }
 

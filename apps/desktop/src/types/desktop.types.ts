@@ -150,6 +150,7 @@ export interface FileAnalysisResult {
   disposition?: DetectionDisposition;
   errorReason?: string;
   motw?: MotwAnalysisResult;
+  email?: EmailAnalysisResult;
 }
 
 export interface ProcessContainmentAuthorization {
@@ -747,5 +748,102 @@ export interface MotwAnalysisResult {
   readonly evidenceFactors: string[];
   readonly hostUrlAnalysis?: MotwUrlAnalysis;
   readonly referrerUrlAnalysis?: MotwUrlAnalysis;
+}
+
+// ============================================================
+// PHASE K: PRACTICAL EMAIL (.EML/.MSG) & NETWORK SOCKET TYPES
+// ============================================================
+
+export interface EmailAuthResults {
+  readonly spf?: 'pass' | 'fail' | 'softfail' | 'neutral' | 'none' | 'temperror' | 'permerror' | string;
+  readonly dmarc?: 'pass' | 'fail' | 'none' | string;
+  readonly dkim?: 'pass' | 'fail' | 'none' | string;
+  readonly raw?: string;
+}
+
+export interface EmailAttachmentInfo {
+  readonly fileName: string;
+  readonly contentType: string;
+  readonly sizeBytes: number;
+  readonly sha256: string;
+  readonly isExecutable: boolean;
+  readonly isThreat: boolean;
+  readonly threatName?: string;
+  readonly riskScore: number;
+  readonly evidenceFactors: string[];
+}
+
+export interface EmailMetadata {
+  readonly from?: string;
+  readonly fromDomain?: string;
+  readonly replyTo?: string;
+  readonly replyToDomain?: string;
+  readonly returnPath?: string;
+  readonly returnPathDomain?: string;
+  readonly subject?: string;
+  readonly date?: string;
+  readonly messageId?: string;
+  readonly authResults: EmailAuthResults;
+  readonly urlsFound: string[];
+  readonly urlThreatsCount: number;
+  readonly attachmentsCount: number;
+  readonly attachmentThreatsCount: number;
+  readonly attachments: EmailAttachmentInfo[];
+  readonly isSenderSpoofed: boolean;
+  readonly isReplyToMismatched: boolean;
+  readonly isReturnPathMismatched: boolean;
+  readonly isAuthFailed: boolean;
+}
+
+export interface EmailAnalysisResult {
+  readonly hasEmailMetadata: boolean;
+  readonly metadata?: EmailMetadata;
+  readonly emailRiskScore: number;
+  readonly emailSeverity: ThreatSeverity;
+  readonly isEmailMalicious: boolean;
+  readonly threatIndicators: string[];
+  readonly evidenceFactors: string[];
+  readonly bodyTextSnippet?: string;
+}
+
+export interface NetworkSocketConnection {
+  readonly protocol: 'TCP' | 'UDP';
+  readonly localAddress: string;
+  readonly localPort: number;
+  readonly remoteAddress: string;
+  readonly remotePort: number;
+  readonly state: string;
+  readonly pid: number;
+  readonly processName?: string;
+  readonly processPath?: string;
+  readonly isRemoteMalicious: boolean;
+  readonly isSuspiciousPort: boolean;
+  readonly threatName?: string;
+  readonly riskScore: number;
+  readonly threatIndicators: string[];
+}
+
+export interface FirewallProfileState {
+  readonly domainProfile: 'ON' | 'OFF' | 'UNKNOWN';
+  readonly privateProfile: 'ON' | 'OFF' | 'UNKNOWN';
+  readonly publicProfile: 'ON' | 'OFF' | 'UNKNOWN';
+  readonly isFirewallActive: boolean;
+  readonly rawDiagnostic?: string;
+}
+
+export interface NetworkPostureReport {
+  readonly interfaces: Array<{
+    name: string;
+    address: string;
+    family: 'IPv4' | 'IPv6';
+    isInternal: boolean;
+  }>;
+  readonly activeInterfacesCount: number;
+  readonly hasExternalConnectivity: boolean;
+  readonly firewallStatus: FirewallProfileState;
+  readonly connections: NetworkSocketConnection[];
+  readonly maliciousSocketsCount: number;
+  readonly suspiciousSocketsCount: number;
+  readonly notice: string;
 }
 

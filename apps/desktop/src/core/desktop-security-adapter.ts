@@ -17,6 +17,7 @@ import {
   MotwAnalysisResult
 } from '../types/desktop.types';
 import { MotwAnalyzer } from './motw-analyzer';
+import { EmailMimeParser } from './email-mime-parser';
 
 export class DesktopSecurityAdapter {
   private pipeline: DetectionPipeline;
@@ -34,7 +35,7 @@ export class DesktopSecurityAdapter {
    */
   public async analyzeFile(
     filePath: string,
-    options?: { entropyDetectionEnabled?: boolean; inspectMotw?: boolean }
+    options?: { entropyDetectionEnabled?: boolean; inspectMotw?: boolean; inspectEmail?: boolean }
   ): Promise<FileAnalysisResult> {
     return FileAnalyzer.analyzeFile(filePath, options);
   }
@@ -44,6 +45,13 @@ export class DesktopSecurityAdapter {
    */
   public analyzeMotw(filePath: string): MotwAnalysisResult {
     return MotwAnalyzer.analyzeFile(filePath);
+  }
+
+  /**
+   * Performs practical email (.eml / .msg) threat analysis.
+   */
+  public async analyzeEmail(filePath: string) {
+    return EmailMimeParser.analyzeEmailFile(filePath);
   }
 
   /**

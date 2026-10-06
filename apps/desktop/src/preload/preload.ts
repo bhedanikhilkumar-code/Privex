@@ -18,7 +18,8 @@ import {
   NotificationInboxState,
   ExclusionItem,
   CreateExclusionInput,
-  MotwAnalysisResult
+  MotwAnalysisResult,
+  EmailAnalysisResult
 } from '../types/desktop.types';
 import { NetworkPostureReport } from '../services/network-monitor.service';
 
@@ -76,6 +77,9 @@ export interface DesktopSecurityApi {
     threatIntelRulesLoaded: number;
     platform: string;
   }>;
+
+  // Phase K: Practical Email (.eml / .msg) Threat API
+  analyzeEmail: (filePath: string) => Promise<EmailAnalysisResult>;
 }
 
 declare global {
@@ -218,7 +222,10 @@ export function createDesktopSecurityApi(ipcRenderer: {
 
     // Phase J: Web & Download MOTW API
     analyzeMotw: (filePath) => ipcRenderer.invoke(IPC_CHANNELS.MOTW_ANALYZE_FILE, filePath),
-    getWebProtectionStatus: () => ipcRenderer.invoke(IPC_CHANNELS.WEB_PROTECTION_STATUS_GET)
+    getWebProtectionStatus: () => ipcRenderer.invoke(IPC_CHANNELS.WEB_PROTECTION_STATUS_GET),
+
+    // Phase K: Practical Email (.eml / .msg) Threat API
+    analyzeEmail: (filePath) => ipcRenderer.invoke(IPC_CHANNELS.EMAIL_ANALYZE_FILE, filePath)
   };
 }
 

@@ -62,7 +62,10 @@ export const IPC_CHANNELS = {
 
   // Phase J: Web & Download MOTW Protection
   MOTW_ANALYZE_FILE: 'desktop:motw:analyzeFile',
-  WEB_PROTECTION_STATUS_GET: 'desktop:webProtection:statusGet'
+  WEB_PROTECTION_STATUS_GET: 'desktop:webProtection:statusGet',
+
+  // Phase K: Practical Email (.eml / .msg) & Network Socket Protection
+  EMAIL_ANALYZE_FILE: 'desktop:email:analyzeFile'
 } as const;
 
 export type IpcChannel = typeof IPC_CHANNELS[keyof typeof IPC_CHANNELS];
@@ -118,7 +121,8 @@ export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.EXCLUSION_TOGGLE,
   IPC_CHANNELS.EXCLUSIONS_CLEAR_ALL,
   IPC_CHANNELS.MOTW_ANALYZE_FILE,
-  IPC_CHANNELS.WEB_PROTECTION_STATUS_GET
+  IPC_CHANNELS.WEB_PROTECTION_STATUS_GET,
+  IPC_CHANNELS.EMAIL_ANALYZE_FILE
 ] as const;
 
 

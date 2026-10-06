@@ -2,12 +2,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import { CoreFileAnalyzer, CleanFileCache, ThreatIntel, Verdict, EngineVerdict } from '@private-protection/core';
-import { FileAnalysisResult, MotwAnalysisResult } from '../types/desktop.types';
+import { FileAnalysisResult, MotwAnalysisResult, EmailAnalysisResult } from '../types/desktop.types';
 import { MotwAnalyzer } from './motw-analyzer';
+import { EmailMimeParser } from './email-mime-parser';
 
 export interface DesktopFileAnalyzeOptions {
   readonly entropyDetectionEnabled?: boolean;
   readonly inspectMotw?: boolean;
+  readonly inspectEmail?: boolean;
 }
 
 /**
@@ -244,6 +246,45 @@ export class FileAnalyzer {
       }
     }
 
+    // Stage 4: Practical Email (.eml / .msg) Threat Inspection (Phase K)
+    let emailResult: EmailAnalysisResult | undefined;
+    const shouldInspectEmail = options?.inspectEmail !== false;
+    const fileExt = path.extname(filePath).toLowerCase();
+
+    if (shouldInspectEmail && (fileExt === '.eml' || fileExt === '.msg')) {
+      emailResult = await EmailMimeParser.analyzeEmailFile(filePath);
+      if (emailResult.hasEmailMetadata) {
+        if (emailResult.evidenceFactors.length > 0) {
+          finalEvidenceFactors.push(...emailResult.evidenceFactors);
+        }
+
+        if (emailResult.emailRiskScore > 0) {
+          finalRiskScore = Math.min(100, Math.max(finalRiskScore, emailResult.emailRiskScore));
+
+          if (finalRiskScore >= 85 || emailResult.emailRiskScore >= 85) {
+            finalVerdict = 'BLOCK';
+            finalSeverity = 'critical';
+            if (finalThreatName === 'BENIGN_FILE' || finalThreatName === 'UNKNOWN') {
+              finalThreatName = emailResult.threatIndicators[0] || 'PHISHING_EMAIL_THREAT';
+            }
+          } else if (finalRiskScore >= 70 || emailResult.emailRiskScore >= 70) {
+            if (finalVerdict !== 'BLOCK') {
+              finalVerdict = 'WARN';
+              finalSeverity = 'dangerous';
+            }
+            if (finalThreatName === 'BENIGN_FILE' || finalThreatName === 'UNKNOWN') {
+              finalThreatName = 'SUSPICIOUS_EMAIL_THREAT';
+            }
+          } else if (finalRiskScore >= 40) {
+            if (finalVerdict === 'ALLOW') {
+              finalVerdict = 'WARN';
+              finalSeverity = 'suspicious';
+            }
+          }
+        }
+      }
+    }
+
     if (finalVerdict === 'ALLOW' && finalRiskScore === 0) {
       CleanFileCache.getSharedInstance().set(
         filePath,
@@ -275,6 +316,7 @@ export class FileAnalyzer {
       analysisStatus: coreOut.analysisStatus,
       disposition: coreOut.disposition,
       ...(motwResult ? { motw: motwResult } : {}),
+      ...(emailResult ? { email: emailResult } : {}),
       ...(coreOut.errorReason ? { errorReason: coreOut.errorReason } : {})
     };
   }
