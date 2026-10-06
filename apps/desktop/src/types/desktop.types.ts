@@ -23,6 +23,7 @@ export type SecurityLogEventType =
   | 'QUARANTINE_ISOLATED'
   | 'QUARANTINE_RESTORED'
   | 'QUARANTINE_DELETED'
+  | 'PROCESS_CONTAINED'
   | 'ENGINE_FAILURE'
   | 'CONFIG_FAILURE'
   | 'CONFIG_UPDATED'
@@ -144,12 +145,54 @@ export interface FileAnalysisResult {
   errorReason?: string;
 }
 
+export interface ProcessLineageNode {
+  pid: number;
+  ppid?: number;
+  processName: string;
+  executablePath?: string;
+  commandLine?: string;
+  sanitizedCommandLine?: string;
+  creationTime: number;
+  sha256?: string;
+  isSigned?: boolean;
+  signer?: string;
+  isLolbin?: boolean;
+  isProtectedSystemProcess?: boolean;
+  instanceKey: string;
+}
+
+export interface ProcessContainmentResult {
+  success: boolean;
+  pid: number;
+  processName?: string;
+  action: 'TERMINATED' | 'REJECTED_PROTECTED' | 'NOT_FOUND' | 'FAILED';
+  reason: string;
+  containedAt: number;
+}
+
 export interface ProcessInfo {
   pid: number;
   processName: string;
   executablePath: string;
   isSuspicious: boolean;
   reason?: string;
+  ppid?: number;
+  parentName?: string;
+  commandLine?: string;
+  sanitizedCommandLine?: string;
+  sha256?: string;
+  isSigned?: boolean;
+  signer?: string;
+  creationDate?: number;
+  riskScore?: number;
+  verdict?: ThreatVerdict;
+  engineVerdict?: 'ALLOW' | 'INFORM' | 'WARN' | 'BLOCK' | 'CONTAIN_PROCESS';
+  severity?: ThreatSeverity;
+  threatName?: string;
+  evidenceFactors?: string[];
+  isLolbin?: boolean;
+  lineageChain?: string[];
+  isProtectedSystemProcess?: boolean;
 }
 
 export interface PersistenceItem {

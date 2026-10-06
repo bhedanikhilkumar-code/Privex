@@ -456,6 +456,18 @@ export class IpcHandler {
     return this.processAuditor.auditRunningProcesses();
   }
 
+  public async handleContainProcess(pid: number, options?: { force?: boolean; dryRun?: boolean; reason?: string }) {
+    const validPid = IpcValidator.validateNumber(pid, 0, 9999999);
+    const result = await this.processAuditor.containProcess(validPid, options);
+    this.storage.recordSecurityEvent(
+      'PROCESS_CONTAINED',
+      result.success ? 'INFO' : 'WARN',
+      `Process containment evaluated for PID ${validPid}: ${result.action} (${result.reason})`,
+      { pid: validPid, action: result.action, success: result.success }
+    );
+    return result;
+  }
+
   public async handleAuditPersistence() {
     return this.persistenceAuditor.auditStartupLocations();
   }
@@ -572,6 +584,11 @@ export class IpcHandler {
     ipcMain.handle(IPC_CHANNELS.PROCESSES_AUDIT, async (event) => {
       verifyOrigin(event);
       return this.handleAuditProcesses();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.PROCESS_CONTAIN, async (event, pid: number, options?: any) => {
+      verifyOrigin(event);
+      return this.handleContainProcess(pid, options);
     });
 
     ipcMain.handle(IPC_CHANNELS.PERSISTENCE_AUDIT, async (event) => {

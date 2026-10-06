@@ -7,6 +7,7 @@ import {
   DetectedThreat,
   DesktopAssistantExplanation,
   ProcessInfo,
+  ProcessContainmentResult,
   PersistenceItem,
   RemovableDrive,
   ScanProgress,
@@ -37,6 +38,7 @@ export interface DesktopSecurityApi {
   explainThreat: (threat: DetectedThreat, level: 'grade6' | 'grade8') => Promise<DesktopAssistantExplanation>;
 
   auditProcesses: () => Promise<ProcessInfo[]>;
+  containProcess: (pid: number, options?: { force?: boolean; dryRun?: boolean; reason?: string }) => Promise<ProcessContainmentResult>;
   auditPersistence: () => Promise<PersistenceItem[]>;
   getRemovableMedia: () => Promise<RemovableDrive[]>;
   getNetworkPosture: () => Promise<NetworkPostureReport>;
@@ -134,6 +136,7 @@ export function createDesktopSecurityApi(ipcRenderer: {
     explainThreat: (threat, level) => ipcRenderer.invoke(IPC_CHANNELS.ASSISTANT_EXPLAIN, threat, level),
 
     auditProcesses: () => ipcRenderer.invoke(IPC_CHANNELS.PROCESSES_AUDIT),
+    containProcess: (pid, options) => ipcRenderer.invoke(IPC_CHANNELS.PROCESS_CONTAIN, pid, options),
     auditPersistence: () => ipcRenderer.invoke(IPC_CHANNELS.PERSISTENCE_AUDIT),
     getRemovableMedia: () => ipcRenderer.invoke(IPC_CHANNELS.REMOVABLE_MEDIA_GET),
     getNetworkPosture: () => ipcRenderer.invoke(IPC_CHANNELS.NETWORK_POSTURE_GET),

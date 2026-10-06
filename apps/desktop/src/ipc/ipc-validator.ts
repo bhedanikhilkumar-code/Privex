@@ -326,4 +326,17 @@ export class IpcValidator {
       quarantined: Boolean(t.quarantined)
     };
   }
+
+  /**
+   * Validates an integer within allowed range (e.g. PID).
+   */
+  public static validateNumber(value: unknown, min = 0, max = 9999999): number {
+    if (typeof value !== 'number' || !Number.isFinite(value) || !Number.isInteger(value)) {
+      throw new Error('INVALID_NUMBER: Expected a valid finite integer.');
+    }
+    if (value < min || value > max) {
+      throw new Error(`SECURITY_VIOLATION: Value ${value} is outside valid range [${min}, ${max}].`);
+    }
+    return value;
+  }
 }
