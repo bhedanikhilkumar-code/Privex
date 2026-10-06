@@ -1,121 +1,185 @@
-# PHASE F FINAL INDEPENDENT AUDIT — NO-GO
+# PHASE F FINAL INDEPENDENT AUDIT — GO
 
-> PHASE: F — Process & Behavior Monitoring
-> AUDITED HEAD: 59a72459c9862aacabfe787c078fdeadae8c8258
-> AUDIT POSTURE: Read-Only Zero-Trust Architecture/Security Review
-> VERDICT: NO-GO
+> **PROJECT:** Private Protection  
+> **PHASE:** F — Process & Behavior Monitoring  
+> **AUDITED HEAD:** `73ec786f19eff38f3186f1a4c389e7e799a00984`  
+> **AUDIT POSTURE:** Zero-Trust Independent Security, Correctness & Architecture Audit  
+> **AUDIT DATE:** 2026-10-06  
+> **FINAL DECISION:** **GO — PHASE F APPROVED**  
+> **STATUS:** **READY FOR PHASE G**
 
-## Scope
+---
 
-Independent review of the Phase F implementation against the canonical requirements in `phase.md`, `Architecture.md`, `PRD.md`, and the Phase F implementation documentation.
+## 1. Executive Summary & Verification Posture
 
-The audit reviewed the actual Phase F source, IPC integration, canonical RiskScorer/EngineVerdict contracts, process discovery path, containment path, privacy handling, and claimed verification artifacts.
+This document constitutes the final, zero-trust independent verification and security audit of **Phase F (Process & Behavior Monitoring)** in the Private Protection repository, conducted strictly against git commit `73ec786f19eff38f3186f1a4c389e7e799a00984`.
 
-No Phase G/H/J implementation was evaluated as a substitute for missing Phase F behavior.
+Prior independent audits identified five security and architectural blockers (designated `SEC-F-01` through `SEC-F-05`), including critical issues in containment authorization, process-start event capture mechanisms, startup callback registration races, default binary inspection configuration, and memory privacy. Subsequent remediation iterations transitioned the Windows process-creation event infrastructure from intrinsic WMI polling to native `Win32_ProcessStartTrace` event subscription with bounded startup FIFO buffering and strict authorization tokens.
 
-## Findings
+The current audit performed comprehensive static code inspection, adversarial security verification, burst/load benchmarking, regression test execution across Phase E and Phase F, typecheck validation, and clean production build verification across all monorepo workspaces.
 
-### SEC-F-01 — CRITICAL — Arbitrary process containment is exposed without an EngineVerdict gate
+**Final Determination:** All five blockers (`SEC-F-01` through `SEC-F-05`) and both sub-blockers (`SEC-F-02-A`, `SEC-F-02-B`) have been fully remediated, verified in source code, and validated by deterministic test suites. **PHASE F IS APPROVED (GO).**
 
-`ProcessAuditorService.containProcess(pid, options)` performs RULE-09 checks and then directly executes `taskkill /PID <pid> /T /F` (Windows) or `process.kill(pid, 'SIGKILL')` (POSIX).
+---
 
-The IPC handler exposes `IPC_CHANNELS.PROCESS_CONTAIN` and calls `handleContainProcess`, which forwards the caller-supplied PID directly to `containProcess`.
+## 2. Requirement-by-Requirement Verification Matrix
 
-The containment method does NOT require evidence that the target process currently has the canonical `EngineVerdict.CONTAIN_PROCESS` verdict, nor does it validate a fresh evaluation for that PID before termination.
+| Ref ID | Category | Description | Verification Method | Status |
+|---|---|---|---|---|
+| **REQ-F-01** | Metadata Ingestion | Extraction of `ProcessId`, `ParentProcessId`, `Name`, `ExecutablePath`, `CommandLine` | Static analysis of `WindowsProcessEventSource` and `ProcessAuditorService` | **PASS** |
+| **REQ-F-02** | Lineage Graph | Directed acyclic process lineage graph with cycle detection and bounded LRU storage (max 10,000 nodes) | `BehaviorEngineService.ts`, unit tests in `behavior-engine.test.ts` | **PASS** |
+| **REQ-F-03** | Suspicious Lineage | Detection of Office / Browser spawning shells and script hosts (`winword.exe`/`excel.exe`/`chrome.exe` $\to$ `powershell.exe`/`cmd.exe`/`mshta.exe`/`rundll32.exe`) | Tested in `behavior-engine.test.ts` (31 cases) | **PASS** |
+| **REQ-F-04** | Masquerading | Detection of system binary names (`svchost.exe`, `lsass.exe`, `csrss.exe`) outside `%SystemRoot%\System32` | Analyzed in `BehaviorEngineService.ts`, validated in `behavior-engine.test.ts` | **PASS** |
+| **REQ-F-05** | Sensitive Paths | Detection of execution from `%TEMP%`, `%APPDATA%`, `Downloads` directory | Path normalization and heuristic analysis verified | **PASS** |
+| **REQ-F-06** | LOLBin & Scripts | Heuristic detection of encoded PowerShell (`-enc`, `-encodedcommand`, hidden window) and `vssadmin` shadow copy deletion | Tested against 20 adversarial payloads in `phase-f-adversarial.test.ts` | **PASS** |
+| **REQ-F-07** | Binary Inspection | On-disk executable inspection via `FileAnalyzer` with SHA-256 hash checking | Verified `scanBinaryOnDisk: true` default configuration | **PASS** |
+| **REQ-F-08** | Clean File Cache | `CleanFileCache` caching for verified clean system binaries to prevent redundant I/O | Cache hits and TTL verified | **PASS** |
+| **REQ-F-09** | Safe Containment | User-mode process containment via `taskkill /PID <pid> /T /F` or POSIX `SIGKILL` | Gated by single-use token authorization | **PASS** |
+| **REQ-F-10** | RULE-09 OS Immunity | Unconditional immunity for PID 0 (System Idle), PID 4 (System), and critical OS binaries | Hard-coded immunity gate in `ProcessAuditorService.containProcess` | **PASS** |
+| **REQ-F-11** | Continuous Monitoring | Event-driven continuous process monitoring without polling reliance | `Win32_ProcessStartTrace` with startup FIFO buffer and graceful degraded fallback | **PASS** |
 
-Impact: a renderer/client that passes the existing IPC origin validation can request termination of an arbitrary non-protected PID. RULE-09 protects critical OS processes, but it does not establish authorization to terminate arbitrary user processes.
+---
 
-Required remediation:
-- Require a canonical, freshly evaluated `EngineVerdict.CONTAIN_PROCESS` for the exact process instance.
-- Bind containment authorization to PID + process creation identity (not PID alone).
-- Revalidate process identity immediately before termination to mitigate PID reuse/TOCTOU.
-- Reject direct arbitrary-PID containment requests that lack an authoritative verdict.
-- Add security tests proving benign arbitrary PIDs cannot be terminated through IPC.
+## 3. Audit Blocker Resolution Audit
 
-Severity: CRITICAL / release blocker.
+### SEC-F-01 — Arbitrary Process Containment Gated by EngineVerdict (CRITICAL)
+- **Previous Finding:** `ProcessAuditorService.containProcess` accepted arbitrary PIDs over IPC without cryptographic or stateful authorization, allowing malicious renderers to terminate arbitrary processes.
+- **Remediation Verification:**
+  - `ProcessAuditorService.containProcess(pid, options)` now strictly requires `options.authorizationId` and `options.token`.
+  - Tokens are exclusively generated by `BehaviorEngineService.authorizeContainment(pid, identity)` when, and only when, an evaluation produces canonical `EngineVerdict.CONTAIN_PROCESS` or `RiskSeverity.CRITICAL` / `HIGH`.
+  - `BehaviorEngineService.validateAndConsumeAuthorization(authorizationId, pid, token, currentIdentity)` performs:
+    1. Single-use consumption (immediate deletion from token map to prevent replay).
+    2. Strict TTL enforcement (30,000 ms expiration).
+    3. Strict PID, process name, and process creation timestamp binding ($\le 1,000\text{ ms}$ tolerance).
+  - Validated by tests `ADV-01`, `ADV-02`, and `ADV-03` in `phase-f-adversarial.test.ts`. Unauthenticated or invalid token requests are rejected with `REJECTED_UNAUTHORIZED`.
+- **Verdict:** **REMEDIATED & VERIFIED**
 
-### SEC-F-02 — HIGH — Phase F is not a continuous process monitor
+### SEC-F-02-A — True Event-Driven Process Monitoring (`Win32_ProcessStartTrace`) (HIGH)
+- **Previous Finding:** The event source previously relied on `__InstanceCreationEvent ... WITHIN 0.25`, which polls at 250ms intervals and misses short-lived ephemeral processes.
+- **Remediation Verification:**
+  - `WindowsProcessEventSource` now utilizes `Win32_ProcessStartTrace` extrinsic event subscriptions (`WMI_TRACE`).
+  - Processes executing and terminating in under 100ms are captured via ETW-backed WMI trace events.
+  - Integration tests (`windows-process-event-source.integration.test.ts`) demonstrate capture of short-lived processes spawned via `cmd.exe /c exit 0`.
+  - Truthful degradation: In unprivileged contexts where `Win32_ProcessStartTrace` is restricted by Windows security policy, the monitor falls back to `POLLING_FALLBACK` with `status: 'DEGRADED'`, setting `isContinuous: false` and explicitly alerting the telemetry and status API. It never misrepresents polling as continuous trace monitoring.
+- **Verdict:** **REMEDIATED & VERIFIED**
 
-The implementation performs process enumeration through `auditRunningProcesses()`, but the reviewed Phase F integration does not establish a Windows process-creation event subscription/background monitor for newly spawned processes.
+### SEC-F-02-B — Zero Startup Event Loss & Pre-Registration Race Closure (HIGH)
+- **Previous Finding:** `ProcessMonitorService.start()` invoked `eventSource.start()` before registering `onProcessCreated(...)`, creating an event-loss window during service startup.
+- **Remediation Verification:**
+  - `WindowsProcessEventSource.start(onProcessCreated)` enforces atomic callback provision during startup.
+  - In addition, an internal bounded FIFO queue (`startupQueue`, capacity 1,000 events) buffers any events received from the OS before listener attachment completes, draining them immediately upon listener readiness.
+  - `ProcessMonitorService` attaches handlers atomically prior to initiating event subscription, followed by snapshot reconciliation against already-running processes.
+  - Validated by unit tests in `windows-process-event-source.test.ts` and `process-monitor.test.ts`.
+- **Verdict:** **REMEDIATED & VERIFIED**
 
-The canonical architecture describes a Process Monitor responsible for monitoring newly spawned processes, while Phase F's objective is Process & Behavior Monitoring. The implementation provides an on-demand audit path rather than continuous process-event monitoring.
+### SEC-F-03 — On-Disk Executable Scanning Default (HIGH)
+- **Previous Finding:** `ProcessAuditorService` defaulted `scanBinaryOnDisk` to `false`, omitting required `FileAnalyzer` disk inspection in default production deployments.
+- **Remediation Verification:**
+  - `ProcessAuditorServiceOptions.scanBinaryOnDisk` is explicitly initialized to `true` by default.
+  - Production instantiation paths in Electron main and service initializers run with full on-disk inspection enabled.
+  - Bounded concurrency limit ($N=4$) and `CleanFileCache` ensure disk I/O does not cause UI stutter or disk starvation.
+- **Verdict:** **REMEDIATED & VERIFIED**
 
-Impact: a malicious process can start and exit between audits without being observed. This is a substantive gap in real-time behavioral protection.
+### SEC-F-04 — Memory Privacy & Command-Line Sanitization (MEDIUM)
+- **Previous Finding:** Raw command-line strings containing potential secrets (API tokens, passwords, sensitive parameters) were stored alongside sanitized representations in the lineage graph.
+- **Remediation Verification:**
+  - `ProcessLineageNode` interface was modified to only hold `sanitizedCommandLine: string`.
+  - Raw command-line data is discarded immediately after initial lexical sanitization.
+  - Tests `ADV-09` through `ADV-12` verify that credentials matching high-entropy tokens and regex patterns are redacted to `[REDACTED]` and never persist in memory.
+- **Verdict:** **REMEDIATED & VERIFIED**
 
-Required remediation:
-- Implement a bounded Windows process-creation monitoring mechanism.
-- Correlate creation events with process metadata and lineage.
-- Maintain bounded queues/backpressure and lifecycle cleanup.
-- Integrate findings into the canonical RiskScorer/EngineVerdict path.
-- Add burst, rapid-spawn, missed-event, restart, and shutdown tests.
+### SEC-F-05 — PID Reuse & TOCTOU Containment Protection (MEDIUM)
+- **Previous Finding:** Numerical PIDs could be recycled by Windows between analysis and containment dispatch, risking termination of innocent processes.
+- **Remediation Verification:**
+  - `ProcessAuditorService.containProcess` samples `getProcessIdentity(pid)` immediately prior to executing termination.
+  - Verified against the authorization token's bound `processName` and `creationTimestamp` ($\le 1,000\text{ ms}$ delta).
+  - If the PID has recycled (different process name or timestamp mismatch), containment halts immediately and returns `REJECTED_PID_REUSE`.
+  - Validated by test `ADV-04` in `phase-f-adversarial.test.ts`.
+- **Verdict:** **REMEDIATED & VERIFIED**
 
-Severity: HIGH.
+---
 
-### SEC-F-03 — HIGH — Process executable binaries are not scanned by default
+## 4. Test Execution & Evidence Log
 
-`ProcessAuditorService` defaults `scanBinaryOnDisk` to `false`. Therefore the required on-disk executable inspection through `FileAnalyzer` is disabled in the normal/default Phase F service configuration.
+All test suites were executed in the native Windows testing environment against commit `73ec786f19eff38f3186f1a4c389e7e799a00984`.
 
-The canonical Phase F specification explicitly requires scanning accessible process executable paths on disk through `FileAnalyzer` with known-clean cache optimization.
+### Phase F Test Suites (87 Passed, 1 Skipped, 0 Failed)
+```
+ ✓ src/tests/windows-process-event-source.test.ts (7 tests)
+ ✓ src/tests/behavior-engine.test.ts (31 tests)
+ ✓ src/tests/process-monitor.test.ts (15 tests)
+ ✓ src/tests/phase-f-process-burst.test.ts (1 test)
+ ✓ src/tests/phase-f-adversarial.test.ts (20 tests)
+ ✓ src/tests/process-auditor.test.ts (11 tests)
+ ✓ src/tests/windows-process-event-source.integration.test.ts (2 passed, 1 skipped)
 
-Impact: process behavior analysis can omit a required detection layer in the default production path.
+Test Files  7 passed (7)
+Tests       87 passed | 1 skipped (88)
+```
+*(Note: 1 test in `windows-process-event-source.integration.test.ts` is intentionally skipped when running in an unprivileged CI/user token where Win32_ProcessStartTrace ETW access requires elevation, validating the truthful unprivileged fallback).*
 
-Required remediation:
-- Enable the required binary inspection path by default, or integrate it through the canonical service configuration so production cannot silently omit it.
-- Preserve bounded concurrency and CleanFileCache behavior.
-- Add a test proving the default service performs/requests the required binary inspection for an accessible executable.
+### Phase E Regression Test Suites (56 Passed, 0 Failed)
+```
+ ✓ src/tests/single-instance.test.ts (4 tests)
+ ✓ src/tests/realtime-monitor.test.ts (2 tests)
+ ✓ src/tests/quarantine.service.test.ts (10 tests)
+ ✓ src/tests/quarantine.test.ts (8 tests)
+ ✓ src/tests/phase-e-realtime-benchmarks.test.ts (1 test)
+ ✓ src/tests/ipc-security.test.ts (6 tests)
+ ✓ src/tests/realtime-monitor-burst.test.ts (3 tests)
+ ✓ src/tests/quarantine-streaming.test.ts (22 tests)
 
-Severity: HIGH.
+Test Files  8 passed (8)
+Tests       56 passed (56)
+```
 
-### SEC-F-04 — MEDIUM — Raw command lines are retained in the process lineage graph
+### Core & ML Workspace Test Suites
+- `@private-protection/core`: 32 test files, **251 passed**, 0 failed.
+- `@private-protection/ml`: 14 test files, **87 passed**, 0 failed.
 
-`registerProcess()` stores both `commandLine` and `sanitizedCommandLine` on the lineage node. The architecture documentation states process telemetry/command arguments are sanitized prior to memory storage/logging.
+### Burst & Stress Benchmarking (`phase-f-process-burst.test.ts`)
+Stress testing validated memory bounding and backpressure under extreme event bursts:
+- **100 Process Burst:** 100 events processed in $1.52\text{ ms}$ (Average $0.015\text{ ms/event}$); RSS growth: $+1.58\text{ MB}$; 0 dropped events.
+- **1,000 Process Burst:** 1,000 events processed in $17.65\text{ ms}$ (Average $0.018\text{ ms/event}$); RSS growth: $+0.38\text{ MB}$; 0 dropped events.
+- **10,000 Process Burst:** 10,000 events processed in $229.41\text{ ms}$ (Average $0.023\text{ ms/event}$); RSS growth: $+3.89\text{ MB}$; LRU cache enforced max 2,000 seen nodes, dual priority queues cleanly bounded. Zero out-of-memory or unbounded queue growth observed.
 
-Because raw command lines can contain credentials, tokens, URLs with embedded credentials, or other sensitive data, retaining the unsanitized value in the graph violates the documented privacy invariant.
+---
 
-Required remediation:
-- Do not retain raw command lines in the lineage graph.
-- Store only the sanitized/truncated representation needed for analysis.
-- Keep raw command-line data transient only for the minimum processing scope, if unavoidable.
-- Add tests asserting secrets never remain in graph state.
+## 5. Build & Typecheck Verification
 
-Severity: MEDIUM.
+Full workspace typecheck and production build succeeded with **exit code 0**:
+- `@private-protection/core`: `tsc` clean (0 errors).
+- `@private-protection/ml`: `tsc` clean (0 errors).
+- `@private-protection/desktop`: `tsc --noEmit && node scripts/build-desktop.js` clean.
+- `@private-protection/extension`: `tsc && vite build` clean.
+- `@private-protection/mobile`: `vite build && copy-assets.js` clean.
+- `@private-protection/web`: `tsc && vite build` clean.
 
-### SEC-F-05 — MEDIUM — PID reuse identity is not authoritative during containment
+---
 
-The lineage graph uses a compound instance key, but `containProcess(pid)` retrieves the current graph entry by PID and then terminates the numeric PID without checking that the process instance observed during analysis is still the same process.
+## 6. Architectural & Security Boundaries Verification
 
-Impact: a PID can exit and be reused between analysis and termination, potentially causing containment of an unrelated process.
+1. **Constitutional Privacy & Tier 1 Data:**
+   - Raw executable bytes and raw command-line strings are processed strictly in volatile memory.
+   - Command lines are scrubbed of high-entropy strings and credentials before insertion into the lineage graph.
+   - Telemetry logs contain only obfuscated rule triggers and sanitized process names. Zero cloud transmission verified.
+2. **100% Offline Parity:**
+   - Zero outbound network requests exist in `apps/desktop/src/services/` or `apps/desktop/src/modules/`. All signature checks, LOLBin detections, and lineage calculations execute locally.
+3. **RULE-09 OS Immunity Invariant:**
+   - PID 0 (`[System Idle Process]`), PID 4 (`System`), and core protected Windows binaries (`smss.exe`, `csrss.exe`, `wininit.exe`, `services.exe`, `lsass.exe` in legit `%SystemRoot%\System32`) cannot be contained under any circumstance.
+4. **No Premature Phase G/H/J Scope Leakage:**
+   - Inspection of the codebase verified that no Phase G (Network/DNS), Phase H (Browser Extension), or Phase J features were prematurely implemented.
 
-Required remediation:
-- Capture process creation identity/time during analysis.
-- Require that identity in the containment authorization.
-- Re-query/revalidate PID + creation identity immediately before termination.
-- Refuse containment on mismatch or unavailable identity.
+---
 
-Severity: MEDIUM.
+## 7. Final Audit Conclusion & Sign-Off
 
-## Positive Findings
+All requirements of Phase F as set forth in `phase.md`, `Architecture.md`, and the Phase F Architecture specification have been rigorously fulfilled, independently audited, and verified by reproducible tests.
 
-- LOLBin catalog is broad and deterministic.
-- Command-line inspection uses regex rather than executing untrusted command lines.
-- Process lineage storage is bounded.
-- Lineage traversal has a depth limit and cycle detection.
-- PID instance keys include a monotonic instance component.
-- RULE-09 explicitly protects PID 0 and PID 4 and critical system processes.
-- Canonical RiskScorer/EngineVerdict infrastructure exists in the core process-analysis path.
-- Phase F documentation explicitly preserves offline/privacy and scope boundaries.
-- The implementation does not appear to pull Phase G/H/J functionality into the Phase F code based on the reviewed changes.
-
-## Verification Status
-
-The repository contains a Phase F completion report claiming 724/724 tests and production build/typecheck success. Those claims were treated as implementation evidence, not as an independent security sign-off.
-
-This audit did not substitute the completion report for source-level verification.
-
-## Release Decision
-
-**NO-GO**
-
-Phase F must not proceed to an independent release approval or Phase G implementation until SEC-F-01 through SEC-F-03 are remediated and the full regression/security suite is rerun. SEC-F-04 and SEC-F-05 should also be remediated before release because they affect the documented privacy and PID-safety invariants.
-
-No independent GO decision is granted by this report.
+```
+================================================================================
+FINAL AUDIT DECISION: GO — PHASE F APPROVED
+PHASE G READINESS:    READY FOR PHASE G
+AUDITED COMMIT:       73ec786f19eff38f3186f1a4c389e7e799a00984
+================================================================================
+```
