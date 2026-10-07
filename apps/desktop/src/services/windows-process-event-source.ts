@@ -278,14 +278,19 @@ try {
         });
       });
 
-    const child = spawnFn('powershell', [
-      '-NoProfile',
-      '-NonInteractive',
-      '-ExecutionPolicy',
-      'Bypass',
-      '-Command',
-      powershellScript
-    ]);
+    const isCustomProvider = Boolean(this.spawnProvider);
+    const powershellArgs = isCustomProvider
+      ? ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', powershellScript]
+      : [
+          '-NoProfile',
+          '-NonInteractive',
+          '-ExecutionPolicy',
+          'Bypass',
+          '-EncodedCommand',
+          Buffer.from(powershellScript, 'utf16le').toString('base64')
+        ];
+
+    const child = spawnFn('powershell', powershellArgs);
 
     this.childProcess = child;
 
@@ -323,7 +328,19 @@ try {
         const trimmedErr = errLine.trim();
         if (trimmedErr.startsWith('PP_WMI_INIT_ERROR:')) {
           const errMsg = trimmedErr.replace('PP_WMI_INIT_ERROR:', '').trim();
+          this.lastError = errMsg;
           onInitError(new Error(`WMI event watcher init failed: ${errMsg}`));
+        } else if (this.state === 'INITIALIZING') {
+          if (!this.lastError && trimmedErr) {
+            this.lastError = trimmedErr;
+          }
+          if (trimmedErr.includes('Access denied') || trimmedErr.includes('UnauthorizedAccessException')) {
+            onInitError(
+              new Error(
+                'WMI event watcher init failed: Access denied (Win32_ProcessStartTrace requires Administrator privileges)'
+              )
+            );
+          }
         } else if (trimmedErr.startsWith('ERR:')) {
           this.emit('diagnostic', trimmedErr);
         }
@@ -342,9 +359,16 @@ try {
     });
 
     child.on('exit', (code: number | null) => {
-      if (!this.isExplicitlyStopped && this.state === 'ACTIVE') {
-        this.lastError = `PowerShell event watcher exited unexpectedly with code ${code}`;
-        this.handleUnexpectedExit();
+      if (!this.isExplicitlyStopped) {
+        if (this.state === 'INITIALIZING') {
+          const failureMsg =
+            this.lastError ||
+            `PowerShell event watcher exited with code ${code} during initialization (Access denied / unprivileged)`;
+          onInitError(new Error(failureMsg));
+        } else if (this.state === 'ACTIVE') {
+          this.lastError = `PowerShell event watcher exited unexpectedly with code ${code}`;
+          this.handleUnexpectedExit();
+        }
       }
     });
   }

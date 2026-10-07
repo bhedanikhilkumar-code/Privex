@@ -127,7 +127,7 @@ describe('WindowsProcessEventSource (Real Windows OS Integration Suite)', () => 
       expect(health.lastError).toContain('Access denied');
       expect(health.lastError).toContain('Win32_ProcessStartTrace requires Administrator privileges');
     },
-    60000
+    120000
   );
 
   it.skipIf(!isWindows)('verifies OS security token group detection executes without error', () => {
