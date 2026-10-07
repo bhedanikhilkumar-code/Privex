@@ -35,7 +35,12 @@ import {
   AuditVerificationResult,
   TamperStatus,
   AuditLogEntry,
-  AuditQueryFilter
+  AuditQueryFilter,
+  RansomwareShieldStatus,
+  RansomwareIncident,
+  TrustedApplication,
+  IncidentRollbackResult,
+  CanaryFileRecord
 } from '../types/desktop.types';
 import { NetworkPostureReport } from '../services/network-monitor.service';
 
@@ -116,6 +121,19 @@ export interface DesktopSecurityApi {
   rollbackUpdateLkg: () => Promise<UpdateRollbackResult>;
   getThreatIntelStatus: () => Promise<ThreatIntelStatus>;
   onUpdateEvent: (callback: (event: any) => void) => () => void;
+
+  // Phase G: Ransomware Shield & Shadow Vault API
+  getRansomwareStatus: () => Promise<RansomwareShieldStatus>;
+  getProtectedFolders: () => Promise<string[]>;
+  addProtectedFolder: (folderPath: string) => Promise<string[]>;
+  removeProtectedFolder: (folderPath: string) => Promise<string[]>;
+  getTrustedApplications: () => Promise<TrustedApplication[]>;
+  addTrustedApplication: (app: TrustedApplication) => Promise<TrustedApplication[]>;
+  removeTrustedApplication: (executablePath: string) => Promise<TrustedApplication[]>;
+  getRansomwareIncidents: () => Promise<RansomwareIncident[]>;
+  rollbackRansomwareIncident: (incidentId: string) => Promise<IncidentRollbackResult>;
+  resetCanaryTraps: () => Promise<CanaryFileRecord[]>;
+  onRansomwareEvent: (callback: (incident: RansomwareIncident) => void) => () => void;
 
   // Phase Q: Health, Watchdog, Audit Log & Tamper Protection API
   getHealthStatus: () => Promise<SystemHealthReport>;
@@ -328,6 +346,32 @@ export function createDesktopSecurityApi(ipcRenderer: {
       };
       ipcRenderer.on(IPC_CHANNELS.UPDATE_EVENT, handler);
       return () => ipcRenderer.removeListener(IPC_CHANNELS.UPDATE_EVENT, handler);
+    },
+
+    // Phase G: Ransomware Shield & Shadow Vault API
+    getRansomwareStatus: () => ipcRenderer.invoke(IPC_CHANNELS.RANSOMWARE_STATUS_GET),
+    getProtectedFolders: () => ipcRenderer.invoke(IPC_CHANNELS.RANSOMWARE_PROTECTED_FOLDERS_GET),
+    addProtectedFolder: (folderPath) =>
+      ipcRenderer.invoke(IPC_CHANNELS.RANSOMWARE_PROTECTED_FOLDERS_ADD, folderPath),
+    removeProtectedFolder: (folderPath) =>
+      ipcRenderer.invoke(IPC_CHANNELS.RANSOMWARE_PROTECTED_FOLDERS_REMOVE, folderPath),
+    getTrustedApplications: () => ipcRenderer.invoke(IPC_CHANNELS.RANSOMWARE_TRUSTED_APPS_GET),
+    addTrustedApplication: (app) =>
+      ipcRenderer.invoke(IPC_CHANNELS.RANSOMWARE_TRUSTED_APPS_ADD, app),
+    removeTrustedApplication: (executablePath) =>
+      ipcRenderer.invoke(IPC_CHANNELS.RANSOMWARE_TRUSTED_APPS_REMOVE, executablePath),
+    getRansomwareIncidents: () => ipcRenderer.invoke(IPC_CHANNELS.RANSOMWARE_INCIDENTS_GET),
+    rollbackRansomwareIncident: (incidentId) =>
+      ipcRenderer.invoke(IPC_CHANNELS.RANSOMWARE_INCIDENT_ROLLBACK, incidentId),
+    resetCanaryTraps: () => ipcRenderer.invoke(IPC_CHANNELS.RANSOMWARE_CANARY_RESET),
+    onRansomwareEvent: (callback) => {
+      const handler = (_event: any, incident: unknown) => {
+        if (incident && typeof incident === 'object') {
+          callback(incident as RansomwareIncident);
+        }
+      };
+      ipcRenderer.on(IPC_CHANNELS.RANSOMWARE_EVENT, handler);
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.RANSOMWARE_EVENT, handler);
     },
 
     // Phase Q: Health, Watchdog, Audit Log & Tamper Protection API
