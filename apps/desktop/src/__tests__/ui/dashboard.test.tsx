@@ -13,10 +13,10 @@ describe('Desktop UI & Dashboard Presentation Layer', () => {
   it('renders App shell with header, sidebar, and initial HomeScreen', () => {
     render(<App />);
     expect(screen.getAllByText('PRIVATE PROTECTION').length).toBeGreaterThan(0);
-    expect(screen.getByText('System Protection Overview')).toBeDefined();
+    expect(screen.getByText('Protection Subsystem Matrix')).toBeDefined();
     expect(screen.getByText('⚡ Quick Scan')).toBeDefined();
     expect(screen.getByText('🔍 Full PC Scan')).toBeDefined();
-    expect(screen.getByText('🔒 Quarantine Vault')).toBeDefined();
+    expect(screen.getByText('☣️ Quarantine Vault')).toBeDefined();
   });
 
   it('navigates to different desktop screens via sidebar tabs', () => {
@@ -30,9 +30,9 @@ describe('Desktop UI & Dashboard Presentation Layer', () => {
     fireEvent.click(screen.getByText('🔍 Full PC Scan'));
     expect(screen.getByText('🔍 Full PC Filesystem Scan')).toBeDefined();
 
-    // Click on Privacy tab
-    fireEvent.click(screen.getByText('👁️ Privacy & Shred'));
-    expect(screen.getByText('👁️ Privacy Guarantees & Cryptographic Erasure')).toBeDefined();
+    // Click on Recovery & Shred tab
+    fireEvent.click(screen.getByText('🔄 Recovery & Shred'));
+    expect(screen.getByText('🔄 Recovery, USB Rescue & Crypto-Shredder')).toBeDefined();
 
     // Click on Settings tab
     fireEvent.click(screen.getByText('⚙️ Settings'));

@@ -24,7 +24,23 @@ export const ThreatDetectionModal: React.FC<ThreatDetectionModalProps> = ({
   onRequestRestore
 }) => {
   const safeButtonRef = useRef<HTMLButtonElement>(null);
-  const { threat, actionTaken } = alert;
+  const anyAlert = alert as any;
+  const threat: DetectedThreat = anyAlert.threat || {
+    threatId: anyAlert.analysis?.sha256 || 'threat-1',
+    fileName: anyAlert.analysis?.filePath
+      ? anyAlert.analysis.filePath.split('\\').pop()
+      : anyAlert.event?.filePath
+      ? anyAlert.event.filePath.split('\\').pop()
+      : 'Suspicious File',
+    filePath: anyAlert.analysis?.filePath || anyAlert.event?.filePath || '',
+    threatName: anyAlert.analysis?.threatIndicators?.[0] || 'Malicious Threat',
+    severity: anyAlert.analysis?.severity || 'critical',
+    riskScore: anyAlert.analysis?.riskScore || 90,
+    evidenceFactors: anyAlert.analysis?.evidenceFactors || [],
+    detectedAt: anyAlert.timestamp || Date.now(),
+    quarantined: anyAlert.quarantined ?? true
+  };
+  const actionTaken = anyAlert.actionTaken || (anyAlert.quarantined ? 'AUTO_QUARANTINED' : 'ALERT_ONLY');
 
   // Auto-focus the safe CTA on mount (WCAG alertdialog requirement)
   useEffect(() => {

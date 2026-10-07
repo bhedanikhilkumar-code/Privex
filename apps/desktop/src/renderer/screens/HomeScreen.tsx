@@ -11,9 +11,9 @@ import {
 
 interface HomeScreenProps {
   onNavigate: (tab: DesktopNavTab) => void;
-  threatsCount: number;
-  quarantineCount: number;
-  filesScannedTotal: number;
+  threatsCount?: number;
+  quarantineCount?: number;
+  filesScannedTotal?: number;
   status: DesktopProtectionStatus;
   healthReport?: SystemHealthReport | null;
   watchdogStatus?: WatchdogStatus | null;
@@ -26,9 +26,9 @@ interface HomeScreenProps {
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   onNavigate,
-  threatsCount,
-  quarantineCount,
-  filesScannedTotal,
+  threatsCount = 0,
+  quarantineCount = 0,
+  filesScannedTotal = 0,
   status,
   healthReport,
   watchdogStatus,
