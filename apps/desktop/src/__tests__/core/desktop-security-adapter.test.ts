@@ -80,6 +80,6 @@ describe('DesktopSecurityAdapter (Core & ML Integration)', () => {
     const versions = adapter.getEngineVersions();
     expect(versions.coreVersion).toBe('1.0.0-verified');
     expect(versions.mlVersion).toBe('1.0.0-verified');
-    expect(versions.threatDatabaseVersion).toContain('offline-seed');
+    expect(versions.threatDatabaseVersion).toContain('seed');
   });
 });

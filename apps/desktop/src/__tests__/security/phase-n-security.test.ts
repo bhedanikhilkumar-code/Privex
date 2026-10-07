@@ -179,6 +179,7 @@ describe('Phase N Security & Adversarial Test Suite (SEC-N-01 to SEC-N-06)', () 
         configDir: tempDir,
         scanner,
         quickScanner,
+        cpuInspector: async () => ({ loadPct: 10, isAvailable: true }),
         batteryInspector: async () => ({
           hasBattery: true,
           isCharging: false,
@@ -196,6 +197,7 @@ describe('Phase N Security & Adversarial Test Suite (SEC-N-01 to SEC-N-06)', () 
         configDir: tempDir,
         scanner,
         quickScanner,
+        cpuInspector: async () => ({ loadPct: 10, isAvailable: true }),
         batteryInspector: async () => ({
           hasBattery: true,
           isCharging: false,
@@ -212,6 +214,7 @@ describe('Phase N Security & Adversarial Test Suite (SEC-N-01 to SEC-N-06)', () 
         configDir: tempDir,
         scanner,
         quickScanner,
+        cpuInspector: async () => ({ loadPct: 10, isAvailable: true }),
         batteryInspector: async () => ({
           hasBattery: true,
           isCharging: false,
