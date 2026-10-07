@@ -102,11 +102,20 @@ export class ThreatIntel {
   private bloomFilter: BloomFilter;
   private lastUpdated: number;
   private databaseVersion: number = 101;
+  private versionSequence: number = 100;
+  private installedVersion: string = '1.0.0-seed';
   private rootPublicKeyHex: string;
 
-  constructor(options?: { rootPublicKeyHex?: string; initialVersion?: number }) {
+  constructor(options?: {
+    rootPublicKeyHex?: string;
+    initialVersion?: number;
+    initialSequence?: number;
+    installedVersion?: string;
+  }) {
     this.lastUpdated = Date.now();
     this.databaseVersion = options?.initialVersion ?? 101;
+    this.versionSequence = options?.initialSequence ?? 100;
+    this.installedVersion = options?.installedVersion ?? '1.0.0-seed';
     // Standard compiled Root Ed25519 Public Key (can be overridden in options for testing)
     this.rootPublicKeyHex = options?.rootPublicKeyHex ?? '00'.repeat(32);
     this.bloomFilter = new BloomFilter({ expectedElements: 100000, targetFalsePositiveRate: 0.001 });
@@ -776,11 +785,242 @@ export class ThreatIntel {
     }
   }
 
+  public getVersionSequence(): number {
+    return this.versionSequence;
+  }
+
+  public setVersionSequence(seq: number): void {
+    if (typeof seq === 'number' && Number.isInteger(seq) && seq > 0) {
+      this.versionSequence = seq;
+    }
+  }
+
+  public getInstalledVersion(): string {
+    return this.installedVersion;
+  }
+
+  public setInstalledVersion(ver: string): void {
+    if (typeof ver === 'string' && ver.trim()) {
+      this.installedVersion = ver.trim();
+    }
+  }
+
+  public setDatabaseVersion(ver: number): void {
+    if (typeof ver === 'number' && Number.isInteger(ver) && ver > 0) {
+      this.databaseVersion = ver;
+    }
+  }
+
+  public getBadHashesCount(): number {
+    return this.badHashes.size;
+  }
+
+  public getGoodHashesCount(): number {
+    return this.goodHashes.size;
+  }
+
+  public removeMaliciousHash(hash: string): void {
+    if (!hash || typeof hash !== 'string') return;
+    const normalized = hash.toLowerCase().trim();
+    this.badHashes.delete(normalized);
+  }
+
+  public removeMaliciousUrl(url: string): void {
+    if (!url || typeof url !== 'string') return;
+    const hash = sha256(url.toLowerCase().trim());
+    this.badHashes.delete(hash);
+  }
+
+  public removeMaliciousIp(ip: string): void {
+    if (!ip || typeof ip !== 'string') return;
+    const hash = sha256(ip.toLowerCase().trim());
+    this.badHashes.delete(hash);
+  }
+
+  /**
+   * Resets this ThreatIntel instance to the immutable compiled-in factory seed dataset.
+   */
+  public resetToFactorySeed(): void {
+    this.badHashes.clear();
+    this.goodHashes.clear();
+    this.fileAllowlist.clear();
+    this.criticalOverrideAllowlist.clear();
+    this.bloomFilter = new BloomFilter({ expectedElements: 100000, targetFalsePositiveRate: 0.001 });
+    this.databaseVersion = 101;
+    this.versionSequence = 100;
+    this.installedVersion = '1.0.0-seed';
+    this.lastUpdated = Date.now();
+    this.loadSeedData();
+  }
+
+  /**
+   * Applies an offline PPDB payload to the active threat intelligence state.
+   */
+  public applyPpdbPayload(
+    payload: any,
+    newVersion: string,
+    newSequence: number,
+    publishedAt?: number
+  ): { success: boolean; error?: string } {
+    if (!payload || typeof payload !== 'object') {
+      return { success: false, error: 'Invalid PPDB payload: payload must be an object' };
+    }
+
+    const backupBad = new Map(this.badHashes);
+    const backupGood = new Set(this.goodHashes);
+    const backupFilterBytes = this.bloomFilter.serialize();
+    const backupVersion = this.databaseVersion;
+    const backupSequence = this.versionSequence;
+    const backupInstalled = this.installedVersion;
+    const backupUpdated = this.lastUpdated;
+
+    try {
+      const hashesToAdd = Array.isArray(payload.addBadHashes)
+        ? payload.addBadHashes
+        : (Array.isArray(payload.maliciousHashes) ? payload.maliciousHashes : []);
+
+      for (const entry of hashesToAdd) {
+        if (entry && typeof entry.hash === 'string') {
+          this.addMaliciousHash(entry.hash, {
+            threatName: entry.threatName || 'MALICIOUS_HASH_INDICATOR',
+            category: entry.category,
+            severity: entry.severity,
+            threatType: entry.threatType || 'HASH',
+            isCritical: entry.isCritical ?? true,
+            sourceFeed: 'PPDB_OTA_UPDATE'
+          });
+        }
+      }
+
+      const domainsToAdd = Array.isArray(payload.addBadDomains)
+        ? payload.addBadDomains
+        : (Array.isArray(payload.maliciousDomains) ? payload.maliciousDomains : []);
+      for (const domain of domainsToAdd) {
+        if (typeof domain === 'string') {
+          this.addMaliciousDomain(domain, { sourceFeed: 'PPDB_OTA_UPDATE' });
+        }
+      }
+
+      const urlsToAdd = Array.isArray(payload.addBadUrls)
+        ? payload.addBadUrls
+        : (Array.isArray(payload.maliciousUrls) ? payload.maliciousUrls : []);
+      for (const url of urlsToAdd) {
+        if (typeof url === 'string') {
+          this.addMaliciousUrl(url, { sourceFeed: 'PPDB_OTA_UPDATE' });
+        }
+      }
+
+      const ipsToAdd = Array.isArray(payload.addBadIps)
+        ? payload.addBadIps
+        : (Array.isArray(payload.maliciousIps) ? payload.maliciousIps : []);
+      for (const ip of ipsToAdd) {
+        if (typeof ip === 'string') {
+          this.addMaliciousIp(ip, { sourceFeed: 'PPDB_OTA_UPDATE' });
+        }
+      }
+
+      const hashesToRemove = Array.isArray(payload.removeBadHashes)
+        ? payload.removeBadHashes
+        : (Array.isArray(payload.removeMaliciousHashes) ? payload.removeMaliciousHashes : []);
+      for (const hash of hashesToRemove) {
+        if (typeof hash === 'string') {
+          this.removeMaliciousHash(hash);
+        }
+      }
+
+      const domainsToRemove = Array.isArray(payload.removeBadDomains)
+        ? payload.removeBadDomains
+        : (Array.isArray(payload.removeMaliciousDomains) ? payload.removeMaliciousDomains : []);
+      for (const domain of domainsToRemove) {
+        if (typeof domain === 'string') {
+          this.removeMaliciousDomain(domain);
+        }
+      }
+
+      const urlsToRemove = Array.isArray(payload.removeBadUrls)
+        ? payload.removeBadUrls
+        : (Array.isArray(payload.removeMaliciousUrls) ? payload.removeMaliciousUrls : []);
+      for (const url of urlsToRemove) {
+        if (typeof url === 'string') {
+          this.removeMaliciousUrl(url);
+        }
+      }
+
+      const ipsToRemove = Array.isArray(payload.removeBadIps)
+        ? payload.removeBadIps
+        : (Array.isArray(payload.removeMaliciousIps) ? payload.removeMaliciousIps : []);
+      for (const ip of ipsToRemove) {
+        if (typeof ip === 'string') {
+          this.removeMaliciousIp(ip);
+        }
+      }
+
+      this.databaseVersion = newSequence;
+      this.versionSequence = newSequence;
+      this.installedVersion = newVersion;
+      this.lastUpdated = publishedAt && publishedAt > 0 ? publishedAt : Date.now();
+      return { success: true };
+    } catch (err: any) {
+      // Rollback to pristine state
+      this.badHashes = backupBad;
+      this.goodHashes = backupGood;
+      this.bloomFilter = BloomFilter.deserialize(backupFilterBytes);
+      this.databaseVersion = backupVersion;
+      this.versionSequence = backupSequence;
+      this.installedVersion = backupInstalled;
+      this.lastUpdated = backupUpdated;
+      return { success: false, error: `Payload application failed: ${err.message}` };
+    }
+  }
+
+  /**
+   * Serializes current threat intelligence state to a JSON string.
+   */
+  public exportState(): string {
+    return JSON.stringify({
+      databaseVersion: this.databaseVersion,
+      versionSequence: this.versionSequence,
+      installedVersion: this.installedVersion,
+      lastUpdated: this.lastUpdated,
+      badHashes: Array.from(this.badHashes.entries()),
+      goodHashes: Array.from(this.goodHashes),
+      fileAllowlist: Array.from(this.fileAllowlist),
+      criticalOverrideAllowlist: Array.from(this.criticalOverrideAllowlist),
+      bloomFilterBytes: Buffer.from(this.bloomFilter.serialize()).toString('base64')
+    });
+  }
+
+  /**
+   * Restores threat intelligence state from a serialized JSON string.
+   */
+  public loadState(serializedJson: string): void {
+    if (!serializedJson || typeof serializedJson !== 'string') {
+      throw new Error('Invalid serialized state: must be a non-empty string');
+    }
+    const parsed = JSON.parse(serializedJson);
+    this.databaseVersion = typeof parsed.databaseVersion === 'number' ? parsed.databaseVersion : 101;
+    this.versionSequence = typeof parsed.versionSequence === 'number' ? parsed.versionSequence : 100;
+    this.installedVersion = typeof parsed.installedVersion === 'string' ? parsed.installedVersion : '1.0.0-seed';
+    this.lastUpdated = typeof parsed.lastUpdated === 'number' ? parsed.lastUpdated : Date.now();
+
+    this.badHashes = new Map(parsed.badHashes || []);
+    this.goodHashes = new Set(parsed.goodHashes || []);
+    this.fileAllowlist = new Set(parsed.fileAllowlist || []);
+    this.criticalOverrideAllowlist = new Set(parsed.criticalOverrideAllowlist || []);
+
+    if (parsed.bloomFilterBytes) {
+      const buf = Buffer.from(parsed.bloomFilterBytes, 'base64');
+      this.bloomFilter = BloomFilter.deserialize(new Uint8Array(buf));
+    }
+  }
+
   /**
    * Creates an encrypted/in-memory snapshot of current state
    */
   public snapshot(): {
     version: number;
+    versionSequence: number;
+    installedVersion: string;
     lastUpdated: number;
     badCount: number;
     goodCount: number;
@@ -789,6 +1029,8 @@ export class ThreatIntel {
   } {
     return {
       version: this.databaseVersion,
+      versionSequence: this.versionSequence,
+      installedVersion: this.installedVersion,
       lastUpdated: this.lastUpdated,
       badCount: this.badHashes.size,
       goodCount: this.goodHashes.size,

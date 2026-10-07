@@ -350,9 +350,6 @@ export interface ThreatIntelRecord {
   readonly generatedEpoch: number;
 }
 
-/**
- * Model 11: Cryptographic manifest describing an OTA differential patch
- */
 export interface UpdateMetadata {
   readonly targetVersion: number;
   readonly baseVersion: number;
@@ -361,6 +358,45 @@ export interface UpdateMetadata {
   readonly ed25519Signature: string;
   readonly downloadUrl: string;
   readonly sizeBytes: number;
+}
+
+export interface PpdbManifest {
+  readonly version: string;
+  readonly versionSequence: number;
+  readonly publishedAt: number;
+  readonly sha256: string;
+  readonly signature: string; // 128 hex chars Ed25519 signature
+}
+
+export interface ThreatHashEntry {
+  readonly hash: string;
+  readonly threatName?: string;
+  readonly category?: RiskCategory | string;
+  readonly severity?: SeverityLevel | string;
+  readonly threatType?: 'DOMAIN' | 'URL' | 'IP' | 'HASH';
+  readonly isCritical?: boolean;
+}
+
+export interface PpdbPayload {
+  readonly addBadHashes?: ThreatHashEntry[];
+  readonly addBadDomains?: string[];
+  readonly addBadUrls?: string[];
+  readonly addBadIps?: string[];
+  readonly removeBadHashes?: string[];
+  readonly removeBadDomains?: string[];
+  readonly removeBadUrls?: string[];
+  readonly removeBadIps?: string[];
+  readonly metadata?: {
+    readonly description?: string;
+    readonly minEngineVersion?: string;
+    readonly totalRules?: number;
+  };
+}
+
+export interface PpdbBundle {
+  readonly format: 'PPDB1';
+  readonly manifest: PpdbManifest;
+  readonly payload: PpdbPayload | string;
 }
 
 // ==========================================
