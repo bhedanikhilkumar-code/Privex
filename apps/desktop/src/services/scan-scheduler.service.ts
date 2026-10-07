@@ -109,7 +109,16 @@ export class ScanSchedulerService extends EventEmitter {
       salt = crypto.randomBytes(32);
       const tmpPath = `${saltPath}.tmp`;
       fs.writeFileSync(tmpPath, salt, { mode: 0o600 });
-      fs.renameSync(tmpPath, saltPath);
+      try {
+        fs.renameSync(tmpPath, saltPath);
+      } catch {
+        try {
+          fs.copyFileSync(tmpPath, saltPath);
+          fs.unlinkSync(tmpPath);
+        } catch {
+          // best-effort
+        }
+      }
     }
 
     const machineSecret = `${os.hostname()}:${os.userInfo().username}:${os.platform()}:${os.arch()}`;
@@ -160,7 +169,16 @@ export class ScanSchedulerService extends EventEmitter {
     } finally {
       fs.closeSync(fd);
     }
-    fs.renameSync(tmpPath, targetPath);
+    try {
+      fs.renameSync(tmpPath, targetPath);
+    } catch {
+      try {
+        fs.copyFileSync(tmpPath, targetPath);
+        fs.unlinkSync(tmpPath);
+      } catch (err: any) {
+        throw new Error(`ATOMIC_WRITE_FAILED: Failed to replace '${targetPath}': ${err.message}`);
+      }
+    }
   }
 
   // ============================================================

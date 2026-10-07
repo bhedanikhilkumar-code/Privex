@@ -195,7 +195,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           }}
         >
           <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, letterSpacing: '0.05em' }}>
-            FILES INSPECTED
+            FILES ANALYZED
           </div>
           <div style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
             {filesScannedTotal.toLocaleString()}
@@ -268,6 +268,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
       {/* Subsystems Live Status Grid */}
       <section>
+        <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b', marginBottom: '4px' }}>
+          System Protection Overview
+        </div>
         <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', color: '#0f172a', fontWeight: 700 }}>
           Protection Subsystem Matrix
         </h3>

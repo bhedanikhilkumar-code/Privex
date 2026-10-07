@@ -45,10 +45,14 @@ export class AuditLoggerService {
     this.loadAndVerifyExistingChain();
   }
 
+  private isDirEnsured: boolean = false;
+
   private ensureDir(): void {
+    if (this.isDirEnsured) return;
     if (!fs.existsSync(this.configDir)) {
       fs.mkdirSync(this.configDir, { recursive: true, mode: 0o700 });
     }
+    this.isDirEnsured = true;
   }
 
   private deriveAuditKey(): Buffer {

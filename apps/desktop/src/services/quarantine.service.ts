@@ -466,7 +466,17 @@ export class QuarantineService {
       }
     }
 
-    fs.renameSync(tmpPath, this.manifestPath);
+    try {
+      fs.renameSync(tmpPath, this.manifestPath);
+    } catch {
+      // Fallback on Windows if rename is temporarily locked: copy and unlink tmp
+      try {
+        fs.copyFileSync(tmpPath, this.manifestPath);
+        fs.unlinkSync(tmpPath);
+      } catch (err: any) {
+        throw new Error(`ATOMIC_WRITE_FAILED: Failed to replace '${this.manifestPath}': ${err.message}`);
+      }
+    }
   }
 
   /**

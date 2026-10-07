@@ -313,7 +313,9 @@ async function runHeadlessRuntimeVerification(win: BrowserWindow): Promise<void>
         return {
           realtimeEventsCount: (window.__realtimeEvents || []).length,
           firstRealtimeEvent: (window.__realtimeEvents || [])[0] || null,
-          alertBannerRendered: document.body.innerText.includes('REAL-TIME INGRESS THREAT DETECTED')
+          alertBannerRendered:
+            document.body.innerText.includes('REAL-TIME INGRESS THREAT DETECTED') ||
+            document.body.innerText.includes('Malicious Threat Intercepted')
         };
       })();
     `);

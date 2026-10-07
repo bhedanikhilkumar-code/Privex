@@ -64,7 +64,16 @@ export class SecureStorageService {
     } finally {
       fs.closeSync(fd);
     }
-    fs.renameSync(tmpPath, targetPath);
+    try {
+      fs.renameSync(tmpPath, targetPath);
+    } catch {
+      try {
+        fs.copyFileSync(tmpPath, targetPath);
+        fs.unlinkSync(tmpPath);
+      } catch (err: any) {
+        throw new Error(`ATOMIC_WRITE_FAILED: Failed to replace '${targetPath}': ${err.message}`);
+      }
+    }
   }
 
   /**

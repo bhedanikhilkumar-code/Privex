@@ -297,17 +297,14 @@ export class RiskScorer {
     }
 
     // Multi-signal extortion / scam correlation (Urgency + Threat/Coercion + Payment/Crypto)
-    const hasUrgency = Array.from(uniqueRuleIds).some((id) => id.includes('urgency'));
-    const hasThreat = Array.from(uniqueRuleIds).some(
-      (id) => id.includes('threat') || id.includes('extortion') || id.includes('arrest')
-    );
-    const hasPayment = Array.from(uniqueRuleIds).some(
-      (id) =>
-        id.includes('crypto') ||
-        id.includes('payment') ||
-        id.includes('bitcoin') ||
-        id.includes('financial')
-    );
+    let hasUrgency = false;
+    let hasThreat = false;
+    let hasPayment = false;
+    for (const id of uniqueRuleIds) {
+      if (id.includes('urgency')) hasUrgency = true;
+      if (id.includes('threat') || id.includes('extortion') || id.includes('arrest')) hasThreat = true;
+      if (id.includes('crypto') || id.includes('payment') || id.includes('bitcoin') || id.includes('financial')) hasPayment = true;
+    }
     if (hasUrgency && (hasThreat || hasPayment) && uniqueRuleIds.size >= 2) {
       const boost = hasThreat && hasPayment ? 30 : 20;
       const desc =
@@ -327,7 +324,10 @@ export class RiskScorer {
       });
     }
 
-    const activeLayersCount = Array.from(uniqueLayerMaxScore.values()).filter((s) => s >= 30).length;
+    let activeLayersCount = 0;
+    for (const s of uniqueLayerMaxScore.values()) {
+      if (s >= 30) activeLayersCount++;
+    }
     if (activeLayersCount >= 3) {
       const desc = `Cross-layer consensus: ${activeLayersCount} independent detection layers reported elevated risk.`;
       correlationSignals.push({

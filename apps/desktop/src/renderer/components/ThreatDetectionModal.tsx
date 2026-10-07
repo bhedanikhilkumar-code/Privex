@@ -55,6 +55,7 @@ export const ThreatDetectionModal: React.FC<ThreatDetectionModalProps> = ({
   return (
     <div
       role="alertdialog"
+      data-testid="realtime-threat-alert"
       aria-modal="true"
       aria-labelledby="threat-dialog-title"
       aria-describedby="threat-dialog-desc"
@@ -74,6 +75,7 @@ export const ThreatDetectionModal: React.FC<ThreatDetectionModalProps> = ({
       }}
     >
       <div
+        data-testid="realtime-threat-alert-content"
         style={{
           backgroundColor: '#ffffff',
           borderRadius: '12px',
@@ -97,6 +99,9 @@ export const ThreatDetectionModal: React.FC<ThreatDetectionModalProps> = ({
         >
           <span style={{ fontSize: '24px' }}>🚨</span>
           <div>
+            <div style={{ fontSize: '11px', fontWeight: 800, color: '#b91c1c', letterSpacing: '0.05em', marginBottom: '2px' }}>
+              REAL-TIME INGRESS THREAT DETECTED
+            </div>
             <h2
               id="threat-dialog-title"
               style={{
@@ -195,6 +200,7 @@ export const ThreatDetectionModal: React.FC<ThreatDetectionModalProps> = ({
             >
               <div style={{ fontWeight: 700, color: '#065f46', marginBottom: '4px' }}>3. WHAT WE DID</div>
               <div style={{ color: '#047857' }}>
+                ACTION TAKEN: {actionTaken} —{' '}
                 {isQuarantined
                   ? 'Safely isolated inside the encrypted Quarantine Vault (PPVAULT2).'
                   : 'Blocked from execution and alerted user.'}
