@@ -23,6 +23,10 @@ import { MotwAnalyzer } from '../core/motw-analyzer';
 import { EmailMimeParser } from '../core/email-mime-parser';
 import { ScanSchedulerService } from '../services/scan-scheduler.service';
 import { ThreatIntelManagerService } from '../services/threat-intel-manager.service';
+import { AuditLoggerService } from '../services/audit-logger.service';
+import { TamperDetectorService } from '../services/tamper-detector.service';
+import { WatchdogService } from '../services/watchdog.service';
+import { HealthMonitorService } from '../services/health-monitor.service';
 import { ThreatIntel } from '@private-protection/core';
 import {
   DesktopProtectionStatus,
@@ -55,7 +59,11 @@ import {
   ScanHistoryRecord,
   UpdateApplyResult,
   UpdateRollbackResult,
-  ThreatIntelStatus
+  ThreatIntelStatus,
+  SystemHealthReport,
+  WatchdogStatus,
+  AuditVerificationResult,
+  TamperStatus
 } from '../types/desktop.types';
 
 
@@ -85,6 +93,10 @@ export class IpcHandler {
   private exclusionManager: ExclusionManagerService;
   private scanScheduler: ScanSchedulerService;
   private threatIntelManager: ThreatIntelManagerService;
+  private auditLogger: AuditLoggerService;
+  private tamperDetector: TamperDetectorService;
+  private watchdog: WatchdogService;
+  private healthMonitor: HealthMonitorService;
   private adapter: DesktopSecurityAdapter;
   private downloadsDir: string;
   private tempDir: string;
@@ -143,6 +155,64 @@ export class IpcHandler {
       dataDir: options?.configDir,
       scannerService: this.scanner
     });
+    this.auditLogger = new AuditLoggerService({ configDir: options?.configDir });
+    this.tamperDetector = new TamperDetectorService({
+      configDir: options?.configDir,
+      auditLogger: this.auditLogger,
+      storageService: this.storage
+    });
+    this.watchdog = new WatchdogService({
+      auditLogger: this.auditLogger,
+      onShieldReEnable: () => {
+        const current = this.storage.getSettings();
+        if (!current.realtimeShieldEnabled) {
+          this.storage.saveSettings({ realtimeShieldEnabled: true });
+        }
+        if (!this.realtimeMonitor.isActive()) {
+          this.realtimeMonitor.start(this.getMonitoredPaths(this.storage.getSettings()));
+        }
+      }
+    });
+    this.healthMonitor = new HealthMonitorService({
+      auditLogger: this.auditLogger,
+      watchdog: this.watchdog,
+      tamperDetector: this.tamperDetector,
+      storageService: this.storage,
+      threatIntelManager: this.threatIntelManager,
+      realtimeMonitor: this.realtimeMonitor,
+      ransomwareShield: this.ransomwareShield,
+      quarantineService: this.quarantine
+    });
+
+    // Register components with Watchdog (Phase Q)
+    this.watchdog.registerComponent({
+      name: 'RealtimeMonitor',
+      checkHealth: () => this.realtimeMonitor.isActive() || !this.storage.getSettings().realtimeShieldEnabled,
+      recover: () => {
+        try {
+          this.realtimeMonitor.stop();
+          this.realtimeMonitor.start(this.getMonitoredPaths(this.storage.getSettings()));
+          return true;
+        } catch {
+          return false;
+        }
+      }
+    });
+
+    this.watchdog.registerComponent({
+      name: 'ScanScheduler',
+      checkHealth: () => Boolean(this.scanScheduler.getState()),
+      recover: () => {
+        try {
+          this.scanScheduler.start();
+          return true;
+        } catch {
+          return false;
+        }
+      }
+    });
+
+    this.watchdog.start();
     this.adapter = new DesktopSecurityAdapter();
 
     this.downloadsDir = options?.downloadsDir || path.join(os.homedir(), 'Downloads');
@@ -424,6 +494,17 @@ export class IpcHandler {
   /**
    * Applies DesktopSettings across ScannerService and RealtimeMonitorService at runtime (GAP-15).
    */
+  public getMonitoredPaths(settings: DesktopSettings): string[] {
+    const watchDirs: string[] = [];
+    if (settings.monitorDownloads && fs.existsSync(this.downloadsDir)) {
+      watchDirs.push(this.downloadsDir);
+    }
+    if (settings.monitorTemp && fs.existsSync(this.tempDir)) {
+      watchDirs.push(this.tempDir);
+    }
+    return watchDirs;
+  }
+
   public applySettings(settings: DesktopSettings, updateWatchers = true): void {
     this.scanner.applySettings(settings);
 
@@ -441,13 +522,7 @@ export class IpcHandler {
       return;
     }
 
-    const watchDirs: string[] = [];
-    if (settings.monitorDownloads && fs.existsSync(this.downloadsDir)) {
-      watchDirs.push(this.downloadsDir);
-    }
-    if (settings.monitorTemp && fs.existsSync(this.tempDir)) {
-      watchDirs.push(this.tempDir);
-    }
+    const watchDirs = this.getMonitoredPaths(settings);
 
     if (watchDirs.length > 0) {
       this.realtimeMonitor.start(watchDirs);
@@ -1144,6 +1219,52 @@ export class IpcHandler {
       verifyOrigin(event);
       return this.handleGetThreatIntelStatus();
     });
+
+    // Phase Q: Health, Watchdog, Audit Log & Tamper Handlers
+    ipcMain.handle(IPC_CHANNELS.HEALTH_STATUS_GET, (event) => {
+      verifyOrigin(event);
+      return this.handleGetHealthStatus();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.HEALTH_CHECK_RUN, (event) => {
+      verifyOrigin(event);
+      return this.handleRunHealthCheck();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.WATCHDOG_STATUS_GET, (event) => {
+      verifyOrigin(event);
+      return this.handleGetWatchdogStatus();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.WATCHDOG_SNOOZE_SHIELD, (event, durationMs: unknown) => {
+      verifyOrigin(event);
+      return this.handleWatchdogSnoozeShield(durationMs);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.WATCHDOG_RESET_ISOLATION, (event, componentName: unknown) => {
+      verifyOrigin(event);
+      return this.handleWatchdogResetIsolation(componentName);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.AUDIT_LOGS_GET, (event, filter: unknown) => {
+      verifyOrigin(event);
+      return this.handleGetAuditLogs(filter);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.AUDIT_CHAIN_VERIFY, (event) => {
+      verifyOrigin(event);
+      return this.handleVerifyAuditChain();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.AUDIT_EXPORT, (event, format: unknown) => {
+      verifyOrigin(event);
+      return this.handleExportAuditLogs(format);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.TAMPER_STATUS_GET, (event) => {
+      verifyOrigin(event);
+      return this.handleGetTamperStatus();
+    });
   }
 
   // ============================================================
@@ -1348,5 +1469,71 @@ export class IpcHandler {
   public getThreatIntelManager(): ThreatIntelManagerService {
     return this.threatIntelManager;
   }
+
+  // ============================================================
+  // PHASE Q SELF-HEALTH, WATCHDOG, AUDIT LOG & TAMPER HANDLERS
+  // ============================================================
+
+  public handleGetHealthStatus(): SystemHealthReport {
+    return this.healthMonitor.getHealth();
+  }
+
+  public handleRunHealthCheck(): SystemHealthReport {
+    return this.healthMonitor.evaluateHealth();
+  }
+
+  public handleGetWatchdogStatus(): WatchdogStatus {
+    return this.watchdog.getStatus();
+  }
+
+  public handleWatchdogSnoozeShield(rawDurationMs: unknown): { success: boolean; remainingMs: number } {
+    const durationMs = IpcValidator.validateSnoozeDuration(rawDurationMs);
+    this.watchdog.snoozeShield(durationMs);
+    if (this.realtimeMonitor.isActive()) {
+      this.realtimeMonitor.stop();
+    }
+    return { success: true, remainingMs: durationMs };
+  }
+
+  public handleWatchdogResetIsolation(rawComponentName: unknown): { success: boolean } {
+    const name = IpcValidator.validateComponentName(rawComponentName);
+    const success = this.watchdog.resetComponentIsolation(name);
+    return { success };
+  }
+
+  public handleGetAuditLogs(rawFilter: unknown) {
+    const filter = IpcValidator.validateAuditFilter(rawFilter);
+    return this.auditLogger.query(filter);
+  }
+
+  public handleVerifyAuditChain(): AuditVerificationResult {
+    return this.auditLogger.verifyChainIntegrity();
+  }
+
+  public handleExportAuditLogs(rawFormat: unknown): string {
+    const format = IpcValidator.validateExportFormat(rawFormat);
+    return this.auditLogger.export(format);
+  }
+
+  public handleGetTamperStatus(): TamperStatus {
+    return this.tamperDetector.checkTamper();
+  }
+
+  public getAuditLogger(): AuditLoggerService {
+    return this.auditLogger;
+  }
+
+  public getWatchdog(): WatchdogService {
+    return this.watchdog;
+  }
+
+  public getHealthMonitor(): HealthMonitorService {
+    return this.healthMonitor;
+  }
+
+  public getTamperDetector(): TamperDetectorService {
+    return this.tamperDetector;
+  }
 }
+
 

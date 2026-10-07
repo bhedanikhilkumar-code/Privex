@@ -86,7 +86,20 @@ export const IPC_CHANNELS = {
   UPDATE_APPLY_BUNDLE: 'desktop:update:applyBundle',
   UPDATE_ROLLBACK_LKG: 'desktop:update:rollbackLkg',
   UPDATE_STATUS_GET: 'desktop:update:statusGet',
-  UPDATE_EVENT: 'desktop:update:event'
+  UPDATE_EVENT: 'desktop:update:event',
+
+  // Phase Q: Self-Health, Watchdog, Audit Log & Tamper Protection
+  HEALTH_STATUS_GET: 'desktop:health:statusGet',
+  HEALTH_CHECK_RUN: 'desktop:health:checkRun',
+  WATCHDOG_STATUS_GET: 'desktop:watchdog:statusGet',
+  WATCHDOG_SNOOZE_SHIELD: 'desktop:watchdog:snoozeShield',
+  WATCHDOG_RESET_ISOLATION: 'desktop:watchdog:resetIsolation',
+  AUDIT_LOGS_GET: 'desktop:audit:logsGet',
+  AUDIT_CHAIN_VERIFY: 'desktop:audit:chainVerify',
+  AUDIT_EXPORT: 'desktop:audit:export',
+  TAMPER_STATUS_GET: 'desktop:tamper:statusGet',
+  HEALTH_EVENT: 'desktop:health:event',
+  WATCHDOG_EVENT: 'desktop:watchdog:event'
 } as const;
 
 export type IpcChannel = typeof IPC_CHANNELS[keyof typeof IPC_CHANNELS];
@@ -100,7 +113,9 @@ export const IPC_EVENT_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.PERSISTENCE_CHANGED,
   IPC_CHANNELS.MEDIA_DRIVE_ATTACHED,
   IPC_CHANNELS.SCHEDULE_EVENT,
-  IPC_CHANNELS.UPDATE_EVENT
+  IPC_CHANNELS.UPDATE_EVENT,
+  IPC_CHANNELS.HEALTH_EVENT,
+  IPC_CHANNELS.WATCHDOG_EVENT
 ] as const;
 
 export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
@@ -156,7 +171,16 @@ export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.SCHEDULE_HISTORY_GET,
   IPC_CHANNELS.UPDATE_APPLY_BUNDLE,
   IPC_CHANNELS.UPDATE_ROLLBACK_LKG,
-  IPC_CHANNELS.UPDATE_STATUS_GET
+  IPC_CHANNELS.UPDATE_STATUS_GET,
+  IPC_CHANNELS.HEALTH_STATUS_GET,
+  IPC_CHANNELS.HEALTH_CHECK_RUN,
+  IPC_CHANNELS.WATCHDOG_STATUS_GET,
+  IPC_CHANNELS.WATCHDOG_SNOOZE_SHIELD,
+  IPC_CHANNELS.WATCHDOG_RESET_ISOLATION,
+  IPC_CHANNELS.AUDIT_LOGS_GET,
+  IPC_CHANNELS.AUDIT_CHAIN_VERIFY,
+  IPC_CHANNELS.AUDIT_EXPORT,
+  IPC_CHANNELS.TAMPER_STATUS_GET
 ] as const;
 
 

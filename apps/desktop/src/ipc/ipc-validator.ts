@@ -1,6 +1,14 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import { DesktopSettings, DetectedThreat, ScanScheduleConfig, PpdbBundle } from '../types/desktop.types';
+import {
+  DesktopSettings,
+  DetectedThreat,
+  ScanScheduleConfig,
+  PpdbBundle,
+  AuditQueryFilter,
+  AuditLogCategory,
+  AuditLogSeverity
+} from '../types/desktop.types';
 
 export class IpcValidator {
   private static readonly FORBIDDEN_SHELL_CHARS = /[|&;$`><\r\n\0]/;
@@ -598,5 +606,104 @@ export class IpcValidator {
     }
     return bundle as PpdbBundle;
   }
+
+  /**
+   * Validates AuditQueryFilter object passed over IPC.
+   */
+  public static validateAuditFilter(input: unknown): AuditQueryFilter {
+    if (!input || typeof input !== 'object') {
+      return {};
+    }
+    const raw = input as Record<string, unknown>;
+    let category: AuditLogCategory | undefined;
+    let severity: AuditLogSeverity | undefined;
+    let startDate: number | undefined;
+    let endDate: number | undefined;
+    let search: string | undefined;
+    let offset: number | undefined;
+    let limit: number | undefined;
+
+    const validCategories: AuditLogCategory[] = [
+      'DETECTION',
+      'SCAN',
+      'QUARANTINE',
+      'PROCESS',
+      'CONFIGURATION',
+      'HEALTH_CHECK',
+      'WATCHDOG',
+      'TAMPER_DETECTION',
+      'UPDATE',
+      'SHRED',
+      'EXCLUSION',
+      'SYSTEM'
+    ];
+    if (typeof raw.category === 'string' && validCategories.includes(raw.category as AuditLogCategory)) {
+      category = raw.category as AuditLogCategory;
+    }
+
+    const validSeverities: AuditLogSeverity[] = ['INFO', 'WARN', 'ERROR', 'CRITICAL'];
+    if (typeof raw.severity === 'string' && validSeverities.includes(raw.severity as AuditLogSeverity)) {
+      severity = raw.severity as AuditLogSeverity;
+    }
+
+    if (typeof raw.startDate === 'number' && Number.isFinite(raw.startDate) && raw.startDate >= 0) {
+      startDate = raw.startDate;
+    }
+
+    if (typeof raw.endDate === 'number' && Number.isFinite(raw.endDate) && raw.endDate >= 0) {
+      endDate = raw.endDate;
+    }
+
+    if (typeof raw.search === 'string') {
+      search = raw.search.trim().slice(0, 100);
+    }
+
+    if (typeof raw.offset === 'number' && Number.isFinite(raw.offset) && raw.offset >= 0) {
+      offset = Math.floor(raw.offset);
+    }
+
+    if (typeof raw.limit === 'number' && Number.isFinite(raw.limit) && raw.limit >= 1 && raw.limit <= 1000) {
+      limit = Math.floor(raw.limit);
+    }
+
+    return {
+      ...(category ? { category } : {}),
+      ...(severity ? { severity } : {}),
+      ...(startDate !== undefined ? { startDate } : {}),
+      ...(endDate !== undefined ? { endDate } : {}),
+      ...(search ? { search } : {}),
+      ...(offset !== undefined ? { offset } : {}),
+      ...(limit !== undefined ? { limit } : {})
+    };
+  }
+
+  /**
+   * Validates export format ('json' | 'csv').
+   */
+  public static validateExportFormat(format: unknown): 'json' | 'csv' {
+    if (format === 'csv') return 'csv';
+    return 'json';
+  }
+
+  /**
+   * Validates shield snooze duration in milliseconds.
+   */
+  public static validateSnoozeDuration(durationMs: unknown): number {
+    if (typeof durationMs !== 'number' || !Number.isFinite(durationMs) || durationMs < 1000 || durationMs > 86400000) {
+      throw new Error('INVALID_SNOOZE_DURATION: Duration must be between 1,000ms and 86,400,000ms (24h).');
+    }
+    return Math.floor(durationMs);
+  }
+
+  /**
+   * Validates component name for watchdog isolation reset.
+   */
+  public static validateComponentName(name: unknown): string {
+    if (typeof name !== 'string' || name.trim().length === 0 || name.length > 100) {
+      throw new Error('INVALID_COMPONENT_NAME: Component name must be a non-empty string under 100 characters.');
+    }
+    return name.trim();
+  }
 }
+
 

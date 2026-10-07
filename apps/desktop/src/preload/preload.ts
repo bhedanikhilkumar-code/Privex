@@ -29,7 +29,13 @@ import {
   UpdateApplyResult,
   UpdateRollbackResult,
   ThreatIntelStatus,
-  PpdbBundle
+  PpdbBundle,
+  SystemHealthReport,
+  WatchdogStatus,
+  AuditVerificationResult,
+  TamperStatus,
+  AuditLogEntry,
+  AuditQueryFilter
 } from '../types/desktop.types';
 import { NetworkPostureReport } from '../services/network-monitor.service';
 
@@ -110,6 +116,19 @@ export interface DesktopSecurityApi {
   rollbackUpdateLkg: () => Promise<UpdateRollbackResult>;
   getThreatIntelStatus: () => Promise<ThreatIntelStatus>;
   onUpdateEvent: (callback: (event: any) => void) => () => void;
+
+  // Phase Q: Health, Watchdog, Audit Log & Tamper Protection API
+  getHealthStatus: () => Promise<SystemHealthReport>;
+  runHealthCheck: () => Promise<SystemHealthReport>;
+  getWatchdogStatus: () => Promise<WatchdogStatus>;
+  snoozeShield: (durationMs: number) => Promise<{ success: boolean; remainingMs: number }>;
+  resetWatchdogIsolation: (componentName: string) => Promise<{ success: boolean }>;
+  getAuditLogs: (filter?: AuditQueryFilter) => Promise<{ entries: AuditLogEntry[]; total: number; offset: number; limit: number }>;
+  verifyAuditChain: () => Promise<AuditVerificationResult>;
+  exportAuditLogs: (format: 'json' | 'csv') => Promise<string>;
+  getTamperStatus: () => Promise<TamperStatus>;
+  onHealthEvent: (callback: (data: unknown) => void) => () => void;
+  onWatchdogEvent: (callback: (data: unknown) => void) => () => void;
 }
 
 declare global {
@@ -309,6 +328,31 @@ export function createDesktopSecurityApi(ipcRenderer: {
       };
       ipcRenderer.on(IPC_CHANNELS.UPDATE_EVENT, handler);
       return () => ipcRenderer.removeListener(IPC_CHANNELS.UPDATE_EVENT, handler);
+    },
+
+    // Phase Q: Health, Watchdog, Audit Log & Tamper Protection API
+    getHealthStatus: () => ipcRenderer.invoke(IPC_CHANNELS.HEALTH_STATUS_GET),
+    runHealthCheck: () => ipcRenderer.invoke(IPC_CHANNELS.HEALTH_CHECK_RUN),
+    getWatchdogStatus: () => ipcRenderer.invoke(IPC_CHANNELS.WATCHDOG_STATUS_GET),
+    snoozeShield: (durationMs) => ipcRenderer.invoke(IPC_CHANNELS.WATCHDOG_SNOOZE_SHIELD, durationMs),
+    resetWatchdogIsolation: (componentName) => ipcRenderer.invoke(IPC_CHANNELS.WATCHDOG_RESET_ISOLATION, componentName),
+    getAuditLogs: (filter) => ipcRenderer.invoke(IPC_CHANNELS.AUDIT_LOGS_GET, filter),
+    verifyAuditChain: () => ipcRenderer.invoke(IPC_CHANNELS.AUDIT_CHAIN_VERIFY),
+    exportAuditLogs: (format) => ipcRenderer.invoke(IPC_CHANNELS.AUDIT_EXPORT, format),
+    getTamperStatus: () => ipcRenderer.invoke(IPC_CHANNELS.TAMPER_STATUS_GET),
+    onHealthEvent: (callback) => {
+      const handler = (_event: any, data: unknown) => {
+        if (data && typeof data === 'object') callback(data);
+      };
+      ipcRenderer.on(IPC_CHANNELS.HEALTH_EVENT, handler);
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.HEALTH_EVENT, handler);
+    },
+    onWatchdogEvent: (callback) => {
+      const handler = (_event: any, data: unknown) => {
+        if (data && typeof data === 'object') callback(data);
+      };
+      ipcRenderer.on(IPC_CHANNELS.WATCHDOG_EVENT, handler);
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.WATCHDOG_EVENT, handler);
     }
   };
 }
