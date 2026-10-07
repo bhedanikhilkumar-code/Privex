@@ -24,11 +24,17 @@ export * from './services/removable-media.service';
 export * from './services/network-monitor.service';
 export * from './services/secure-storage.service';
 export * from './services/update-verifier.service';
+export * from './services/threat-intel-manager.service';
 export * from './services/shadow-vault.service';
 export * from './services/ransomware-shield.service';
 export * from './services/scan-scheduler.service';
+export * from './services/audit-logger.service';
+export * from './services/tamper-detector.service';
+export * from './services/watchdog.service';
+export * from './services/health-monitor.service';
 export * from './ipc/ipc-channels';
 export * from './ipc/ipc-validator';
 export * from './ipc/ipc-handler';
 export * from './preload/preload';
 export * from './renderer/App';
+
