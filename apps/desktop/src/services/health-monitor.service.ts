@@ -118,7 +118,11 @@ export class HealthMonitorService {
 
     if (this.realtimeMonitor) {
       const isMonitoring = this.realtimeMonitor.isActive();
-      if (!isMonitoring) {
+      const isSnoozed = Boolean(this.watchdog?.getStatus().shieldSnoozeActive);
+      if (isSnoozed) {
+        shieldState = 'WARNING';
+        shieldMsg = 'Real-time protection is temporarily snoozed';
+      } else if (!isMonitoring) {
         shieldState = 'DEGRADED';
         shieldMsg = 'Real-time protection is paused or stopped';
         issues.push('Real-time file monitoring is inactive');
@@ -234,17 +238,21 @@ export class HealthMonitorService {
 
     // 7. Evaluate Ransomware Shield & Decoy Canaries
     let ransomwareState: HealthState = 'HEALTHY';
-    let ransomwareMsg = 'Ransomware shield and canary traps operational';
+    let ransomwareMsg = 'Ransomware shield operational';
 
     if (this.ransomwareShield) {
       const rStatus = this.ransomwareShield.getStatus();
-      if (!rStatus.active) {
-        ransomwareState = 'DEGRADED';
-        ransomwareMsg = 'Ransomware monitoring is paused or inactive';
-        issues.push('Ransomware shield monitoring is inactive');
-      } else if (rStatus.activeCanariesCount === 0) {
-        ransomwareState = 'WARNING';
-        ransomwareMsg = 'No canary decoy files deployed';
+      if (rStatus.active) {
+        if (rStatus.activeCanariesCount === 0 && rStatus.protectedFolders.length > 0) {
+          ransomwareState = 'WARNING';
+          ransomwareMsg = 'No canary decoy files deployed in protected folders';
+        } else {
+          ransomwareState = 'HEALTHY';
+          ransomwareMsg = `Ransomware shield active (${rStatus.protectedFolders.length} folders, ${rStatus.activeCanariesCount} canaries)`;
+        }
+      } else {
+        ransomwareState = 'HEALTHY';
+        ransomwareMsg = 'Ransomware shield standby';
       }
     }
     subsystems.push({

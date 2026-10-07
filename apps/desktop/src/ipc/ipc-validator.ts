@@ -662,8 +662,8 @@ export class IpcValidator {
       offset = Math.floor(raw.offset);
     }
 
-    if (typeof raw.limit === 'number' && Number.isFinite(raw.limit) && raw.limit >= 1 && raw.limit <= 1000) {
-      limit = Math.floor(raw.limit);
+    if (typeof raw.limit === 'number' && Number.isFinite(raw.limit) && raw.limit >= 1) {
+      limit = Math.min(1000, Math.floor(raw.limit));
     }
 
     return {
