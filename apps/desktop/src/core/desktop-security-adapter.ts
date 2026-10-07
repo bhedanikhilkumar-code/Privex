@@ -2,7 +2,8 @@ import {
   DetectionPipeline,
   Verdict,
   SeverityLevel,
-  InputType
+  InputType,
+  ThreatIntel
 } from '@private-protection/core';
 import {
   UrlSemanticClassifier,
@@ -326,10 +327,12 @@ export class DesktopSecurityAdapter {
    * Returns current engine versions for transparency.
    */
   public getEngineVersions() {
+    const ti = ThreatIntel.getSharedInstance();
     return {
       coreVersion: '1.0.0-verified',
       mlVersion: '1.0.0-verified',
-      threatDatabaseVersion: '2026.10-offline-seed'
+      threatDatabaseVersion: ti.getInstalledVersion(),
+      threatDatabaseSequence: ti.getVersionSequence()
     };
   }
 }

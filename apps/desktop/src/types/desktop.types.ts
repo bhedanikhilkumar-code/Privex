@@ -1072,4 +1072,125 @@ export interface ScanSchedulerOptions {
   readonly clock?: () => number;
 }
 
+// ============================================================
+// PHASE O: THREAT INTELLIGENCE & SIGNED UPDATE TYPES
+// ============================================================
+
+export interface PpdbManifest {
+  version: string;
+  versionSequence: number;
+  publishedAt: number;
+  sha256: string;
+  signature: string; // 128 hex chars Ed25519 signature
+}
+
+export interface ThreatHashEntry {
+  readonly hash: string;
+  readonly threatName: string;
+  readonly severity?: ThreatSeverity | string;
+  readonly category?: string;
+  readonly isCritical?: boolean;
+}
+
+export interface PpdbPayload {
+  readonly maliciousHashes?: ThreatHashEntry[];
+  readonly removeMaliciousHashes?: string[];
+  readonly maliciousUrls?: string[];
+  readonly removeMaliciousUrls?: string[];
+  readonly maliciousIps?: string[];
+  readonly removeMaliciousIps?: string[];
+  readonly maliciousDomains?: string[];
+  readonly removeMaliciousDomains?: string[];
+  readonly removeBadDomains?: string[];
+  readonly removeBadUrls?: string[];
+  readonly removeBadIps?: string[];
+  readonly metadata?: {
+    readonly description?: string;
+    readonly minEngineVersion?: string;
+    readonly totalRules?: number;
+  };
+}
+
+export interface PpdbBundle {
+  format: 'PPDB1';
+  manifest: PpdbManifest;
+  payload: PpdbPayload | any;
+  signature?: string;
+}
+
+export interface UpdateVerificationResult {
+  readonly valid: boolean;
+  readonly code?: string;
+  readonly reason?: string;
+  readonly manifest?: PpdbManifest;
+  readonly payload?: PpdbPayload;
+}
+
+export interface UpdateApplyResult {
+  readonly success: boolean;
+  readonly version?: string;
+  readonly newVersion?: string;
+  readonly versionSequence?: number;
+  readonly newVersionSequence?: number;
+  readonly previousVersionSequence?: number;
+  readonly badCount?: number;
+  readonly errorCode?: string;
+  readonly reason?: string;
+  readonly error?: string;
+  readonly rolledBackToPrevious?: boolean;
+}
+
+export interface UpdateRollbackResult {
+  readonly success: boolean;
+  readonly restoredVersion?: string;
+  readonly restoredVersionSequence?: number;
+  readonly fallbackToFactorySeed?: boolean;
+  readonly reason?: string;
+  readonly error?: string;
+}
+
+export interface ThreatIntelStatus {
+  readonly currentVersion?: string;
+  readonly installedVersion: string;
+  readonly currentSequence?: number;
+  readonly currentVersionSequence: number;
+  readonly lastUpdated: number;
+  readonly lastUpdatedAt?: number;
+  readonly hasLkg: boolean;
+  readonly lkgVersion?: string;
+  readonly lkgInstalledVersion?: string;
+  readonly lkgSequence?: number;
+  readonly lkgVersionSequence?: number;
+  readonly stalenessState: 'FRESH' | 'AGED' | 'STALE' | 'EXPIRED_CACHE';
+  readonly stalenessDays: number;
+  readonly badHashesCount: number;
+  readonly isFactorySeed: boolean;
+}
+
+export interface UpdateMetadataRecord {
+  readonly currentVersionSequence: number;
+  readonly installedVersion: string;
+  readonly lastUpdated: number;
+  readonly activeSha256: string;
+  readonly hasLkg: boolean;
+  readonly lkgVersionSequence?: number;
+  readonly lkgInstalledVersion?: string;
+  readonly lkgSha256?: string;
+  readonly isFactorySeed: boolean;
+}
+
+export interface ThreatIntelManagerOptions {
+  readonly configDir?: string;
+  readonly dataDir?: string;
+  readonly rootPublicKeyHex?: string;
+  readonly threatIntel?: any;
+  readonly threatIntelInstance?: any;
+  readonly cleanFileCache?: any;
+  readonly scannerService?: any;
+  readonly storage?: any;
+  readonly notificationService?: any;
+  readonly clock?: () => number;
+}
+
+
 
