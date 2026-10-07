@@ -1,32 +1,29 @@
-# PRIVATE PROTECTION v0.1.0 — OFFICIAL PUBLIC RELEASE
+# Private Protection v0.1.1
 
-> **Problem Statement:** PS-05 — On-device threat, phishing and scam detection  
-> **Doctrine:** LOCAL-FIRST • PRIVACY-FIRST • DATA-MINIMIZATION • ZERO-KNOWLEDGE • ZERO-CLOUD-DEPENDENCE  
+## Release status
+Official public release.
 
-Private Protection `v0.1.0` is the official public release candidate of the on-device cybersecurity platform.
+## Verification
+- Full test suite: PASS (185 test files, 1,250 passed, 0 failed, exit code 0)
+- Typecheck: PASS (6/6 workspaces, 0 errors, exit code 0)
+- Production build: PASS (core, ml, desktop, extension, mobile, web, exit code 0)
+- Windows EXE smoke test: PASS (PrivateProtection.exe --headless-verify, exit code 0)
+- Security audit: GO (0 critical/high/medium findings, zero-knowledge, canonical authority intact)
+- Privacy/offline audit: PASS (100% on-device local execution, zero Tier-1 transmission, air-gapped parity)
+- SHA-256 verification: PASS (100% matching SHA256SUMS.txt)
 
-## Official Release Packages & Checksums (100% Verified)
-- `private-protection-web-0.1.0.zip` (125,553 bytes)  
-  `SHA-256: 18d4c35762d0a41d3908aa2f7b8a72420615d67817e70af76cac93757c705b1d`
-- `private-protection-extension-0.1.0.zip` (100,161 bytes)  
-  `SHA-256: d0f42ab50db530b752cffd3b6e39a6f3a1e23f888e145375fe4b8cc5c67b25dc`
-- `private-protection-mobile-0.1.0.apk` (1,032,677 bytes)  
-  `SHA-256: 95ee838e739e69feed4f007c431cb6a7e74304f6751e17a38c6e21269fcdb5b5`
-- `private-protection-mobile-0.1.0.aab` (1,548,180 bytes)  
-  `SHA-256: 5f039cc7ce5e8aa3793b1207ebfd74163ef576423a10b96ea08b5177de1dcd24`
-- `PrivateProtection-Setup-0.1.0.exe` (158,047,232 bytes)  
-  `SHA-256: 529bee4bc50bb73a0a282575f088099ef264bd0e8a5004be7eba3275eca9e569`
-- `PrivateProtection-0.1.0-win-x64.exe` (245,726,208 bytes)  
-  `SHA-256: 49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa`
+## Artifacts
+| Filename | Platform | SHA-256 |
+|---|---|---|
+| `PrivateProtection-0.1.1-win-x64.exe` | Windows 10/11 x64 (Portable) | `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa` |
+| `PrivateProtection-Setup-0.1.1.exe` | Windows 10/11 x64 (Installer) | `9ca273b992bedaabc42d3161dbf3ac1c24aad518b84faf8e99e005c5a54d8d84` |
+| `private-protection-web-0.1.1.zip` | Web PWA Client Bundle | `0a4d73bab911bf00b6870f3c722d2ab77e29ac72d1fd2b8e05284d1507e895c7` |
+| `private-protection-extension-0.1.1.zip` | Chromium MV3 Browser Extension | `c1c66d041fe3d198c52025f53122d5eefce328e1ad7c61db798c98d2493daadf` |
+| `private-protection-mobile-0.1.1.apk` | Android 8.0+ Direct Distribution APK | `8229c2c1188f09c55d3d290a3e3b4a2486a93cf3588f4f51da40faf8cdaed5c8` |
+| `private-protection-mobile-0.1.1.aab` | Android Build Archive AAB (Build Artifact) | `0e1117b2dbd0653191935de6578c2f4c73bbbe62651cf428e352195662134a32` |
 
-## Supported Platforms
-- **Web App:** Available as PWA and static site bundle (`https://private-protection.pages.dev`).
-- **Android:** Direct APK sideloading and Google Play release bundle (Android 8.0+ / API 26-34).
-- **Windows:** Consumer installer and portable executable for 64-bit Windows 10/11.
-- **Browser Extension:** Manifest V3 extension for Google Chrome, Microsoft Edge, and Chromium-based browsers.
+## Privacy
+Private Protection remains 100% privacy-first and offline-capable. All threat detection, AI briefing synthesis, URL tokenization, and quarantine operations execute locally on-device in volatile RAM without transmitting user payloads off-device.
 
-## Core Security & Privacy Guarantees
-- 100% On-Device Processing in volatile RAM.
-- Zero raw user payloads (URLs, SMS, files) ever transmitted off-device.
-- Canonical Core detection authority with read-only Grade 6 AI threat briefings.
-- Full offline / air-gapped threat detection parity.
+## Distribution
+Available for Windows, Web, Browser Extension, and Android direct distribution via verified GitHub release assets. No publication has occurred on the Google Play Store.

@@ -109,7 +109,7 @@ export const Header: React.FC = () => {
             color: '#111111'
           }}
         >
-          <span>ENGINE: v0.1.0</span>
+          <span>ENGINE: v0.1.1</span>
           <span style={{ opacity: 0.4 }}>|</span>
           <span>RAM: 42MB</span>
           <span style={{ opacity: 0.4 }}>|</span>

@@ -479,8 +479,8 @@ export const App: React.FC = () => {
                     Direct APK sideload for Android 8.0+. Live QR scanning and SMS notification filter.
                   </p>
                   <a
-                    href="/downloads/private-protection-mobile-0.1.0.apk"
-                    download="private-protection-mobile-0.1.0.apk"
+                    href="/downloads/private-protection-mobile-0.1.1.apk"
+                    download="private-protection-mobile-0.1.1.apk"
                     style={{
                       display: 'inline-block',
                       fontSize: '0.75rem',
@@ -510,7 +510,7 @@ export const App: React.FC = () => {
                     Windows 10/11 x64 installer &amp; portable. Downloads watcher and quarantine vault.
                   </p>
                   <a
-                    href="https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0"
+                    href="https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.1"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
@@ -542,8 +542,8 @@ export const App: React.FC = () => {
                     Chromium Manifest V3 zip. Pre-navigation link interceptor and phishing shield.
                   </p>
                   <a
-                    href="/downloads/private-protection-extension-0.1.0.zip"
-                    download="private-protection-extension-0.1.0.zip"
+                    href="/downloads/private-protection-extension-0.1.1.zip"
+                    download="private-protection-extension-0.1.1.zip"
                     style={{
                       display: 'inline-block',
                       fontSize: '0.75rem',

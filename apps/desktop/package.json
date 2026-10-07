@@ -1,6 +1,6 @@
 {
   "name": "@private-protection/desktop",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "On-device threat, phishing, scam, and malware desktop security application for PC",
   "main": "dist/main/electron-main.cjs",

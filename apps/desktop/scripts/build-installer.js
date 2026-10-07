@@ -53,10 +53,13 @@ async function buildInstaller() {
   execSync(uninstallerCmd, { stdio: 'inherit' });
   console.log('✓ Uninstaller compiled successfully.');
 
+  const pkgJson = JSON.parse(fs.readFileSync(path.resolve(desktopRoot, 'package.json'), 'utf8'));
+  const version = pkgJson.version || '0.1.1';
+
   // 2. Compile Installer with embedded payload.zip and uninstaller.exe
-  console.log('[Installer] Compiling standalone Windows consumer installer (PrivateProtection-Setup-0.1.0.exe)...');
+  console.log(`[Installer] Compiling standalone Windows consumer installer (PrivateProtection-Setup-${version}.exe)...`);
   const installerCs = path.join(installerSrcDir, 'Installer.cs');
-  const setupExe = path.join(releaseDir, 'PrivateProtection-Setup-0.1.0.exe');
+  const setupExe = path.join(releaseDir, `PrivateProtection-Setup-${version}.exe`);
 
   const installerCmd = `"${cscPath}" /nologo /target:winexe /platform:x64 /optimize+ /out:"${setupExe}" /resource:"${payloadZip}" /resource:"${uninstallerExe}" /r:System.Windows.Forms.dll /r:System.IO.Compression.FileSystem.dll /r:System.IO.Compression.dll "${installerCs}"`;
   execSync(installerCmd, { stdio: 'inherit' });
@@ -73,13 +76,13 @@ async function buildInstaller() {
   // Update installer manifest
   const manifest = {
     productName: 'Private Protection Desktop Security',
-    version: '0.1.0',
+    version: version,
     platform: 'win32',
     arch: 'x64',
     installerType: 'Single-File Native Windows Setup (NSIS-compatible /S silent install)',
     builtAt: new Date().toISOString(),
     installer: {
-      fileName: 'PrivateProtection-Setup-0.1.0.exe',
+      fileName: `PrivateProtection-Setup-${version}.exe`,
       path: setupExe,
       sizeBytes: setupStat.size,
       sha256: setupSha256

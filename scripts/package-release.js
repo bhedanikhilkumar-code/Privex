@@ -20,9 +20,12 @@ function calculateSha256(filePath) {
   return crypto.createHash('sha256').update(fileBuffer).digest('hex');
 }
 
+const rootPkg = JSON.parse(fs.readFileSync(path.resolve(rootDir, 'package.json'), 'utf8'));
+const version = rootPkg.version || '0.1.1';
+
 // 1. Extension Package
 const extDist = path.resolve(rootDir, 'apps/extension/dist');
-const extZip = path.resolve(releaseDir, 'private-protection-extension-0.1.0.zip');
+const extZip = path.resolve(releaseDir, `private-protection-extension-${version}.zip`);
 
 if (fs.existsSync(extDist)) {
   console.log('Packaging Browser Extension artifact...');
@@ -43,7 +46,7 @@ if (fs.existsSync(extDist)) {
 
 // 2. Web Application Package
 const webDist = path.resolve(rootDir, 'apps/web/dist');
-const webZip = path.resolve(releaseDir, 'private-protection-web-0.1.0.zip');
+const webZip = path.resolve(releaseDir, `private-protection-web-${version}.zip`);
 
 if (fs.existsSync(webDist)) {
   console.log('Packaging Web Application artifact...');
@@ -66,8 +69,8 @@ const releaseApk = path.resolve(rootDir, 'apps/mobile/android/app/build/outputs/
 const debugApk = path.resolve(rootDir, 'apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk');
 const releaseAab = path.resolve(rootDir, 'apps/mobile/android/app/build/outputs/bundle/release/app-release.aab');
 
-const finalApkDest = path.resolve(releaseDir, 'private-protection-mobile-0.1.0.apk');
-const finalAabDest = path.resolve(releaseDir, 'private-protection-mobile-0.1.0.aab');
+const finalApkDest = path.resolve(releaseDir, `private-protection-mobile-${version}.apk`);
+const finalAabDest = path.resolve(releaseDir, `private-protection-mobile-${version}.aab`);
 
 if (fs.existsSync(releaseApk)) {
   console.log('Packaging Mobile Android Release APK artifact...');
@@ -96,9 +99,9 @@ if (fs.existsSync(releaseAab)) {
 
 // 4. Desktop Packages
 const desktopExe = path.resolve(rootDir, 'apps/desktop/release/PrivateProtection-win32-x64/PrivateProtection.exe');
-const desktopPortableDest = path.resolve(releaseDir, 'PrivateProtection-0.1.0-win-x64.exe');
-const desktopInstallerSrc = path.resolve(rootDir, 'apps/desktop/release/PrivateProtection-Setup-0.1.0.exe');
-const desktopInstallerDest = path.resolve(releaseDir, 'PrivateProtection-Setup-0.1.0.exe');
+const desktopPortableDest = path.resolve(releaseDir, `PrivateProtection-${version}-win-x64.exe`);
+const desktopInstallerSrc = path.resolve(rootDir, `apps/desktop/release/PrivateProtection-Setup-${version}.exe`);
+const desktopInstallerDest = path.resolve(releaseDir, `PrivateProtection-Setup-${version}.exe`);
 
 if (fs.existsSync(desktopExe)) {
   console.log('Packaging Desktop Portable Executable artifact...');
@@ -125,10 +128,10 @@ const lines = [];
 const artifacts = [
   { path: extZip, name: path.basename(extZip) },
   { path: webZip, name: path.basename(webZip) },
-  { path: finalApkDest, name: 'private-protection-mobile-0.1.0.apk' },
-  { path: finalAabDest, name: 'private-protection-mobile-0.1.0.aab' },
-  { path: desktopExe, name: 'PrivateProtection-0.1.0-win-x64.exe' },
-  { path: desktopInstallerDest, name: 'PrivateProtection-Setup-0.1.0.exe' }
+  { path: finalApkDest, name: path.basename(finalApkDest) },
+  { path: finalAabDest, name: path.basename(finalAabDest) },
+  { path: desktopPortableDest, name: path.basename(desktopPortableDest) },
+  { path: desktopInstallerDest, name: path.basename(desktopInstallerDest) }
 ];
 
 for (const artifact of artifacts) {

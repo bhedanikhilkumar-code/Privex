@@ -18,7 +18,7 @@ const pkgs = [
 
 console.log('=== AUDITING WORKSPACE PACKAGE VERSIONS ===');
 let consistent = true;
-const targetVersion = '0.1.0';
+const targetVersion = '0.1.1';
 
 for (const rel of pkgs) {
   const full = path.resolve(rootDir, rel);

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Private Protection — On-Device Threat Defender",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Privacy-first real-time threat, phishing, and scam protection running 100% locally on-device.",
   "permissions": [
     "webNavigation",

@@ -97,10 +97,11 @@ function packageWindowsRelease() {
   fs.mkdirSync(appResourcesDir, { recursive: true });
   fs.cpSync(distDir, path.join(appResourcesDir, 'dist'), { recursive: true });
 
+  const pkgJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf8'));
   const appPackageJson = {
     name: 'private-protection-desktop',
     productName: 'Private Protection Desktop Security',
-    version: '0.1.0',
+    version: pkgJson.version || '0.1.1',
     private: true,
     main: 'dist/main/electron-main.cjs'
   };
@@ -113,10 +114,9 @@ function packageWindowsRelease() {
   const exeStat = fs.statSync(targetExe);
   const exeSha256 = sha256File(targetExe);
 
-  const pkgJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf8'));
   const manifest = {
     productName: 'Private Protection Desktop Security',
-    version: pkgJson.version || '0.1.0',
+    version: pkgJson.version || '0.1.1',
     platform: 'win32',
     arch: 'x64',
     builtAt: new Date().toISOString(),
