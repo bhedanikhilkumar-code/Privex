@@ -1,24 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar, DesktopNavTab } from './components/Sidebar';
 import { Header } from './components/Header';
+import { FrictionGateModal } from './components/FrictionGateModal';
+import { ThreatDetectionModal } from './components/ThreatDetectionModal';
+
+// All 20 Required Screens
 import { HomeScreen } from './screens/HomeScreen';
 import { QuickScanScreen } from './screens/QuickScanScreen';
 import { FullScanScreen } from './screens/FullScanScreen';
 import { CustomScanScreen } from './screens/CustomScanScreen';
+import { ScheduledScanScreen } from './screens/ScheduledScanScreen';
+import { RealtimeProtectionScreen } from './screens/RealtimeProtectionScreen';
 import { ScanResultsScreen } from './screens/ScanResultsScreen';
-import { QuarantineScreen } from './screens/QuarantineScreen';
-import { ProtectionStatusScreen } from './screens/ProtectionStatusScreen';
 import { AssistantScreen } from './screens/AssistantScreen';
-import { PrivacyScreen } from './screens/PrivacyScreen';
-import { SettingsScreen } from './screens/SettingsScreen';
+import { QuarantineScreen } from './screens/QuarantineScreen';
+import { HistoryScreen } from './screens/HistoryScreen';
+import { RansomwareShieldScreen } from './screens/RansomwareShieldScreen';
+import { WebProtectionScreen } from './screens/WebProtectionScreen';
+import { NotificationsScreen } from './screens/NotificationsScreen';
+import { ProtectionStatusScreen } from './screens/ProtectionStatusScreen';
 import { UpdateStatusScreen } from './screens/UpdateStatusScreen';
+import { SettingsScreen } from './screens/SettingsScreen';
+import { ExclusionsScreen } from './screens/ExclusionsScreen';
+import { TrustedAppsScreen } from './screens/TrustedAppsScreen';
+import { RecoveryScreen } from './screens/RecoveryScreen';
+import { AboutSecurityScreen } from './screens/AboutSecurityScreen';
+
 import {
   DetectedThreat,
   QuarantineItem,
   ScanResult,
   DesktopProtectionStatus,
   DesktopSettings,
-  RealtimeThreatEvent
+  RealtimeThreatEvent,
+  SystemHealthReport,
+  WatchdogStatus,
+  ThreatIntelStatus,
+  RansomwareShieldStatus,
+  ScanSchedulerState
 } from '../types/desktop.types';
 
 export const App: React.FC = () => {
@@ -28,7 +47,10 @@ export const App: React.FC = () => {
   const [selectedThreat, setSelectedThreat] = useState<DetectedThreat | null>(null);
   const [filesScannedTotal, setFilesScannedTotal] = useState<number>(0);
   const [realtimeAlert, setRealtimeAlert] = useState<RealtimeThreatEvent | null>(null);
+  const [recentThreatEvents, setRecentThreatEvents] = useState<RealtimeThreatEvent[]>([]);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState<number>(0);
 
+  // Subsystem Backend States
   const [status, setStatus] = useState<DesktopProtectionStatus>({
     realtimeShieldActive: true,
     monitoredPaths: ['Downloads', 'Temp'],
@@ -54,6 +76,41 @@ export const App: React.FC = () => {
     excludedPaths: []
   });
 
+  const [healthReport, setHealthReport] = useState<SystemHealthReport | null>(null);
+  const [watchdogStatus, setWatchdogStatus] = useState<WatchdogStatus | null>(null);
+  const [threatIntelStatus, setThreatIntelStatus] = useState<ThreatIntelStatus | null>(null);
+  const [ransomwareStatus, setRansomwareStatus] = useState<RansomwareShieldStatus | null>(null);
+  const [schedulerState, setSchedulerState] = useState<ScanSchedulerState | null>(null);
+
+  // Friction Gate Modal State
+  const [frictionGate, setFrictionGate] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    description: '',
+    onConfirm: () => {}
+  });
+
+  const requestFrictionGate = (actionDesc: string, onConfirm: () => void) => {
+    if (!settings.frictionGateEnabled) {
+      onConfirm();
+      return;
+    }
+    setFrictionGate({
+      isOpen: true,
+      title: '⚠️ Security Friction Gate Confirmation',
+      description: `This operation lowers or modifies security protection: "${actionDesc}". Confirm only if you trust this action.`,
+      onConfirm: () => {
+        setFrictionGate((prev) => ({ ...prev, isOpen: false }));
+        onConfirm();
+      }
+    });
+  };
+
   const handleStartQuickScan = async () => {
     setActiveTab('quick-scan');
     if (window.desktopSecurity?.startQuickScan) {
@@ -66,10 +123,28 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleReEnableShield = async () => {
+    if (window.desktopSecurity?.snoozeShield) {
+      await window.desktopSecurity.snoozeShield(0);
+    }
+    if (window.desktopSecurity?.saveSettings) {
+      await window.desktopSecurity.saveSettings({ realtimeShieldEnabled: true });
+    }
+    setSettings((prev) => ({ ...prev, realtimeShieldEnabled: true }));
+    if (window.desktopSecurity?.getProtectionStatus) {
+      const s = await window.desktopSecurity.getProtectionStatus();
+      setStatus(s);
+    }
+    if (window.desktopSecurity?.getWatchdogStatus) {
+      const w = await window.desktopSecurity.getWatchdogStatus();
+      setWatchdogStatus(w);
+    }
+  };
+
   useEffect(() => {
     const cleanupFns: Array<() => void> = [];
 
-    // Initial fetch from desktop security bridge if available
+    // Hydrate backend state
     if (window.desktopSecurity?.listQuarantine) {
       window.desktopSecurity.listQuarantine().then(setQuarantineItems).catch(() => {});
     }
@@ -79,42 +154,77 @@ export const App: React.FC = () => {
     if (window.desktopSecurity?.getSettings) {
       window.desktopSecurity.getSettings().then(setSettings).catch(() => {});
     }
+    if (window.desktopSecurity?.getHealthStatus) {
+      window.desktopSecurity.getHealthStatus().then(setHealthReport).catch(() => {});
+    }
+    if (window.desktopSecurity?.getWatchdogStatus) {
+      window.desktopSecurity.getWatchdogStatus().then(setWatchdogStatus).catch(() => {});
+    }
+    if (window.desktopSecurity?.getThreatIntelStatus) {
+      window.desktopSecurity.getThreatIntelStatus().then(setThreatIntelStatus).catch(() => {});
+    }
+    if (window.desktopSecurity?.getRansomwareStatus) {
+      window.desktopSecurity.getRansomwareStatus().then(setRansomwareStatus).catch(() => {});
+    }
+    if (window.desktopSecurity?.getScanSchedule) {
+      window.desktopSecurity.getScanSchedule().then(setSchedulerState).catch(() => {});
+    }
+    if (window.desktopSecurity?.getNotificationInboxState) {
+      window.desktopSecurity.getNotificationInboxState().then((s) => setUnreadNotificationsCount(s.unreadCount)).catch(() => {});
+    }
 
-    // Subscribe to real-time ingress threat events (GAP-14)
+    // Subscribe to Realtime Ingress Threat Events (Screen 07 Interstitial trigger)
     if (window.desktopSecurity?.onRealtimeThreat) {
-      const unsubscribeRealtime = window.desktopSecurity.onRealtimeThreat((event: RealtimeThreatEvent) => {
+      const unsub = window.desktopSecurity.onRealtimeThreat((event: RealtimeThreatEvent) => {
         setThreats((prev) => {
-          const exists = prev.some(
-            (t) => t.id === event.threat.id || t.filePath === event.threat.filePath
-          );
+          const exists = prev.some((t) => t.id === event.threat.id || t.filePath === event.threat.filePath);
           if (exists) {
-            return prev.map((t) =>
-              t.id === event.threat.id || t.filePath === event.threat.filePath ? event.threat : t
-            );
+            return prev.map((t) => (t.id === event.threat.id || t.filePath === event.threat.filePath ? event.threat : t));
           }
           return [event.threat, ...prev];
         });
 
         if (event.actionTaken === 'AUTO_QUARANTINED' && event.quarantineItem) {
           setQuarantineItems((prev) => {
-            const exists = prev.some(
-              (q) => q.quarantineId === event.quarantineItem!.quarantineId
-            );
+            const exists = prev.some((q) => q.quarantineId === event.quarantineItem!.quarantineId);
             return exists ? prev : [event.quarantineItem!, ...prev];
           });
         }
 
+        setRecentThreatEvents((prev) => [event, ...prev.slice(0, 19)]);
         setRealtimeAlert(event);
       });
-      cleanupFns.push(unsubscribeRealtime);
+      cleanupFns.push(unsub);
     }
 
-    // Subscribe to System Tray Quick Scan trigger (SEC-E-02)
+    // Subscribe to System Tray Quick Scan trigger
     if (window.desktopSecurity?.onTriggerQuickScan) {
-      const unsubscribeTrayQuick = window.desktopSecurity.onTriggerQuickScan(() => {
+      const unsub = window.desktopSecurity.onTriggerQuickScan(() => {
         void handleStartQuickScan();
       });
-      cleanupFns.push(unsubscribeTrayQuick);
+      cleanupFns.push(unsub);
+    }
+
+    // Subscribe to Notification Events
+    if (window.desktopSecurity?.onNotificationEvent) {
+      const unsub = window.desktopSecurity.onNotificationEvent(() => {
+        setUnreadNotificationsCount((prev) => prev + 1);
+      });
+      cleanupFns.push(unsub);
+    }
+
+    // Subscribe to Health & Watchdog Events
+    if (window.desktopSecurity?.onHealthEvent) {
+      const unsub = window.desktopSecurity.onHealthEvent((data: any) => {
+        if (data && typeof data === 'object') setHealthReport(data);
+      });
+      cleanupFns.push(unsub);
+    }
+    if (window.desktopSecurity?.onWatchdogEvent) {
+      const unsub = window.desktopSecurity.onWatchdogEvent((data: any) => {
+        if (data && typeof data === 'object') setWatchdogStatus(data);
+      });
+      cleanupFns.push(unsub);
     }
 
     return () => {
@@ -159,21 +269,22 @@ export const App: React.FC = () => {
 
   const handleIsolateThreat = async (threat: DetectedThreat) => {
     if (!window.desktopSecurity?.isolateFile) {
-      throw new Error('DESKTOP_BRIDGE_UNAVAILABLE: Native quarantine vault requires the desktop runtime.');
+      throw new Error('DESKTOP_BRIDGE_UNAVAILABLE: Native quarantine vault requires desktop runtime.');
     }
     const qItem = await window.desktopSecurity.isolateFile(threat.filePath);
     setQuarantineItems((prev) => [qItem, ...prev]);
-
     setThreats((prev) =>
       prev.map((t) => (t.id === threat.id ? { ...t, quarantined: true } : t))
     );
   };
 
   const handleRestoreQuarantine = async (item: QuarantineItem) => {
-    if (window.desktopSecurity?.restoreQuarantine) {
-      await window.desktopSecurity.restoreQuarantine(item.quarantineId);
-    }
-    setQuarantineItems((prev) => prev.filter((q) => q.quarantineId !== item.quarantineId));
+    requestFrictionGate(`Restore quarantined file '${item.originalPath}' to disk`, async () => {
+      if (window.desktopSecurity?.restoreQuarantine) {
+        await window.desktopSecurity.restoreQuarantine(item.quarantineId);
+      }
+      setQuarantineItems((prev) => prev.filter((q) => q.quarantineId !== item.quarantineId));
+    });
   };
 
   const handleDeleteQuarantine = async (item: QuarantineItem) => {
@@ -184,11 +295,13 @@ export const App: React.FC = () => {
   };
 
   const handlePurgeAllQuarantine = async () => {
-    if (window.desktopSecurity?.privacyShred) {
-      await window.desktopSecurity.privacyShred();
-    }
-    setQuarantineItems([]);
-    setThreats([]);
+    requestFrictionGate('Permanently shred ALL quarantined files in PPVAULT2', async () => {
+      if (window.desktopSecurity?.privacyShred) {
+        await window.desktopSecurity.privacyShred();
+      }
+      setQuarantineItems([]);
+      setThreats([]);
+    });
   };
 
   const handleSaveSettings = async (newSettings: Partial<DesktopSettings>) => {
@@ -201,17 +314,54 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleSnoozeShield = async (durationMs: number) => {
+    if (window.desktopSecurity?.snoozeShield) {
+      await window.desktopSecurity.snoozeShield(durationMs);
+      const w = await window.desktopSecurity.getWatchdogStatus();
+      setWatchdogStatus(w);
+    }
+  };
+
+  // Derive top-level posture
+  const unquarantinedThreatsCount = threats.filter((t) => !t.quarantined).length;
+  const isCrit =
+    unquarantinedThreatsCount > 0 ||
+    healthReport?.overallState === 'CRITICAL' ||
+    healthReport?.overallState === 'DEGRADED' ||
+    (!status.realtimeShieldActive && !watchdogStatus?.shieldSnoozeActive);
+
+  const isAttn =
+    !isCrit &&
+    (healthReport?.overallState === 'WARNING' ||
+      Boolean(watchdogStatus?.shieldSnoozeActive) ||
+      threatIntelStatus?.stalenessState === 'STALE');
+
+  const postureStatus: 'PROTECTED' | 'ATTENTION' | 'ACTION_REQUIRED' = isCrit
+    ? 'ACTION_REQUIRED'
+    : isAttn
+    ? 'ATTENTION'
+    : 'PROTECTED';
+
   const renderActiveScreen = () => {
     switch (activeTab) {
       case 'home':
         return (
           <HomeScreen
             onNavigate={setActiveTab}
-            threatsCount={threats.filter((t) => !t.quarantined).length}
+            threatsCount={unquarantinedThreatsCount}
             quarantineCount={quarantineItems.length}
             filesScannedTotal={filesScannedTotal}
+            status={status}
+            healthReport={healthReport}
+            watchdogStatus={watchdogStatus}
+            threatIntelStatus={threatIntelStatus}
+            ransomwareStatus={ransomwareStatus}
+            schedulerState={schedulerState}
+            onQuickScanLaunch={handleStartQuickScan}
+            onReEnableShield={handleReEnableShield}
           />
         );
+
       case 'quick-scan':
         return (
           <QuickScanScreen
@@ -219,6 +369,7 @@ export const App: React.FC = () => {
             onSelectThreat={handleSelectThreat}
           />
         );
+
       case 'full-scan':
         return (
           <FullScanScreen
@@ -226,6 +377,7 @@ export const App: React.FC = () => {
             onSelectThreat={handleSelectThreat}
           />
         );
+
       case 'custom-scan':
         return (
           <CustomScanScreen
@@ -233,6 +385,28 @@ export const App: React.FC = () => {
             onSelectThreat={handleSelectThreat}
           />
         );
+
+      case 'scheduled-scan':
+        return (
+          <ScheduledScanScreen
+            onScanTriggered={handleScanComplete}
+          />
+        );
+
+      case 'realtime':
+        return (
+          <RealtimeProtectionScreen
+            status={status}
+            settings={settings}
+            watchdogStatus={watchdogStatus}
+            onUpdateSettings={handleSaveSettings}
+            onSnoozeShield={handleSnoozeShield}
+            onResumeShield={handleReEnableShield}
+            onRequestFrictionGate={requestFrictionGate}
+            recentEvents={recentThreatEvents}
+          />
+        );
+
       case 'results':
         return (
           <ScanResultsScreen
@@ -241,6 +415,27 @@ export const App: React.FC = () => {
             onExplainThreat={handleExplainThreat}
           />
         );
+
+      case 'assistant':
+        return (
+          <AssistantScreen
+            selectedThreat={selectedThreat}
+            onExplainThreat={async (threat, level) => {
+              if (window.desktopSecurity?.explainThreat) {
+                return window.desktopSecurity.explainThreat(threat, level);
+              }
+              return {
+                threatTitle: threat.threatName,
+                summary: `This file was blocked because it exhibits suspicious executable signals (${threat.evidenceFactors.join(', ')}).`,
+                explanation: 'The system inspected the header bytes and found indicators common to deceptive files designed to trick users into running hidden software.',
+                riskLevel: threat.severity.toUpperCase(),
+                recommendedActions: ['Do not run or open this file', 'Keep the file in the quarantine vault', 'Delete the file if you did not expect it'],
+                cognitiveLevel: level
+              };
+            }}
+          />
+        );
+
       case 'quarantine':
         return (
           <QuarantineScreen
@@ -250,6 +445,24 @@ export const App: React.FC = () => {
             onPurgeAll={handlePurgeAllQuarantine}
           />
         );
+
+      case 'history':
+        return <HistoryScreen />;
+
+      case 'ransomware':
+        return (
+          <RansomwareShieldScreen
+            onRequestFrictionGate={requestFrictionGate}
+            onNavigateToTrustedApps={() => setActiveTab('trusted-apps')}
+          />
+        );
+
+      case 'web-protection':
+        return <WebProtectionScreen />;
+
+      case 'notifications':
+        return <NotificationsScreen />;
+
       case 'status':
         return (
           <ProtectionStatusScreen
@@ -264,28 +477,17 @@ export const App: React.FC = () => {
                 ? () => window.desktopSecurity!.auditPersistence()
                 : async () => []
             }
-          />
-        );
-      case 'assistant':
-        return (
-          <AssistantScreen
-            selectedThreat={selectedThreat}
-            onExplainThreat={
-              window.desktopSecurity?.explainThreat
-                ? (threat, level) => window.desktopSecurity!.explainThreat(threat, level)
-                : async () => ({
-                    threatTitle: selectedThreat?.threatName || 'Threat Briefing',
-                    summary: 'Suspicious file detected and flagged by on-device rules.',
-                    explanation: 'The file contains suspicious patterns common to malware.',
-                    riskLevel: selectedThreat?.severity.toUpperCase() || 'HIGH',
-                    recommendedActions: ['Keep file in quarantine', 'Do not run or open file'],
-                    cognitiveLevel: 'grade6'
-                  })
+            onResetIsolation={
+              window.desktopSecurity?.resetWatchdogIsolation
+                ? (name) => window.desktopSecurity!.resetWatchdogIsolation(name)
+                : undefined
             }
           />
         );
-      case 'privacy':
-        return <PrivacyScreen onCryptoShred={handlePurgeAllQuarantine} />;
+
+      case 'updates':
+        return <UpdateStatusScreen />;
+
       case 'settings':
         return (
           <SettingsScreen
@@ -293,147 +495,94 @@ export const App: React.FC = () => {
             onSaveSettings={handleSaveSettings}
           />
         );
-      case 'updates':
-        return <UpdateStatusScreen />;
+
+      case 'exclusions':
+        return <ExclusionsScreen onRequestFrictionGate={requestFrictionGate} />;
+
+      case 'trusted-apps':
+        return <TrustedAppsScreen onRequestFrictionGate={requestFrictionGate} />;
+
+      case 'recovery':
+        return <RecoveryScreen onRequestFrictionGate={requestFrictionGate} />;
+
+      case 'about':
+        return <AboutSecurityScreen />;
+
       default:
-        return <div>Unknown View</div>;
+        return <div>Unknown Screen</div>;
     }
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+    <div
+      style={{
+        display: 'flex',
+        height: '100vh',
+        width: '100vw',
+        overflow: 'hidden',
+        fontFamily: 'system-ui, -apple-system, sans-serif'
+      }}
+    >
       <Sidebar
         activeTab={activeTab}
         onSelectTab={setActiveTab}
         quarantineCount={quarantineItems.length}
-        threatsCount={threats.filter((t) => !t.quarantined).length}
+        threatsCount={unquarantinedThreatsCount}
+        unreadNotificationsCount={unreadNotificationsCount}
       />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundColor: '#f8fafc' }}>
+
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          backgroundColor: '#f8fafc'
+        }}
+      >
         <Header
-          threatsCount={threats.filter((t) => !t.quarantined).length}
+          threatsCount={unquarantinedThreatsCount}
           engineActive={status.realtimeShieldActive}
           offline={status.offlineMode}
+          unreadNotificationsCount={unreadNotificationsCount}
+          postureStatus={postureStatus}
+          onOpenNotifications={() => setActiveTab('notifications')}
+          onOpenStatus={() => setActiveTab('status')}
         />
-
-        {realtimeAlert && (
-          <div
-            data-testid="realtime-threat-alert"
-            style={{
-              backgroundColor:
-                realtimeAlert.actionTaken === 'AUTO_QUARANTINED' ? '#fef2f2' : '#fffbeb',
-              borderBottom: `2px solid ${
-                realtimeAlert.actionTaken === 'AUTO_QUARANTINED' ? '#ef4444' : '#f59e0b'
-              }`,
-              padding: '14px 24px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <strong style={{ color: '#991b1b', fontSize: '14px' }}>
-                  REAL-TIME INGRESS THREAT DETECTED
-                </strong>
-                <span
-                  data-testid="realtime-action-badge"
-                  style={{
-                    backgroundColor:
-                      realtimeAlert.actionTaken === 'AUTO_QUARANTINED' ? '#dc2626' : '#d97706',
-                    color: '#ffffff',
-                    padding: '2px 8px',
-                    borderRadius: '4px',
-                    fontSize: '11px',
-                    fontWeight: 700
-                  }}
-                >
-                  ACTION TAKEN: {realtimeAlert.actionTaken}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setRealtimeAlert(null)}
-                style={{
-                  border: '1px solid #cbd5e1',
-                  backgroundColor: '#ffffff',
-                  borderRadius: '4px',
-                  padding: '4px 10px',
-                  fontSize: '12px',
-                  cursor: 'pointer'
-                }}
-              >
-                Dismiss
-              </button>
-            </div>
-
-            <div style={{ fontSize: '13px', color: '#1e293b', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-              <span><strong>File:</strong> {realtimeAlert.threat.fileName}</span>
-              <span><strong>Verdict:</strong> {realtimeAlert.threat.verdict}</span>
-              <span><strong>Severity:</strong> {realtimeAlert.threat.severity.toUpperCase()}</span>
-              <span><strong>Risk Score:</strong> {realtimeAlert.threat.riskScore}/100</span>
-            </div>
-
-            <div style={{ fontSize: '12px', color: '#475569' }}>
-              <strong>Reason / Evidence:</strong> {realtimeAlert.threat.evidenceFactors.join(' • ')}
-            </div>
-
-            <div style={{ display: 'flex', gap: '8px' }}>
-              {realtimeAlert.actionTaken === 'ALERTED' && !realtimeAlert.threat.quarantined && (
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await handleIsolateThreat(realtimeAlert.threat);
-                    setRealtimeAlert((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            actionTaken: 'AUTO_QUARANTINED',
-                            threat: { ...prev.threat, quarantined: true }
-                          }
-                        : null
-                    );
-                  }}
-                  style={{
-                    backgroundColor: '#dc2626',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '6px 12px',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  Quarantine Threat Now
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  handleExplainThreat(realtimeAlert.threat);
-                  setRealtimeAlert(null);
-                }}
-                style={{
-                  backgroundColor: '#e2e8f0',
-                  color: '#1e293b',
-                  border: 'none',
-                  borderRadius: '4px',
-                  padding: '6px 12px',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                Explain Threat
-              </button>
-            </div>
-          </div>
-        )}
 
         <main style={{ flex: 1, overflowY: 'auto' }}>
           {renderActiveScreen()}
         </main>
       </div>
+
+      {/* Screen 07: High-Priority Threat Detection Modal Interstitial */}
+      {realtimeAlert && (
+        <ThreatDetectionModal
+          alert={realtimeAlert}
+          onAcknowledge={() => setRealtimeAlert(null)}
+          onInspectEvidence={(t) => {
+            setSelectedThreat(t);
+            setActiveTab('results');
+            setRealtimeAlert(null);
+          }}
+          onRequestRestore={(t) => {
+            requestFrictionGate(`Restore malicious threat '${t.fileName}'`, async () => {
+              setRealtimeAlert(null);
+            });
+          }}
+        />
+      )}
+
+      {/* Security Friction Gate Modal */}
+      <FrictionGateModal
+        isOpen={frictionGate.isOpen}
+        title={frictionGate.title}
+        description={frictionGate.description}
+        confirmLabel="Confirm Security Modification"
+        countdownSeconds={3}
+        onConfirm={frictionGate.onConfirm}
+        onCancel={() => setFrictionGate((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 };
