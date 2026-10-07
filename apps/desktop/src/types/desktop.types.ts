@@ -1192,5 +1192,134 @@ export interface ThreatIntelManagerOptions {
   readonly clock?: () => number;
 }
 
+// ============================================================================
+// PHASE Q: Self-Health, Watchdog, Audit Log & Tamper Protection Domain Models
+// ============================================================================
+
+export type HealthState = 'HEALTHY' | 'WARNING' | 'DEGRADED' | 'CRITICAL';
+
+export interface SubsystemHealthStatus {
+  readonly name: string;
+  readonly state: HealthState;
+  readonly message: string;
+  readonly lastCheckTime: number;
+  readonly metadata?: Record<string, string | number | boolean>;
+}
+
+export interface HealthRemediationAction {
+  readonly actionId: string;
+  readonly title: string;
+  readonly description: string;
+  readonly subsystem: string;
+  readonly autoExecutable: boolean;
+}
+
+export interface SystemHealthReport {
+  readonly overallState: HealthState;
+  readonly subsystems: readonly SubsystemHealthStatus[];
+  readonly issues: readonly string[];
+  readonly recommendedRemediations: readonly HealthRemediationAction[];
+  readonly timestamp: number;
+}
+
+export type WatchdogSubsystemHealth = 'HEALTHY' | 'DEGRADED' | 'FAILED' | 'RECOVERING' | 'ISOLATED';
+
+export interface WatchdogComponentStatus {
+  readonly name: string;
+  readonly status: WatchdogSubsystemHealth;
+  readonly failureCount: number;
+  readonly lastHeartbeat: number;
+  readonly lastRecoveryTime?: number;
+  readonly isIsolated: boolean;
+}
+
+export interface WatchdogStatus {
+  readonly isActive: boolean;
+  readonly heartbeatIntervalMs: number;
+  readonly monitoredComponents: readonly WatchdogComponentStatus[];
+  readonly safeMinimalMode: boolean;
+  readonly shieldSnoozeActive: boolean;
+  readonly shieldSnoozeRemainingMs: number;
+  readonly shieldSnoozeTotalMs: number;
+  readonly crashHistory: readonly { readonly component: string; readonly timestamp: number }[];
+}
+
+export type AuditLogCategory =
+  | 'DETECTION'
+  | 'SCAN'
+  | 'QUARANTINE'
+  | 'PROCESS'
+  | 'CONFIGURATION'
+  | 'HEALTH_CHECK'
+  | 'WATCHDOG'
+  | 'TAMPER_DETECTION'
+  | 'UPDATE'
+  | 'SHRED'
+  | 'EXCLUSION'
+  | 'SYSTEM';
+
+export type AuditLogSeverity = 'INFO' | 'WARN' | 'ERROR' | 'CRITICAL';
+
+export interface AuditEventInput {
+  readonly category: AuditLogCategory;
+  readonly severity: AuditLogSeverity;
+  readonly action: string;
+  readonly actor: string;
+  readonly targetSummary: string;
+  readonly sha256?: string;
+  readonly ruleIds?: readonly string[];
+  readonly verdict?: string;
+  readonly riskScore?: number;
+  readonly metadata?: Record<string, string | number | boolean>;
+}
+
+export interface AuditLogEntry {
+  readonly index: number;
+  readonly id: string;
+  readonly timestamp: number;
+  readonly category: AuditLogCategory;
+  readonly severity: AuditLogSeverity;
+  readonly action: string;
+  readonly actor: string;
+  readonly targetSummary: string;
+  readonly prevHash: string;
+  readonly entryHmacSha256: string;
+  readonly sha256?: string;
+  readonly ruleIds?: readonly string[];
+  readonly verdict?: string;
+  readonly riskScore?: number;
+  readonly metadata?: Record<string, string | number | boolean>;
+}
+
+export interface AuditVerificationResult {
+  readonly isValid: boolean;
+  readonly totalEntries: number;
+  readonly verifiedEntries: number;
+  readonly corruptedIndex?: number;
+  readonly reason?: string;
+  readonly tamperDetails?: string;
+}
+
+export interface AuditQueryFilter {
+  readonly category?: AuditLogCategory;
+  readonly severity?: AuditLogSeverity;
+  readonly startDate?: number;
+  readonly endDate?: number;
+  readonly search?: string;
+  readonly offset?: number;
+  readonly limit?: number;
+}
+
+export interface TamperStatus {
+  readonly tamperDetected: boolean;
+  readonly tamperedComponents: readonly string[];
+  readonly lastTamperCheck: number;
+  readonly configIntegrityValid: boolean;
+  readonly auditChainIntegrityValid: boolean;
+  readonly quarantineManifestIntegrityValid: boolean;
+  readonly details: readonly string[];
+}
+
+
 
 
