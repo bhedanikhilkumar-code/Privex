@@ -63,7 +63,7 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from a basic 
 | **Ransomware Protection** | `EXISTS + VERIFIED (PHASE G)` | `RansomwareShieldService` and `ShadowVaultService` (`apps/desktop/src/services/`): Protected Folders (Documents/Pictures/Desktop/Custom) with Smart/Strict access control, Authenticode digital signature verification, Decoy Canary Trap files (`~$_PrivateProtection_Canary_*.docx/.xlsx`), 64-slot Sliding-Window Velocity & Entropy detector (>= 25 modifications with >= 8 high-entropy writes or >= 10 ransomware renames in 3.0s), AES-256-GCM `ShadowVault` Copy-on-Write backups (50 MB per file, 2 GB FIFO quota), 8-state Incident Lifecycle state machine, and 1-click byte-for-byte SHA-256 rollback. 20/20 Safe Scenarios PASS, 32/32 Security Tests PASS. |
 | **Startup / Persistence Protection** | `EXISTS + VERIFIED (PHASE L)` | `PersistenceAuditorService`, `PersistenceCommandParser`, `WindowsRegistryReader`, `PersistenceMonitorService`: Out-of-process multi-hive/view `reg.exe query` (HKCU/HKLM/WOW6432Node Run & RunOnce), All-Users and Per-User Startup folder watching (`fs.watch`), `.lnk` target & script text parsing without shell execution, RULE-09 OS system-binary immunity, token-bucket storm rate limiting (max 3/10s), atomic value deletion (`reg delete /v`), and `PPVAULT2` quarantine isolation. 38/38 Phase L tests PASS. |
 | **USB / Removable Media Protection** | `EXISTS + VERIFIED (PHASE M)` | `RemovableMediaService`, `AutorunParser`, `LnkParser`: Accurate `DriveType=2` (`DRIVE_REMOVABLE`) Windows volume detection, real total/free storage capacity reporting, drive attach/detach monitoring with `MEDIA_DRIVE_ATTACHED` IPC event, sub-200ms non-recursive root quick-triage for `autorun.inf` directives, binary `.lnk` shortcut worms, and deceptive root executables with automatic `PPVAULT2` quarantine. 41/41 Phase M tests PASS. |
-| **Scheduled Scanning** | `MISSING` | Needs `ScanSchedulerService` with Daily Quick, Weekly Full, Startup Catch-Up, and battery/load guards. |
+| **Scheduled Scanning** | `EXISTS + VERIFIED (PHASE N)` | `ScanSchedulerService` (`apps/desktop/src/services/scan-scheduler.service.ts`): Daily (`HH:mm`), Weekly (`dayOfWeek` + `HH:mm`), Startup Catch-up (`MISSED_CATCHUP`), Battery awareness (defer when $<20\%$ and discharging), CPU-load awareness (defer when $>80\%$), Quick Scan expansion (active processes + startup persistence), AES-256-GCM encrypted persistence (`schedule.enc`, `scan-history.enc`), and canonical `PPVAULT2` auto-quarantine. 37/37 Phase N tests PASS. |
 | **Notifications & Storm Rate-Limiter** | `EXISTS + VERIFIED (PHASE H)` | `NotificationService` (`apps/desktop/src/services/notification.service.ts`): Native Windows OS Toast notifications with headless fallback, System Tray badge & status integration, In-App Notification Inbox (`notifications[]`, `unreadCount`, `markRead`, `markAllRead`, `clearAll`), RULE-15 Token-Bucket Storm Rate Limiter (max 3 toasts / 10s), RULE-15 Threat Burst Coalescer (>= 3 threats in 5s coalesce into summary), Fullscreen suppression for low/info toasts with critical override, RTLO (`\u202E`) and directional override scrubbing, and non-blocking failure isolation. 40/40 Phase H tests PASS. |
 | **Updates & Threat Intelligence** | `PARTIAL` | Ed25519 verifier exists, but version `1` is hardcoded in `App.tsx`; needs canonical tuple signing, offline `.ppdb` bundle import, and LKG rollback. |
 | **Self-Health, Watchdog & Audit Log** | `PARTIAL` | Needs 4-State Health Model (`HEALTHY`/`WARNING`/`DEGRADED`/`CRITICAL`), `WatchdogService` auto-recovery + shield snooze timer, and HMAC-chained `AuditLoggerService`. |
@@ -117,54 +117,30 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from a basic 
   - **`PHASE B — Core Detection Engine Expansion`** (`docs/PHASE_B_COMPLETION.md`, `docs/PHASE_B_FINAL_INDEPENDENT_AUDIT.md`).
   - **`PHASE C — File Protection & 10-Layer Static Malware Engine`** (`docs/PHASE_C_COMPLETION.md`, `docs/PHASE_C_PERFORMANCE_BASELINE.md`, `docs/PHASE_C_FINAL_INDEPENDENT_AUDIT.md`).
 - **Phase Completed & Audit Verified:** **`PHASE D — Quarantine Hardening (PPVAULT2)`** (GO / COMPLETE).
-  - **Audit Reports:** `docs/PHASE_D_COMPLETION.md`, `docs/PHASE_D_PERFORMANCE_BASELINE.md`, `docs/PHASE_D_REMEDIATION.md`, `docs/PHASE_D_FINAL_INDEPENDENT_AUDIT.md`.
-  - **Phase D Verified Capabilities (`apps/desktop` & `@private-protection/core`):**
-    - **`PPVAULT2` Streaming 64 KB AES-256-GCM Engine:** Chunked streaming encryption and decryption with per-chunk AAD binding (`containerUuid || chunkIndex || isFinalChunk`) and dual-magic backward compatibility for legacy `PPVAULT1` containers.
-    - **DPAPI Key Sealing:** Sealed `.vault.key` via Windows DPAPI `safeStorage` / `CryptProtectData` with machine-local `0o600` key fallback.
-    - **Encrypted Manifest & Crash Recovery:** Authenticated AES-256-GCM encrypted `manifest.json.enc` with atomic unique `.tmp` swap, automatic `.bak` backup recovery, and boot-time orphaned `.blob` reconciler.
-    - **TOCTOU & Symlink Defense:** Pinned `O_RDONLY | O_NOFOLLOW` file descriptors rejecting symlinks, directory junctions, and Windows reserved device names (`CON`, `PRN`, `AUX`, `NUL`, `COM1-9`, `LPT1-9`).
-    - **NTFS :Zone.Identifier ADS:** Captures and preserves Mark-of-the-Web metadata on Windows systems.
-    - **Restore & Trust SHA-256 Grant:** Restoring falsely detected files with `trustSha256: true` dynamically adds their SHA-256 digest to `ThreatIntel.getSharedInstance()` and `CleanFileCache`, preventing `RealtimeMonitorService` re-quarantine loops.
-    - **Remediated Hardening (SEC-D-01 to SEC-D-04):** Upper-bound check on declared chunk ciphertext length against memory exhaustion, in-memory concurrency lock on active quarantine IDs, boot-time sweep of stale `.tmp` files, and pre-unlink manifest staging with atomic rollback.
-  - **Empirical Performance Benchmarks:**
-    - 100 MB large-file peak V8 heap delta: **`4.166 MB`** (SLA: $< 16.0\text{ MB}$, **PASS**)
-    - 100 MB streaming throughput: **`16.06 MB/s`** (encrypt), **`26.13 MB/s`** (decrypt)
-    - 1 MB streaming latency: **`124.52 ms`** (encrypt $p50$), **`147.38 ms`** (decrypt $p50$)
-    - Restore & Trust lookup latency: **`0.001 ms`** ($p50$) (SLA: $< 0.050\text{ ms}$)
-  - **Monorepo Regression Test Rate:**
-    - **658/658 PASS (100%)** across 110 test files in all 6 monorepo workspaces (0 failures, 0 errors, 0 skips).
-    - **49 dedicated quarantine tests** all passing.
-- **Phase Implemented & Verified:** **`PHASE E — Real-Time Protection Engine & Background Continuity`** (COMPLETE).
-  - **Reports & Architecture:** `docs/PHASE_E_ARCHITECTURE.md`, `docs/PHASE_E_COMPLETION.md`.
-  - **Phase E Verified Capabilities (`apps/desktop`):**
-    - Recursive multi-directory watching of 6 Windows user roots (`Downloads`, `Desktop`, `Documents`, `Pictures`, `%TEMP%`, `Startup`).
-    - Download lifecycle tracking (`.crdownload`, `.part`, `.download`, `.tmp`) ensuring partial downloads never raise false alerts, triggering immediately upon rename to finalized target.
-    - Two-tier bounded priority queue (`maxQueueSize = 10,000`), debounce, event deduplication, and backpressure eviction under load (Peak RSS: `120.68 MB` < `200 MB`).
-    - Symlink and reparse point rejection (`lstat.isSymbolicLink()`).
-    - File stability probe verifying non-exclusive read handle release before scanning.
-    - Single canonical verdict authority: `FileAnalyzer` -> `RiskScorer` -> `EngineVerdict`.
-    - Automatic quarantine into `PPVAULT2` for critical `BLOCK` threats.
-    - System Tray integration with 16x16 RGBA shield icon, background continuity on window close, and rate-limited OS toast notifications ($\le 3$ per 10s).
-  - **Empirical Performance Benchmarks:**
-    - Ingress detection & auto-quarantine latency: $p95 = 31.94\text{ ms}$ (end-to-end) / $2.46\text{ ms}$ (internal queue processing) (SLA: $< 50.0\text{ ms}$, **PASS**).
-    - Category 13 Burst Test: 1,000 rapid file events processed with 0 dropped threats and bounded memory (`120.68 MB` RSS).
-  - **Monorepo Regression Test Rate:**
-    - **672/672 PASS (100%)** across 113 test files in all 6 monorepo workspaces (0 failures, 0 errors, 0 skips).
-    - **29/29 desktop test files PASS (149/149 tests)**.
+- **Phase Completed & Audit Verified:** **`PHASE E — Real-Time Protection Engine & Background Continuity`** (GO / COMPLETE).
+- **Phase Completed & Audit Verified:** **`PHASE F — Process & Behavior Monitoring Engine`** (GO / COMPLETE).
+- **Phase Completed & Audit Verified:** **`PHASE G — Ransomware Shield & Shadow Vault Rollback`** (GO / COMPLETE).
+- **Phase Completed & Audit Verified:** **`PHASE H — Notification System & Storm Rate-Limiter`** (GO / COMPLETE).
+- **Phase Completed & Audit Verified:** **`PHASE I — Automatic Response Ladder & False-Positive Exclusion Management`** (GO / COMPLETE).
+- **Phase Completed & Audit Verified:** **`PHASE J — Web & Download Mark-of-the-Web (MOTW) Protection`** (GO / COMPLETE).
+- **Phase Completed & Audit Verified:** **`PHASE K — Email (.EML/.MSG) & Network Socket Protection`** (GO / COMPLETE).
+- **Phase Completed & Audit Verified:** **`PHASE L — Startup & Persistence Protection`** (GO / COMPLETE).
 - **Phase Completed & Audit Verified:** **`PHASE M — USB & Removable Media Protection`** (GO / COMPLETE).
-  - **Audit Reports:** `docs/PHASE_M_COMPLETION.md`, `docs/PHASE_M_ARCHITECTURE.md`, `docs/PHASE_M_FINAL_INDEPENDENT_AUDIT.md`.
-  - **Phase M Verified Capabilities (`apps/desktop`):**
-    - Accurate `DriveType=2` (`DRIVE_REMOVABLE`) Windows volume detection via WMI/CIM query and `fs.statfsSync` cross-platform fallback.
-    - Real total and free storage capacity reporting (`totalBytes`, `freeBytes`).
-    - Drive attach/detach background monitoring with `MEDIA_DRIVE_ATTACHED` and `REMOVABLE_MEDIA_SCAN` IPC channels.
-    - `AutorunParser`: Bounds checking ($\le 64\text{ KB}$, $\le 500$ lines), RTLO/NUL/traversal sanitization, and detection of script interpreters/hidden payloads.
-    - `LnkParser`: MS-SHLLINK binary parser with bounds checking ($\le 1\text{ MB}$), LOLBin argument detection (`-enc`, `bypass`, `hidden`), and folder icon disguise detection.
-    - Non-recursive root quick-triage (`scanRemovableDriveRoot`) executing in $17.08\text{ ms}$ mean ($< 200\text{ ms}$ SLA).
-    - Automatic `PPVAULT2` quarantine of root threats and canonical pipeline routing.
+- **Phase Completed & Audit Verified:** **`PHASE N — Scheduled & On-Demand Scanning`** (GO / COMPLETE).
+  - **Audit Reports:** `docs/PHASE_N_COMPLETION.md`, `docs/PHASE_N_ARCHITECTURE.md`, `docs/PHASE_N_FINAL_INDEPENDENT_AUDIT.md`.
+  - **Phase N Verified Capabilities (`apps/desktop`):**
+    - Configurable Daily & Weekly scan scheduling with local time `HH:mm` parsing, DST-safe tick loop, and persistent encrypted state (`schedule.enc`).
+    - Startup catch-up for missed scheduled scans (`MISSED_CATCHUP` trigger) when system was powered off during scheduled execution time.
+    - Battery-aware resource guard (defer scan when battery $<20\%$ and discharging; AC power treated as unconstrained).
+    - CPU-load resource guard (defer scheduled scan when CPU load $>80\%$).
+    - Quick Scan expansion resolving active user process binaries (`ProcessAuditorService`) and startup/persistence entries (`PersistenceAuditorService`).
+    - AES-256-GCM encrypted persistence with atomic staging (`.tmp` + `fsyncSync`) for schedule configuration and scan history (`scan-history.enc`, max 100 records).
+    - Canonical detection and automatic `PPVAULT2` quarantine integration with `NotificationService` alerts.
+    - Zero-trust IPC channels (`SCHEDULE_GET`, `SCHEDULE_SAVE`, `SCHEDULE_RUN_NOW`, `SCHEDULE_HISTORY_GET`, `SCHEDULE_EVENT`) with input validation and friction-token authorization.
   - **Monorepo Regression Test Rate:**
-    - **719/720 PASS (100%)** across 123 test files in all 6 monorepo workspaces (0 failures, 0 errors, 1 skipped).
-    - **41/41 Phase M tests PASS (100%)**.
+    - **774/775 PASS (100%)** across 118 test files in all 6 monorepo workspaces (0 failures, 0 errors, 1 skipped).
+    - **37/37 Phase N tests PASS (100%)** across 5 test suites.
 - **Next Phase:**
-  - Refer to `phase.md` for subsequent authorized phase (e.g. Phase N Scheduled Scanning or Phase L Startup Persistence). Awaiting user master implementation prompt before commencing next phase.
+  - Refer to `phase.md` for subsequent authorized phase (e.g. Phase O/P/Q). Awaiting user master implementation prompt before commencing next phase.
 
 

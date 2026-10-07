@@ -22,7 +22,10 @@ import {
   CreateExclusionInput,
   MotwAnalysisResult,
   EmailAnalysisResult,
-  RemovableDriveScanResult
+  RemovableDriveScanResult,
+  ScanScheduleConfig,
+  ScanSchedulerState,
+  ScanHistoryRecord
 } from '../types/desktop.types';
 import { NetworkPostureReport } from '../services/network-monitor.service';
 
@@ -87,6 +90,16 @@ export interface DesktopSecurityApi {
 
   // Phase K: Practical Email (.eml / .msg) Threat API
   analyzeEmail: (filePath: string) => Promise<EmailAnalysisResult>;
+
+  // Phase N: Scheduled & On-Demand Scanning API
+  getScanSchedule: () => Promise<ScanSchedulerState>;
+  saveScanSchedule: (
+    config: ScanScheduleConfig,
+    options?: { frictionToken?: string }
+  ) => Promise<{ success: boolean; config: ScanScheduleConfig; state: ScanSchedulerState }>;
+  runScheduledScanNow: (options?: { frictionToken?: string }) => Promise<ScanResult>;
+  getScanHistory: () => Promise<ScanHistoryRecord[]>;
+  onScheduleEvent: (callback: (event: any) => void) => () => void;
 }
 
 declare global {
@@ -254,7 +267,24 @@ export function createDesktopSecurityApi(ipcRenderer: {
     getWebProtectionStatus: () => ipcRenderer.invoke(IPC_CHANNELS.WEB_PROTECTION_STATUS_GET),
 
     // Phase K: Practical Email (.eml / .msg) Threat API
-    analyzeEmail: (filePath) => ipcRenderer.invoke(IPC_CHANNELS.EMAIL_ANALYZE_FILE, filePath)
+    analyzeEmail: (filePath) => ipcRenderer.invoke(IPC_CHANNELS.EMAIL_ANALYZE_FILE, filePath),
+
+    // Phase N: Scheduled & On-Demand Scanning API
+    getScanSchedule: () => ipcRenderer.invoke(IPC_CHANNELS.SCHEDULE_GET),
+    saveScanSchedule: (config, options) =>
+      ipcRenderer.invoke(IPC_CHANNELS.SCHEDULE_SAVE, config, options),
+    runScheduledScanNow: (options) =>
+      ipcRenderer.invoke(IPC_CHANNELS.SCHEDULE_RUN_NOW, options),
+    getScanHistory: () => ipcRenderer.invoke(IPC_CHANNELS.SCHEDULE_HISTORY_GET),
+    onScheduleEvent: (callback) => {
+      const handler = (_event: any, data: unknown) => {
+        if (data && typeof data === 'object') {
+          callback(data);
+        }
+      };
+      ipcRenderer.on(IPC_CHANNELS.SCHEDULE_EVENT, handler);
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.SCHEDULE_EVENT, handler);
+    }
   };
 }
 

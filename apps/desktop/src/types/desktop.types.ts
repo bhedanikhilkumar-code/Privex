@@ -32,7 +32,10 @@ export type SecurityLogEventType =
   | 'EXCLUSION_TOGGLED'
   | 'EXCLUSION_CLEARED'
   | 'EXCLUSION_REJECTED'
-  | 'SECURITY_VIOLATION';
+  | 'SECURITY_VIOLATION'
+  | 'SCHEDULED_SCAN_TRIGGERED'
+  | 'SCHEDULED_SCAN_DEFERRED'
+  | 'SCHEDULE_CONFIG_UPDATED';
 
 export interface SecurityLogEntry {
   eventId: string;
@@ -980,4 +983,93 @@ export interface NetworkPostureReport {
   readonly suspiciousSocketsCount: number;
   readonly notice: string;
 }
+
+// ============================================================
+// PHASE N: SCHEDULED & ON-DEMAND SCANNING TYPES
+// ============================================================
+
+export type ScheduleFrequency = 'daily' | 'weekly';
+
+export type ScheduleScanType = 'quick' | 'full';
+
+export type ScheduleTrigger = 'USER' | 'SCHEDULED' | 'MISSED_CATCHUP';
+
+export type ScheduleExecutionStatus =
+  | 'COMPLETED'
+  | 'COMPLETED_WITH_FINDINGS'
+  | 'CANCELLED'
+  | 'FAILED'
+  | 'DEFERRED_BATTERY'
+  | 'DEFERRED_CPU'
+  | 'SKIPPED_ALREADY_RUNNING';
+
+export interface ScanScheduleConfig {
+  readonly enabled: boolean;
+  readonly frequency: ScheduleFrequency;
+  readonly timeOfDay: string;                  // 'HH:mm' 24-hour format
+  readonly weekday?: number;                   // 0-6 (0=Sun, 1=Mon, ..., 6=Sat)
+  readonly scanType: ScheduleScanType;
+  readonly pauseOnBattery: boolean;
+  readonly runMissedOnStartup: boolean;
+  readonly autoQuarantine: boolean;
+  readonly maxCpuThresholdPct?: number;        // default 80
+  readonly minBatteryThresholdPct?: number;    // default 20
+}
+
+export interface ScanHistoryRecord {
+  readonly scanId: string;
+  readonly scanType: ScanType;
+  readonly trigger: ScheduleTrigger;
+  readonly scheduledTime?: number;
+  readonly startTime: number;
+  readonly completedAt: number;
+  readonly durationMs: number;
+  readonly totalFilesScanned: number;
+  readonly totalBytesScanned: number;
+  readonly threatsFound: number;
+  readonly threatsQuarantined: number;
+  readonly skippedCount: number;
+  readonly errorCount: number;
+  readonly overallVerdict: ThreatVerdict;
+  readonly finalStatus: ScheduleExecutionStatus;
+  readonly deferredReason?: string;
+  readonly errorReason?: string;
+  readonly targetsScanned?: string[];
+}
+
+export interface ScanSchedulerState {
+  readonly config: ScanScheduleConfig;
+  readonly lastScheduledRun?: number;
+  readonly lastSuccessfulRun?: number;
+  readonly lastStatus?: ScheduleExecutionStatus;
+  readonly nextScheduledRun?: number;
+  readonly isRunning: boolean;
+  readonly currentScanId?: string;
+}
+
+export interface BatteryStatus {
+  readonly hasBattery: boolean;
+  readonly isCharging: boolean;
+  readonly percent: number;
+}
+
+export interface CpuLoadStatus {
+  readonly loadPct: number;
+  readonly isAvailable: boolean;
+}
+
+export interface ScanSchedulerOptions {
+  readonly configDir?: string;
+  readonly storage?: any;
+  readonly scanner?: any;
+  readonly quickScanner?: any;
+  readonly quarantineService?: any;
+  readonly notificationService?: any;
+  readonly processAuditor?: any;
+  readonly persistenceAuditor?: any;
+  readonly batteryInspector?: () => Promise<BatteryStatus>;
+  readonly cpuInspector?: () => Promise<CpuLoadStatus>;
+  readonly clock?: () => number;
+}
+
 

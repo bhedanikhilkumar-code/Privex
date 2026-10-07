@@ -73,7 +73,14 @@ export const IPC_CHANNELS = {
 
   // Phase M: USB & Removable Media Protection
   REMOVABLE_MEDIA_SCAN: 'desktop:removableMedia:scan',
-  MEDIA_DRIVE_ATTACHED: 'desktop:removableMedia:attached'
+  MEDIA_DRIVE_ATTACHED: 'desktop:removableMedia:attached',
+
+  // Phase N: Scheduled & On-Demand Scanning
+  SCHEDULE_GET: 'desktop:schedule:get',
+  SCHEDULE_SAVE: 'desktop:schedule:save',
+  SCHEDULE_RUN_NOW: 'desktop:schedule:runNow',
+  SCHEDULE_HISTORY_GET: 'desktop:schedule:historyGet',
+  SCHEDULE_EVENT: 'desktop:schedule:event'
 } as const;
 
 export type IpcChannel = typeof IPC_CHANNELS[keyof typeof IPC_CHANNELS];
@@ -85,7 +92,8 @@ export const IPC_EVENT_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.RANSOMWARE_EVENT,
   IPC_CHANNELS.NOTIFICATION_EVENT,
   IPC_CHANNELS.PERSISTENCE_CHANGED,
-  IPC_CHANNELS.MEDIA_DRIVE_ATTACHED
+  IPC_CHANNELS.MEDIA_DRIVE_ATTACHED,
+  IPC_CHANNELS.SCHEDULE_EVENT
 ] as const;
 
 export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
@@ -134,7 +142,11 @@ export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.EXCLUSIONS_CLEAR_ALL,
   IPC_CHANNELS.MOTW_ANALYZE_FILE,
   IPC_CHANNELS.WEB_PROTECTION_STATUS_GET,
-  IPC_CHANNELS.EMAIL_ANALYZE_FILE
+  IPC_CHANNELS.EMAIL_ANALYZE_FILE,
+  IPC_CHANNELS.SCHEDULE_GET,
+  IPC_CHANNELS.SCHEDULE_SAVE,
+  IPC_CHANNELS.SCHEDULE_RUN_NOW,
+  IPC_CHANNELS.SCHEDULE_HISTORY_GET
 ] as const;
 
 

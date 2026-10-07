@@ -22,6 +22,7 @@ export * from './services/secure-storage.service';
 export * from './services/update-verifier.service';
 export * from './services/shadow-vault.service';
 export * from './services/ransomware-shield.service';
+export * from './services/scan-scheduler.service';
 export * from './ipc/ipc-channels';
 export * from './ipc/ipc-validator';
 export * from './ipc/ipc-handler';

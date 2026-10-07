@@ -1,6 +1,6 @@
-import * as fs from 'fs';
 import * as path from 'path';
-import { DesktopSettings, DetectedThreat } from '../types/desktop.types';
+import * as fs from 'fs';
+import { DesktopSettings, DetectedThreat, ScanScheduleConfig } from '../types/desktop.types';
 
 export class IpcValidator {
   private static readonly FORBIDDEN_SHELL_CHARS = /[|&;$`><\r\n\0]/;
@@ -458,6 +458,111 @@ export class IpcValidator {
       throw new Error('INVALID_FRICTION_TOKEN: Friction token must be a non-empty string.');
     }
     return token.trim();
+  }
+
+  /**
+   * Validates a ScanScheduleConfig input payload from IPC.
+   * Enforces strict schema verification, rejects prototype pollution, unexpected fields,
+   * invalid frequencies, malformed 24-hour time strings, and out-of-range thresholds.
+   */
+  public static validateScheduleConfig(input: unknown): ScanScheduleConfig {
+    if (!input || typeof input !== 'object' || Array.isArray(input)) {
+      throw new Error('INVALID_SCHEDULE_PAYLOAD: Expected object payload for scan schedule configuration.');
+    }
+
+    // Prototype pollution & unexpected properties check
+    const forbiddenKeys = ['__proto__', 'constructor', 'prototype'];
+    const allowedKeys = new Set([
+      'enabled',
+      'frequency',
+      'timeOfDay',
+      'weekday',
+      'scanType',
+      'pauseOnBattery',
+      'runMissedOnStartup',
+      'autoQuarantine',
+      'maxCpuThresholdPct',
+      'minBatteryThresholdPct',
+      'frictionToken'
+    ]);
+
+    const obj = input as Record<string, unknown>;
+    for (const key of Object.keys(obj)) {
+      if (forbiddenKeys.includes(key)) {
+        throw new Error(`SECURITY_VIOLATION: Forbidden prototype key detected: ${key}`);
+      }
+      if (!allowedKeys.has(key)) {
+        throw new Error(`INVALID_SCHEDULE_FIELD: Unexpected field in schedule payload: ${key}`);
+      }
+    }
+
+    if (typeof obj.enabled !== 'boolean') {
+      throw new Error('INVALID_SCHEDULE_ENABLED: Expected boolean for enabled.');
+    }
+
+    if (obj.frequency !== 'daily' && obj.frequency !== 'weekly') {
+      throw new Error("INVALID_SCHEDULE_FREQUENCY: Expected 'daily' or 'weekly' for frequency.");
+    }
+
+    if (typeof obj.timeOfDay !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(obj.timeOfDay.trim())) {
+      throw new Error("INVALID_SCHEDULE_TIME: Expected valid 24-hour 'HH:mm' time format (00:00 to 23:59).");
+    }
+
+    let weekday: number | undefined;
+    if (obj.weekday !== undefined && obj.weekday !== null) {
+      if (typeof obj.weekday === 'number' && Number.isInteger(obj.weekday) && obj.weekday >= 0 && obj.weekday <= 6) {
+        weekday = obj.weekday;
+      } else {
+        throw new Error('INVALID_SCHEDULE_WEEKDAY: Expected integer weekday 0-6 (0=Sun, ..., 6=Sat).');
+      }
+    } else if (obj.frequency === 'weekly') {
+      weekday = 0; // default Sunday
+    }
+
+    if (obj.scanType !== 'quick' && obj.scanType !== 'full') {
+      throw new Error("INVALID_SCHEDULE_SCAN_TYPE: Expected 'quick' or 'full' for scanType.");
+    }
+
+    if (typeof obj.pauseOnBattery !== 'boolean') {
+      throw new Error('INVALID_SCHEDULE_PAUSE_ON_BATTERY: Expected boolean for pauseOnBattery.');
+    }
+
+    if (typeof obj.runMissedOnStartup !== 'boolean') {
+      throw new Error('INVALID_SCHEDULE_RUN_MISSED: Expected boolean for runMissedOnStartup.');
+    }
+
+    if (typeof obj.autoQuarantine !== 'boolean') {
+      throw new Error('INVALID_SCHEDULE_AUTO_QUARANTINE: Expected boolean for autoQuarantine.');
+    }
+
+    let maxCpuThresholdPct = 80;
+    if (obj.maxCpuThresholdPct !== undefined && obj.maxCpuThresholdPct !== null) {
+      if (typeof obj.maxCpuThresholdPct !== 'number' || !Number.isFinite(obj.maxCpuThresholdPct) || obj.maxCpuThresholdPct < 10 || obj.maxCpuThresholdPct > 100) {
+        throw new Error('INVALID_SCHEDULE_CPU_THRESHOLD: Expected number between 10 and 100 for maxCpuThresholdPct.');
+      }
+      maxCpuThresholdPct = Math.floor(obj.maxCpuThresholdPct);
+    }
+
+    let minBatteryThresholdPct = 20;
+    if (obj.minBatteryThresholdPct !== undefined && obj.minBatteryThresholdPct !== null) {
+      if (typeof obj.minBatteryThresholdPct !== 'number' || !Number.isFinite(obj.minBatteryThresholdPct) || obj.minBatteryThresholdPct < 5 || obj.minBatteryThresholdPct > 100) {
+        throw new Error('INVALID_SCHEDULE_BATTERY_THRESHOLD: Expected number between 5 and 100 for minBatteryThresholdPct.');
+      }
+      minBatteryThresholdPct = Math.floor(obj.minBatteryThresholdPct);
+    }
+
+    return {
+      enabled: obj.enabled,
+      frequency: obj.frequency,
+      timeOfDay: obj.timeOfDay.trim(),
+      weekday,
+      scanType: obj.scanType,
+      pauseOnBattery: obj.pauseOnBattery,
+      runMissedOnStartup: obj.runMissedOnStartup,
+      autoQuarantine: obj.autoQuarantine,
+      maxCpuThresholdPct,
+      minBatteryThresholdPct
+    };
   }
 }
 

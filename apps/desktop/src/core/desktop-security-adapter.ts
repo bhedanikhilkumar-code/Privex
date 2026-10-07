@@ -14,12 +14,16 @@ import {
   FileAnalysisResult,
   DetectedThreat,
   DesktopAssistantExplanation,
-  MotwAnalysisResult
+  MotwAnalysisResult,
+  ScanScheduleConfig,
+  ScanSchedulerState,
+  ScanHistoryRecord
 } from '../types/desktop.types';
 import { MotwAnalyzer } from './motw-analyzer';
 import { EmailMimeParser } from './email-mime-parser';
 import { RemovableMediaService } from '../services/removable-media.service';
 import { PersistenceAuditorService, AuditPersistenceOptions } from '../services/persistence-auditor.service';
+import { ScanSchedulerService } from '../services/scan-scheduler.service';
 
 export class DesktopSecurityAdapter {
   private pipeline: DetectionPipeline;
@@ -86,6 +90,45 @@ export class DesktopSecurityAdapter {
   public async remediatePersistence(itemId: string, options?: { frictionToken?: string }) {
     const auditor = new PersistenceAuditorService();
     return auditor.remediateItem(itemId, options);
+  }
+
+  /**
+   * Retrieves the current scan scheduler state.
+   */
+  public async getScanSchedule(): Promise<ScanSchedulerState> {
+    const scheduler = new ScanSchedulerService();
+    return scheduler.getState();
+  }
+
+  /**
+   * Updates and saves the scan scheduler configuration.
+   */
+  public async saveScanSchedule(
+    config: Partial<ScanScheduleConfig>
+  ): Promise<{ success: boolean; config: ScanScheduleConfig; state: ScanSchedulerState }> {
+    const scheduler = new ScanSchedulerService();
+    const updated = scheduler.saveSchedule(config);
+    return {
+      success: true,
+      config: updated,
+      state: scheduler.getState()
+    };
+  }
+
+  /**
+   * Runs an immediate scheduled scan cycle.
+   */
+  public async runScheduledScanNow() {
+    const scheduler = new ScanSchedulerService();
+    return scheduler.runNow();
+  }
+
+  /**
+   * Retrieves recent scan history records.
+   */
+  public async getScanHistory(): Promise<ScanHistoryRecord[]> {
+    const scheduler = new ScanSchedulerService();
+    return scheduler.getHistory();
   }
 
   /**

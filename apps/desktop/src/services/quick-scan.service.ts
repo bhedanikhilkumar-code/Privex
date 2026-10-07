@@ -3,21 +3,61 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { CoreFileAnalyzer } from '@private-protection/core';
 import { ScannerService } from './scanner.service';
+import { ProcessAuditorService } from './process-auditor.service';
+import { PersistenceAuditorService } from './persistence-auditor.service';
 import { ScanResult } from '../types/desktop.types';
 
+export interface QuickScanOptions {
+  readonly scanner?: ScannerService;
+  readonly processAuditor?: ProcessAuditorService;
+  readonly persistenceAuditor?: PersistenceAuditorService;
+}
+
+/**
+ * QuickScanService (Phase N Expanded)
+ *
+ * Implements targeted, rapid threat discovery across high-risk ingress points:
+ * 1. User Downloads
+ * 2. User/System Temp Directory
+ * 3. User Desktop
+ * 4. User and System Startup Folders
+ * 5. Active user-mode process executable binaries (via ProcessAuditorService)
+ * 6. Windows Startup and Persistence registered targets (via PersistenceAuditorService)
+ *
+ * All discovered targets are safely evaluated through the canonical FileAnalyzer pipeline
+ * without executing untrusted binaries or spawning child shells.
+ */
 export class QuickScanService {
   private scanner: ScannerService;
+  private processAuditor?: ProcessAuditorService;
+  private persistenceAuditor?: PersistenceAuditorService;
 
-  constructor(scanner?: ScannerService) {
-    this.scanner = scanner || new ScannerService();
+  constructor(optionsOrScanner?: QuickScanOptions | ScannerService) {
+    if (optionsOrScanner instanceof ScannerService) {
+      this.scanner = optionsOrScanner;
+    } else if (optionsOrScanner && typeof optionsOrScanner === 'object') {
+      this.scanner = optionsOrScanner.scanner || new ScannerService();
+      this.processAuditor = optionsOrScanner.processAuditor;
+      this.persistenceAuditor = optionsOrScanner.persistenceAuditor;
+    } else {
+      this.scanner = new ScannerService();
+    }
   }
 
   public getScanner(): ScannerService {
     return this.scanner;
   }
 
+  public setProcessAuditor(auditor: ProcessAuditorService): void {
+    this.processAuditor = auditor;
+  }
+
+  public setPersistenceAuditor(auditor: PersistenceAuditorService): void {
+    this.persistenceAuditor = auditor;
+  }
+
   /**
-   * Resolves legitimate high-risk ingress points for a targeted Quick Scan.
+   * Resolves legitimate high-risk ingress directory points for a targeted Quick Scan.
    */
   public getQuickScanTargets(): string[] {
     const home = os.homedir();
@@ -40,6 +80,10 @@ export class QuickScanService {
       const appData = process.env.APPDATA || path.join(home, 'AppData', 'Roaming');
       const startup = path.join(appData, 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup');
       if (fs.existsSync(startup)) targets.push(startup);
+
+      const progData = process.env.ProgramData || 'C:\\ProgramData';
+      const commonStartup = path.join(progData, 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup');
+      if (fs.existsSync(commonStartup)) targets.push(commonStartup);
     } else {
       const autostart = path.join(home, '.config', 'autostart');
       if (fs.existsSync(autostart)) targets.push(autostart);
@@ -49,13 +93,82 @@ export class QuickScanService {
   }
 
   /**
-   * Runs the Quick Scan targeting executables, scripts, and double-extension/RTLO deceptions.
+   * Resolves complete Quick Scan targets including directory ingress points,
+   * active process executable binaries, and registered persistence items.
    */
-  public async executeQuickScan(customTargets?: string[]): Promise<ScanResult> {
-    const targets =
+  public async resolveAllQuickScanTargets(customTargets?: string[]): Promise<string[]> {
+    const targetSet = new Set<string>();
+
+    // 1. Add base directory targets
+    const baseTargets =
       customTargets && customTargets.length > 0
         ? customTargets
         : this.getQuickScanTargets();
+
+    for (const t of baseTargets) {
+      if (t && typeof t === 'string' && fs.existsSync(t)) {
+        targetSet.add(path.resolve(t));
+      }
+    }
+
+    // 2. Add Active Process Binaries (Phase N Expansion)
+    if (this.processAuditor) {
+      try {
+        const processes = await this.processAuditor.auditRunningProcesses();
+        for (const proc of processes) {
+          if (proc.executablePath && typeof proc.executablePath === 'string') {
+            const resolved = path.resolve(proc.executablePath);
+            if (fs.existsSync(resolved)) {
+              try {
+                const stat = fs.statSync(resolved);
+                if (stat.isFile()) {
+                  targetSet.add(resolved);
+                }
+              } catch {
+                // Ignore inaccessible process binary
+              }
+            }
+          }
+        }
+      } catch {
+        // Continue if process auditor encounters permission restriction
+      }
+    }
+
+    // 3. Add Startup / Persistence Targets (Phase N Expansion)
+    if (this.persistenceAuditor) {
+      try {
+        const persistenceResult = await this.persistenceAuditor.auditStartupLocations();
+        for (const item of persistenceResult.items) {
+          const candidatePath = item.targetPath || item.executablePath;
+          if (candidatePath && typeof candidatePath === 'string') {
+            const resolved = path.resolve(candidatePath);
+            if (fs.existsSync(resolved)) {
+              try {
+                const stat = fs.statSync(resolved);
+                if (stat.isFile()) {
+                  targetSet.add(resolved);
+                }
+              } catch {
+                // Ignore inaccessible persistence file
+              }
+            }
+          }
+        }
+      } catch {
+        // Continue if persistence auditor encounters permission restriction
+      }
+    }
+
+    return Array.from(targetSet);
+  }
+
+  /**
+   * Runs the Quick Scan targeting executables, scripts, active process binaries,
+   * persistence mechanisms, and double-extension/RTLO deceptions.
+   */
+  public async executeQuickScan(customTargets?: string[]): Promise<ScanResult> {
+    const targets = await this.resolveAllQuickScanTargets(customTargets);
 
     const isTargetFile = (filePath: string) => {
       const rawName = path.basename(filePath);

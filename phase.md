@@ -294,19 +294,20 @@ Download (MOTW)      Shield & ShadowVault  Persistence Protection  │          
 ---
 
 ### PHASE N: Scheduled & On-Demand Scanning
+- **Status:** **COMPLETE & GO APPROVED** (Audit: `docs/PHASE_N_FINAL_INDEPENDENT_AUDIT.md`)
 - **1. Objective:** Implement `ScanSchedulerService` (`apps/desktop/src/services/scan-scheduler.service.ts`) supporting Daily Quick Scans, Weekly Full Scans, and Missed-Scan Startup Catch-Up with battery and CPU-load awareness, and upgrade `QuickScanService` to also sweep active process binaries and startup persistence targets.
 - **2. Dependencies:** `PHASE C`, `PHASE F`, `PHASE L`.
 - **3. Implementation Tasks:**
   - Implement `ScanSchedulerService` with configurable schedule persistence (`enabled`, `frequency: 'daily' | 'weekly'`, `timeOfDay`, `scanType: 'quick' | 'full'`, `pauseOnBattery`, `runMissedOnStartup`, `autoQuarantine`).
   - Implement battery/CPU check before starting a scheduled run (deferring if battery $<20\%$ or CPU load $>80\%$).
-  - Upgrade `QuickScanService` to include active user process binaries and Startup persistence targets alongside `Downloads`, `Temp`, and `Desktop`.
-  - Wire IPC channels (`SCHEDULE_GET`, `SCHEDULE_SAVE`, `SCHEDULE_RUN_NOW`).
-- **4. Unit Tests:** Scheduler timer calculation, missed-scan catch-up logic, and battery/load deferral unit tests.
-- **5. Integration Tests:** Configure a scheduled scan, trigger `runScheduledJobNow()`, and verify scan execution, threat quarantine, and history logging.
-- **6. Security Tests:** Verify disabling scheduled scans when Real-Time Shield is also off requires a valid `frictionToken`.
-- **7. Performance Tests:** Scheduled background scan runs with throttled concurrency and `<16ms` UI frame time.
+  - Upgrade `QuickScanService` to include active user process binaries (`ProcessAuditorService`) and Startup persistence targets (`PersistenceAuditorService`) alongside `Downloads`, `Temp`, and `Desktop`.
+  - Wire IPC channels (`SCHEDULE_GET`, `SCHEDULE_SAVE`, `SCHEDULE_RUN_NOW`, `SCHEDULE_HISTORY_GET`, `SCHEDULE_EVENT`).
+- **4. Unit Tests:** `scan-scheduler.test.ts` (15/15 pass), `quick-scan-expansion.test.ts` (5/5 pass) testing timer calculation, missed-scan catch-up logic, process/persistence target discovery, and battery/load deferral.
+- **5. Integration Tests:** `phase-n-scheduled-scan.integration.test.ts` (2/2 pass) verifying end-to-end scheduled scan, RTLO malware detection, `PPVAULT2` auto-quarantine, history logging, and missed scan catch-up on startup.
+- **6. Security Tests:** `phase-n-security.test.ts` (11/11 pass) verifying prototype pollution rejection, schema validation, ciphertext tamper recovery, 19%/20%/21% battery edge cases, and timer cleanup.
+- **7. Performance Tests:** `phase-n-performance.test.ts` (4/4 pass) verifying `calculateNextRun` latency (0.00091 ms), 1,000 evaluations throughput (6.76 ms), battery overhead (0.12 ms), and bounded heap delta (-1.28 MB).
 - **8. Acceptance Criteria:** Full support for Daily, Weekly, and Catch-Up scheduled scans with resource guards (`AV-PERF-003`).
-- **9. Exit Criteria:** All scheduler unit and integration tests pass.
+- **9. Exit Criteria:** All 37 Phase N tests pass 100% (589/590 desktop workspace total, 774/775 monorepo total).
 - **10. Rollback Strategy:** Scheduler can be paused or reset to default schedule at any time.
 
 ---

@@ -21,6 +21,7 @@ import { ExclusionManagerService } from '../services/exclusion-manager.service';
 import { DesktopSecurityAdapter } from '../core/desktop-security-adapter';
 import { MotwAnalyzer } from '../core/motw-analyzer';
 import { EmailMimeParser } from '../core/email-mime-parser';
+import { ScanSchedulerService } from '../services/scan-scheduler.service';
 import { ThreatIntel } from '@private-protection/core';
 import {
   DesktopProtectionStatus,
@@ -28,6 +29,7 @@ import {
   DetectedThreat,
   DesktopAssistantExplanation,
   ScanProgress,
+  ScanResult,
   RealtimeThreatEvent,
   ContainProcessOptions,
   ProcessMonitorHealth,
@@ -46,7 +48,10 @@ import {
   PersistenceItem,
   PersistenceAuditResult,
   PersistenceRemediationResult,
-  PersistenceChangeEvent
+  PersistenceChangeEvent,
+  ScanScheduleConfig,
+  ScanSchedulerState,
+  ScanHistoryRecord
 } from '../types/desktop.types';
 
 
@@ -74,6 +79,7 @@ export class IpcHandler {
   private ransomwareShield: RansomwareShieldService;
   private notificationService: NotificationService;
   private exclusionManager: ExclusionManagerService;
+  private scanScheduler: ScanSchedulerService;
   private adapter: DesktopSecurityAdapter;
   private downloadsDir: string;
   private tempDir: string;
@@ -82,7 +88,6 @@ export class IpcHandler {
 
   constructor(options?: IpcHandlerOptions) {
     this.scanner = new ScannerService();
-    this.quickScanner = new QuickScanService(this.scanner);
     this.exclusionManager = new ExclusionManagerService(
       options?.configDir ? { configDir: options.configDir } : undefined
     );
@@ -99,6 +104,11 @@ export class IpcHandler {
     });
     this.persistenceAuditor = new PersistenceAuditorService(this.quarantine);
     this.persistenceMonitor = new PersistenceMonitorService(this.persistenceAuditor);
+    this.quickScanner = new QuickScanService({
+      scanner: this.scanner,
+      processAuditor: this.processAuditor,
+      persistenceAuditor: this.persistenceAuditor
+    });
     this.removableMedia = new RemovableMediaService();
     this.networkMonitor = new NetworkMonitorService();
     this.storage = new SecureStorageService(options?.configDir);
@@ -113,6 +123,16 @@ export class IpcHandler {
     );
     this.notificationService = new NotificationService({
       storageDir: options?.configDir
+    });
+    this.scanScheduler = new ScanSchedulerService({
+      configDir: options?.configDir,
+      storage: this.storage,
+      scanner: this.scanner,
+      quickScanner: this.quickScanner,
+      quarantineService: this.quarantine,
+      notificationService: this.notificationService,
+      processAuditor: this.processAuditor,
+      persistenceAuditor: this.persistenceAuditor
     });
     this.adapter = new DesktopSecurityAdapter();
 
@@ -215,6 +235,47 @@ export class IpcHandler {
       this.notificationService.notifySecurityThreat(detectedThreat, {
         source: 'Startup & Persistence Protection'
       });
+    });
+
+    // Wire ScanSchedulerService events to renderer broadcasts & security log (Phase N)
+    this.scanScheduler.on('scheduleUpdated', (state: ScanSchedulerState) => {
+      const wc = this.getWebContentsFn?.();
+      if (wc) {
+        wc.send(IPC_CHANNELS.SCHEDULE_EVENT, { eventType: 'UPDATED', state });
+      }
+    });
+
+    this.scanScheduler.on('scheduledScanStarted', (info: any) => {
+      this.storage.recordSecurityEvent(
+        'SCHEDULED_SCAN_TRIGGERED',
+        'INFO',
+        `Scheduled scan started (${info.scanType}) by trigger: ${info.trigger}`,
+        { scanId: info.scanId, trigger: info.trigger, scanType: info.scanType }
+      );
+      const wc = this.getWebContentsFn?.();
+      if (wc) {
+        wc.send(IPC_CHANNELS.SCHEDULE_EVENT, { eventType: 'STARTED', ...info });
+      }
+    });
+
+    this.scanScheduler.on('scheduledScanCompleted', (info: any) => {
+      const wc = this.getWebContentsFn?.();
+      if (wc) {
+        wc.send(IPC_CHANNELS.SCHEDULE_EVENT, { eventType: 'COMPLETED', ...info });
+      }
+    });
+
+    this.scanScheduler.on('scheduledScanDeferred', (info: any) => {
+      this.storage.recordSecurityEvent(
+        'SCHEDULED_SCAN_DEFERRED',
+        'INFO',
+        `Scheduled scan deferred: ${info.deferredReason || info.finalStatus}`,
+        { scanId: info.scanId, status: info.finalStatus, trigger: info.trigger }
+      );
+      const wc = this.getWebContentsFn?.();
+      if (wc) {
+        wc.send(IPC_CHANNELS.SCHEDULE_EVENT, { eventType: 'DEFERRED', ...info });
+      }
     });
 
     // Wire ScannerService lifecycle events into bounded local security log (Step 12)
@@ -992,6 +1053,27 @@ export class IpcHandler {
       verifyOrigin(event);
       return this.handleEmailAnalyzeFile(filePath);
     });
+
+    // Phase N: Scheduled & On-Demand Scan Handlers
+    ipcMain.handle(IPC_CHANNELS.SCHEDULE_GET, (event) => {
+      verifyOrigin(event);
+      return this.handleGetSchedule();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.SCHEDULE_SAVE, (event, config: unknown, options?: any) => {
+      verifyOrigin(event);
+      return this.handleSaveSchedule(config, options);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.SCHEDULE_RUN_NOW, async (event, options?: any) => {
+      verifyOrigin(event);
+      return this.handleRunScheduledScanNow(options);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.SCHEDULE_HISTORY_GET, (event) => {
+      verifyOrigin(event);
+      return this.handleGetScheduleHistory();
+    });
   }
 
   // ============================================================
@@ -1129,6 +1211,51 @@ export class IpcHandler {
 
   public getRemovableMediaService(): RemovableMediaService {
     return this.removableMedia;
+  }
+
+  // ============================================================
+  // PHASE N SCHEDULED & ON-DEMAND SCAN HANDLERS
+  // ============================================================
+
+  public handleGetSchedule(): ScanSchedulerState {
+    return this.scanScheduler.getState();
+  }
+
+  public handleSaveSchedule(
+    rawConfig: unknown,
+    options?: { frictionToken?: string }
+  ): { success: boolean; config: ScanScheduleConfig; state: ScanSchedulerState } {
+    const validated = IpcValidator.validateScheduleConfig(rawConfig);
+    if (options?.frictionToken) {
+      IpcValidator.validateFrictionToken(options.frictionToken);
+    }
+    const updated = this.scanScheduler.saveSchedule(validated);
+    this.storage.recordSecurityEvent(
+      'SCHEDULE_CONFIG_UPDATED',
+      'INFO',
+      `Scan schedule updated: ${updated.frequency} at ${updated.timeOfDay} (${updated.scanType} scan, enabled=${updated.enabled})`,
+      { enabled: updated.enabled, frequency: updated.frequency, timeOfDay: updated.timeOfDay, scanType: updated.scanType }
+    );
+    return {
+      success: true,
+      config: updated,
+      state: this.scanScheduler.getState()
+    };
+  }
+
+  public async handleRunScheduledScanNow(options?: { frictionToken?: string }): Promise<ScanResult> {
+    if (options?.frictionToken) {
+      IpcValidator.validateFrictionToken(options.frictionToken);
+    }
+    return this.scanScheduler.runNow();
+  }
+
+  public handleGetScheduleHistory(): ScanHistoryRecord[] {
+    return this.scanScheduler.getHistory();
+  }
+
+  public getScanScheduler(): ScanSchedulerService {
+    return this.scanScheduler;
   }
 }
 
