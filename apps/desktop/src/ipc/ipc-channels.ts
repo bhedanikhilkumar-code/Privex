@@ -80,7 +80,13 @@ export const IPC_CHANNELS = {
   SCHEDULE_SAVE: 'desktop:schedule:save',
   SCHEDULE_RUN_NOW: 'desktop:schedule:runNow',
   SCHEDULE_HISTORY_GET: 'desktop:schedule:historyGet',
-  SCHEDULE_EVENT: 'desktop:schedule:event'
+  SCHEDULE_EVENT: 'desktop:schedule:event',
+
+  // Phase O: Threat Intelligence & Signed Updates
+  UPDATE_APPLY_BUNDLE: 'desktop:update:applyBundle',
+  UPDATE_ROLLBACK_LKG: 'desktop:update:rollbackLkg',
+  UPDATE_STATUS_GET: 'desktop:update:statusGet',
+  UPDATE_EVENT: 'desktop:update:event'
 } as const;
 
 export type IpcChannel = typeof IPC_CHANNELS[keyof typeof IPC_CHANNELS];
@@ -93,7 +99,8 @@ export const IPC_EVENT_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.NOTIFICATION_EVENT,
   IPC_CHANNELS.PERSISTENCE_CHANGED,
   IPC_CHANNELS.MEDIA_DRIVE_ATTACHED,
-  IPC_CHANNELS.SCHEDULE_EVENT
+  IPC_CHANNELS.SCHEDULE_EVENT,
+  IPC_CHANNELS.UPDATE_EVENT
 ] as const;
 
 export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
@@ -146,7 +153,10 @@ export const IPC_INVOKE_CHANNELS: readonly IpcChannel[] = [
   IPC_CHANNELS.SCHEDULE_GET,
   IPC_CHANNELS.SCHEDULE_SAVE,
   IPC_CHANNELS.SCHEDULE_RUN_NOW,
-  IPC_CHANNELS.SCHEDULE_HISTORY_GET
+  IPC_CHANNELS.SCHEDULE_HISTORY_GET,
+  IPC_CHANNELS.UPDATE_APPLY_BUNDLE,
+  IPC_CHANNELS.UPDATE_ROLLBACK_LKG,
+  IPC_CHANNELS.UPDATE_STATUS_GET
 ] as const;
 
 

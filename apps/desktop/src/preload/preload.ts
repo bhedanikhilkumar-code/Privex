@@ -25,7 +25,11 @@ import {
   RemovableDriveScanResult,
   ScanScheduleConfig,
   ScanSchedulerState,
-  ScanHistoryRecord
+  ScanHistoryRecord,
+  UpdateApplyResult,
+  UpdateRollbackResult,
+  ThreatIntelStatus,
+  PpdbBundle
 } from '../types/desktop.types';
 import { NetworkPostureReport } from '../services/network-monitor.service';
 
@@ -100,6 +104,12 @@ export interface DesktopSecurityApi {
   runScheduledScanNow: (options?: { frictionToken?: string }) => Promise<ScanResult>;
   getScanHistory: () => Promise<ScanHistoryRecord[]>;
   onScheduleEvent: (callback: (event: any) => void) => () => void;
+
+  // Phase O: Threat Intelligence & Signed Update API
+  applyUpdateBundle: (bundleOrPath: string | PpdbBundle) => Promise<UpdateApplyResult>;
+  rollbackUpdateLkg: () => Promise<UpdateRollbackResult>;
+  getThreatIntelStatus: () => Promise<ThreatIntelStatus>;
+  onUpdateEvent: (callback: (event: any) => void) => () => void;
 }
 
 declare global {
@@ -284,6 +294,21 @@ export function createDesktopSecurityApi(ipcRenderer: {
       };
       ipcRenderer.on(IPC_CHANNELS.SCHEDULE_EVENT, handler);
       return () => ipcRenderer.removeListener(IPC_CHANNELS.SCHEDULE_EVENT, handler);
+    },
+
+    // Phase O: Threat Intelligence & Signed Update API
+    applyUpdateBundle: (bundleOrPath) =>
+      ipcRenderer.invoke(IPC_CHANNELS.UPDATE_APPLY_BUNDLE, bundleOrPath),
+    rollbackUpdateLkg: () => ipcRenderer.invoke(IPC_CHANNELS.UPDATE_ROLLBACK_LKG),
+    getThreatIntelStatus: () => ipcRenderer.invoke(IPC_CHANNELS.UPDATE_STATUS_GET),
+    onUpdateEvent: (callback) => {
+      const handler = (_event: any, data: unknown) => {
+        if (data && typeof data === 'object') {
+          callback(data);
+        }
+      };
+      ipcRenderer.on(IPC_CHANNELS.UPDATE_EVENT, handler);
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.UPDATE_EVENT, handler);
     }
   };
 }

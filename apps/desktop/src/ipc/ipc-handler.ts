@@ -22,6 +22,7 @@ import { DesktopSecurityAdapter } from '../core/desktop-security-adapter';
 import { MotwAnalyzer } from '../core/motw-analyzer';
 import { EmailMimeParser } from '../core/email-mime-parser';
 import { ScanSchedulerService } from '../services/scan-scheduler.service';
+import { ThreatIntelManagerService } from '../services/threat-intel-manager.service';
 import { ThreatIntel } from '@private-protection/core';
 import {
   DesktopProtectionStatus,
@@ -51,7 +52,10 @@ import {
   PersistenceChangeEvent,
   ScanScheduleConfig,
   ScanSchedulerState,
-  ScanHistoryRecord
+  ScanHistoryRecord,
+  UpdateApplyResult,
+  UpdateRollbackResult,
+  ThreatIntelStatus
 } from '../types/desktop.types';
 
 
@@ -80,6 +84,7 @@ export class IpcHandler {
   private notificationService: NotificationService;
   private exclusionManager: ExclusionManagerService;
   private scanScheduler: ScanSchedulerService;
+  private threatIntelManager: ThreatIntelManagerService;
   private adapter: DesktopSecurityAdapter;
   private downloadsDir: string;
   private tempDir: string;
@@ -134,11 +139,59 @@ export class IpcHandler {
       processAuditor: this.processAuditor,
       persistenceAuditor: this.persistenceAuditor
     });
+    this.threatIntelManager = new ThreatIntelManagerService({
+      dataDir: options?.configDir,
+      scannerService: this.scanner
+    });
     this.adapter = new DesktopSecurityAdapter();
 
     this.downloadsDir = options?.downloadsDir || path.join(os.homedir(), 'Downloads');
     this.tempDir = options?.tempDir || os.tmpdir();
     this.autoStartRealtime = options?.autoStartRealtime ?? false;
+
+    // Wire ThreatIntelManager events to security log, notifications, and renderer broadcast (Phase O)
+    this.threatIntelManager.on('updateApplied', (res: UpdateApplyResult) => {
+      const ver = res.version || res.newVersion || 'unknown';
+      const seq = res.versionSequence ?? res.newVersionSequence ?? 0;
+      this.storage.recordSecurityEvent(
+        'CONFIG_UPDATED',
+        'INFO',
+        `Threat database updated to ${ver} (seq: ${seq})`,
+        { version: ver, versionSequence: seq, badCount: res.badCount ?? 0 }
+      );
+      const wc = this.getWebContentsFn?.();
+      if (wc) {
+        wc.send(IPC_CHANNELS.UPDATE_EVENT, { eventType: 'APPLIED', result: res });
+      }
+    });
+
+    this.threatIntelManager.on('updateRollback', (res: UpdateRollbackResult) => {
+      const restVer = res.restoredVersion || 'seed';
+      const restSeq = res.restoredVersionSequence ?? 0;
+      this.storage.recordSecurityEvent(
+        'CONFIG_UPDATED',
+        'WARN',
+        `Threat database rolled back to ${restVer} (seq: ${restSeq})`,
+        { restoredVersion: restVer, restoredVersionSequence: restSeq }
+      );
+      const wc = this.getWebContentsFn?.();
+      if (wc) {
+        wc.send(IPC_CHANNELS.UPDATE_EVENT, { eventType: 'ROLLBACK', result: res });
+      }
+    });
+
+    this.threatIntelManager.on('updateFailed', (err: any) => {
+      this.storage.recordSecurityEvent(
+        'ENGINE_FAILURE',
+        'ERROR',
+        `Threat database update failed: ${err?.reason || err?.message || 'Unknown error'}`,
+        { code: String(err?.code || 'UNKNOWN'), reason: String(err?.reason || err?.message || 'Unknown error') }
+      );
+      const wc = this.getWebContentsFn?.();
+      if (wc) {
+        wc.send(IPC_CHANNELS.UPDATE_EVENT, { eventType: 'FAILED', error: err });
+      }
+    });
 
     // Wire NotificationService broadcasts to renderer
     this.notificationService.on('notification', (notif: DesktopNotification) => {
@@ -625,11 +678,12 @@ export class IpcHandler {
 
   public handleGetProtectionStatus(): DesktopProtectionStatus {
     const mem = process.memoryUsage();
+    const tiStatus = this.threatIntelManager.getStatus();
     return {
       realtimeShieldActive: this.realtimeMonitor.isActive(),
       monitoredPaths: this.realtimeMonitor.getMonitoredPaths(),
-      threatDatabaseVersion: '2026.10-offline-seed',
-      threatDatabaseTimestamp: 1760000000000,
+      threatDatabaseVersion: tiStatus.currentVersion || tiStatus.installedVersion,
+      threatDatabaseTimestamp: tiStatus.lastUpdatedAt ?? tiStatus.lastUpdated,
       coreEngineVersion: '1.0.0-verified',
       mlAssistantReady: true,
       offlineMode: true,
@@ -1074,6 +1128,22 @@ export class IpcHandler {
       verifyOrigin(event);
       return this.handleGetScheduleHistory();
     });
+
+    // Phase O: Signed Threat Update Handlers
+    ipcMain.handle(IPC_CHANNELS.UPDATE_APPLY_BUNDLE, async (event, input: unknown) => {
+      verifyOrigin(event);
+      return this.handleApplyUpdateBundle(input);
+    });
+
+    ipcMain.handle(IPC_CHANNELS.UPDATE_ROLLBACK_LKG, async (event) => {
+      verifyOrigin(event);
+      return this.handleRollbackUpdateLkg();
+    });
+
+    ipcMain.handle(IPC_CHANNELS.UPDATE_STATUS_GET, (event) => {
+      verifyOrigin(event);
+      return this.handleGetThreatIntelStatus();
+    });
   }
 
   // ============================================================
@@ -1256,6 +1326,27 @@ export class IpcHandler {
 
   public getScanScheduler(): ScanSchedulerService {
     return this.scanScheduler;
+  }
+
+  // ============================================================
+  // PHASE O THREAT INTEL & SIGNED UPDATE HANDLERS
+  // ============================================================
+
+  public async handleApplyUpdateBundle(input: unknown): Promise<UpdateApplyResult> {
+    const validated = IpcValidator.validateApplyBundlePayload(input);
+    return this.threatIntelManager.applyUpdate(validated);
+  }
+
+  public async handleRollbackUpdateLkg(): Promise<UpdateRollbackResult> {
+    return this.threatIntelManager.rollbackToLkg();
+  }
+
+  public handleGetThreatIntelStatus(): ThreatIntelStatus {
+    return this.threatIntelManager.getStatus();
+  }
+
+  public getThreatIntelManager(): ThreatIntelManagerService {
+    return this.threatIntelManager;
   }
 }
 

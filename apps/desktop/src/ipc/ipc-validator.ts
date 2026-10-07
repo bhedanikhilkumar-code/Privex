@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import { DesktopSettings, DetectedThreat, ScanScheduleConfig } from '../types/desktop.types';
+import { DesktopSettings, DetectedThreat, ScanScheduleConfig, PpdbBundle } from '../types/desktop.types';
 
 export class IpcValidator {
   private static readonly FORBIDDEN_SHELL_CHARS = /[|&;$`><\r\n\0]/;
@@ -563,6 +563,40 @@ export class IpcValidator {
       maxCpuThresholdPct,
       minBatteryThresholdPct
     };
+  }
+
+  /**
+   * Validates a path to an offline .ppdb update bundle file.
+   */
+  public static validateUpdateBundlePath(filePath: unknown): string {
+    const validPath = this.validatePath(filePath);
+    if (!validPath.toLowerCase().endsWith('.ppdb')) {
+      throw new Error('INVALID_UPDATE_BUNDLE: File must have a .ppdb extension.');
+    }
+    return validPath;
+  }
+
+  /**
+   * Validates an update bundle payload or file path passed over IPC.
+   */
+  public static validateApplyBundlePayload(input: unknown): string | PpdbBundle {
+    if (typeof input === 'string') {
+      return this.validateUpdateBundlePath(input);
+    }
+    if (!input || typeof input !== 'object') {
+      throw new Error('INVALID_UPDATE_BUNDLE: Payload must be a file path or valid PpdbBundle object.');
+    }
+    const bundle = input as any;
+    if (!bundle.manifest || typeof bundle.manifest !== 'object') {
+      throw new Error('INVALID_UPDATE_BUNDLE: Manifest is missing or invalid.');
+    }
+    if (!bundle.payload || typeof bundle.payload !== 'object') {
+      throw new Error('INVALID_UPDATE_BUNDLE: Payload is missing or invalid.');
+    }
+    if (typeof bundle.signature !== 'string' || !/^[0-9a-fA-F]{128}$/.test(bundle.signature.trim())) {
+      throw new Error('INVALID_UPDATE_BUNDLE: Signature is missing or invalid hex format.');
+    }
+    return bundle as PpdbBundle;
   }
 }
 
