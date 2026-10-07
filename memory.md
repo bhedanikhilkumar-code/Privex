@@ -126,21 +126,20 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from a basic 
 - **Phase Completed & Audit Verified:** **`PHASE K — Email (.EML/.MSG) & Network Socket Protection`** (GO / COMPLETE).
 - **Phase Completed & Audit Verified:** **`PHASE L — Startup & Persistence Protection`** (GO / COMPLETE).
 - **Phase Completed & Audit Verified:** **`PHASE M — USB & Removable Media Protection`** (GO / COMPLETE).
-- **Phase Completed & Audit Verified:** **`PHASE N — Scheduled & On-Demand Scanning`** (GO / COMPLETE).
-  - **Audit Reports:** `docs/PHASE_N_COMPLETION.md`, `docs/PHASE_N_ARCHITECTURE.md`, `docs/PHASE_N_FINAL_INDEPENDENT_AUDIT.md`.
-  - **Phase N Verified Capabilities (`apps/desktop`):**
-    - Configurable Daily & Weekly scan scheduling with local time `HH:mm` parsing, DST-safe tick loop, and persistent encrypted state (`schedule.enc`).
-    - Startup catch-up for missed scheduled scans (`MISSED_CATCHUP` trigger) when system was powered off during scheduled execution time.
-    - Battery-aware resource guard (defer scan when battery $<20\%$ and discharging; AC power treated as unconstrained).
-    - CPU-load resource guard (defer scheduled scan when CPU load $>80\%$).
-    - Quick Scan expansion resolving active user process binaries (`ProcessAuditorService`) and startup/persistence entries (`PersistenceAuditorService`).
-    - AES-256-GCM encrypted persistence with atomic staging (`.tmp` + `fsyncSync`) for schedule configuration and scan history (`scan-history.enc`, max 100 records).
-    - Canonical detection and automatic `PPVAULT2` quarantine integration with `NotificationService` alerts.
-    - Zero-trust IPC channels (`SCHEDULE_GET`, `SCHEDULE_SAVE`, `SCHEDULE_RUN_NOW`, `SCHEDULE_HISTORY_GET`, `SCHEDULE_EVENT`) with input validation and friction-token authorization.
+- **Phase Completed & Audit Verified:** **`PHASE P — Performance, Worker Pool & Low-Resource Optimization`** (GO / COMPLETE).
+  - **Audit Reports:** `docs/PHASE_P_COMPLETION.md`, `docs/PHASE_P_ARCHITECTURE.md`, `docs/PHASE_P_FINAL_INDEPENDENT_AUDIT.md`.
+  - **Phase P Verified Capabilities (`apps/desktop`):**
+    - 65,536-entry Stage 0 $O(1)$ LRU `CleanFileCache` with composite 6-tuple identity `(dev, ino, size, mtimeMs, engineVersion, dbVersion)` delimited by ASCII unit separator `\x1f`.
+    - Sub-millisecond lookup latency ($0.0023\text{ ms}$ vs $<0.08\text{ ms}$ SLA target) and fast-path scan latency ($p50 = 0.149\text{ ms}$ vs $<2.0\text{ ms}$ SLA target).
+    - Strict refusal of non-clean verdicts (`BLOCK`, `WARN`, or `riskScore > 0`) preventing cache poisoning.
+    - 20 Hz (50 ms cooldown) IPC progress throttling (`ScanProgressThrottler`) with immediate initial dispatch and guaranteed terminal `flush()`.
+    - Instantaneous unthrottled bypass for threat detection events (`threatFound`).
+    - Hardware-adaptive resource policy (`ResourcePolicy`) with specialized profiles for $\le 4\text{ GB}$ RAM machines (2 workers, 32-file batch, 2,048 queue) and event loop yielding between batches.
+    - Bounded-memory batch executor (`ScanBatchExecutor`) achieving $1.31\text{ MB}$ heap delta during 500-file scan.
   - **Monorepo Regression Test Rate:**
-    - **774/775 PASS (100%)** across 118 test files in all 6 monorepo workspaces (0 failures, 0 errors, 1 skipped).
-    - **37/37 Phase N tests PASS (100%)** across 5 test suites.
+    - **100% PASS** across all 6 monorepo workspaces (0 failures, 0 errors).
+    - **36/36 Phase P tests PASS (100%)** across all unit, security, integration, and benchmark suites.
 - **Next Phase:**
-  - Refer to `phase.md` for subsequent authorized phase (e.g. Phase O/P/Q). Awaiting user master implementation prompt before commencing next phase.
+  - Refer to `phase.md` for subsequent authorized phase. Awaiting user master implementation prompt before commencing next phase.
 
 

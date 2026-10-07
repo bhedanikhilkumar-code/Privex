@@ -11,8 +11,29 @@ import {
   ScanErrorItem,
   DesktopSettings
 } from '../types/desktop.types';
-import { FileAnalyzer } from '../core/file-analyzer';
+import { CleanFileCache } from '../core/clean-file-cache';
+import { ResourcePolicy } from '../core/resource-policy';
+import { ScanProgressThrottler } from '../core/scan-progress-throttler';
+import { ScanBatchExecutor } from '../core/scan-batch-executor';
 
+export interface ScanOptions {
+  readonly bypassCache?: boolean;
+  readonly fileFilter?: (filePath: string) => boolean;
+}
+
+/**
+ * ScannerService (Phase P — Performance, Worker Pool & Low-Resource Optimization)
+ *
+ * Production-grade on-demand and filesystem scanning engine.
+ *
+ * Features:
+ * 1. 65,536-entry O(1) LRU Stage 0 CleanFileCache with 6-tuple identity.
+ * 2. 20 Hz (50 ms) max IPC progress throttling preventing renderer flooding.
+ * 3. Adaptive concurrency & batch sizing scaling to host RAM/CPU (special <= 4 GB tuning).
+ * 4. Bounded memory and non-blocking batch execution.
+ * 5. Instantaneous threat detection dispatch.
+ * 6. Fail-closed error isolation and 100% offline local-only operation.
+ */
 export class ScannerService extends EventEmitter {
   private currentStatus: ScanStatus = 'idle';
   private currentScanId: string | null = null;
@@ -26,12 +47,64 @@ export class ScannerService extends EventEmitter {
   private activeSkippedCount = 0;
   private activeErrorCount = 0;
 
+  public getScanType(): ScanType {
+    return this.currentScanType;
+  }
+
+  public getActiveStartTime(): number {
+    return this.activeStartTime;
+  }
+
+  public getActiveSkippedCount(): number {
+    return this.activeSkippedCount;
+  }
+
+  public getActiveErrorCount(): number {
+    return this.activeErrorCount;
+  }
+
   // Dynamic settings enforced at runtime (GAP-15)
   private maxFileSizeBytes = 50 * 1024 * 1024;
   private entropyDetectionEnabled = true;
   private excludedPaths: Set<string> = new Set();
   private maxDepth = 64;
   private followSymlinks = true;
+
+  // Optimization components
+  private resourcePolicy: ResourcePolicy;
+  private cleanFileCache: CleanFileCache;
+  private progressThrottler: ScanProgressThrottler | null = null;
+
+  constructor(options?: {
+    resourcePolicy?: ResourcePolicy;
+    cleanFileCache?: CleanFileCache;
+  }) {
+    super();
+    this.resourcePolicy = options?.resourcePolicy ?? ResourcePolicy.getSharedInstance();
+    this.cleanFileCache = options?.cleanFileCache ?? CleanFileCache.getSharedInstance();
+  }
+
+  public getResourcePolicy(): ResourcePolicy {
+    return this.resourcePolicy;
+  }
+
+  public setResourcePolicy(policy: ResourcePolicy): void {
+    if (policy) {
+      this.resourcePolicy = policy;
+    }
+  }
+
+  public getCleanFileCache(): CleanFileCache {
+    return this.cleanFileCache;
+  }
+
+  public clearCache(): void {
+    this.cleanFileCache.clear();
+  }
+
+  public invalidateCache(filePath: string): boolean {
+    return this.cleanFileCache.invalidate(filePath);
+  }
 
   public setMaxFileSizeBytes(bytes: number): void {
     if (typeof bytes !== 'number' || !Number.isFinite(bytes)) {
@@ -133,6 +206,9 @@ export class ScannerService extends EventEmitter {
         this.pauseResolver = null;
       }
       this.currentStatus = 'cancelled';
+      if (this.progressThrottler) {
+        this.progressThrottler.flush();
+      }
       this.emit('cancelled', { scanId: this.currentScanId });
     }
   }
@@ -141,6 +217,9 @@ export class ScannerService extends EventEmitter {
     if (this.currentStatus === 'running') {
       this.isPaused = true;
       this.currentStatus = 'paused';
+      if (this.progressThrottler) {
+        this.progressThrottler.flush();
+      }
       this.emit('paused', { scanId: this.currentScanId });
     }
   }
@@ -170,13 +249,21 @@ export class ScannerService extends EventEmitter {
   }
 
   /**
-   * Executes a recursive filesystem scan across target directories.
+   * Executes a recursive filesystem scan across target directories with batching,
+   * CleanFileCache fast-pathing, adaptive concurrency, and 20 Hz progress rate-limiting.
    */
   public async scanPaths(
     targets: string[],
     scanType: ScanType = 'custom',
-    fileFilter?: (filePath: string) => boolean
+    fileFilter?: ((filePath: string) => boolean) | ScanOptions,
+    scanOptions?: ScanOptions
   ): Promise<ScanResult> {
+    const filterFn = typeof fileFilter === 'function' ? fileFilter : undefined;
+    const options: ScanOptions =
+      typeof fileFilter === 'object' && fileFilter !== null
+        ? fileFilter
+        : scanOptions ?? {};
+
     const scanId = `scan-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
     this.currentScanId = scanId;
     this.currentScanType = scanType;
@@ -197,7 +284,47 @@ export class ScannerService extends EventEmitter {
     const skippedFiles: SkippedItem[] = [];
     const errors: ScanErrorItem[] = [];
 
-    // Tracks visited real paths to prevent symlink recursion cycles
+    // Initialize 20 Hz progress throttler
+    this.progressThrottler = new ScanProgressThrottler(
+      (progress: ScanProgress) => {
+        this.emit('progress', progress);
+      },
+      { intervalMs: 50 }
+    );
+
+    // Bounded batch executor
+    const batchExecutor = new ScanBatchExecutor({
+      scanId,
+      scanType,
+      maxFileSizeBytes: this.maxFileSizeBytes,
+      entropyDetectionEnabled: this.entropyDetectionEnabled,
+      bypassCache: options.bypassCache,
+      resourcePolicy: this.resourcePolicy,
+      progressThrottler: this.progressThrottler,
+      isPathExcluded: (p) => this.isPathExcluded(p),
+      isCancelled: () => this.cancelRequested,
+      isPaused: () => this.isPaused,
+      waitForResume: async () => {
+        if (this.isPaused) {
+          await new Promise<void>((resolve) => {
+            this.pauseResolver = resolve;
+          });
+        }
+      },
+      onThreatFound: (threat) => {
+        this.emit('threatFound', threat);
+      },
+      onProgress: (progress) => {
+        this.emit('progress', progress);
+      },
+      onFileProcessed: (bytes) => {
+        totalBytesScanned += bytes;
+        totalFilesScanned++;
+        this.activeBytesScanned = totalBytesScanned;
+        this.activeFilesScanned = totalFilesScanned;
+      }
+    });
+
     const visitedRealPaths = new Set<string>();
     const safeTargets = Array.isArray(targets) ? targets : [];
 
@@ -236,34 +363,39 @@ export class ScannerService extends EventEmitter {
 
         const rootStat = await fs.promises.stat(canonicalTarget);
         if (rootStat.isFile()) {
-          await this.processSingleFile(
-            canonicalTarget,
-            threats,
-            skippedFiles,
-            errors,
-            (bytes) => {
-              totalBytesScanned += bytes;
-              totalFilesScanned++;
-              this.activeBytesScanned = totalBytesScanned;
-              this.activeFilesScanned = totalFilesScanned;
-            }
-          );
+          if (!filterFn || filterFn(canonicalTarget)) {
+            await batchExecutor.processFile(canonicalTarget);
+          }
         } else if (rootStat.isDirectory()) {
-          await this.traverseDirectory(
+          // Collect directory files in memory-bounded batches
+          const collectedBatch: string[] = [];
+          const profile = this.resourcePolicy.getProfile();
+          const batchSize = profile.batchSize;
+
+          const flushCollectedBatch = async () => {
+            if (collectedBatch.length > 0) {
+              const toProcess = collectedBatch.splice(0, collectedBatch.length);
+              await batchExecutor.execute(toProcess);
+            }
+          };
+
+          await this.traverseDirectoryStream(
             canonicalTarget,
             visitedRealPaths,
-            threats,
             skippedFiles,
             errors,
-            fileFilter,
-            (bytes) => {
-              totalBytesScanned += bytes;
-              totalFilesScanned++;
-              this.activeBytesScanned = totalBytesScanned;
-              this.activeFilesScanned = totalFilesScanned;
+            filterFn,
+            async (filePath) => {
+              collectedBatch.push(filePath);
+              if (collectedBatch.length >= batchSize) {
+                await flushCollectedBatch();
+              }
             },
             0
           );
+
+          // Flush any remaining collected files in the batch
+          await flushCollectedBatch();
         }
       } catch (err: any) {
         errors.push({ path: target, error: err.message || 'Unknown traversal error' });
@@ -271,10 +403,23 @@ export class ScannerService extends EventEmitter {
       }
     }
 
+    // Flush any pending progress frame before dispatching completed event
+    if (this.progressThrottler) {
+      this.progressThrottler.flush();
+      this.progressThrottler.dispose();
+      this.progressThrottler = null;
+    }
+
     const durationMs = Date.now() - startTime;
     this.currentStatus = this.cancelRequested ? 'cancelled' : 'completed';
 
-    // Step 6 & Step 7: Fail-closed verdict calculation — never silently report ALLOW when scan errors occurred
+    // Merge threats, skipped, and errors from batch executor
+    const batchResult = await batchExecutor.execute([]);
+    threats.push(...batchResult.threats);
+    skippedFiles.push(...batchResult.skipped);
+    errors.push(...batchResult.errors);
+
+    // Fail-closed overall verdict calculation
     let overallVerdict: 'ALLOW' | 'INFORM' | 'WARN' | 'BLOCK' = 'ALLOW';
     if (threats.some((t) => t.verdict === 'BLOCK')) {
       overallVerdict = 'BLOCK';
@@ -302,8 +447,8 @@ export class ScannerService extends EventEmitter {
       scanId,
       scanType,
       status: this.currentStatus,
-      totalFilesScanned,
-      totalBytesScanned,
+      totalFilesScanned: this.activeFilesScanned,
+      totalBytesScanned: this.activeBytesScanned,
       durationMs,
       threats,
       skippedFiles,
@@ -318,14 +463,16 @@ export class ScannerService extends EventEmitter {
     return result;
   }
 
-  private async traverseDirectory(
+  /**
+   * Traverses directories streaming file paths into batch buffer.
+   */
+  private async traverseDirectoryStream(
     dirPath: string,
     visitedRealPaths: Set<string>,
-    threats: DetectedThreat[],
     skippedFiles: SkippedItem[],
     errors: ScanErrorItem[],
     fileFilter: ((filePath: string) => boolean) | undefined,
-    onFileProcessed: (bytes: number) => void,
+    onFileFound: (filePath: string) => Promise<void>,
     currentDepth = 0
   ): Promise<void> {
     if (await this.checkPauseAndCancel()) return;
@@ -401,19 +548,18 @@ export class ScannerService extends EventEmitter {
                 this.activeSkippedCount = skippedFiles.length;
                 continue;
               }
-              await this.traverseDirectory(
+              await this.traverseDirectoryStream(
                 fullPath,
                 visitedRealPaths,
-                threats,
                 skippedFiles,
                 errors,
                 fileFilter,
-                onFileProcessed,
+                onFileFound,
                 currentDepth + 1
               );
             } else if (targetStat.isFile()) {
               if (!fileFilter || fileFilter(fullPath)) {
-                await this.processSingleFile(fullPath, threats, skippedFiles, errors, onFileProcessed);
+                await onFileFound(fullPath);
               }
             }
           } catch {
@@ -421,19 +567,18 @@ export class ScannerService extends EventEmitter {
             this.activeSkippedCount = skippedFiles.length;
           }
         } else if (entry.isDirectory()) {
-          await this.traverseDirectory(
+          await this.traverseDirectoryStream(
             fullPath,
             visitedRealPaths,
-            threats,
             skippedFiles,
             errors,
             fileFilter,
-            onFileProcessed,
+            onFileFound,
             currentDepth + 1
           );
         } else if (entry.isFile()) {
           if (!fileFilter || fileFilter(fullPath)) {
-            await this.processSingleFile(fullPath, threats, skippedFiles, errors, onFileProcessed);
+            await onFileFound(fullPath);
           }
         }
       } catch (err: any) {
@@ -441,106 +586,5 @@ export class ScannerService extends EventEmitter {
         this.activeErrorCount = errors.length;
       }
     }
-  }
-
-  private async processSingleFile(
-    filePath: string,
-    threats: DetectedThreat[],
-    skippedFiles: SkippedItem[],
-    errors: ScanErrorItem[],
-    onFileProcessed: (bytes: number) => void
-  ): Promise<void> {
-    try {
-      const stat = await fs.promises.stat(filePath);
-
-      if (stat.size > this.maxFileSizeBytes) {
-        skippedFiles.push({
-          path: filePath,
-          reason: `File exceeds size limit (${Math.round(stat.size / 1024 / 1024)} MB > ${Math.round(this.maxFileSizeBytes / 1024 / 1024)} MB)`
-        });
-        this.activeSkippedCount = skippedFiles.length;
-        return;
-      }
-
-      const analysis = await FileAnalyzer.analyzeFile(filePath, {
-        entropyDetectionEnabled: this.entropyDetectionEnabled
-      });
-      onFileProcessed(stat.size);
-
-      if (analysis.verdict === 'BLOCK' || analysis.verdict === 'WARN' || analysis.riskScore >= 30) {
-        const threat: DetectedThreat = {
-          id: `threat-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-          filePath: analysis.filePath,
-          fileName: analysis.fileName,
-          fileSize: analysis.fileSize,
-          sha256: analysis.sha256,
-          riskScore: analysis.riskScore,
-          severity: analysis.severity,
-          verdict: analysis.verdict,
-          threatName: analysis.threatName,
-          detectedAt: Date.now(),
-          evidenceFactors: analysis.evidenceFactors,
-          quarantined: false
-        };
-        threats.push(threat);
-        this.emit('threatFound', threat);
-      }
-
-      this.emitProgress(filePath, threats.length);
-    } catch (err: any) {
-      if (err.code === 'EACCES' || err.code === 'EPERM' || err.code === 'EBUSY') {
-        skippedFiles.push({ path: filePath, reason: `File locked or permission denied (${err.code})` });
-        this.activeSkippedCount = skippedFiles.length;
-
-        // Fail-closed lexical check: if a locked/inaccessible file uses deceptive double extension
-        // or RTLO spoofing, emit a warning threat even though file bytes could not be read!
-        const fileName = path.basename(filePath);
-        const deceptive = FileAnalyzer.checkDeceptiveExtension(fileName);
-        if (deceptive.isDeceptive) {
-          const lockedThreat: DetectedThreat = {
-            id: `threat-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-            filePath,
-            fileName,
-            fileSize: 0,
-            sha256: '',
-            riskScore: 60,
-            severity: 'suspicious',
-            verdict: 'WARN',
-            threatName: 'LOCKED_DECEPTIVE_FILE',
-            detectedAt: Date.now(),
-            evidenceFactors: [
-              `Locked or permission-restricted file (${err.code}) exhibits deceptive extension spoofing (${deceptive.fakeExt} -> ${deceptive.realExt})`
-            ],
-            quarantined: false
-          };
-          threats.push(lockedThreat);
-          this.emit('threatFound', lockedThreat);
-        }
-      } else {
-        errors.push({ path: filePath, error: err.message || 'File analysis error' });
-        this.activeErrorCount = errors.length;
-      }
-    }
-  }
-
-  private emitProgress(currentPath: string, threatsFound: number): void {
-    const elapsedMs = Math.max(1, Date.now() - this.activeStartTime);
-    const scanSpeedFilesPerSec = Math.round((this.activeFilesScanned / (elapsedMs / 1000)) * 10) / 10;
-
-    const progress: ScanProgress = {
-      scanId: this.currentScanId || 'unknown',
-      scanType: this.currentScanType,
-      status: this.currentStatus,
-      filesScanned: this.activeFilesScanned,
-      threatsFound,
-      currentPath,
-      bytesScanned: this.activeBytesScanned,
-      skippedCount: this.activeSkippedCount,
-      errorCount: this.activeErrorCount,
-      startTime: this.activeStartTime,
-      elapsedMs,
-      scanSpeedFilesPerSec
-    };
-    this.emit('progress', progress);
   }
 }

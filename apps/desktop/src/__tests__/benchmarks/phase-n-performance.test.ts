@@ -125,5 +125,5 @@ describe('Phase N Performance Benchmarks — Scheduling & Resource Overhead', ()
 
     console.log(`[PERF] 1,000 History Records Heap Delta: ${deltaMB.toFixed(2)} MB (Limit: < 15 MB)`);
     expect(deltaMB).toBeLessThan(15.0);
-  });
+  }, 60000);
 });

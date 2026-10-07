@@ -233,7 +233,8 @@ describe('Phase N Security & Adversarial Test Suite (SEC-N-01 to SEC-N-06)', () 
           hasBattery: false,
           isCharging: true,
           percent: 100
-        })
+        }),
+        cpuInspector: async () => ({ loadPct: 10, isAvailable: true })
       });
       acScheduler.saveSchedule({ enabled: true, pauseOnBattery: true });
       const res = await acScheduler.executeScheduledScan('SCHEDULED', [tempDir]);

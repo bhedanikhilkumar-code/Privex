@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { CoreFileAnalyzer, CleanFileCache, ThreatIntel, Verdict, EngineVerdict } from '@private-protection/core';
+import { CoreFileAnalyzer, ThreatIntel, Verdict, EngineVerdict } from '@private-protection/core';
+import { CleanFileCache } from './clean-file-cache';
 import { FileAnalysisResult, MotwAnalysisResult, EmailAnalysisResult } from '../types/desktop.types';
 import { MotwAnalyzer } from './motw-analyzer';
 import { EmailMimeParser } from './email-mime-parser';
@@ -10,6 +11,7 @@ export interface DesktopFileAnalyzeOptions {
   readonly entropyDetectionEnabled?: boolean;
   readonly inspectMotw?: boolean;
   readonly inspectEmail?: boolean;
+  readonly bypassCache?: boolean;
 }
 
 /**
@@ -72,18 +74,17 @@ export class FileAnalyzer {
     }
 
     const fileName = path.basename(filePath);
-    const fd = await fs.promises.open(filePath, 'r');
-    let stat: fs.Stats;
-    let actualHeaderBuffer: Buffer = Buffer.alloc(0);
+    const stat = await fs.promises.stat(filePath);
+    if (!stat.isFile()) {
+      throw new Error('NOT_A_REGULAR_FILE: Target path is not a regular file.');
+    }
 
-    try {
-      stat = await fd.stat();
-      if (!stat.isFile()) {
-        throw new Error('NOT_A_REGULAR_FILE: Target path is not a regular file.');
-      }
-
-      // Stage 0: CleanFileCache lookup (< 0.08 ms fast-path)
-      const cached = CleanFileCache.getSharedInstance().get(filePath, stat.size, stat.mtimeMs);
+    // Stage 0: CleanFileCache lookup (< 0.08 ms fast-path)
+    if (!options?.bypassCache) {
+      const cached = CleanFileCache.getSharedInstance().get(filePath, stat.size, stat.mtimeMs, {
+        dev: stat.dev,
+        ino: stat.ino
+      });
       if (cached) {
         return {
           filePath,
@@ -103,7 +104,12 @@ export class FileAnalyzer {
           disposition: 'SAFE'
         };
       }
+    }
 
+    const fd = await fs.promises.open(filePath, 'r');
+    let actualHeaderBuffer: Buffer = Buffer.alloc(0);
+
+    try {
       const bytesToRead = Math.min(stat.size, this.MAX_HEADER_READ_BYTES);
       if (bytesToRead > 0) {
         const rawHeaderBuffer = Buffer.allocUnsafe(bytesToRead);
@@ -146,6 +152,8 @@ export class FileAnalyzer {
         stat.mtimeMs,
         sha256,
         {
+          dev: stat.dev,
+          ino: stat.ino,
           verdict: Verdict.ALLOW,
           engineVerdict: EngineVerdict.ALLOW,
           riskScore: 0
@@ -292,6 +300,8 @@ export class FileAnalyzer {
         stat.mtimeMs,
         coreOut.sha256 || sha256,
         {
+          dev: stat.dev,
+          ino: stat.ino,
           verdict: coreOut.verdict,
           engineVerdict: coreOut.engineVerdict,
           riskScore: coreOut.riskScore

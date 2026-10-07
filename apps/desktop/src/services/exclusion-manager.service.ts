@@ -93,7 +93,7 @@ export class ExclusionManagerService extends EventEmitter {
 
   private writeAtomicFileSync(targetPath: string, content: string | Buffer): void {
     this.initDirectory();
-    const tmpPath = `${targetPath}.tmp`;
+    const tmpPath = `${targetPath}.tmp.${Date.now()}.${Math.random().toString(36).substring(2, 7)}`;
     const fd = fs.openSync(tmpPath, 'w', 0o600);
     try {
       if (typeof content === 'string') {
@@ -105,7 +105,24 @@ export class ExclusionManagerService extends EventEmitter {
     } finally {
       fs.closeSync(fd);
     }
-    fs.renameSync(tmpPath, targetPath);
+
+    try {
+      if (fs.existsSync(targetPath)) {
+        try {
+          fs.unlinkSync(targetPath);
+        } catch {
+          // Ignore pre-unlink error
+        }
+      }
+      fs.renameSync(tmpPath, targetPath);
+    } catch {
+      try {
+        fs.copyFileSync(tmpPath, targetPath);
+        fs.unlinkSync(tmpPath);
+      } catch {
+        fs.renameSync(tmpPath, targetPath);
+      }
+    }
   }
 
   private deriveEncryptionKey(): Buffer {
