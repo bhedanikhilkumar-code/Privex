@@ -3,7 +3,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { AuditLoggerService } from '../../services/audit-logger.service';
-import { AuditEventInput } from '../../types/desktop.types';
 
 describe('AuditLoggerService Unit Tests', () => {
   let tempDir: string;

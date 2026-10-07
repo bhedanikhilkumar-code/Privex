@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
@@ -174,5 +174,6 @@ describe('WatchdogService Unit Tests', () => {
     watchdog.cancelSnooze();
     expect(watchdog.getStatus().shieldSnoozeActive).toBe(false);
     expect(watchdog.getStatus().shieldSnoozeRemainingMs).toBe(0);
+    expect(reEnabled).toBe(false);
   });
 });
