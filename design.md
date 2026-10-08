@@ -402,3 +402,97 @@ Every status hero banner, threat detection modal, and notification card MUST str
 - **Accessibility:** Semantic tables and compliance checklists with full screen-reader support.
 - **Performance:** Socket and firewall query runs asynchronously in $<400\text{ ms}$.
 - **Security Implications:** Upholds `RULE-25` and `RULE-26` by transparently reporting exact user-mode capabilities, firewall status, and zero-cloud privacy guarantees.
+
+
+---
+
+# MOBILE APP SECURITY UX & INTERACTION DESIGN
+
+## 1. Mobile Home / Protection Status
+The home screen must immediately show:
+- Protection ON/OFF
+- App Install Shield
+- Download/File Shield
+- Web/Phishing Shield
+- Threat Database status
+- Last Full Scan
+- Device Health
+- battery/resource mode
+
+The main CTA is Scan Now with Quick / Standard / Full options.
+
+## 2. Installation Warning UX
+When a newly installed or installable APK is risky:
+- show app name/package,
+- risk level,
+- evidence categories,
+- dangerous permissions,
+- signer/certificate information,
+- recommended action,
+- whether the scan occurred before or immediately after installation.
+Never use deceptive "Google Play Protect" branding.
+
+## 3. Download Warning UX
+When a downloaded file is suspicious:
+- intercept the user-facing "safe" state where technically possible,
+- show file type detected from content,
+- explain the threat,
+- offer Remove / Quarantine / Review,
+- show an Android access limitation if the OS prevented automatic scanning.
+
+## 4. Full Scan UX
+Use a real progress model:
+- files discovered,
+- files scanned,
+- threats,
+- skipped/permission denied,
+- current location,
+- estimated remaining time,
+- pause/cancel/resume.
+Do not display fake 0–100% progress.
+
+## 5. Phishing Warning UX
+Warnings must be concise but evidence-based:
+"This website may be unsafe"
+- deceptive domain,
+- suspicious redirect,
+- credential theft indicators,
+- known local threat match,
+- unsafe download.
+Actions: Go Back, Open Anyway (with friction), Report/Review.
+
+## 6. Password Generator UX
+Provide:
+- strength meter based on entropy,
+- length slider,
+- character-set controls,
+- passphrase mode,
+- copy button with automatic clipboard clearing where supported.
+Never display or store generated passwords in analytics/logs.
+
+## 7. Notification Design
+Use high-priority notifications only for active threats. Batch repetitive findings. The notification itself must identify the reason and action.
+
+## 8. Permission UX
+Each permission screen must answer:
+- Why does Private Protection need this?
+- What functionality stops if denied?
+- What data remains local?
+- How can the user revoke it?
+
+## 9. Accessibility
+Mobile security flows must support:
+- TalkBack,
+- large text,
+- high contrast,
+- touch target minimums,
+- screen-reader labels,
+- no color-only severity indicators.
+
+## 10. Trust & Honesty
+Every protection state must distinguish:
+- PROTECTED
+- PROTECTED WITH LIMITATIONS
+- DEGRADED
+- ACTION REQUIRED
+The UI must never say "fully protected" if Android denied required access.
