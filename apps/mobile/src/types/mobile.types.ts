@@ -36,6 +36,10 @@ declare global {
       inspectFile?: (filePath: string) => string;
       inspectFileUri?: (uriString: string, declaredFileName: string) => string;
       quarantineFile?: (filePath: string) => string;
+      startDeviceScan?: (scanModeStr: string) => string;
+      getPersistedSafTrees?: () => string;
+      persistSafTree?: (treeUriString: string) => boolean;
+      releaseSafTree?: (treeUriString: string) => boolean;
       [key: string]: any;
     };
   }
@@ -265,5 +269,45 @@ export interface QuarantineResult {
   originalDeleted?: boolean;
   timestamp: number;
   error?: string;
+}
+
+// ==========================================
+// PHASE T4: FULL ACCESSIBLE DEVICE SCAN
+// ==========================================
+
+export type DeviceScanMode = 'QUICK_SCAN' | 'STANDARD_SCAN' | 'FULL_ACCESSIBLE_SCAN';
+
+export interface ScanScopeDTO {
+  scopeId: string;
+  displayName: string;
+  scopeType: string;
+  uriOrPath: string;
+  accessibilityState: 'AUTOMATICALLY_ACCESSIBLE' | 'MEDIASTORE_ACCESSIBLE' | 'SAF_USER_GRANTED' | 'APP_PRIVATE' | 'INACCESSIBLE' | 'PERMISSION_DENIED';
+  scanStatus: 'PENDING' | 'SCANNING' | 'COMPLETED' | 'PARTIAL' | 'SKIPPED' | 'FAILED' | 'CANCELLED';
+  filesDiscovered: number;
+  filesScanned: number;
+  filesSkipped: number;
+  threatsFound: number;
+  startTimeMs: number;
+  endTimeMs: number;
+  errorDetails?: string;
+}
+
+export interface DeviceScanReport {
+  scanMode: DeviceScanMode;
+  status: 'SECURE' | 'ACTION_REQUIRED' | 'CANCELLED' | 'FAILED';
+  startTimeMs: number;
+  endTimeMs: number;
+  durationMs: number;
+  totalDiscovered: number;
+  totalScanned: number;
+  totalSkipped: number;
+  threatsCount: number;
+  coverage: {
+    isFullDeviceClaimed: boolean;
+    coverageDescription: string;
+  };
+  scopes: ScanScopeDTO[];
+  threats: any[];
 }
 

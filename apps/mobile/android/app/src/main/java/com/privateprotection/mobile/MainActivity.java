@@ -721,5 +721,78 @@ public class MainActivity extends AppCompatActivity {
                 return "{\"error\":\"" + e.getMessage() + "\"}";
             }
         }
+
+        // ==========================================
+        // FULL ACCESSIBLE DEVICE SCAN (PHASE T4)
+        // ==========================================
+
+        @JavascriptInterface
+        public String startDeviceScan(String scanModeStr) {
+            try {
+                com.privateprotection.mobile.shield.FullDeviceScanService.ScanMode mode;
+                if ("QUICK".equalsIgnoreCase(scanModeStr) || "QUICK_SCAN".equalsIgnoreCase(scanModeStr)) {
+                    mode = com.privateprotection.mobile.shield.FullDeviceScanService.ScanMode.QUICK_SCAN;
+                } else if ("STANDARD".equalsIgnoreCase(scanModeStr) || "STANDARD_SCAN".equalsIgnoreCase(scanModeStr)) {
+                    mode = com.privateprotection.mobile.shield.FullDeviceScanService.ScanMode.STANDARD_SCAN;
+                } else {
+                    mode = com.privateprotection.mobile.shield.FullDeviceScanService.ScanMode.FULL_ACCESSIBLE_SCAN;
+                }
+
+                JSONObject meta = new JSONObject();
+                meta.put("scanMode", mode.name());
+
+                MobileSecurityCoordinator coordinator = MobileSecurityCoordinator.getInstance(activity);
+                SecurityJob job = coordinator.submitJob(JobType.STORAGE_SCAN, meta, (j, ctrl) -> {
+                    com.privateprotection.mobile.shield.FullDeviceScanService scanService =
+                            new com.privateprotection.mobile.shield.FullDeviceScanService(activity);
+                    return scanService.executeScan(mode, ctrl, (item, scanned, discovered, threats) -> {
+                        if (discovered > 0) {
+                            j.setProgress(Math.min(99, (int) ((scanned * 100.0) / discovered)));
+                        }
+                    });
+                });
+                return job.toJSON().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to initiate full device scan", e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public String getPersistedSafTrees() {
+            try {
+                com.privateprotection.mobile.shield.SafManager safManager =
+                        new com.privateprotection.mobile.shield.SafManager(activity);
+                return safManager.getPersistedTreesJSON().toString();
+            } catch (Exception e) {
+                return "[]";
+            }
+        }
+
+        @JavascriptInterface
+        public boolean persistSafTree(String treeUriString) {
+            try {
+                if (treeUriString == null || treeUriString.trim().isEmpty()) return false;
+                com.privateprotection.mobile.shield.SafManager safManager =
+                        new com.privateprotection.mobile.shield.SafManager(activity);
+                return safManager.persistTreePermission(Uri.parse(treeUriString.trim()));
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to persist SAF tree " + treeUriString, e);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public boolean releaseSafTree(String treeUriString) {
+            try {
+                if (treeUriString == null || treeUriString.trim().isEmpty()) return false;
+                com.privateprotection.mobile.shield.SafManager safManager =
+                        new com.privateprotection.mobile.shield.SafManager(activity);
+                return safManager.releaseTreePermission(Uri.parse(treeUriString.trim()));
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to release SAF tree " + treeUriString, e);
+                return false;
+            }
+        }
     }
 }

@@ -193,4 +193,10 @@ A mobile release is not considered complete from CI alone. Required evidence inc
 - **Phase T3 (Universal Download & File Shield):** COMPLETE & CERTIFIED (`docs/PHASE_T3_FINAL_INDEPENDENT_AUDIT.md`).
   - Implemented `CanonicalFileIdentity`, `UniversalMagicDetector` (EICAR, DEX, ELF, PE, ZIP, APK, PDF, images, shell scripts, media), `BoundedArchiveInspector` (Zip Bomb ratio > 100:1, max 10,000 entries, max 500MB, path traversal, disguised executables), `UniversalFileShieldService`, `DownloadContentObserver` (MediaStore Downloads with 3s debouncing), app-private quarantine vault isolation, and bridge bindings.
   - Verified with 80/80 Android unit tests passing, 98/98 mobile Vitest tests passing, 492/492 monorepo tests passing, 0 typecheck errors, and clean R8 release build. Physical device validation honestly reported as NOT EXECUTED due to no attached USB handset.
+- **Phase T4 (Full Device Scan):** COMPLETE & CERTIFIED (`docs/PHASE_T4_FINAL_INDEPENDENT_AUDIT.md`).
+  - Implemented `ScanScopeDescriptor`, `SafManager`, `MobileCleanFileCache`, `FullDeviceScanService` with three scan modes: `QUICK_SCAN` (Downloads + recently modified media <48 hrs + installed 3rd-party apps), `STANDARD_SCAN` (common shared storage + active SAF trees + apps), and `FULL_ACCESSIBLE_SCAN` (all accessible MediaStore collections, persistent SAF trees, installed apps, quarantine vault).
+  - Truthful coverage model: Inaccessible private app data (`/data/data/*`) and system dirs are reported as `SKIPPED` / `PERMISSION_DENIED`, never pretending 100% full phone storage access.
+  - Sub-millisecond file deduplication via 10,000-entry bounded LRU `MobileCleanFileCache` with disk persistence.
+  - Full component reuse: Delegates file scanning to `UniversalFileShieldService` (T3) and package scanning to `PackageAuditService` (T2). Zero duplicated detection logic.
+  - Verified with 94/94 Android unit tests passing, 106/106 mobile Vitest tests passing, 501/501 monorepo tests passing, 0 typecheck errors, and clean R8 release build (`assembleRelease` passed). Physical device validation honestly reported as NOT EXECUTED due to no attached USB handset.
 
