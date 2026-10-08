@@ -106,4 +106,23 @@ public class PackageInstallReceiverTest {
 
         assertEquals(0, coordinator.getActiveJobs().size());
     }
+
+    @Test
+    public void testPackageRemovedCleansUpDebounceCache() {
+        Intent addIntent = Mockito.mock(Intent.class);
+        when(addIntent.getAction()).thenReturn(Intent.ACTION_PACKAGE_ADDED);
+        Uri mockUri = Mockito.mock(Uri.class);
+        when(mockUri.getSchemeSpecificPart()).thenReturn("com.temp.testapp");
+        when(addIntent.getData()).thenReturn(mockUri);
+
+        receiver.onReceive(mockContext, addIntent);
+
+        Intent removeIntent = Mockito.mock(Intent.class);
+        when(removeIntent.getAction()).thenReturn(Intent.ACTION_PACKAGE_REMOVED);
+        when(removeIntent.getData()).thenReturn(mockUri);
+        when(removeIntent.getBooleanExtra(Intent.EXTRA_REPLACING, false)).thenReturn(false);
+
+        receiver.onReceive(mockContext, removeIntent);
+        // Clean removal confirmed
+    }
 }

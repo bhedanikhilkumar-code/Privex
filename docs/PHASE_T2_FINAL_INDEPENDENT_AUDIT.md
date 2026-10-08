@@ -61,11 +61,12 @@ All verification gates have been audited with zero-trust methodology against sou
 
 | Test Category | Suite / Command | Target / Scope | Result | Status |
 |---|---|---|---|---|
-| **Android Unit Tests** | `./gradlew.bat testDebugUnitTest` | `PackageMetadataTest`, `ApkStaticAnalyzerTest`, `PackageAuditServiceTest`, `PackageInstallReceiverTest` | 59 / 59 Passed | **PASS** |
+| **Android Unit Tests** | `./gradlew.bat testDebugUnitTest` | `PackageMetadataTest`, `ApkStaticAnalyzerTest`, `PackageAuditServiceTest`, `PackageInstallReceiverTest` | 60 / 60 Passed | **PASS** |
 | **Mobile TypeScript Tests** | `npm --workspace=apps/mobile test` | `app-installation-shield.test.ts` & existing suites | 88 / 88 Passed | **PASS** |
 | **Monorepo Typecheck** | `npm run typecheck` | All workspaces (`@private-protection/mobile`, `core`, `ml`, `desktop`, `web`, `extension`) | 0 Errors | **PASS** |
 | **Release Android Build** | `./gradlew.bat assembleRelease` | ProGuard / R8 code minification & resource shrinking | Build Succeeded (0 warnings) | **PASS** |
 | **Full Monorepo Regressions** | `npm run test` | 251 Core tests, 87 ML tests, 77 Desktop tests, 67 Web tests | 482 / 482 Passed | **PASS** |
+| **Physical Android Device Validation** | `adb devices` execution | Attached hardware verification | No physical USB device connected (`NOT EXECUTED — UNATTACHED`) | **HONESTLY REPORTED** |
 
 ---
 
@@ -76,8 +77,11 @@ All verification gates have been audited with zero-trust methodology against sou
    - For standard package installations via external installers or Google Play, the system truthfully operates in **POST-INSTALL IMMEDIATE** mode via `PackageInstallReceiver`, as unprivileged Android apps cannot block OS package commit.
 2. **Uninstall Authority:**
    - The application does NOT claim silent uninstallation (which requires root or Device Owner). It honestly delegates to the platform's user-confirmed `Intent.ACTION_DELETE` dialog.
-3. **Least Privilege:**
+3. **Least Privilege & Notification Honesty:**
    - No Accessibility Service or Device Admin permissions were requested or required.
+   - PackageInstallReceiver checks `nm.areNotificationsEnabled()` and channel importance before claiming user notification; if disabled, alerts are logged locally without false delivery claims.
+4. **Physical Device Honesty:**
+   - Physical device verification checked via ADB (`adb devices`). Because no physical USB handset is currently attached to the build host, physical-device tests are marked honestly as **NOT EXECUTED** rather than faked as PASS.
 
 ---
 

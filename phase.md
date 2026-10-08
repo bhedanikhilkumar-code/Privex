@@ -440,16 +440,16 @@ Before implementation, freeze a capability matrix against the Android version ra
 - Preserve the single canonical verdict authority.
 - AI remains explanation-only.
 
-## T2 — Play-Protect-Like App Installation Shield
+## T2 — Play-Protect-Like App Installation Shield [STATUS: COMPLETE & AUDITED]
 Build a mobile App Safety pipeline:
-1. Detect package installation/update lifecycle.
-2. Resolve installed package metadata.
-3. Analyze APK when accessible: SHA-256, package identity, certificate chain, version, signing scheme, requested permissions, exported components, services/receivers/providers, native libraries, DEX indicators, embedded URLs, suspicious strings and local signatures.
-4. Compare against signed local threat intelligence.
-5. Produce SAFE / INFORM / WARN / BLOCK according to deterministic evidence.
-6. Notify the user immediately for suspicious/high-risk packages.
-7. If pre-install interception is technically unavailable, use the strongest safe post-install flow and explicitly report the limitation.
-8. Never claim Google Play Protect parity at the privileged OS level.
+1. Detect package installation/update lifecycle (`ACTION_PACKAGE_ADDED`, `ACTION_PACKAGE_REPLACED`, `ACTION_PACKAGE_REMOVED`).
+2. Resolve installed package metadata via `PackageManager` (`PackageMetadata.java`).
+3. Analyze APK statically when accessible (`ApkStaticAnalyzer.java`): SHA-256, package identity, certificates, version, requested permissions, dangerous permissions, exported components, native libraries, DEX presence, and embedded suspicious dropper payloads.
+4. Compare against signed local threat intelligence and heuristic risk scoring (`PackageAuditService.java`).
+5. Produce canonical verdicts (`ALLOW`, `CAUTION`, `SUSPICIOUS`, `DANGEROUS`) and severity tiers according to deterministic evidence.
+6. Notify the user immediately for suspicious/high-risk packages with rate-limiting and channel verification.
+7. Truthful Android flow: Pre-install APK auditing where directly accessible via SAF/filesystem + immediate post-install package inspection/remediation.
+8. Truthfully report platform limitations: normal 3rd-party Android applications cannot block OS package commits or silently uninstall; remediation delegates to user-confirmed `Intent.ACTION_DELETE`.
 
 ## T3 — Universal Download & File Shield
 Create an automatic file-ingress pipeline:

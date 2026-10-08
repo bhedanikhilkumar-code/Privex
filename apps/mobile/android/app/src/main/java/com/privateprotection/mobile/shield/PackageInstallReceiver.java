@@ -46,14 +46,9 @@ public class PackageInstallReceiver extends BroadcastReceiver {
         String action = intent.getAction();
         if (action == null) return;
 
-        if (!Intent.ACTION_PACKAGE_ADDED.equals(action) && !Intent.ACTION_PACKAGE_REPLACED.equals(action)) {
-            return;
-        }
-
-        // Check if this is an app update rather than new install
-        boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
-        if (Intent.ACTION_PACKAGE_ADDED.equals(action) && isReplacing) {
-            // An update is in progress; wait for ACTION_PACKAGE_REPLACED to avoid double-scanning
+        if (!Intent.ACTION_PACKAGE_ADDED.equals(action) &&
+            !Intent.ACTION_PACKAGE_REPLACED.equals(action) &&
+            !Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
             return;
         }
 
@@ -67,6 +62,30 @@ public class PackageInstallReceiver extends BroadcastReceiver {
 
         // Ignore our own package
         if (context.getPackageName().equals(packageName)) {
+            return;
+        }
+
+        // Handle package removal: purge debounce entry and cancel any active/queued audits
+        if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+            boolean isReplacingRemove = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+            if (!isReplacingRemove) {
+                lastAuditedTimestamps.remove(packageName);
+                Log.i(TAG, "Package uninstalled/removed: " + packageName + ", cleared audit cache.");
+                // Dismiss any outstanding threat notification for this uninstalled app
+                try {
+                    NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                    if (nm != null) {
+                        nm.cancel(packageName.hashCode());
+                    }
+                } catch (Exception ignored) {}
+            }
+            return;
+        }
+
+        // Check if this is an app update rather than new install
+        boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+        if (Intent.ACTION_PACKAGE_ADDED.equals(action) && isReplacing) {
+            // An update is in progress; wait for ACTION_PACKAGE_REPLACED to avoid double-scanning
             return;
         }
 
@@ -121,6 +140,20 @@ public class PackageInstallReceiver extends BroadcastReceiver {
         try {
             NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             if (nm == null) return;
+
+            // Check if notifications are enabled on the OS level
+            if (!nm.areNotificationsEnabled()) {
+                Log.w(TAG, "Notification permission denied or blocked on device; threat alert logged locally for " + packageName);
+                return;
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                android.app.NotificationChannel chan = nm.getNotificationChannel(MainActivity.CHANNEL_ID);
+                if (chan != null && chan.getImportance() == NotificationManager.IMPORTANCE_NONE) {
+                    Log.w(TAG, "Notification channel " + MainActivity.CHANNEL_ID + " is muted; threat alert logged locally for " + packageName);
+                    return;
+                }
+            }
 
             // 1. Content Intent: Opens main app dashboard
             Intent mainIntent = new Intent(context, MainActivity.class);
