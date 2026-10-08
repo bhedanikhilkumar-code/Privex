@@ -406,3 +406,96 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from an on-de
 18. **Protect configuration and quarantine integrity (`SC-18`):** DPAPI + HMAC verification on `settings.enc` and `manifest.json.enc`; fails closed to Maximum Protection on tamper; requires Friction Gate + Auto-Re-Enable timer on shield pause (`AV-SEC-001`–`002`).
 19. **Recover cleanly from crashes (`SC-19`):** `WatchdogService` auto-recovers crashed workers/watchers in $<500\text{ ms}$; atomic `.tmp`+`rename` storage prevents manifest corruption on abrupt kill (`AV-SEC-002`).
 20. **Pass full test and security verification (`SC-20`):** `100%` test pass rate across all 16 test categories, $\ge 90\%$ code coverage, and `0.00%` false-block rate across the clean signed binary/developer corpus (`RULE-20`).
+
+
+---
+
+# MOBILE PRODUCT REQUIREMENTS — ANDROID SECURITY PLATFORM
+
+Milestone: Phase T — Mobile Security Protection Platform  
+Status: Planned / Not Started  
+Priority: High
+
+## Product Objective
+Private Protection Mobile shall provide a local-first Android security layer covering application safety, downloaded-file scanning, full-device scanning, phishing prevention, pre-threat warnings, password generation, and safe remediation while respecting Android sandbox and permission boundaries.
+
+## Functional Requirements
+
+### MOB-001 — App Installation Safety
+The app shall observe supported package lifecycle events and evaluate newly installed/updated applications. When an APK is accessible before installation in a supported flow, it shall be scanned before launch/install completion. When Android does not permit pre-install interception, the product shall perform an immediate post-install scan and clearly disclose that limitation.
+
+### MOB-002 — APK Analysis
+The APK analyzer shall inspect:
+- SHA-256
+- package identity/version
+- signing certificate and signing scheme
+- dangerous/runtime permissions
+- exported components
+- services/receivers/providers
+- native libraries
+- DEX indicators
+- suspicious strings/URLs
+- local threat-intelligence matches
+- structural anomalies
+- risk-scoring evidence.
+
+### MOB-003 — Universal File Download Shield
+All observable newly downloaded/created files shall enter the canonical scan pipeline independent of extension. Supported types include ZIP, APK, PDF, DOC/DOCX, XLS/XLSX, PPT/PPTX, JPG/JPEG, PNG, GIF, WEBP, MP4, TXT, CSV, HTML, JS and generic binary.
+
+### MOB-004 — Content-Based File Identification
+The scanner shall identify actual content type using magic bytes/structural parsing. Filename extensions are untrusted metadata.
+
+### MOB-005 — Archive Safety
+Archives shall be recursively scanned with strict limits on depth, entry count, compressed bytes, expanded bytes, parser time and memory. Bombs shall fail closed without ANR/OOM.
+
+### MOB-006 — Full Device Scan
+The app shall provide Quick, Standard and Full scans. Full scan shall cover every storage scope legally exposed through Android APIs and user-granted SAF permissions. Coverage gaps must be reported.
+
+### MOB-007 — Real-Time Download Monitoring
+The product shall observe supported Downloads/MediaStore/file-ingress events, debounce incomplete writes, wait for file stabilization, and scan as early as the Android API surface permits.
+
+### MOB-008 — Phishing/Web Shield
+The product shall provide privacy-first URL protection with:
+- URL normalization,
+- IDN/punycode/homograph checks,
+- suspicious redirect detection,
+- dangerous scheme detection,
+- local signed threat database,
+- credential-harvesting indicators where supported,
+- supported browser integration,
+- optional domain/IP metadata inspection without default TLS MITM.
+
+### MOB-009 — Pre-Threat Warning
+High-confidence threats shall trigger a warning before the risky action whenever technically possible. Warnings must identify evidence and recommended action.
+
+### MOB-010 — Password Generator
+The product shall provide a local CSPRNG password generator supporting 12–128 characters, configurable character sets, strong presets, passphrases, entropy measurement and clipboard hygiene. Generated passwords shall never be uploaded or logged.
+
+### MOB-011 — Privacy
+Raw files, document contents, credentials, browsing history and URL query secrets shall remain on-device. Telemetry is disabled by default.
+
+### MOB-012 — Permissions
+The product shall request only necessary Android permissions and must gracefully degrade when permissions are denied.
+
+### MOB-013 — Battery & Performance
+Background scanning shall adapt to battery, thermal and memory state. Critical threat detection remains prioritized. No unbounded worker queue or persistent wakelock.
+
+### MOB-014 — Remediation
+Downloaded threats shall be quarantined/removed where Android permits. Installed-app remediation shall use supported user-facing uninstall/settings flows when silent control is unavailable.
+
+### MOB-015 — Threat Intelligence
+Mobile threat intelligence shall use signed, monotonic, rollback-safe local databases compatible with the product's existing update security doctrine.
+
+### MOB-016 — Physical Device Acceptance
+At least one real supported Android phone must pass the complete security acceptance matrix before release.
+
+## Non-Goals / Explicit Limitations
+- No claim of being Google Play Protect.
+- No guaranteed interception of every installation path without a supported privileged role.
+- No unrestricted filesystem claim on scoped-storage Android.
+- No silent uninstall claim for ordinary third-party app mode.
+- No HTTPS MITM by default.
+- No cloud-only security dependency.
+
+## Success Criteria
+Phase T can reach release-ready status only when all MOB-001..016 requirements have implementation evidence, physical-device tests pass, offline/privacy parity passes, security adversarial corpus passes, battery/thermal/low-RAM tests pass, typecheck/build pass, and a fresh independent mobile zero-trust audit returns GO.
