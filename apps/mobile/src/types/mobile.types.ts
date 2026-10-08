@@ -33,6 +33,9 @@ declare global {
       auditPackage?: (packageName: string) => string;
       auditApkFile?: (apkFilePath: string) => string;
       requestUninstall?: (packageName: string) => boolean;
+      inspectFile?: (filePath: string) => string;
+      inspectFileUri?: (uriString: string, declaredFileName: string) => string;
+      quarantineFile?: (filePath: string) => string;
       [key: string]: any;
     };
   }
@@ -210,5 +213,57 @@ export interface PackageAuditReport {
   }>;
   apkInspection?: ApkInspectionDTO;
   timestamp: number;
+}
+
+// ==========================================
+// PHASE T3: UNIVERSAL DOWNLOAD & FILE SHIELD
+// ==========================================
+
+export interface FileIdentityDTO {
+  uriString: string;
+  fileName: string;
+  fileExtension: string;
+  detectedMimeType: string;
+  sizeBytes: number;
+  lastModifiedMs: number;
+  sha256: string;
+  sourceCollection: string;
+  isExecutable: boolean;
+}
+
+export interface ArchiveInspectionReportDTO {
+  isValidArchive: boolean;
+  entryCount: number;
+  totalUncompressedBytes: number;
+  isZipBomb: boolean;
+  hasPathTraversal: boolean;
+  hasSuspiciousExecutables: boolean;
+  suspiciousEntries: string[];
+  detectedFileTypes: string[];
+}
+
+export interface UniversalFileInspectionReport {
+  fileIdentity: FileIdentityDTO;
+  score: number;
+  verdict: Verdict | 'ALLOW' | 'CAUTION' | 'SUSPICIOUS' | 'DANGEROUS';
+  severity: SeverityLevel | 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  recommendation: string;
+  evidence: Array<{
+    code: string;
+    severity: string;
+    weight: number;
+    description: string;
+  }>;
+  archiveInspection?: ArchiveInspectionReportDTO;
+  apkInspection?: ApkInspectionDTO;
+  timestamp: number;
+}
+
+export interface QuarantineResult {
+  status: 'QUARANTINED' | 'FAILED';
+  quarantinePath?: string;
+  originalDeleted?: boolean;
+  timestamp: number;
+  error?: string;
 }
 

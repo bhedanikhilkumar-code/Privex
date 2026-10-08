@@ -669,5 +669,57 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         }
+
+        // ==========================================
+        // UNIVERSAL DOWNLOAD & FILE SHIELD (PHASE T3)
+        // ==========================================
+
+        @JavascriptInterface
+        public String inspectFile(String filePath) {
+            try {
+                if (filePath == null || filePath.trim().isEmpty()) {
+                    return "{\"error\":\"INVALID_FILE_PATH\"}";
+                }
+                com.privateprotection.mobile.shield.UniversalFileShieldService shieldService =
+                        new com.privateprotection.mobile.shield.UniversalFileShieldService(activity);
+                JSONObject result = shieldService.inspectFile(new java.io.File(filePath.trim()));
+                return result != null ? result.toString() : "{\"error\":\"INSPECTION_FAILED\"}";
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to inspect file: " + filePath, e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public String inspectFileUri(String uriString, String declaredFileName) {
+            try {
+                if (uriString == null || uriString.trim().isEmpty()) {
+                    return "{\"error\":\"INVALID_URI\"}";
+                }
+                com.privateprotection.mobile.shield.UniversalFileShieldService shieldService =
+                        new com.privateprotection.mobile.shield.UniversalFileShieldService(activity);
+                JSONObject result = shieldService.inspectUri(Uri.parse(uriString.trim()), declaredFileName);
+                return result != null ? result.toString() : "{\"error\":\"INSPECTION_FAILED\"}";
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to inspect file URI: " + uriString, e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public String quarantineFile(String filePath) {
+            try {
+                if (filePath == null || filePath.trim().isEmpty()) {
+                    return "{\"error\":\"INVALID_FILE_PATH\"}";
+                }
+                com.privateprotection.mobile.shield.UniversalFileShieldService shieldService =
+                        new com.privateprotection.mobile.shield.UniversalFileShieldService(activity);
+                JSONObject result = shieldService.quarantineFile(new java.io.File(filePath.trim()));
+                return result != null ? result.toString() : "{\"error\":\"QUARANTINE_FAILED\"}";
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to quarantine file: " + filePath, e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
     }
 }
