@@ -6,7 +6,7 @@
 
 ---
 
-## Rule Index (The 28 Mandatory Engineering & Security Rules)
+## Rule Index (The 42 Mandatory Engineering & Security Rules)
 
 | Rule ID | Rule Name | Enforcement Layer | Primary Verification Gate |
 |---|---|---|---|
@@ -237,3 +237,73 @@
 - **Mandate:** Every completed step, phase, architectural artifact, and prompt turn **MUST** be committed to git using clear, informative, conventional commit messages (`docs(...)`, `feat(...)`, `fix(...)`, `test(...)`, `sec(...)`) and immediately pushed to the remote repository (`git push origin main`).
 - **Verification:** `git status -s` must be clean and `git log -n 5` / `git push` must confirm synchronization with `origin/main` at the conclusion of every step and every prompt.
 
+
+
+---
+
+# MOBILE SECURITY EXTENSION — ANDROID PROTECTION CONSTITUTION
+
+> Scope: These rules extend the existing Windows security constitution to the Android/mobile product surface. They do not weaken any existing desktop rule.
+> Architectural honesty: Private Protection MUST reproduce the security goals of a modern mobile security product, but MUST NOT claim privileged Android capabilities that a normal third-party application cannot actually obtain.
+
+## Rule Index Extension
+
+| Rule ID | Rule Name | Enforcement Layer | Primary Verification Gate |
+|---|---|---|---|
+| RULE-30 | Mobile Local-First Rule | Android Core / Network Guard | Offline Mobile Parity |
+| RULE-31 | Install-Time App Safety Rule | Package Lifecycle / APK Analyzer | Physical-Device Install Matrix |
+| RULE-32 | Download & File Shield Rule | Download/Media Observation / File Analyzer | Multi-Type Download Corpus |
+| RULE-33 | Full Device Scan Rule | Storage Traversal / SAF | Full-Device Physical Scan |
+| RULE-34 | Pre-Threat Warning Rule | URL Analyzer / Web Shield / Notification | Malicious-URL Warning Matrix |
+| RULE-35 | Password Generator Rule | Cryptographic RNG / UI | Entropy & RNG Audit |
+| RULE-36 | Mobile Capability Honesty Rule | Android OS Boundary | API/Permission Capability Audit |
+| RULE-37 | Mobile Privacy & Permission Rule | Storage / Permissions / Telemetry | Permission & Privacy Audit |
+| RULE-38 | Mobile Resource & Battery Rule | Scheduler / Scanner Workers | Low-Battery/Low-RAM Test |
+| RULE-39 | Archive & Content Bomb Safety Rule | ZIP/Office/PDF/Image Parsers | Bomb/Parser Fuzz Suite |
+| RULE-40 | Mobile Threat-DB Integrity Rule | Signed DB / LKG | Update/Rollback Audit |
+| RULE-41 | Physical Device Acceptance Rule | Android Build / Device Lab | Real-Phone Acceptance Gate |
+| RULE-42 | Safe Remediation & User Control Rule | Quarantine / Uninstall Guidance | Destructive-Action Audit |
+
+## RULE-30: Mobile Local-First Rule
+All core Android malware, APK, downloaded-file, URL, phishing, archive, document, image metadata, risk-scoring, and password-generation decisions MUST execute locally by default. Network access is optional and explicitly governed. No raw files, document contents, screenshots, credentials, or URL query secrets may be uploaded for scanning.
+
+## RULE-31: Install-Time App Safety Rule
+Private Protection MUST observe Android package installation lifecycle events available to a normal app and perform the strongest technically permitted safety check:
+1. When an APK is available before installation, scan it before the user launches/installs it whenever the OS/install flow exposes the APK to Private Protection.
+2. For installations that Private Protection cannot technically interpose before package commit, perform an immediate post-install package scan and warn/block use according to the supported Android control surface.
+3. Analyze package name, signing certificate, version, requested permissions, exported components, native libraries, DEX structure, manifest anomalies, embedded URLs, suspicious strings, dangerous capabilities, known hashes, and local heuristic indicators.
+4. Never claim to be the Android system installer, Google Play Protect, or a privileged device-owner service unless the product is actually provisioned with that role.
+5. If the OS prevents pre-install interception, surface a clear limitation instead of pretending the app was checked before installation.
+
+## RULE-32: Download & File Shield Rule
+Every observable downloaded or newly created user file MUST be eligible for automatic scanning, regardless of extension. The content pipeline MUST recognize at minimum APK, ZIP, RAR/7z where supported, PDF, DOC/DOCX, XLS/XLSX, PPT/PPTX, JPG/JPEG, PNG, GIF, WEBP, MP4, TXT, CSV, HTML, JS, and generic binary files. File type MUST be determined from content/magic bytes and parser evidence rather than trusting the filename extension. Archive recursion, bomb detection, decompression limits, and nested-file scanning are mandatory.
+
+## RULE-33: Full Device Scan Rule
+A user-triggered Full Device Scan MUST traverse every storage location that Android legally exposes to the application, including shared storage and user-selected SAF trees. The scan MUST show scope, progress, files examined, threats found, skipped/protected locations, and a truthful completion status. The scanner MUST never report "100% scanned" when Android denied access to a location.
+
+## RULE-34: Pre-Threat Warning Rule
+When a URL, download, APK, or file presents a high-confidence threat before execution/opening, Private Protection MUST warn the user as early as technically possible. URL protection MUST use local reputation, normalized URL analysis, IDN/punycode/homograph detection, suspicious redirects, credential-form indicators, deceptive domains, dangerous schemes, and signed local threat intelligence. HTTPS content MUST NOT be decrypted or MITM'd merely to claim web protection; use privacy-preserving metadata and browser integration where technically available.
+
+## RULE-35: Password Generator Rule
+The Password Generator MUST use a platform CSPRNG (Android SecureRandom / OS secure random source), never Math.random or predictable seeds. It MUST support configurable length and character sets, generate high-entropy passwords locally, avoid accidental clipboard persistence where possible, provide copy-with-timeout behavior, and never transmit generated passwords. "Stronger than Google Password Manager" MUST NOT be claimed as an absolute fact; the product may offer configurable higher entropy and length and show the measured entropy.
+
+## RULE-36: Mobile Capability Honesty Rule
+A feature is COMPLETE only when its Android API/permission behavior has been demonstrated on a real supported device. Emulator-only success is insufficient for security-critical mobile claims. If Android sandbox, scoped storage, background execution, browser, package-install, or permission restrictions prevent a requested behavior, documentation MUST state the limitation and implement the strongest safe alternative.
+
+## RULE-37: Mobile Privacy & Permission Rule
+Request the minimum Android permissions necessary. Never request Accessibility, VPN, notification access, broad storage, device-admin/device-owner, or other sensitive privileges merely because they are convenient. Every sensitive permission MUST have a visible user-facing purpose, graceful denial behavior, and a test proving no data leaves the device unexpectedly.
+
+## RULE-38: Mobile Resource & Battery Rule
+Background scanning MUST be adaptive. On low battery, thermal throttling, low RAM, metered connections, or foreground-heavy usage, scanning MUST reduce concurrency, defer non-urgent work, or pause safely. Critical threat detection remains active. The app MUST target low background CPU, bounded memory, and no persistent wakelock unless strictly required.
+
+## RULE-39: Archive & Content Bomb Safety Rule
+All decompression and content parsing MUST be bounded by maximum compressed bytes, expanded bytes, recursion depth, entry count, parser time, and memory. ZIP bombs, nested archive bombs, malformed PDFs, Office parser abuse, oversized images, decompression bombs, and parser fuzz inputs MUST terminate safely without OOM or ANR.
+
+## RULE-40: Mobile Threat-DB Integrity Rule
+Mobile threat intelligence MUST use the same signed-update doctrine as the desktop product: pinned Ed25519 root, SHA-256 payload verification, monotonic version sequence, staged validation, self-test, atomic activation, and LKG rollback. A failed update MUST never replace a known-good database.
+
+## RULE-41: Physical Device Acceptance Rule
+The Android release gate MUST include at least one supported physical Android phone. Security-critical claims MUST be verified on-device for installation events, downloads, storage access, notifications, battery behavior, web protection, APK scanning, full scan, remediation, and password generation. A green CI build alone is not release evidence.
+
+## RULE-42: Safe Remediation & User Control Rule
+Private Protection MUST prefer reversible actions. Quarantine must be isolated and recoverable; uninstall/block/open actions must be explicit; automatic deletion is forbidden for uncertain findings. Every destructive or security-lowering action requires clear explanation and confirmation unless it is a narrowly defined emergency containment action already authorized by the user.
