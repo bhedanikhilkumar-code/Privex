@@ -4,19 +4,6 @@ import {
   CoordinatorStats
 } from '../types/mobile.types';
 
-declare global {
-  interface Window {
-    AndroidSecurityBridge?: {
-      submitSecurityJob?: (jobTypeStr: string, metadataJsonStr: string) => string;
-      cancelSecurityJob?: (jobId: string, reason: string) => boolean;
-      getSecurityJobStatus?: (jobId: string) => string;
-      listActiveSecurityJobs?: () => string;
-      getCoordinatorStats?: () => string;
-      [key: string]: any;
-    };
-  }
-}
-
 /**
  * Client service interface for the Native Android MobileSecurityCoordinator (Phase T1).
  * Communicates with the native coordinator via window.AndroidSecurityBridge when running

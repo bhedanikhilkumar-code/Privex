@@ -622,5 +622,52 @@ public class MainActivity extends AppCompatActivity {
                 return "{}";
             }
         }
+
+        // ==========================================
+        // APP INSTALLATION SHIELD (PHASE T2)
+        // ==========================================
+
+        @JavascriptInterface
+        public String auditPackage(String packageName) {
+            try {
+                com.privateprotection.mobile.shield.PackageAuditService auditService =
+                        new com.privateprotection.mobile.shield.PackageAuditService(activity);
+                JSONObject report = auditService.auditInstalledPackage(packageName);
+                return report != null ? report.toString() : "{\"error\":\"PACKAGE_NOT_FOUND\"}";
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to audit package " + packageName, e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public String auditApkFile(String apkFilePath) {
+            try {
+                com.privateprotection.mobile.shield.PackageAuditService auditService =
+                        new com.privateprotection.mobile.shield.PackageAuditService(activity);
+                JSONObject report = auditService.auditApkFile(apkFilePath);
+                return report != null ? report.toString() : "{\"error\":\"FILE_NOT_FOUND\"}";
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to audit APK file " + apkFilePath, e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public boolean requestUninstall(String packageName) {
+            try {
+                if (packageName == null || packageName.trim().isEmpty()) {
+                    return false;
+                }
+                Intent intent = new Intent(Intent.ACTION_DELETE);
+                intent.setData(Uri.parse("package:" + packageName));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                activity.startActivity(intent);
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to trigger uninstall intent for " + packageName, e);
+                return false;
+            }
+        }
     }
 }

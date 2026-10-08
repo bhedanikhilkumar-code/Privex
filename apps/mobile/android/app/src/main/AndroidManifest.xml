@@ -57,6 +57,17 @@
             </intent-filter>
         </activity>
 
+        <!-- Phase T2: App Installation & Update Safety Shield -->
+        <receiver
+            android:name=".shield.PackageInstallReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

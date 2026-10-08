@@ -67,6 +67,13 @@ public class MobileSecurityCoordinator {
         }
     }
 
+    /**
+     * Sets the singleton instance (used in unit testing).
+     */
+    public static synchronized void setInstanceForTest(MobileSecurityCoordinator instance) {
+        sInstance = instance;
+    }
+
     public MobileSecurityCoordinator(Context context) {
         this(context, new BoundedWorkerExecutor(), new JobStateStore(context));
     }

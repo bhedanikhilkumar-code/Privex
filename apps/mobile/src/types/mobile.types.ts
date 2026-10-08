@@ -8,6 +8,36 @@ import { AssistantOutput } from '@private-protection/ml';
 
 export type ScanTargetType = 'URL' | 'TEXT' | 'FILE';
 
+declare global {
+  interface Window {
+    AndroidSecurityBridge?: {
+      getPlatformMetadata?: () => string;
+      notifyClientReady?: () => void;
+      consumePendingIntent?: () => string | null;
+      isSecureStorageEncrypted?: () => boolean;
+      secureStorageGet?: (key: string) => string | null;
+      secureStoragePut?: (key: string, value: string) => boolean;
+      secureStorageRemove?: (key: string) => boolean;
+      secureStorageClear?: () => boolean;
+      decodeQrFrame?: (base64Image: string) => string;
+      triggerWarningHaptics?: (severity: string) => void;
+      dispatchNativeNotification?: (title: string, body: string, priority: string) => boolean;
+      hasCameraPermission?: () => boolean;
+      requestCameraPermission?: () => void;
+      getDeviceSecurityPosture?: () => string;
+      submitSecurityJob?: (jobTypeStr: string, metadataJsonStr: string) => string;
+      cancelSecurityJob?: (jobId: string, reason: string) => boolean;
+      getSecurityJobStatus?: (jobId: string) => string;
+      listActiveSecurityJobs?: () => string;
+      getCoordinatorStats?: () => string;
+      auditPackage?: (packageName: string) => string;
+      auditApkFile?: (apkFilePath: string) => string;
+      requestUninstall?: (packageName: string) => boolean;
+      [key: string]: any;
+    };
+  }
+}
+
 export interface MobileScanResult {
   scanId: string;
   targetType: ScanTargetType;
@@ -128,3 +158,57 @@ export interface CoordinatorStats {
   workerQueueSize: number;
   totalPersistedJobs: number;
 }
+
+// ==========================================
+// PHASE T2: APP INSTALLATION SHIELD
+// ==========================================
+
+export interface PackageMetadataDTO {
+  packageName: string;
+  appLabel: string;
+  versionName: string;
+  versionCode: number;
+  firstInstallTimeMs: number;
+  lastUpdateTimeMs: number;
+  installerPackageName: string;
+  sourceDir: string;
+  isSystemApp: boolean;
+  requestedPermissions: string[];
+  dangerousPermissions: string[];
+  exportedComponents: string[];
+  signingCertSha256s: string[];
+}
+
+export interface ApkInspectionDTO {
+  isValidZip: boolean;
+  hasDex: boolean;
+  hasAndroidManifest: boolean;
+  hasNativeLibraries: boolean;
+  hasSuspiciousPayloads: boolean;
+  uncompressedSizeBytes: number;
+  fileCount: number;
+  fileSha256: string;
+  suspiciousEntries: string[];
+  certEntries: string[];
+}
+
+export interface PackageAuditReport {
+  packageName: string;
+  appLabel: string;
+  score: number;
+  verdict: Verdict | 'ALLOW' | 'CAUTION' | 'SUSPICIOUS' | 'DANGEROUS';
+  severity: SeverityLevel | 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  recommendation: string;
+  isSideloaded: boolean;
+  isSystemApp: boolean;
+  metadata?: PackageMetadataDTO;
+  evidence?: Array<{
+    code: string;
+    severity: string;
+    weight: number;
+    description: string;
+  }>;
+  apkInspection?: ApkInspectionDTO;
+  timestamp: number;
+}
+
