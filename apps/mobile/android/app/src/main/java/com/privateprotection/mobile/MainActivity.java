@@ -844,5 +844,82 @@ public class MainActivity extends AppCompatActivity {
                 return "{\"error\":\"" + e.getMessage() + "\"}";
             }
         }
+
+        // ==========================================
+        // PHASE T6: WEB SHIELD & PHISHING PROTECTION
+        // ==========================================
+
+        @JavascriptInterface
+        public String inspectUrl(String url) {
+            try {
+                com.privateprotection.mobile.shield.WebShieldService service =
+                        com.privateprotection.mobile.shield.WebShieldService.getInstance(activity);
+                com.privateprotection.mobile.shield.UrlThreatDetector.UrlThreatResult result = service.inspectUrl(url);
+                return result.toJson().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "inspectUrl failed", e);
+                return "{\"verdict\":\"UNKNOWN\",\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public String inspectRedirectChain(String urlsJsonArray) {
+            try {
+                com.privateprotection.mobile.shield.WebShieldService service =
+                        com.privateprotection.mobile.shield.WebShieldService.getInstance(activity);
+                org.json.JSONArray array = new org.json.JSONArray(urlsJsonArray);
+                java.util.List<String> list = new java.util.ArrayList<>();
+                for (int i = 0; i < array.length(); i++) {
+                    list.add(array.getString(i));
+                }
+                com.privateprotection.mobile.shield.UrlThreatDetector.RedirectChainResult result = service.inspectRedirectChain(list);
+                return result.toJson().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "inspectRedirectChain failed", e);
+                return "{\"isDangerous\":false,\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public boolean startWebShield() {
+            try {
+                com.privateprotection.mobile.shield.WebShieldService service =
+                        com.privateprotection.mobile.shield.WebShieldService.getInstance(activity);
+                android.content.Intent vpnIntent = service.prepareVpn();
+                if (vpnIntent != null) {
+                    activity.startActivityForResult(vpnIntent, 4002);
+                    return false;
+                }
+                return service.startWebShield();
+            } catch (Exception e) {
+                Log.e(TAG, "startWebShield failed", e);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public boolean stopWebShield() {
+            try {
+                com.privateprotection.mobile.shield.WebShieldService service =
+                        com.privateprotection.mobile.shield.WebShieldService.getInstance(activity);
+                service.stopWebShield();
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "stopWebShield failed", e);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public String getWebShieldStatus() {
+            try {
+                com.privateprotection.mobile.shield.WebShieldService service =
+                        com.privateprotection.mobile.shield.WebShieldService.getInstance(activity);
+                return service.getWebShieldStatusJson().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "getWebShieldStatus failed", e);
+                return "{\"isWebShieldActive\":false,\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
     }
 }

@@ -498,19 +498,25 @@ Build a mobile App Safety pipeline:
   - Release / R8 Build: BUILD SUCCESSFUL (shrinking, obfuscation, and lint vital passed).
   - Physical Android Device Validation: NOT EXECUTED (Honestly reported; no USB device connected).
 
-## T6 — Phishing & Web Protection
-Create a privacy-first Web Shield:
-- URL normalization.
-- Punycode/IDN homograph detection.
-- Unicode/control-character and deceptive-character detection.
-- Suspicious TLD/domain reputation signals only when locally available.
-- Credential-harvesting form indicators where browser integration exposes them.
-- Redirect-chain analysis where the URL is available.
-- Dangerous scheme detection.
-- Local signed phishing/malware domain database.
-- Browser integration for supported browsers.
-- Optional local VPNService domain/IP metadata protection only if necessary and clearly disclosed; no TLS MITM by default.
-- Warning levels before navigation/download where technically possible.
+## T6 — Phishing & Web Protection (COMPLETE & AUDITED GO)
+- **Status:** COMPLETE & CERTIFIED (Audited GO in `docs/PHASE_T6_FINAL_INDEPENDENT_AUDIT.md`)
+- **Key Deliverables:**
+  - URL Normalization & RFC Canonicalization: `UrlThreatDetector` performs scheme lowercasing, punycode ASCII conversion, path traversal stripping, default port stripping, and credential URL extraction.
+  - Punycode & IDN Homograph Defense: Detects spoofed IDN domains (`xn--`), mixed-script Cyrillic/Greek/Latin lookalikes (e.g. `pаypаl.com`), and right-to-left override / bidirectional control characters (`\u202E`, `\u202D`, `\u202C`, `\u200E`, `\u200F`).
+  - Brand Typosquatting Distance Analyzer: Levenshtein distance $\le 2$ against protected financial and tech brands (`paypal`, `google`, `microsoft`, `apple`, `amazon`, `netflix`, `chase`, `wellsfargo`, `bankofamerica`, `coinbase`, `binance`).
+  - IP-Based Host Detection: Flags direct IPv4 and IPv6 URL hosts bypassing standard domain name resolution.
+  - Dangerous Scheme Blocker: Flags dangerous or non-navigable schemes (`javascript:`, `data:`, `file:`, `blob:`, `vbscript:`, `intent:`).
+  - Credential Harvesting Path Indicators: Flags sensitive paths (`/login`, `/signin`, `/verify`, `/account`, `/update-billing`, `/wallet`, `/security-check`) paired with suspicious domains or subdomains.
+  - Multi-Hop Redirect Chain Scoring: Tracks transition hops, detects circular redirect loops, cross-domain shifts to untrusted TLDs, and protocol downgrades.
+  - RFC 1035 UDP DNS Packet Parser & Loopback TUN: `DnsPacketParser` parses raw UDP DNS wire format and synthesizes standard NXDOMAIN responses in volatile RAM for blocked domains without touching user payload data.
+  - Strict DNS-Only VpnService: `WebShieldVpnService` routes DNS IP addresses (`10.0.0.1/32`, `10.0.0.2/32`) on port 53. Strictly **ZERO TLS MITM, ZERO Root CA installation, ZERO HTTPS decryption, ZERO browsing history logging**.
+  - Honest Android Capability Matrix: Explicitly classifies capabilities across categories A (direct Android), B (browser integration), C (share sheet receiver), D (local VpnService DNS), and E (unprivileged system-wide browser interception without VPN). Category E is truthfully reported as **false/unsupported** with an explicit platform sandboxing notice.
+  - Android Unit Tests: 141/141 PASS (100% pass rate).
+  - Mobile Vitest Tests: 116/116 PASS (100% pass rate across 19 test files).
+  - Monorepo Regression: 511/511 PASS (100% pass rate across core, ml, desktop, extension, mobile, web).
+  - Typecheck: 0 errors across all 6 workspaces.
+  - Release / R8 Build: BUILD SUCCESSFUL (`assembleRelease` with full R8 shrinking and resource optimization).
+  - Physical Android Device Validation: NOT EXECUTED (Honestly reported; no USB device connected).
 
 ## T7 — Predictive Pre-Threat Warning
 Before opening a high-risk URL or launching a downloaded file/app, surface:

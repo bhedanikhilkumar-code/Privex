@@ -372,4 +372,79 @@ export interface RealtimeDownloadEventResult {
   reason?: string;
 }
 
+// ==========================================
+// PHASE T6: WEB SHIELD & PHISHING PROTECTION
+// ==========================================
+
+export type UrlVerdict = 'SAFE' | 'SUSPICIOUS' | 'DANGEROUS' | 'UNKNOWN';
+
+export type UrlThreatType =
+  | 'NONE'
+  | 'DANGEROUS_SCHEME'
+  | 'HOMOGLYPH_ATTACK'
+  | 'PUNYCODE_SPOOF'
+  | 'TYPOSQUATTING'
+  | 'CREDENTIAL_HARVESTING'
+  | 'SUSPICIOUS_IP_HOST'
+  | 'USERINFO_SPOOF'
+  | 'MALICIOUS_DOMAIN'
+  | 'BIDI_OVERRIDE_SPOOF'
+  | 'DECEPTIVE_REDIRECT'
+  | 'INVALID_URL';
+
+export interface UrlInspectionReport {
+  normalizedUrl: string;
+  domain: string;
+  scheme: string;
+  riskScore: number;
+  verdict: UrlVerdict;
+  threatType: UrlThreatType;
+  indicators: string[];
+  explanation: string;
+  error?: string;
+}
+
+export interface RedirectHopReport {
+  hopIndex: number;
+  url: string;
+  domain: string;
+  riskScore: number;
+  threatType: UrlThreatType;
+}
+
+export interface RedirectChainReport {
+  isDangerous: boolean;
+  totalHops: number;
+  hops: RedirectHopReport[];
+  initialUrl: string;
+  finalUrl: string;
+  reason: string;
+  error?: string;
+}
+
+export interface WebShieldCapabilities {
+  categoryA_directAndroid: boolean;
+  categoryA_description: string;
+  categoryB_browserIntegration: boolean;
+  categoryB_description: string;
+  categoryC_userUrlSharing: boolean;
+  categoryC_description: string;
+  categoryD_localVpnShield: boolean;
+  categoryD_description: string;
+  categoryE_systemWideBrowserHookWithoutVpn: boolean;
+  categoryE_limitationExplanation: string;
+}
+
+export interface WebShieldStatus {
+  isWebShieldActive: boolean;
+  isAnotherVpnActive: boolean;
+  totalDnsQueries: number;
+  blockedDnsQueries: number;
+  lastThreatTimestamp: number;
+  knownBlockedDomainsCount: number;
+  capabilities: WebShieldCapabilities;
+  error?: string;
+}
+
+
 

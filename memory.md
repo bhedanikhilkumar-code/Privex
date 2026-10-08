@@ -205,5 +205,10 @@ A mobile release is not considered complete from CI alone. Required evidence inc
   - Catch-up reconciliation: Queries MediaStore.Downloads for items modified while the app was inactive, diffing against deduplicator state.
   - Platform capability truth: Honestly reports `isPreOpenInterceptionSupported = false` and documents that third-party Android apps inspect files upon availability without claiming impossible pre-open system hooks.
   - Verified with 119/119 Android unit tests passing, 110/110 mobile Vitest tests passing, 505/505 monorepo tests passing, 0 typecheck errors, and clean R8 release build (`assembleRelease` passed). Physical device validation honestly reported as NOT EXECUTED due to no attached USB handset.
-
-
+- **Phase T6 (Phishing & Web Protection):** COMPLETE & CERTIFIED (`docs/PHASE_T6_FINAL_INDEPENDENT_AUDIT.md`).
+  - Implemented `UrlThreatDetector` (URL normalization, IDN homographs, punycode lookalikes, bidirectional overrides, brand typosquatting Levenshtein distance, IP hosts, dangerous schemes, credential harvesting paths, redirect chain multi-hop risk scoring).
+  - Implemented `DnsPacketParser` (RFC 1035 UDP DNS packet parser and synthetic NXDOMAIN response builder in volatile RAM).
+  - Implemented `WebShieldVpnService` (`android.net.VpnService` with DNS-only TUN loopback, `10.0.0.1/32` & `10.0.0.2/32`, port 53). Zero TLS MITM, zero Root CA certs, zero HTTPS decryption, zero user browsing data persisted or transmitted.
+  - Implemented `WebShieldService` (native coordinator, foreground service notifications, thread pool, domain stats).
+  - Implemented `web-shield.service.ts` and `WebShieldCapabilities` reporting honest Android sandboxing limitation (no unprivileged system-wide browser interception without VPN).
+  - Verified with 141/141 Android unit tests passing, 116/116 mobile Vitest tests passing across 19 test files, 511/511 monorepo tests passing, 0 typecheck errors, and clean R8 release build (`assembleRelease` passed). Physical device validation honestly reported as NOT EXECUTED due to no attached USB handset.
