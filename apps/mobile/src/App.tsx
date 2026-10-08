@@ -14,6 +14,7 @@ import { AssistantScreen } from './screens/AssistantScreen';
 import { ProtectionStatusScreen } from './screens/ProtectionStatusScreen';
 import { PrivacyScreen } from './screens/PrivacyScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { PasswordGeneratorScreen } from './screens/PasswordGeneratorScreen';
 
 import { PreThreatWarningModal } from './components/PreThreatWarningModal';
 import { PreThreatWarningService } from './services/pre-threat-warning.service';
@@ -177,6 +178,9 @@ export const App: React.FC = () => {
             scannerService={fileService}
             onNavigateHome={() => setCurrentTab('HOME')}
           />
+        )}
+        {currentTab === 'PASSWORD' && (
+          <PasswordGeneratorScreen onBack={() => setCurrentTab('HOME')} />
         )}
         {currentTab === 'ASSISTANT' && <AssistantScreen />}
         {currentTab === 'STATUS' && <ProtectionStatusScreen />}

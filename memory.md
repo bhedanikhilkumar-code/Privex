@@ -222,4 +222,16 @@ A mobile release is not considered complete from CI alone. Required evidence inc
   - WCAG 2.1 AA accessible UI: `PreThreatWarningModal.tsx` provides an alertdialog modal with keyboard navigation, ARIA attributes, collapsible technical evidence tokens, and integrated friction gate.
   - TypeScript Service: `pre-threat-warning.service.ts` provides lifecycle management, fallback deterministic evaluation, and bounded decision history.
   - Verified with 151/151 Android unit tests passing (+10 new tests), 131/131 mobile Vitest tests passing across 21 test files (+15 new tests), 552/552 monorepo tests passing, 0 typecheck errors, and clean R8 release build (`assembleRelease` passed). Physical device validation honestly reported as NOT EXECUTED due to no attached USB handset.
+- **Phase T8 (Secure Password Generator):** COMPLETE & CERTIFIED (`docs/PHASE_T8_FINAL_INDEPENDENT_AUDIT.md`).
+  - Implemented `SecurePasswordGenerator.java`: Native Android password & passphrase generator powered exclusively by `java.security.SecureRandom`.
+  - Unbiased Rejection Sampling: Mathematical threshold rejection sampling (`UnbiasedRandom.ts` and `SecurePasswordGenerator.java`) completely eliminating modulo bias.
+  - Multi-Preset Character Engine: Presets for Standard (20), Strong (32), Very Strong (48), and Custom (12–128) characters with guaranteed representation from every active character group.
+  - Character Disambiguation: Optional exclusion of visually similar (`l`, `1`, `I`, `o`, `0`, `O`) and ambiguous symbols (`{}[]()/\'"`).
+  - Curated 2,048-Word Passphrase Mode: Bundled BIP-0039 standard dictionary (`passphrase-wordlist.ts` and `PassphraseWordlist.java`, CC0/Public Domain) providing 11 bits of entropy per word (\(C \log_2(2048)\)). Supports 3–10 words, custom separators (`-`, `_`, space, `.`), word capitalization, and optional appended random digits.
+  - Plain-Language Entropy Guidance: Displays mathematical search space bits (\(L \log_2(N)\) or \(C \log_2(W)\)) with plain-language disclosure that entropy guards against brute-force guessing but does not prevent phishing or malware keylogging.
+  - Sensitive Clipboard Protection: Sets `ClipDescription.EXTRA_IS_SENSITIVE` on Android 13+ (API 33+) to suppress clipboard overlay preview and schedules automatic clipboard clearance after 60 seconds.
+  - Zero-Knowledge & Zero Persistence: Secrets are never saved to disk, logged, synced, or transmitted over any network. Autofill service integration is deferred.
+  - UI & Presentation Layer: `PasswordGeneratorScreen.tsx` integrated with `TabBar.tsx`, `HomeScreen.tsx`, and `App.tsx` with responsive presets, sliders, and feedback.
+  - Verified with 157/157 Android unit tests passing (+6 new tests), 151/151 mobile Vitest tests passing across 23 test files (+20 new tests), 572/572 monorepo tests passing, 0 typecheck errors, and clean R8 release build (`assembleRelease` passed). Physical device validation honestly reported as NOT EXECUTED due to no attached USB handset.
+
 

@@ -1016,5 +1016,50 @@ public class MainActivity extends AppCompatActivity {
                 return "[]";
             }
         }
+
+        // ==========================================
+        // PHASE T8: SECURE PASSWORD GENERATOR
+        // ==========================================
+
+        @JavascriptInterface
+        public String generateSecurePassword(String optionsJson) {
+            try {
+                com.privateprotection.mobile.shield.SecurePasswordGenerator generator =
+                        new com.privateprotection.mobile.shield.SecurePasswordGenerator(activity);
+                org.json.JSONObject options = (optionsJson != null && !optionsJson.isEmpty())
+                        ? new org.json.JSONObject(optionsJson)
+                        : new org.json.JSONObject();
+                org.json.JSONObject result = generator.generatePassword(options);
+                return result.toString();
+            } catch (Exception e) {
+                Log.e(TAG, "generateSecurePassword bridge error", e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public String generateSecurePassphrase(int wordCount, String separator, boolean capitalize, boolean includeNumber) {
+            try {
+                com.privateprotection.mobile.shield.SecurePasswordGenerator generator =
+                        new com.privateprotection.mobile.shield.SecurePasswordGenerator(activity);
+                org.json.JSONObject result = generator.generatePassphrase(wordCount, separator, capitalize, includeNumber);
+                return result.toString();
+            } catch (Exception e) {
+                Log.e(TAG, "generateSecurePassphrase bridge error", e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public boolean copySensitiveToClipboard(String label, String secretText) {
+            try {
+                com.privateprotection.mobile.shield.SecurePasswordGenerator generator =
+                        new com.privateprotection.mobile.shield.SecurePasswordGenerator(activity);
+                return generator.copySensitiveToClipboard(label, secretText);
+            } catch (Exception e) {
+                Log.e(TAG, "copySensitiveToClipboard bridge error", e);
+                return false;
+            }
+        }
     }
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type MobileTab = 'HOME' | 'URL_SCAN' | 'TEXT_SCAN' | 'FILE_SCAN' | 'QR_SCAN' | 'ASSISTANT' | 'STATUS' | 'PRIVACY' | 'SETTINGS';
+export type MobileTab = 'HOME' | 'URL_SCAN' | 'TEXT_SCAN' | 'FILE_SCAN' | 'QR_SCAN' | 'PASSWORD' | 'ASSISTANT' | 'STATUS' | 'PRIVACY' | 'SETTINGS';
 
 interface TabBarProps {
   currentTab: MobileTab;
@@ -14,6 +14,7 @@ export const TabBar: React.FC<TabBarProps> = ({ currentTab, onSelectTab }) => {
     { id: 'TEXT_SCAN', label: 'Message', icon: '💬' },
     { id: 'QR_SCAN', label: 'QR', icon: '📷' },
     { id: 'FILE_SCAN', label: 'File', icon: '📁' },
+    { id: 'PASSWORD', label: 'Pass', icon: '🔐' },
     { id: 'ASSISTANT', label: 'Assistant', icon: '🤖' },
     { id: 'STATUS', label: 'Engine', icon: '⚙️' },
     { id: 'PRIVACY', label: 'Privacy', icon: '🔒' },
