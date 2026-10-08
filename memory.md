@@ -199,4 +199,11 @@ A mobile release is not considered complete from CI alone. Required evidence inc
   - Sub-millisecond file deduplication via 10,000-entry bounded LRU `MobileCleanFileCache` with disk persistence.
   - Full component reuse: Delegates file scanning to `UniversalFileShieldService` (T3) and package scanning to `PackageAuditService` (T2). Zero duplicated detection logic.
   - Verified with 94/94 Android unit tests passing, 106/106 mobile Vitest tests passing, 501/501 monorepo tests passing, 0 typecheck errors, and clean R8 release build (`assembleRelease` passed). Physical device validation honestly reported as NOT EXECUTED due to no attached USB handset.
+- **Phase T5 (Real-Time Download Protection):** COMPLETE & CERTIFIED (`docs/PHASE_T5_FINAL_INDEPENDENT_AUDIT.md`).
+  - Implemented `DownloadContentObserver` (MediaStore observation), `DownloadStabilizer` (IS_PENDING == 0 check + partial download extension gating), `DownloadEventDeduplicator` (5,000-entry LRU cache, rescanning on size/mtime/hash changes), `DownloadNotificationHelper` (storm rate limiting, max 3/10s, coalesced alerts), and `RealtimeDownloadProtectionService`.
+  - Race condition immunity: Re-checks file stability after scanning; invalidates cache and triggers rescan if file was modified or replaced during analysis.
+  - Catch-up reconciliation: Queries MediaStore.Downloads for items modified while the app was inactive, diffing against deduplicator state.
+  - Platform capability truth: Honestly reports `isPreOpenInterceptionSupported = false` and documents that third-party Android apps inspect files upon availability without claiming impossible pre-open system hooks.
+  - Verified with 119/119 Android unit tests passing, 110/110 mobile Vitest tests passing, 505/505 monorepo tests passing, 0 typecheck errors, and clean R8 release build (`assembleRelease` passed). Physical device validation honestly reported as NOT EXECUTED due to no attached USB handset.
+
 

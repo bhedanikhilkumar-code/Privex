@@ -64,8 +64,8 @@ public class DownloadContentObserver extends ContentObserver {
 
             MobileSecurityCoordinator coordinator = MobileSecurityCoordinator.getInstance(context);
             coordinator.submitJob(JobType.DOWNLOAD_INSPECT, meta, (job, ctrl) -> {
-                UniversalFileShieldService shield = new UniversalFileShieldService(context);
-                return shield.inspectUri(uri, null);
+                RealtimeDownloadProtectionService service = RealtimeDownloadProtectionService.getInstance(context);
+                return service.handleIncomingDownloadUri(uri, null);
             });
         } catch (Exception e) {
             Log.e(TAG, "Failed to submit download inspection job for " + uri, e);

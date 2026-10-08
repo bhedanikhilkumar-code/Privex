@@ -311,3 +311,65 @@ export interface DeviceScanReport {
   threats: any[];
 }
 
+// ==========================================
+// PHASE T5: REAL-TIME DOWNLOAD PROTECTION
+// ==========================================
+
+export type DownloadStabilizationState =
+  | 'WAITING_FOR_COMPLETION'
+  | 'STABILIZING'
+  | 'READY_TO_SCAN'
+  | 'DEFERRED'
+  | 'INACCESSIBLE'
+  | 'FAILED';
+
+export interface DownloadStabilizationDTO {
+  state: DownloadStabilizationState;
+  size: number;
+  dateModified: number;
+  mimeType: string;
+  reason: string;
+  isReady: boolean;
+}
+
+export interface RealtimeDownloadStatus {
+  isMonitoringActive: boolean;
+  lastEventTimestamp: number;
+  lastReconciliationTimestamp: number;
+  eventsProcessed: number;
+  threatsDetected: number;
+  deduplicatorStats: {
+    cachedEntries: number;
+    maxCapacity: number;
+  };
+  cleanCacheCount: number;
+  isPreOpenInterceptionSupported: boolean;
+  platformLimitationNotice: string;
+}
+
+export interface DownloadCatchUpReport {
+  discovered: number;
+  rescanned: number;
+  skipped: number;
+  threatsFound: number;
+  durationMs: number;
+  timestamp: number;
+  error?: string;
+}
+
+export interface RealtimeDownloadEventResult {
+  status: 'COMPLETED' | 'SUPPRESSED_DUPLICATE' | 'CLEAN_CACHE_HIT' | 'WAITING_FOR_COMPLETION' | 'STABILIZING' | 'DEFERRED' | 'INACCESSIBLE' | 'FAILED';
+  uri?: string;
+  path?: string;
+  verdict?: Verdict | 'ALLOW' | 'CAUTION' | 'SUSPICIOUS' | 'DANGEROUS';
+  severity?: SeverityLevel | 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  score?: number;
+  cached?: boolean;
+  stabilization?: DownloadStabilizationDTO;
+  inspection?: UniversalFileInspectionReport;
+  quarantine?: QuarantineResult;
+  error?: string;
+  reason?: string;
+}
+
+

@@ -794,5 +794,55 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         }
+
+        // ==========================================
+        // REAL-TIME DOWNLOAD PROTECTION (PHASE T5)
+        // ==========================================
+
+        @JavascriptInterface
+        public boolean startRealtimeDownloadProtection() {
+            try {
+                com.privateprotection.mobile.shield.RealtimeDownloadProtectionService service =
+                        com.privateprotection.mobile.shield.RealtimeDownloadProtectionService.getInstance(activity);
+                return service.startMonitoring();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to start real-time download protection", e);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public boolean stopRealtimeDownloadProtection() {
+            try {
+                com.privateprotection.mobile.shield.RealtimeDownloadProtectionService service =
+                        com.privateprotection.mobile.shield.RealtimeDownloadProtectionService.getInstance(activity);
+                return service.stopMonitoring();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to stop real-time download protection", e);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public String getRealtimeDownloadProtectionStatus() {
+            try {
+                com.privateprotection.mobile.shield.RealtimeDownloadProtectionService service =
+                        com.privateprotection.mobile.shield.RealtimeDownloadProtectionService.getInstance(activity);
+                return service.getProtectionStatus().toString();
+            } catch (Exception e) {
+                return "{\"isMonitoringActive\":false,\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public String reconcileDownloadCatchUp() {
+            try {
+                com.privateprotection.mobile.shield.RealtimeDownloadProtectionService service =
+                        com.privateprotection.mobile.shield.RealtimeDownloadProtectionService.getInstance(activity);
+                return service.reconcileCatchUp().toString();
+            } catch (Exception e) {
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
     }
 }
