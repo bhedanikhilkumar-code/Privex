@@ -1,6 +1,6 @@
 # PHASE 12 GAP REMEDIATION REPORT
 ## Root-Cause Remediation of Discovered Gaps & Security Hardening
-### Master Prompt #28 — PRIVATE PROTECTION Architecture & Security Governance
+### Master Prompt #28 — PRIVEX Architecture & Security Governance
 
 > **DOCUMENT TYPE:** Canonical Architectural Remediation Report  
 > **EVALUATION DATE:** 2026-10-02  
@@ -18,7 +18,7 @@
 
 ## 1. Executive Summary
 
-During Phase 12 Full Product Validation (`docs/PHASE_12_FULL_PRODUCT_VALIDATION_REPORT.md`), independent subagents audited the entire Private Protection monorepo against the original PS-05 specification. While core detection, desktop runtime, and cross-platform capabilities demonstrated strong performance, 6 security, architecture, and completeness gaps were uncovered.
+During Phase 12 Full Product Validation (`docs/PHASE_12_FULL_PRODUCT_VALIDATION_REPORT.md`), independent subagents audited the entire Privex monorepo against the original PS-05 specification. While core detection, desktop runtime, and cross-platform capabilities demonstrated strong performance, 6 security, architecture, and completeness gaps were uncovered.
 
 In accordance with Master Prompt #28 and the Autonomous Agent Operating Manual (`AGENTS.md`), these gaps were not superficially patched. Each issue was traced to its architectural root cause, corrected at the appropriate layer, and verified through dedicated red-team regression tests.
 
@@ -108,7 +108,7 @@ Every phase change was committed and pushed to `origin/main` with informative gi
 
 ```
 ================================================================================
-                    PRIVATE PROTECTION MONOREPO TEST SUITE
+                    PRIVEX MONOREPO TEST SUITE
 ================================================================================
 Workspace           Test Files    Tests Passed    Tests Failed    Pass Rate
 --------------------------------------------------------------------------------

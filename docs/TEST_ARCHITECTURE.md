@@ -1,7 +1,7 @@
 # TEST_ARCHITECTURE.md — Comprehensive Testing Architecture & Quality Gates
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION TEST ARCHITECTURE**  
+> **CANONICAL SPECIFICATION — PRIVEX TEST ARCHITECTURE**  
 > This document specifies the 11-tier testing architecture, test directories, execution frameworks, coverage thresholds, adversarial testing protocols, and agent test ownership.
 
 ---

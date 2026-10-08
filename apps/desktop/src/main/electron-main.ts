@@ -67,8 +67,8 @@ function updateTrayStatus(unreadCount: number, latestThreatTitle?: string): void
   if (!systemTray) return;
   try {
     const tooltip = unreadCount > 0
-      ? `Private Protection — ${unreadCount} Unread Alert${unreadCount > 1 ? 's' : ''}${latestThreatTitle ? ` (${latestThreatTitle})` : ''}`
-      : 'Private Protection — Real-Time Shield Active';
+      ? `Privex — ${unreadCount} Unread Alert${unreadCount > 1 ? 's' : ''}${latestThreatTitle ? ` (${latestThreatTitle})` : ''}`
+      : 'Privex — Real-Time Shield Active';
     systemTray.setToolTip(tooltip);
   } catch {
     // Non-blocking tray update
@@ -81,7 +81,7 @@ function setupSystemTray(win: BrowserWindow): void {
   try {
     const icon = createTrayIcon();
     systemTray = new Tray(icon);
-    systemTray.setToolTip('Private Protection — Real-Time Shield Active');
+    systemTray.setToolTip('Privex — Real-Time Shield Active');
 
     const contextMenu = Menu.buildFromTemplate([
       {
@@ -109,7 +109,7 @@ function setupSystemTray(win: BrowserWindow): void {
       },
       { type: 'separator' },
       {
-        label: 'Exit Private Protection',
+        label: 'Exit Privex',
         click: () => {
           isQuitting = true;
           app.quit();
@@ -138,7 +138,7 @@ function createMainWindow(isHeadlessVerify: boolean): BrowserWindow {
     height: 800,
     minWidth: 960,
     minHeight: 640,
-    title: 'Private Protection — On-Device Desktop Security',
+    title: 'Privex — On-Device Desktop Security',
     show: !isHeadlessVerify,
     backgroundColor: '#f8fafc',
     webPreferences: {
@@ -190,7 +190,7 @@ async function runHeadlessRuntimeVerification(win: BrowserWindow): Promise<void>
   fs.mkdirSync(watchDir, { recursive: true });
 
   const safeFile = path.join(scanDir, 'readme-notes.txt');
-  fs.writeFileSync(safeFile, 'This is a completely benign text note for Private Protection desktop verification.\n', 'utf8');
+  fs.writeFileSync(safeFile, 'This is a completely benign text note for Privex desktop verification.\n', 'utf8');
 
   const nestedSafeFile = path.join(subDir, 'config.json');
   fs.writeFileSync(nestedSafeFile, JSON.stringify({ app: 'private-protection', offline: true }), 'utf8');
@@ -259,7 +259,7 @@ async function runHeadlessRuntimeVerification(win: BrowserWindow): Promise<void>
         return {
           bridgeAvailable: true,
           nodeIntegrationDisabled: typeof process === 'undefined' || typeof process.versions === 'undefined',
-          rootTitleRendered: document.body.innerText.includes('System Protection Overview') || document.body.innerText.includes('Private Protection'),
+          rootTitleRendered: document.body.innerText.includes('System Protection Overview') || document.body.innerText.includes('Privex'),
           protectionStatus: status,
           progressEventsReceived: progressEvents.length,
           benignQuarantineRejected,

@@ -1,7 +1,7 @@
 # PHASE R8 — PERFORMANCE, LOW-END DEVICE & OFFLINE DEEP VALIDATION
 
 > **DOCUMENT STATUS:** CANONICAL PHASE R8 PERFORMANCE & RESOURCE VALIDATION REPORT  
-> **PROJECT:** PRIVATE PROTECTION (`PS-05` — On-Device Threat, Phishing, and Scam Detection)  
+> **PROJECT:** PRIVEX (`PS-05` — On-Device Threat, Phishing, and Scam Detection)  
 > **RELEASE CANDIDATE:** `v0.1.0`  
 > **VALIDATION METHODOLOGY:** `MEASURE → IDENTIFY BOTTLENECK → ROOT CAUSE → MINIMAL FIX → MEASURE AGAIN`
 
@@ -9,7 +9,7 @@
 
 ## 1. PERFORMANCE GOALS & BASELINE TARGETS (`R8-A`)
 
-From [`AGENT.md`](../AGENT.md) and [`README.md`](../README.md), Private Protection enforces the following empirical performance, resource, and offline targets without cloud offloads:
+From [`AGENT.md`](../AGENT.md) and [`README.md`](../README.md), Privex enforces the following empirical performance, resource, and offline targets without cloud offloads:
 
 | Metric / Capability | Documented Target Budget | Architectural Requirement |
 |---|---|---|

@@ -2,7 +2,7 @@
 
 **Document Identifier:** `docs/R1_REAL_WORLD_VALIDATION.md`  
 **Phase:** R1-H (Final Real-World Validation & Production Sealing Audit)  
-**Product:** PRIVATE PROTECTION  
+**Product:** PRIVEX  
 **Problem Statement:** PS-05 — On-device threat, phishing and scam detection  
 **Canonical Doctrine:** LOCAL-FIRST • PRIVACY-FIRST • DATA-MINIMIZATION • ZERO-KNOWLEDGE • ZERO-CLOUD-DEPENDENCE  
 **Version:** `v0.1.0`  
@@ -13,7 +13,7 @@
 
 ## 1. Executive Summary
 
-This master validation document compiles empirical test evidence, real-world execution metrics, and cross-platform audit results across all four client surfaces of **PRIVATE PROTECTION**:
+This master validation document compiles empirical test evidence, real-world execution metrics, and cross-platform audit results across all four client surfaces of **PRIVEX**:
 1. **Web Application** (`@private-protection/web`) — React 18 SPA + Web Worker + Offline PWA
 2. **Android Application** (`@private-protection/mobile` / `com.privateprotection.mobile`) — Release APK & AAB + Keystore
 3. **Desktop Application** (`@private-protection/desktop`) — Native Windows x64 NSIS Installer + Portable Executable
@@ -242,7 +242,7 @@ To maintain complete architectural integrity without overclaiming capabilities:
 ### Entry 6: Windows Desktop Real-Machine Installer & Runtime
 - **ENVIRONMENT:** Windows 11 Enterprise x64 (Build 26100), native host execution (no dev server, stripped PATH).
 - **TEST:** Full installer lifecycle: silent NSIS setup extraction (`release/PrivateProtection-Setup-0.1.0.exe /S`), AppContainer ACL verification (`icacls`), Start Menu and Desktop shortcut resolution, Registry uninstaller configuration (`HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\PrivateProtection`), headless verification (`--headless-verify`), double-extension `.pdf.exe` detection, AES-256-GCM `PPVAULT1` vault isolation, and silent uninstallation (`Uninstall.exe /S`).
-- **EXPECTED:** Clean silent installation to `%LOCALAPPDATA%\Programs\Private Protection`, shortcuts point to `PrivateProtection.exe`, deceptive double-extension blocked with risk score 95, isolated to encrypted vault, uninstallation cleans registry and shortcuts.
+- **EXPECTED:** Clean silent installation to `%LOCALAPPDATA%\Programs\Privex`, shortcuts point to `PrivateProtection.exe`, deceptive double-extension blocked with risk score 95, isolated to encrypted vault, uninstallation cleans registry and shortcuts.
 - **OBSERVED:** Extracted 86 files to install path, AppContainer ACLs `*S-1-15-2-1:(OI)(CI)(RX)` verified, double-extension threat detected with score 95 (`BLOCK`), benign file quarantine rejected with `QUARANTINE_POLICY_REJECTED`, silent uninstallation cleanly removed install folder, registry keys, and shortcuts. Candidate build accurately documented as unsigned.
 - **RESULT:** PASS
 - **EVIDENCE:** `release/PrivateProtection-Setup-0.1.0.exe` (SHA-256: `7bf197ff1810d6db0019598bd465e9f309b1321357be80f7c80c568317e0971a`); `release/PrivateProtection-0.1.0-win-x64.exe` (SHA-256: `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa`); `[ELECTRON_E2E_PROOF]` runtime JSON dump.
@@ -252,4 +252,4 @@ To maintain complete architectural integrity without overclaiming capabilities:
 
 ## 8. Final Audit Certification
 
-The comprehensive evidence audited across all surfaces confirms that **PRIVATE PROTECTION v0.1.0** satisfies all mandatory requirements of **Problem Statement PS-05**. The product operates with complete air-gapped offline autonomy, mathematically verified zero-egress privacy, sub-millisecond core detection, unambiguous instant warnings, and accessible Grade 6 cognitive explanations.
+The comprehensive evidence audited across all surfaces confirms that **PRIVEX v0.1.0** satisfies all mandatory requirements of **Problem Statement PS-05**. The product operates with complete air-gapped offline autonomy, mathematically verified zero-egress privacy, sub-millisecond core detection, unambiguous instant warnings, and accessible Grade 6 cognitive explanations.

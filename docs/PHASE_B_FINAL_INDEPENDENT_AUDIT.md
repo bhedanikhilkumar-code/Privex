@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary & Release Gate Verdict
 
-This audit represents the independent, adversarial, release-quality verification of **Phase B: Core Detection Engine Expansion** for Private Protection.
+This audit represents the independent, adversarial, release-quality verification of **Phase B: Core Detection Engine Expansion** for Privex.
 
 Every claim of completion, performance, determinism, and security was independently verified against repository reality through automated test execution, static AST analysis, adversarial fuzzing, memory leak profiling, and cross-workspace regression validation.
 

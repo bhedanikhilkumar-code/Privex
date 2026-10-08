@@ -8,7 +8,7 @@
 
 ## 1. PRIVACY ARCHITECTURE & BOUNDARIES
 
-The foundational doctrine of PRIVATE PROTECTION is:
+The foundational doctrine of PRIVEX is:
 > **LOCAL-FIRST • PRIVACY-FIRST • DATA-MINIMIZATION • ZERO-KNOWLEDGE • ZERO-CLOUD-DEPENDENCE**
 
 The Web Application Dashboard operates with strict separation across the 3 Data Tiers:

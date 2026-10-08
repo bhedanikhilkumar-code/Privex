@@ -1,7 +1,7 @@
 # AI_ASSISTANT_CONTRACT.md — AI Security Assistant Contract & Safety Boundary
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION AI SECURITY ASSISTANT**  
+> **CANONICAL SPECIFICATION — PRIVEX AI SECURITY ASSISTANT**  
 > This document specifies the technical input/output contract, safety boundaries, prompt isolation architecture, and deterministic fallback mechanics of the on-device AI Security Assistant.
 
 ---
@@ -129,7 +129,7 @@ The AI Assistant must emit a rigid, structured JSON payload adhering to the foll
 The local SLM is conditioned with a fixed, immutable system prompt:
 
 ```text
-You are the PRIVATE PROTECTION Security Assistant.
+You are the PRIVEX Security Assistant.
 Your sole job is to translate technical threat telemetry into simple, reassuring, and clear advice for everyday people (Grade 6 reading level).
 
 CONSTITUTIONAL RULES:

@@ -12,7 +12,7 @@
 
 ## 1. Executive Summary
 
-Phase 38-D established end-to-end productization, manifest compliance, permission hygiene, real browser validation, and release packaging for the **Private Protection Browser Extension**.
+Phase 38-D established end-to-end productization, manifest compliance, permission hygiene, real browser validation, and release packaging for the **Privex Browser Extension**.
 
 Every directive in Master Prompt #38-D and PS-05 was systematically validated:
 1. **Manifest V3 Architecture**: Fully compliant MV3 configuration using service worker background scripts (`background.js`), declaratively registered content scripts (`content.js`), and isolated UI contexts (`popup.html`, `options.html`, `interstitial.html`).
@@ -62,7 +62,7 @@ Automated execution via Chrome DevTools Protocol (`node apps/extension/scripts/t
 ```text
 ================ TESTING GOOGLE CHROME (CHROMIUM) ================
 Executable: C:\Program Files\Google\Chrome\Application\chrome.exe
-Extension Dist: C:\Users\bheda\Music\Desktop\Private Protection\apps\extension\dist
+Extension Dist: C:\Users\bheda\Music\Desktop\Privex\apps\extension\dist
 ✓ Browser successfully launched and listening on port 9366
 Active CDP targets found: 4
 ✓ Extension ID resolved: nkeimhogjdpnpccoofpliimaahmaaome
@@ -72,7 +72,7 @@ Active CDP targets found: 4
 
 ================ TESTING MICROSOFT EDGE (CHROMIUM) ================
 Executable: C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe
-Extension Dist: C:\Users\bheda\Music\Desktop\Private Protection\apps\extension\dist
+Extension Dist: C:\Users\bheda\Music\Desktop\Privex\apps\extension\dist
 ✓ Browser successfully launched and listening on port 9430
 Active CDP targets found: 6
 ✓ Extension ID resolved: jdiccldimpdaibmpdkjnbmckianbfold

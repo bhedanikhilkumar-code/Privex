@@ -10,7 +10,7 @@
 
 ## 1. EXECUTIVE SUMMARY
 
-In Phase 38-A.2, the deployment architecture for the **Private Protection Web Application** (`@private-protection/web`) was audited, validated, and hardened for production static hosting.
+In Phase 38-A.2, the deployment architecture for the **Privex Web Application** (`@private-protection/web`) was audited, validated, and hardened for production static hosting.
 
 1. **Target URL Diagnostics**: Empirical fetch diagnostics on `https://private-protection.pages.dev` diagnosed DNS/publishing status (`ENOTFOUND`), indicating the Cloudflare Pages project deployment was pending initial deploy and SPA routing rules.
 2. **Root Cause Analysis & Fixes**:

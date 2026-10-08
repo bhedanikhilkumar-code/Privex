@@ -1,7 +1,7 @@
 # WEB_TECHNICAL_ARCHITECTURE.md — Client-Side Next.js Web App & PWA Architecture
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION WEB DASHBOARD**  
+> **CANONICAL SPECIFICATION — PRIVEX WEB DASHBOARD**  
 > This document specifies the web application dashboard architecture, detailing the static client-side export, WebAssembly worker execution, Progressive Web App (PWA) offline caching, Content Security Policy, and zero-server privacy guarantees.
 
 ---

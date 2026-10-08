@@ -1,6 +1,6 @@
 # PHASE R13 — PUBLIC LAUNCH + DISTRIBUTION VERIFICATION REPORT
 
-**Project Name:** PRIVATE PROTECTION  
+**Project Name:** PRIVEX  
 **Problem Statement Code:** PS-05  
 **Version:** v0.1.0 (Public Release Candidate)  
 **Date of Verification:** October 4, 2026  
@@ -46,7 +46,7 @@ Every user-facing downloadable artifact has been compiled, hashed, and published
   1. A user on an Android phone navigates to `https://private-protection.pages.dev` or `README.md`.
   2. Tapping "Direct APK (1.0 MB)" triggers immediate download of `private-protection-mobile-0.1.0.apk` via HTTP 200 with content-type `application/vnd.android.package-archive`.
   3. User opens download notification or Files app $\rightarrow$ taps APK $\rightarrow$ enables "Install unknown apps" toggle when prompted $\rightarrow$ taps "Install".
-  4. App icon ("Private Protection") launches into on-device dashboard.
+  4. App icon ("Privex") launches into on-device dashboard.
   5. Scans URLs and SMS texts via local Webview/native bridge without cloud connectivity.
   6. Tested offline with airplane mode enabled $\rightarrow$ threat verdicts returned in $< 100\text{ ms}$.
 - **Google Play Store Policy:**
@@ -62,7 +62,7 @@ Every user-facing downloadable artifact has been compiled, hashed, and published
   1. Windows PC user navigates to `https://private-protection.pages.dev` or `README.md`.
   2. Clicks "Desktop Downloads" $\rightarrow$ GitHub Release `v0.1.0`.
   3. Downloads `PrivateProtection-0.1.0-win-x64.exe` (Portable) or `PrivateProtection-Setup-0.1.0.exe` (Setup).
-  4. Double-clicks executable. The portable version runs immediately without installation or admin rights; the setup installer installs to `%LOCALAPPDATA%\Programs\Private Protection`.
+  4. Double-clicks executable. The portable version runs immediately without installation or admin rights; the setup installer installs to `%LOCALAPPDATA%\Programs\Privex`.
   5. Standalone window opens displaying local desktop threat scanner.
   6. Analyzes URLs, texts, and local download files. Background quarantine vault (`PPVAULT1`) encrypts malicious downloads in AES-256-GCM.
   7. Tested offline with network disabled $\rightarrow$ operates at 100% feature parity.
@@ -105,7 +105,7 @@ Evaluated strictly from the perspective of an external user who has never viewed
 
 | First-Time User Question | Public Location Found | Answer Clarity & Accuracy |
 |---|---|---|
-| *"What is Private Protection?"* | Website hero & README Section 1 | "Local-first, privacy-first cybersecurity platform protecting users from phishing links, scam messages, deceptive websites, and malicious files directly on their endpoint." |
+| *"What is Privex?"* | Website hero & README Section 1 | "Local-first, privacy-first cybersecurity platform protecting users from phishing links, scam messages, deceptive websites, and malicious files directly on their endpoint." |
 | *"How do I use it?"* | Website scanner tabs & README Section 8 | Visit `https://private-protection.pages.dev` and paste a URL or message into the scanner, or install native apps. |
 | *"Where do I download Android?"* | Website Overview & README Section 8 | Direct APK download link (`/downloads/private-protection-mobile-0.1.0.apk`) with 5-step sideloading guide. |
 | *"Where do I download Windows?"* | Website Overview & README Section 8 | GitHub release links for Setup installer and Portable executable. |
@@ -145,7 +145,7 @@ All product surfaces, manifests, and documentation authoritatively reference rel
 - `apps/extension/manifest.json`: `"version": "0.1.0"`
 - `apps/mobile/app.json`: `"version": "0.1.0"`
 - `README.md`: `"Release Candidate: v0.1.0"`
-- `Web App Footer`: `"PRIVATE PROTECTION v0.1.0"`
+- `Web App Footer`: `"PRIVEX v0.1.0"`
 - `release/SHA256SUMS.txt`: All filenames tagged with `0.1.0`
 - **Inconsistencies Detected:** **0**
 
@@ -254,4 +254,4 @@ The public documentation makes zero exaggerated compatibility claims:
 
 ### FINAL LAUNCH VERDICT: **LAUNCH GO**
 
-*Private Protection (v0.1.0) is officially verified and approved for public distribution. Any non-developer end user can discover, obtain, install, understand, and use Private Protection with 100% on-device privacy, zero cloud dependence, and complete cryptographic security.*
+*Privex (v0.1.0) is officially verified and approved for public distribution. Any non-developer end user can discover, obtain, install, understand, and use Privex with 100% on-device privacy, zero cloud dependence, and complete cryptographic security.*

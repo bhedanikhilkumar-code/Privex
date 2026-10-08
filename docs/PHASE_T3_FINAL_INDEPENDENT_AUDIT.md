@@ -11,7 +11,7 @@
 
 ### 1. EXECUTIVE SUMMARY & ZERO-TRUST ASSESSMENT
 
-Phase T3 (Universal Download & File Shield) expands Private Protection's native mobile defenses beyond application packages to universal files and inbound downloads. 
+Phase T3 (Universal Download & File Shield) expands Privex's native mobile defenses beyond application packages to universal files and inbound downloads. 
 
 This independent audit rigorously verified the implementation against the project's constitutional constraints:
 1. **Local-First / Zero-Cloud Data Minimization:** 100% of header inspection, magic detection, and hashing is executed locally on-device. No file contents, byte fragments, hashes, or filenames are transmitted off-device.

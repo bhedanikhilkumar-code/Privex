@@ -1,6 +1,6 @@
 # PHASE G — FINAL INDEPENDENT ZERO-TRUST AUDIT REPORT
 
-**Project:** Private Protection — Windows Desktop Strong Antivirus  
+**Project:** Privex — Windows Desktop Strong Antivirus  
 **Phase:** G — Ransomware Shield & Shadow Vault Rollback  
 **Audited Target Commit:** `69fddd7b6585348232cb0f9e0605fbedfcadafc7` (`HEAD` on `main`)  
 **Audit Standard:** Zero-Trust Audit against `phase.md`, `rules.md`, `PRD.md`, `Architecture.md`, `design.md`, and `AGENTS.md`  

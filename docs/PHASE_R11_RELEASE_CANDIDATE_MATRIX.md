@@ -1,7 +1,7 @@
 # PHASE R11: FINAL RELEASE CANDIDATE MATRIX & DISTRIBUTION VALIDATION REPORT
 
 > **SYSTEM STATUS: RELEASE CANDIDATE FROZEN & VERIFIED (GO)**  
-> **PROJECT:** PRIVATE PROTECTION  
+> **PROJECT:** PRIVEX  
 > **PROBLEM STATEMENT CODE:** PS-05 (On-Device Threat, Phishing, and Scam Detection)  
 > **RELEASE VERSION:** `0.1.0` (`v0.1.0`)  
 > **BUILD COMMIT:** `355643acbf0c28329b58e3c6df30df04fa0151c6`  
@@ -12,7 +12,7 @@
 
 ## 1. EXECUTIVE SUMMARY & RELEASE CANDIDATE ARTIFACT MATRIX
 
-Phase R11 is the final release candidate build, distribution packaging, and multi-surface validation milestone for **PRIVATE PROTECTION**. Across all four supported client surfaces—**Web Application**, **Android Mobile (Direct APK)**, **Desktop (Windows x64 Setup & Portable)**, and **Browser Extension (Manifest V3)**—the production release packages were independently generated, cryptographically signed with SHA-256 hashes, frozen in `release/SHA256SUMS.txt`, and validated against real environments.
+Phase R11 is the final release candidate build, distribution packaging, and multi-surface validation milestone for **PRIVEX**. Across all four supported client surfaces—**Web Application**, **Android Mobile (Direct APK)**, **Desktop (Windows x64 Setup & Portable)**, and **Browser Extension (Manifest V3)**—the production release packages were independently generated, cryptographically signed with SHA-256 hashes, frozen in `release/SHA256SUMS.txt`, and validated against real environments.
 
 ### Final Artifact Matrix (R11-N)
 
@@ -66,7 +66,7 @@ The authoritative product release version is strictly **`0.1.0`** across all man
 - **Verified Public URL:** `https://private-protection.pages.dev`
 - **Protocol:** `HTTPS` (Verified live with Cloudflare edge SSL/TLS)
 - **Live Headless Chrome CDP Verification:**
-  - **Page Load:** Title: `"PRIVATE PROTECTION — Security Dashboard"`, `#root` active
+  - **Page Load:** Title: `"PRIVEX — Security Dashboard"`, `#root` active
   - **Core Safe Scan:** `https://www.google.com/search?q=cybersecurity` $\longrightarrow$ Verdict: `SAFE` / `ALLOWED` in `100 ms`
   - **Core Phishing Scan:** `http://192.168.1.100/secure-banking/login` $\longrightarrow$ Verdict: `DANGEROUS` / `BLOCK`, high-contrast warning banner, instant explanation in `100 ms`
   - **Offline Functionality:** Network conditions emulated `offline: true` $\longrightarrow$ Scan of `http://paypal-security-alert.xyz/verify` yielded `DANGEROUS` / `BLOCK (OFFLINE OPERATIONAL)` in `100 ms`
@@ -109,7 +109,7 @@ The authoritative product release version is strictly **`0.1.0`** across all man
 - **Architecture:** Windows x64 (`AMD64`)
 - **Package Type:** Single-File C# Native Setup Installer (NSIS-compatible `/S` silent install flag) & Standalone Portable Binary
 - **Real-Machine Execution Verification:**
-  - Silent setup execution: `release/PrivateProtection-Setup-0.1.0.exe /S` installed cleanly into `%LOCALAPPDATA%\Programs\Private Protection\`.
+  - Silent setup execution: `release/PrivateProtection-Setup-0.1.0.exe /S` installed cleanly into `%LOCALAPPDATA%\Programs\Privex\`.
   - Executed installed target `PrivateProtection.exe --headless-verify`:
     - Process exited with code `0`.
     - Real-time monitor detected synthetic threat `dropped_payroll_bonus.pdf.exe` (`DECEPTIVE_DOUBLE_EXTENSION`, Score: `95`, Severity: `critical`).
@@ -128,7 +128,7 @@ The authoritative product release version is strictly **`0.1.0`** across all man
 - **Real Browser Verification (Google Chrome via CDP):**
   - Unpacked extension loaded via `Extensions.loadUnpacked` $\rightarrow$ Assigned Extension ID: `fkgcfbihlpkblpgejlojkmcjpnicjcpa`.
   - Popup UI (`chrome-extension://.../popup.html`) rendered:
-    - `"🛡️ PRIVATE PROTECTION"`, `"SAFE / ALLOWED"`, `"0 / 100 Risk Index"`, `"🔒 100% On-Device Processing • Zero Browsing History Collected"`.
+    - `"🛡️ PRIVEX"`, `"SAFE / ALLOWED"`, `"0 / 100 Risk Index"`, `"🔒 100% On-Device Processing • Zero Browsing History Collected"`.
   - Interstitial Warning Page (`chrome-extension://.../interstitial.html?tabId=1&target=...`) rendered:
     - `"🛑 DANGEROUS THREAT"`, `"Dangerous Website Blocked"`, `"MALICIOUS_PHISHING"`, `"95 / 100"`, `"🛡️ Back to Safety"`.
   - Service Worker `background.js` bundles `@private-protection/core` and `@private-protection/ml` with zero external network requests.
@@ -176,13 +176,13 @@ d0f42ab50db530b752cffd3b6e39a6f3a1e23f888e145375fe4b8cc5c67b25dc  private-protec
 ### 2. ANDROID MOBILE
 - **Distribution Method:** Direct APK download / sideload.
 - **Package File:** `release/private-protection-mobile-0.1.0.apk`
-- **Installation Path:** User downloads APK $\rightarrow$ Enables "Install unknown apps" for browser/file manager $\rightarrow$ Taps APK $\rightarrow$ Completes install $\rightarrow$ Opens Private Protection.
+- **Installation Path:** User downloads APK $\rightarrow$ Enables "Install unknown apps" for browser/file manager $\rightarrow$ Taps APK $\rightarrow$ Completes install $\rightarrow$ Opens Privex.
 
 ### 3. WINDOWS DESKTOP
 - **Distribution Method:** Direct Setup installer download or Portable EXE.
 - **Installer Package:** `release/PrivateProtection-Setup-0.1.0.exe`
 - **Portable Package:** `release/PrivateProtection-0.1.0-win-x64.exe`
-- **Installation Path:** User downloads installer $\rightarrow$ Runs setup (standard user level, zero admin elevation needed) $\rightarrow$ Installs to `%LOCALAPPDATA%\Programs\Private Protection\` $\rightarrow$ Launches from Desktop or Start Menu shortcut.
+- **Installation Path:** User downloads installer $\rightarrow$ Runs setup (standard user level, zero admin elevation needed) $\rightarrow$ Installs to `%LOCALAPPDATA%\Programs\Privex\` $\rightarrow$ Launches from Desktop or Start Menu shortcut.
 
 ### 4. BROWSER EXTENSION
 - **Distribution Method:** Direct ZIP download / Unpacked loading.
@@ -202,13 +202,13 @@ d0f42ab50db530b752cffd3b6e39a6f3a1e23f888e145375fe4b8cc5c67b25dc  private-protec
 ### Android Mobile User Guide
 1. **Obtain APK:** Download `private-protection-mobile-0.1.0.apk`.
 2. **Install:** Tap the downloaded APK in your device notifications or Downloads folder. If prompted, toggle "Allow from this source".
-3. **Launch:** Tap "Open" or launch "Private Protection" from your home screen.
+3. **Launch:** Tap "Open" or launch "Privex" from your home screen.
 4. **Scan:** Use the integrated URL/SMS scanner, share links directly to the app, or scan suspicious QR codes with the camera.
 
 ### Desktop Software User Guide
 1. **Obtain Installer:** Download `PrivateProtection-Setup-0.1.0.exe`.
 2. **Install:** Double-click the installer. Installation completes automatically in seconds without requiring administrator privileges.
-3. **Launch:** Open "Private Protection" from the Start Menu or Desktop.
+3. **Launch:** Open "Privex" from the Start Menu or Desktop.
 4. **Real-Time Shield:** The application automatically monitors your Downloads directory and isolates deceptive executable files to the secure quarantine vault.
 
 ### Browser Extension User Guide
@@ -302,4 +302,4 @@ $$\mathbf{RELEASE\ CANDIDATE\ IS\ OFFICIALLY\ FROZEN}$$
 
 $$\mathbf{FINAL\ VERDICT:}\quad \mathbf{GO}$$
 
-*Private Protection v0.1.0 Release Candidate has met all criteria across Web, Android, Desktop, and Browser Extension surfaces.*
+*Privex v0.1.0 Release Candidate has met all criteria across Web, Android, Desktop, and Browser Extension surfaces.*

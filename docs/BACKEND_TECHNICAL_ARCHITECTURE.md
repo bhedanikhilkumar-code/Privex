@@ -1,8 +1,8 @@
 # BACKEND_TECHNICAL_ARCHITECTURE.md — Stateless Cloud Edge & Privacy Relay
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION BACKEND ARCHITECTURE**  
-> This document specifies the optional, stateless cloud edge infrastructure of PRIVATE PROTECTION. It defines the strict operational boundaries, Oblivious HTTP relays, update distribution endpoints, rate limiting, and constitutional data prohibitions.
+> **CANONICAL SPECIFICATION — PRIVEX BACKEND ARCHITECTURE**  
+> This document specifies the optional, stateless cloud edge infrastructure of PRIVEX. It defines the strict operational boundaries, Oblivious HTTP relays, update distribution endpoints, rate limiting, and constitutional data prohibitions.
 
 ---
 

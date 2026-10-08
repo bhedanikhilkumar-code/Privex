@@ -1,7 +1,7 @@
 # DESKTOP_TECHNICAL_ARCHITECTURE.md — Tauri 2.x Desktop Security Client & Quarantine Vault
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION DESKTOP CLIENT**  
+> **CANONICAL SPECIFICATION — PRIVEX DESKTOP CLIENT**  
 > This document specifies the desktop security client architecture across Windows and macOS, detailing the Tauri 2.x framework, memory-safe Rust backend daemon, filesystem download monitoring, encrypted quarantine vault, and explicit user-mode boundary constraints.
 
 ---
@@ -101,7 +101,7 @@ When a file is flagged as malicious, it is immediately neutralized:
 
 ## 5. PRIVILEGE BOUNDARY & ARCHITECTURAL HONESTY
 
-> **CONSTITUTIONAL DIRECTIVE**: PRIVATE PROTECTION Desktop Software will **NEVER** claim to be a kernel-level Antivirus or Endpoint Detection & Response (EDR) system.
+> **CONSTITUTIONAL DIRECTIVE**: PRIVEX Desktop Software will **NEVER** claim to be a kernel-level Antivirus or Endpoint Detection & Response (EDR) system.
 
 1. **User-Space Only**: The software executes strictly with standard user privileges. It does not install kernel-mode drivers (`.sys` on Windows or Kernel Extensions on macOS).
 2. **Scope of Protection**: Protection is focused on **ingress points** (browser downloads, user-initiated file scans, drag-and-drop analysis) and **communication vectors** (URLs, messages, clipboard text). It does not intercept kernel-level process injection or rootkit memory modifications.

@@ -514,7 +514,7 @@ public class RealtimeDownloadProtectionService {
             // Truthful Android platform capability disclosure
             status.put("isPreOpenInterceptionSupported", false);
             status.put("platformLimitationNotice",
-                    "Private Protection scans supported downloads as soon as Android makes the file available for inspection. System-wide pre-open interception is not supported by Android for third-party applications.");
+                    "Privex scans supported downloads as soon as Android makes the file available for inspection. System-wide pre-open interception is not supported by Android for third-party applications.");
         } catch (JSONException ignored) {}
         return status;
     }

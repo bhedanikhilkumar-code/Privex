@@ -1,16 +1,16 @@
 # AGENT.md — Canonical Project Constitution & Master Source of Truth
 
-> **PROJECT:** PRIVATE PROTECTION  
+> **PROJECT:** PRIVEX  
 > **PROBLEM STATEMENT:** PS-05 — On-Device Threat, Phishing, and Scam Detection  
 > **CANONICAL INSTRUCTION DOCUMENT FOR ALL AI AGENTS, SUBAGENTS & HUMAN ENGINEERS**  
 > **STATUS:** PRE-IMPLEMENTATION DEEP AUDIT & GOVERNANCE PHASE COMPLETE  
-> Every agent, subagent, and human engineer must read and comply with this document before planning, modifying, or executing tasks within the **PRIVATE PROTECTION** project.
+> Every agent, subagent, and human engineer must read and comply with this document before planning, modifying, or executing tasks within the **PRIVEX** project.
 
 ---
 
 ## SECTION A — PROJECT IDENTITY
 
-- **Project Name:** PRIVATE PROTECTION
+- **Project Name:** PRIVEX
 - **Problem Statement:** PS-05 — On-device threat, phishing and scam detection.
 - **Core Mission:** Develop an on-device AI security assistant that can detect phishing links, scam messages, malicious content, and suspicious communications in real time without sending sensitive user data to the cloud.
 - **Value Proposition:** Instant warnings and clear, jargon-free explanations to help users recognize and avoid potential cyber threats while maintaining privacy, low latency, and offline functionality.
@@ -35,7 +35,7 @@
 
 ## SECTION C — PRODUCT SURFACES
 
-PRIVATE PROTECTION comprises 6 distinct surfaces, each with strictly defined boundaries:
+PRIVEX comprises 6 distinct surfaces, each with strictly defined boundaries:
 
 1. **Website (`apps/web`):** Client-side single-page application (React 18 + Vite 6 + Web Worker) providing zero-install URL/text scanners, security dashboard, educational threat breakdowns, and PWA offline capability.
 2. **Android Application (`apps/mobile`):** Mobile security client for Android 8.0+ (API 26–34) supporting shared text/SMS scan intents, deep-link URL validation, live camera QR scanning, local file analysis, and device security posture auditing.
@@ -357,9 +357,9 @@ A Release Candidate is approved for production distribution **ONLY** when:
 
 ---
 
-## 1. WHAT PRIVATE PROTECTION WAS DESIGNED TO ACHIEVE
+## 1. WHAT PRIVEX WAS DESIGNED TO ACHIEVE
 
-Private Protection is designed to provide on-device cyber threat, phishing link, scam message, and malicious content detection with instant warnings and plain-language explanations without transmitting sensitive user data to the cloud.
+Privex is designed to provide on-device cyber threat, phishing link, scam message, and malicious content detection with instant warnings and plain-language explanations without transmitting sensitive user data to the cloud.
 
 ### The 7 Core Architectural Pillars Across 4 Client Surfaces
 1. **LOCAL-FIRST:** Core security decision authority executes exclusively on the user endpoint.
@@ -517,7 +517,7 @@ All 18 foundational capabilities are fully completed, verified against actual re
   - Host OS: Microsoft Windows 11 Home Single Language (`10.0.26300`, Build `26300`, `win32-x64`)
   - Hardware: 13th Gen Intel Core i5-13420H, 15.6 GB RAM (`BHEDA_NIKHIL`)
 - **Lifecycle & Functional Validation:**
-  - Installs silently (`/S`) or interactively to `%LOCALAPPDATA%\Programs\Private Protection\` without admin rights.
+  - Installs silently (`/S`) or interactively to `%LOCALAPPDATA%\Programs\Privex\` without admin rights.
   - Grants Chromium AppContainer sandbox ACL permissions (`*S-1-15-2-1:(OI)(CI)(RX)`).
   - Registers Start Menu shortcut, Desktop shortcut, and Add/Remove Programs registry key `HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\PrivateProtection`.
   - Zero-Dependency Execution: Verified standalone execution (`PrivateProtection.exe --headless-verify`) in sanitized minimal `PATH` (`C:\Windows\system32;C:\Windows`) without external Node.js, Python, or repo dependencies.

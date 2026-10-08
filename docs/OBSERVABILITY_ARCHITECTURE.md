@@ -1,8 +1,8 @@
 # OBSERVABILITY_ARCHITECTURE.md — Privacy-Preserving Diagnostics & Telemetry
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION OBSERVABILITY**  
-> This document specifies the privacy-preserving observability architecture of PRIVATE PROTECTION, detailing local-only diagnostic logging, crash sanitization, Differential Privacy telemetry, and Oblivious HTTP relays.
+> **CANONICAL SPECIFICATION — PRIVEX OBSERVABILITY**  
+> This document specifies the privacy-preserving observability architecture of PRIVEX, detailing local-only diagnostic logging, crash sanitization, Differential Privacy telemetry, and Oblivious HTTP relays.
 
 ---
 

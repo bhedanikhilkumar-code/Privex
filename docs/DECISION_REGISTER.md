@@ -1,4 +1,4 @@
-# Decision Register: PRIVATE PROTECTION
+# Decision Register: PRIVEX
 
 This register records all major architectural decisions made during Phase 0 (Architecture & Specification).
 

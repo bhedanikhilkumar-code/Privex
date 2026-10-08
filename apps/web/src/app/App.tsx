@@ -392,7 +392,7 @@ export const App: React.FC = () => {
               </div>
             </div>
 
-            {/* How Private Protection Works (4-Step Pipeline from Landing Page & How It Works designs) */}
+            {/* How Privex Works (4-Step Pipeline from Landing Page & How It Works designs) */}
             <div style={{ marginBottom: '3rem' }}>
               <div
                 style={{
@@ -405,7 +405,7 @@ export const App: React.FC = () => {
                   marginBottom: '1rem'
                 }}
               >
-                HOW PRIVATE PROTECTION WORKS
+                HOW PRIVEX WORKS
               </div>
 
               <div

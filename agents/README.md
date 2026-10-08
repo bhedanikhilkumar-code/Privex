@@ -1,8 +1,8 @@
-# Autonomous Agent Organization Directory: PRIVATE PROTECTION
+# Autonomous Agent Organization Directory: PRIVEX
 
 ## 1. Directory Mission & Purpose
 
-This `agents/` directory establishes the permanent, hierarchical autonomous agent orchestration structure for the PRIVATE PROTECTION cybersecurity project.
+This `agents/` directory establishes the permanent, hierarchical autonomous agent orchestration structure for the PRIVEX cybersecurity project.
 
 It defines:
 - The 20 specialized agent roles required across discovery, architecture, core engine engineering, platform applications, security auditing, and release engineering.

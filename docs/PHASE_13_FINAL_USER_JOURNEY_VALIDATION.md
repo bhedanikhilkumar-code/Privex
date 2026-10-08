@@ -1,6 +1,6 @@
 # PHASE 13 — FINAL FULL PRODUCT USER-JOURNEY VALIDATION REPORT
 ## Comprehensive End-to-End Audit Across All 6 Product Surfaces
-### Master Prompt #30 — PRIVATE PROTECTION Architecture & Security Governance
+### Master Prompt #30 — PRIVEX Architecture & Security Governance
 
 > **DOCUMENT TYPE:** Canonical Phase 13 Final Audit Artifact  
 > **EVALUATION DATE:** 2026-10-02  
@@ -17,9 +17,9 @@
 
 ## 1. EXECUTIVE SUMMARY & VALIDATION MANDATE
 
-Under Master Prompt #30, the PRIVATE PROTECTION platform underwent its final, zero-trust, end-to-end user-journey validation. Following the remediation of all Phase 12 findings (`GAP-22` Core Fail-Closed Math, `GAP-23` Extension IPC Origin Validation, `GAP-18` Mobile SAF File Scanner, `GAP-24` Desktop Quarantine Path Defenses, `GAP-19` Mobile Posture Baseline, and `SEC-05` Extension CSP), this phase evaluates the central product question:
+Under Master Prompt #30, the PRIVEX platform underwent its final, zero-trust, end-to-end user-journey validation. Following the remediation of all Phase 12 findings (`GAP-22` Core Fail-Closed Math, `GAP-23` Extension IPC Origin Validation, `GAP-18` Mobile SAF File Scanner, `GAP-24` Desktop Quarantine Path Defenses, `GAP-19` Mobile Posture Baseline, and `SEC-05` Extension CSP), this phase evaluates the central product question:
 
-> **"CAN A REAL USER ACTUALLY USE PRIVATE PROTECTION SUCCESSFULLY, SAFELY, PRIVATELY, AND END-TO-END?"**
+> **"CAN A REAL USER ACTUALLY USE PRIVEX SUCCESSFULLY, SAFELY, PRIVATELY, AND END-TO-END?"**
 
 The audit evaluated all six product surfaces:
 1. **Website Dashboard (`apps/web`)**
@@ -252,7 +252,7 @@ Every required capability works end-to-end, all 481 monorepo tests pass, product
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                    PRIVATE PROTECTION — PHASE 13 VALIDATION CERTIFICATE                │
+│                    PRIVEX — PHASE 13 VALIDATION CERTIFICATE                │
 │                                                                                        │
 │   • Problem Statement: PS-05 (On-Device Threat, Phishing and Scam Detection)          │
 │   • Core Capabilities Validated: 33 / 33 PASS (100.0%)                                 │

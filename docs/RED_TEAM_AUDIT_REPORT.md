@@ -1,7 +1,7 @@
 # RED_TEAM_AUDIT_REPORT.md — Multi-Disciplinary Red-Team & Security Audit
 
 > **SYSTEM STATUS: PRE-CODING AUDIT PHASE (MASTER PROMPT #5)**  
-> **CANONICAL RED-TEAM REPORT — PRIVATE PROTECTION SYSTEM AUDIT**  
+> **CANONICAL RED-TEAM REPORT — PRIVEX SYSTEM AUDIT**  
 > Conducted by an independent 12-role technical audit committee. This document stress-tests every platform assumption, privacy claim, cryptographic defense, AI boundary, and failure mode prior to implementation.
 
 ---
@@ -167,4 +167,4 @@ We verified platform capabilities against OS sandboxes:
 
 ## 6. RED-TEAM AUDIT CONCLUSION
 
-The PRIVATE PROTECTION architecture exhibits exceptional defensive rigor. The separation between deterministic detection and AI narrative synthesis completely neutralizes indirect prompt injection attacks. The local-first data lifecycle mathematically guarantees zero user payload exfiltration. The system is structurally, mathematically, and operationally sound.
+The PRIVEX architecture exhibits exceptional defensive rigor. The separation between deterministic detection and AI narrative synthesis completely neutralizes indirect prompt injection attacks. The local-first data lifecycle mathematically guarantees zero user payload exfiltration. The system is structurally, mathematically, and operationally sound.

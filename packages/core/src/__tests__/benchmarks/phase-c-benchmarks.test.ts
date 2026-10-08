@@ -105,7 +105,7 @@ describe('Phase C — File Protection & Static Malware Engine Performance Benchm
 
   it('SLA 4: DetectionPipeline FILE scan latency is under 5.0 ms p95', async () => {
     const pipeline = new DetectionPipeline();
-    const cleanDoc = new TextEncoder().encode('Private Protection Secure Endpoint Document Verification');
+    const cleanDoc = new TextEncoder().encode('Privex Secure Endpoint Document Verification');
 
     // Warm-up
     for (let i = 0; i < 50; i++) {

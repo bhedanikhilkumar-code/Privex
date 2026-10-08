@@ -1,7 +1,7 @@
 # BUILD_ARCHITECTURE.md — Multi-Platform Build System, Packaging & Release Security
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION BUILD ARCHITECTURE**  
+> **CANONICAL SPECIFICATION — PRIVEX BUILD ARCHITECTURE**  
 > This document specifies the multi-platform build toolchains, cross-compilation pipelines, reproducible builds, Software Bill of Materials (SBOM), code signing, and release channels across all deployment targets.
 
 ---

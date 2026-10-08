@@ -100,7 +100,7 @@ function packageWindowsRelease() {
   const pkgJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf8'));
   const appPackageJson = {
     name: 'private-protection-desktop',
-    productName: 'Private Protection Desktop Security',
+    productName: 'Privex Desktop Security',
     version: pkgJson.version || '0.1.1',
     private: true,
     main: 'dist/main/electron-main.cjs'
@@ -115,7 +115,7 @@ function packageWindowsRelease() {
   const exeSha256 = sha256File(targetExe);
 
   const manifest = {
-    productName: 'Private Protection Desktop Security',
+    productName: 'Privex Desktop Security',
     version: pkgJson.version || '0.1.1',
     platform: 'win32',
     arch: 'x64',

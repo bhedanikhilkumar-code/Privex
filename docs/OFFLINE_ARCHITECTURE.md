@@ -1,8 +1,8 @@
 # OFFLINE_ARCHITECTURE.md — Offline-First Architecture & Degradation Strategy
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION OFFLINE CAPABILITY**  
-> This document specifies the offline operational architecture of PRIVATE PROTECTION, detailing local component parity, data staleness handling, failure degradation modes, and network reconnection synchronization.
+> **CANONICAL SPECIFICATION — PRIVEX OFFLINE CAPABILITY**  
+> This document specifies the offline operational architecture of PRIVEX, detailing local component parity, data staleness handling, failure degradation modes, and network reconnection synchronization.
 
 ---
 

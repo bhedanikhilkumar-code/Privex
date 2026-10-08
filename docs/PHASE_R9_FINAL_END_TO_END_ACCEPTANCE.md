@@ -11,7 +11,7 @@
 
 ## 1. Objective
 
-Perform final, comprehensive end-to-end user acceptance validation of the **PRIVATE PROTECTION** product exactly as a real user experiences it across all four target surfaces (**Web**, **Android**, **Desktop**, and **Browser Extension**).
+Perform final, comprehensive end-to-end user acceptance validation of the **PRIVEX** product exactly as a real user experiences it across all four target surfaces (**Web**, **Android**, **Desktop**, and **Browser Extension**).
 
 This phase validates the actual distributed artifacts, real browser interactions, Android runtime execution, Windows desktop binary lifecycle, cross-surface security semantics, error recovery paths, air-gapped offline parity, and privacy boundaries with empirical proof.
 
@@ -268,6 +268,6 @@ In alignment with our engineering constitution:
 
 ## 19. Final Acceptance Verdict
 
-The complete **PRIVATE PROTECTION** product has been exercised end-to-end as a real user across **Web**, **Android**, **Desktop**, and **Browser Extension**. All 11 core capabilities of Problem Statement **PS-05** are functional, verified, and passing without cloud dependencies or false-success compromises.
+The complete **PRIVEX** product has been exercised end-to-end as a real user across **Web**, **Android**, **Desktop**, and **Browser Extension**. All 11 core capabilities of Problem Statement **PS-05** are functional, verified, and passing without cloud dependencies or false-success compromises.
 
 **Phase R9 Evaluation Verdict:** **R9 COMPLETE (PASS)**

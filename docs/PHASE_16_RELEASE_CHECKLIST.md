@@ -86,4 +86,4 @@
 ## CHECKLIST SIGN-OFF
 
 **Phase 16 Release Hardening Status:** **COMPLETE & PASSED**  
-The Private Protection Release Candidate is technically ready for Master Prompt #35 (Release Candidate Clean-Machine + Final Regression).
+The Privex Release Candidate is technically ready for Master Prompt #35 (Release Candidate Clean-Machine + Final Regression).

@@ -9,7 +9,7 @@
 
 ## 1. Executive Privacy Summary
 
-The core privacy doctrine of PRIVATE PROTECTION (**Zero Tier 1 Data Transmitted, 100% On-Device Processing**) was empirically audited across all client runtimes (Web, Extension, Desktop, Mobile, Core, ML).
+The core privacy doctrine of PRIVEX (**Zero Tier 1 Data Transmitted, 100% On-Device Processing**) was empirically audited across all client runtimes (Web, Extension, Desktop, Mobile, Core, ML).
 
 **Audit Verdict: VERIFIED COMPLIANT WITH ZERO PRIVACY LEAKS.**
 During URL analysis, SMS parsing, file header inspection, and AI explanation generation, exactly **zero** outbound HTTP/HTTPS requests, WebSocket connections, DNS requests, or tracking beacons were initiated.

@@ -1,5 +1,5 @@
 # PHASE L: STARTUP & PERSISTENCE PROTECTION — COMPLETION REPORT
-**PRIVATE PROTECTION WINDOWS DESKTOP ANTIVIRUS**
+**PRIVEX WINDOWS DESKTOP ANTIVIRUS**
 
 **Status:** COMPLETE  
 **Architecture:** `docs/PHASE_L_ARCHITECTURE.md`  
@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary
 
-Phase L implements the **Windows Startup & Persistence Protection** subsystem for Private Protection Windows Desktop Antivirus. It provides comprehensive, real-time, and on-demand discovery, analysis, monitoring, and safe remediation of Windows persistence mechanisms across Registry Run keys and Startup folder directories without executing untrusted payloads, without cloud dependency, and with strict fail-closed safety.
+Phase L implements the **Windows Startup & Persistence Protection** subsystem for Privex Windows Desktop Antivirus. It provides comprehensive, real-time, and on-demand discovery, analysis, monitoring, and safe remediation of Windows persistence mechanisms across Registry Run keys and Startup folder directories without executing untrusted payloads, without cloud dependency, and with strict fail-closed safety.
 
 ---
 

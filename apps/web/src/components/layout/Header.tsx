@@ -77,7 +77,7 @@ export const Header: React.FC = () => {
               color: '#111111'
             }}
           >
-            PRIVATE PROTECTION
+            PRIVEX
           </h1>
           <p
             style={{

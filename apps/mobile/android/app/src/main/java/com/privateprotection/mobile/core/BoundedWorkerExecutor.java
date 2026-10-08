@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Bounded Native Worker Executor for Private Protection Android (Phase T1).
+ * Bounded Native Worker Executor for Privex Android (Phase T1).
  *
  * Guarantees:
  * 1. Bounded thread count (prevents thread exhaustion & battery drain).

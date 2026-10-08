@@ -4,7 +4,7 @@
 **Security Auditor & Independent Red Teamer**
 
 ## 2. Mission
-Conduct adversarial red-team evaluations, fuzz testing, prompt injection stress-testing, and rigorous independent audits of the PRIVATE PROTECTION codebase and architecture. Challenge all assumptions and verify that security controls cannot be bypassed.
+Conduct adversarial red-team evaluations, fuzz testing, prompt injection stress-testing, and rigorous independent audits of the PRIVEX codebase and architecture. Challenge all assumptions and verify that security controls cannot be bypassed.
 
 ## 3. Responsibilities
 - Execute adversarial fuzzing against all input parsers (URLs, text messages, Punycode, QR frames, file headers).

@@ -1,6 +1,6 @@
-# Data Architecture: Private Protection
+# Data Architecture: Privex
 
-The PRIVATE PROTECTION system is designed with a privacy-first, offline-first architecture. This document defines the data models used across local clients, optional backend services, and the formats for threat intelligence and detection results.
+The PRIVEX system is designed with a privacy-first, offline-first architecture. This document defines the data models used across local clients, optional backend services, and the formats for threat intelligence and detection results.
 
 ## 1. Data Classification Principles
 

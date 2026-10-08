@@ -11,7 +11,7 @@
 
 ## 1. Executive Summary & Verification Verdict
 
-An exhaustive, zero-trust independent security, architecture, and mathematical audit was conducted on Phase H of the Private Protection Windows Desktop Antivirus project. Every requirement specified in `phase.md`, `PRD.md`, `Architecture.md`, and `rules.md` (specifically **RULE-15**) was evaluated directly against the production source code and verified with empirical benchmarks and adversarial regression suites.
+An exhaustive, zero-trust independent security, architecture, and mathematical audit was conducted on Phase H of the Privex Windows Desktop Antivirus project. Every requirement specified in `phase.md`, `PRD.md`, `Architecture.md`, and `rules.md` (specifically **RULE-15**) was evaluated directly against the production source code and verified with empirical benchmarks and adversarial regression suites.
 
 - **Total Phase H Tests:** **54 tests across 6 suites (100% PASS)**
 - **Total Desktop Tests:** **390 tests (389 passed, 1 skipped real OS integration test when non-elevated)**
@@ -64,7 +64,7 @@ The rate limiter enforces a mathematical Token Bucket algorithm:
 - **Threshold:** $\ge 3\text{ events}$ in window
 - **Behavior:**
   - Events 1 & 2: Individual toasts dispatched (consuming tokens).
-  - Event 3: Coalesced summary toast dispatched (*"Multiple Threats Blocked: Private Protection blocked 3 threats in the last 5 seconds"*).
+  - Event 3: Coalesced summary toast dispatched (*"Multiple Threats Blocked: Privex blocked 3 threats in the last 5 seconds"*).
   - Events 4+: Suppressed with reason `'RATE_LIMITED'` (or updated if interval $\ge 4\text{ s}$ elapsed).
   - **Zero Loss Invariant:** Every event is recorded in `DesktopNotification` inbox array regardless of toast suppression.
 
@@ -150,7 +150,7 @@ The rate limiter enforces a mathematical Token Bucket algorithm:
 
 ## 6. Official Independent Auditor Declaration
 
-Phase H has met and exceeded every constitutional requirement of Private Protection. The implementation is robust, mathematically correct, highly performant, defensively sanitized against adversarial abuse, and completely isolated against failure.
+Phase H has met and exceeded every constitutional requirement of Privex. The implementation is robust, mathematically correct, highly performant, defensively sanitized against adversarial abuse, and completely isolated against failure.
 
 **OFFICIAL VERDICT:**  
 # **GO — PHASE H APPROVED**

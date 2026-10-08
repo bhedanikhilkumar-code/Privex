@@ -11,7 +11,7 @@
 
 ## 1. Executive Summary
 
-Phase R has successfully delivered the complete 20-screen Antivirus Command Center for the Private Protection Windows Desktop application. 
+Phase R has successfully delivered the complete 20-screen Antivirus Command Center for the Privex Windows Desktop application. 
 
 Every requirement from `phase.md` and `design.md` has been implemented with production-grade React components, strict TypeScript typing, WCAG AA compliance, and complete wiring to backend IPC services. There are zero placeholder stubs, zero simulated success messages, zero fake buttons, and zero compromises to the canonical detection authority.
 
@@ -58,7 +58,7 @@ Every requirement from `phase.md` and `design.md` has been implemented with prod
 All 3 Phase R test suites executed cleanly with 100% pass rate:
 
 ```
- RUN  v5.0.3 C:/Users/bheda/Music/Desktop/Private Protection/apps/desktop
+ RUN  v5.0.3 C:/Users/bheda/Music/Desktop/Privex/apps/desktop
 
  ✓ src/__tests__/security/phase-r-security-ui.test.ts (11 tests) 8ms
  ✓ src/__tests__/ui/dashboard.test.tsx (5 tests) 493ms

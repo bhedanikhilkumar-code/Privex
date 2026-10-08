@@ -8,7 +8,7 @@ namespace PrivateProtection.Uninstaller
 {
     static class Program
     {
-        private const string AppName = "Private Protection Desktop Security";
+        private const string AppName = "Privex Desktop Security";
 
         [STAThread]
         static int Main(string[] args)
@@ -42,7 +42,7 @@ namespace PrivateProtection.Uninstaller
                 }
 
                 string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                string installDir = Path.Combine(localAppData, "Programs", "Private Protection");
+                string installDir = Path.Combine(localAppData, "Programs", "Privex");
 
                 // 1. Terminate any running instances of PrivateProtection
                 Process[] existingProcesses = Process.GetProcessesByName("PrivateProtection");
@@ -64,7 +64,7 @@ namespace PrivateProtection.Uninstaller
                 // 3. Remove Start Menu Shortcut
                 try
                 {
-                    string startMenuDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "Private Protection");
+                    string startMenuDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "Privex");
                     if (Directory.Exists(startMenuDir))
                     {
                         Directory.Delete(startMenuDir, true);
@@ -79,7 +79,7 @@ namespace PrivateProtection.Uninstaller
                 try
                 {
                     string desktopDir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-                    string desktopLink = Path.Combine(desktopDir, "Private Protection.lnk");
+                    string desktopLink = Path.Combine(desktopDir, "Privex.lnk");
                     if (File.Exists(desktopLink))
                     {
                         File.Delete(desktopLink);

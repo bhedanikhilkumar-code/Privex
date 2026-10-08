@@ -1,8 +1,8 @@
-# rules.md — Permanent Engineering & Security Rulebook for Private Protection Windows Antivirus
+# rules.md — Permanent Engineering & Security Rulebook for Privex Windows Antivirus
 
 > **DOCUMENT STATUS:** CANONICAL ENGINEERING & SECURITY GOVERNANCE RULEBOOK  
-> **APPLICABILITY:** All Engineers, Autonomous AI Agents, Subagents, CI/CD Pipelines, and Code Reviewers working on Private Protection (`apps/desktop`, `packages/core`, `packages/ml`, and native Windows service helpers).  
-> **SUPREMACY:** This rulebook complements and enforces `AGENTS.md` specifically for the transformation of Private Protection Windows Desktop into a real, local-first, offline-first Windows Antivirus & Endpoint Protection product. Violation of any rule in this document blocks phase completion and PR merge.
+> **APPLICABILITY:** All Engineers, Autonomous AI Agents, Subagents, CI/CD Pipelines, and Code Reviewers working on Privex (`apps/desktop`, `packages/core`, `packages/ml`, and native Windows service helpers).  
+> **SUPREMACY:** This rulebook complements and enforces `AGENTS.md` specifically for the transformation of Privex Windows Desktop into a real, local-first, offline-first Windows Antivirus & Endpoint Protection product. Violation of any rule in this document blocks phase completion and PR merge.
 
 ---
 
@@ -145,7 +145,7 @@
 ### RULE-15: Notification Rate Limit Rule
 - **Mandate:** Malware outbreaks or archive extractions containing hundreds of infected files **MUST NEVER** flood the Windows Notification Center or freeze the UI with modal storms:
   1. Enforce a strict token-bucket rate limit of **at most 3 native OS toast notifications per 10-second window**.
-  2. When $\ge 3$ threats are detected within a 5-second burst, automatically coalesce subsequent alerts into a single **Batch Threat Summary Notification** (e.g., *"Private Protection blocked 47 threats in Downloads. Click to review summary"*).
+  2. When $\ge 3$ threats are detected within a 5-second burst, automatically coalesce subsequent alerts into a single **Batch Threat Summary Notification** (e.g., *"Privex blocked 47 threats in Downloads. Click to review summary"*).
   3. Suppress non-critical (`LOW` / `MEDIUM`) background notifications when the user is in a full-screen application, while still executing automatic `CRITICAL` / `RANSOMWARE_BEHAVIOR` containment silently and logging the event.
 - **Verification:** `apps/desktop/src/__tests__/services/notification-rate-limiter.test.ts`.
 
@@ -244,7 +244,7 @@
 # MOBILE SECURITY EXTENSION — ANDROID PROTECTION CONSTITUTION
 
 > Scope: These rules extend the existing Windows security constitution to the Android/mobile product surface. They do not weaken any existing desktop rule.
-> Architectural honesty: Private Protection MUST reproduce the security goals of a modern mobile security product, but MUST NOT claim privileged Android capabilities that a normal third-party application cannot actually obtain.
+> Architectural honesty: Privex MUST reproduce the security goals of a modern mobile security product, but MUST NOT claim privileged Android capabilities that a normal third-party application cannot actually obtain.
 
 ## Rule Index Extension
 
@@ -268,9 +268,9 @@
 All core Android malware, APK, downloaded-file, URL, phishing, archive, document, image metadata, risk-scoring, and password-generation decisions MUST execute locally by default. Network access is optional and explicitly governed. No raw files, document contents, screenshots, credentials, or URL query secrets may be uploaded for scanning.
 
 ## RULE-31: Install-Time App Safety Rule
-Private Protection MUST observe Android package installation lifecycle events available to a normal app and perform the strongest technically permitted safety check:
-1. When an APK is available before installation, scan it before the user launches/installs it whenever the OS/install flow exposes the APK to Private Protection.
-2. For installations that Private Protection cannot technically interpose before package commit, perform an immediate post-install package scan and warn/block use according to the supported Android control surface.
+Privex MUST observe Android package installation lifecycle events available to a normal app and perform the strongest technically permitted safety check:
+1. When an APK is available before installation, scan it before the user launches/installs it whenever the OS/install flow exposes the APK to Privex.
+2. For installations that Privex cannot technically interpose before package commit, perform an immediate post-install package scan and warn/block use according to the supported Android control surface.
 3. Analyze package name, signing certificate, version, requested permissions, exported components, native libraries, DEX structure, manifest anomalies, embedded URLs, suspicious strings, dangerous capabilities, known hashes, and local heuristic indicators.
 4. Never claim to be the Android system installer, Google Play Protect, or a privileged device-owner service unless the product is actually provisioned with that role.
 5. If the OS prevents pre-install interception, surface a clear limitation instead of pretending the app was checked before installation.
@@ -282,7 +282,7 @@ Every observable downloaded or newly created user file MUST be eligible for auto
 A user-triggered Full Device Scan MUST traverse every storage location that Android legally exposes to the application, including shared storage and user-selected SAF trees. The scan MUST show scope, progress, files examined, threats found, skipped/protected locations, and a truthful completion status. The scanner MUST never report "100% scanned" when Android denied access to a location.
 
 ## RULE-34: Pre-Threat Warning Rule
-When a URL, download, APK, or file presents a high-confidence threat before execution/opening, Private Protection MUST warn the user as early as technically possible. URL protection MUST use local reputation, normalized URL analysis, IDN/punycode/homograph detection, suspicious redirects, credential-form indicators, deceptive domains, dangerous schemes, and signed local threat intelligence. HTTPS content MUST NOT be decrypted or MITM'd merely to claim web protection; use privacy-preserving metadata and browser integration where technically available.
+When a URL, download, APK, or file presents a high-confidence threat before execution/opening, Privex MUST warn the user as early as technically possible. URL protection MUST use local reputation, normalized URL analysis, IDN/punycode/homograph detection, suspicious redirects, credential-form indicators, deceptive domains, dangerous schemes, and signed local threat intelligence. HTTPS content MUST NOT be decrypted or MITM'd merely to claim web protection; use privacy-preserving metadata and browser integration where technically available.
 
 ## RULE-35: Password Generator Rule
 The Password Generator MUST use a platform CSPRNG (Android SecureRandom / OS secure random source), never Math.random or predictable seeds. It MUST support configurable length and character sets, generate high-entropy passwords locally, avoid accidental clipboard persistence where possible, provide copy-with-timeout behavior, and never transmit generated passwords. "Stronger than Google Password Manager" MUST NOT be claimed as an absolute fact; the product may offer configurable higher entropy and length and show the measured entropy.
@@ -306,4 +306,4 @@ Mobile threat intelligence MUST use the same signed-update doctrine as the deskt
 The Android release gate MUST include at least one supported physical Android phone. Security-critical claims MUST be verified on-device for installation events, downloads, storage access, notifications, battery behavior, web protection, APK scanning, full scan, remediation, and password generation. A green CI build alone is not release evidence.
 
 ## RULE-42: Safe Remediation & User Control Rule
-Private Protection MUST prefer reversible actions. Quarantine must be isolated and recoverable; uninstall/block/open actions must be explicit; automatic deletion is forbidden for uncertain findings. Every destructive or security-lowering action requires clear explanation and confirmation unless it is a narrowly defined emergency containment action already authorized by the user.
+Privex MUST prefer reversible actions. Quarantine must be isolated and recoverable; uninstall/block/open actions must be explicit; automatic deletion is forbidden for uncertain findings. Every destructive or security-lowering action requires clear explanation and confirmation unless it is a narrowly defined emergency containment action already authorized by the user.

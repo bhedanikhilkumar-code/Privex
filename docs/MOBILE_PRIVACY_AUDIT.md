@@ -9,7 +9,7 @@
 
 ## 1. Foundational Privacy Mandate
 
-The foundational doctrine of PRIVATE PROTECTION is:
+The foundational doctrine of PRIVEX is:
 > **Zero User Data Exfiltration:** Visited URLs, message texts, selected files, contacts, and keystrokes are mathematically kept on-device. No telemetry containing raw user payloads is ever transmitted off-device.
 
 ---

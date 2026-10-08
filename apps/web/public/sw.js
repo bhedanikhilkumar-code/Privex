@@ -1,5 +1,5 @@
 /**
- * PRIVATE PROTECTION — PROGRESSIVE WEB APP SERVICE WORKER
+ * PRIVEX — PROGRESSIVE WEB APP SERVICE WORKER
  *
  * Enforces strict offline cache-first strategy for application shell assets.
  * CONSTITUTIONAL PRIVACY MANDATE:

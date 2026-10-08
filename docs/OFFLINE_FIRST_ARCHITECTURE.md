@@ -1,7 +1,7 @@
 # Offline-First Architecture
 
 ## Overview
-PRIVATE PROTECTION is fundamentally designed to operate with zero internet connectivity. All critical threat detection occurs locally on the device to guarantee absolute privacy and zero-latency analysis. 
+PRIVEX is fundamentally designed to operate with zero internet connectivity. All critical threat detection occurs locally on the device to guarantee absolute privacy and zero-latency analysis. 
 
 ## ONLINE vs OFFLINE Capabilities
 

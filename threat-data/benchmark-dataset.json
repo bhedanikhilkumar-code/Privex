@@ -1,5 +1,5 @@
 {
-  "description": "PRIVATE PROTECTION Phase 1 Benchmark Dataset for Accuracy, FPR, and Latency Evaluation",
+  "description": "PRIVEX Phase 1 Benchmark Dataset for Accuracy, FPR, and Latency Evaluation",
   "version": "1.0.0",
   "samples": [
     { "input": "https://www.google.com/search?q=cybersecurity", "type": "URL", "label": "BENIGN" },

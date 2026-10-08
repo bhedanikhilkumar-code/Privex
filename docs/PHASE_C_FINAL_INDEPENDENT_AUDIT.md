@@ -1,5 +1,5 @@
 # PHASE C FINAL INDEPENDENT AUDIT REPORT
-**Project:** Private Protection  
+**Project:** Privex  
 **Phase:** C — File Protection & 10-Layer Static Malware Engine  
 **Audit Type:** Independent Phase-Gate Security, Architecture, Runtime & Performance Audit  
 **Auditor:** Independent Antivirus Security & Architecture Audit Committee  
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-This document presents the independent security, architectural, and performance phase-gate audit of **Phase C: File Protection & 10-Layer Static Malware Engine** for PRIVATE PROTECTION.
+This document presents the independent security, architectural, and performance phase-gate audit of **Phase C: File Protection & 10-Layer Static Malware Engine** for PRIVEX.
 
 An initial read-only adversarial audit identified three critical architectural and parser safety defects:
 1. **RiskScorer Bypass:** `DetectionPipeline.scan(FILE)` and `CoreFileAnalyzer` previously computed their own local risk scores, verdicts, and engine verdicts rather than delegating evidence to Core's canonical `RiskScorer.calculateScore()`, violating Core Constitutional Invariant 1 (single verdict authority).

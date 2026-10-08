@@ -6,7 +6,7 @@ When users download files from the web, modern web browsers attach an NTFS Alter
 
 Attackers leverage diverse evasion techniques—such as bundling malicious binaries in ISO/VHD/ZIP archives (MOTW bypass), registering typosquatted or IDN punycode domains, or hosting payloads on raw IP C2 nodes.
 
-**Phase J** integrates production-grade, local-first Mark-of-the-Web (MOTW) extraction and download origin security into Private Protection's Windows Antivirus engine.
+**Phase J** integrates production-grade, local-first Mark-of-the-Web (MOTW) extraction and download origin security into Privex's Windows Antivirus engine.
 
 ---
 

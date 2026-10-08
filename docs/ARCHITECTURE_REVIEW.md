@@ -1,4 +1,4 @@
-# Architecture Review: PRIVATE PROTECTION
+# Architecture Review: PRIVEX
 
 ## Lead Architect's Final Consolidation Report
 

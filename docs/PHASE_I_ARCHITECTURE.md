@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-Phase I establishes the autonomous threat mitigation policy and user-governed false-positive resolution system for the Private Protection Windows Desktop Antivirus. It solves two critical operational requirements:
+Phase I establishes the autonomous threat mitigation policy and user-governed false-positive resolution system for the Privex Windows Desktop Antivirus. It solves two critical operational requirements:
 1. **Deterministic, Non-Dilutable Response Ladder**: Transforming multi-factor threat detection telemetry into proportional, automated security interventions without user fatigue or unsafe mitigation dilution.
 2. **Hardened 3-Tier False-Positive Exclusion Management**: Providing granular, secure user overrides (`HASH`, `PATH`, `DOMAIN`) shielded by cryptographic persistence, anti-abuse guardrails, mandatory domain TTLs, and cryptographic non-bypassability during ransomware or canary trip events.
 

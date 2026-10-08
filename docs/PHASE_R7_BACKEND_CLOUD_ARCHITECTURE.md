@@ -1,6 +1,6 @@
 # PHASE R7 — BACKEND NECESSITY AUDIT & CLOUD BOUNDARY ARCHITECTURE
 
-- **Project:** PRIVATE PROTECTION (PS-05)
+- **Project:** PRIVEX (PS-05)
 - **Phase:** R7 — Backend Necessity Audit + Cloud Boundary Architecture
 - **Execution Date:** 2026-10-04
 - **Audit Scope:** `@private-protection/core`, `@private-protection/ml`, `apps/web`, `apps/mobile` (Android), `apps/desktop` (Windows x64), `apps/extension` (Manifest V3), `scripts/`, `.github/workflows/`
@@ -232,6 +232,6 @@ All 6 workspaces were tested after applying `DEFECT-R7-LOG-01`:
 
 ## 14. Final Recommendation (R7-N)
 
-1. **Do NOT create or deploy a runtime backend for Private Protection `v0.1.0`.**
+1. **Do NOT create or deploy a runtime backend for Privex `v0.1.0`.**
 2. **Maintain the 100% Local-First Core Architecture:** All threat detection, risk scoring, warning generation, and AI explanation synthesis must remain strictly on-device (`USER INPUT -> LOCAL CORE -> LOCAL VERDICT -> LOCAL WARNING -> LOCAL EXPLANATION`).
 3. **Keep Cloud Footprint Limited to Static Distribution:** Use Cloudflare Pages strictly as a static asset CDN (`https://private-protection.pages.dev`) and GitHub Releases for direct binary downloads verified via `release/SHA256SUMS.txt`.

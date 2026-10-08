@@ -4,7 +4,7 @@
 **Cybersecurity & Threat Modeling Architect**
 
 ## 2. Mission
-Establish and enforce the security architecture and product self-defense posture of PRIVATE PROTECTION. Maintain the STRIDE threat model, defend the product against tampering, model reverse engineering, IPC hijacking, parser exploitation, and supply-chain attacks.
+Establish and enforce the security architecture and product self-defense posture of PRIVEX. Maintain the STRIDE threat model, defend the product against tampering, model reverse engineering, IPC hijacking, parser exploitation, and supply-chain attacks.
 
 ## 3. Responsibilities
 - Maintain `docs/SECURITY_ARCHITECTURE.md`, `docs/THREAT_MODEL.md`, and `docs/AI_SECURITY_BOUNDARY.md`.

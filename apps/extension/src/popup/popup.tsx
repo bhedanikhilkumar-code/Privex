@@ -123,7 +123,7 @@ export const PopupApp: React.FC = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.65rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           <span style={{ fontSize: '1.25rem' }}>🛡️</span>
-          <strong style={{ fontSize: '0.95rem', letterSpacing: '-0.02em' }}>PRIVATE PROTECTION</strong>
+          <strong style={{ fontSize: '0.95rem', letterSpacing: '-0.02em' }}>PRIVEX</strong>
         </div>
         <button
           onClick={openOptions}

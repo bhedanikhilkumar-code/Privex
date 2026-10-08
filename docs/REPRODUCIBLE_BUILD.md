@@ -1,5 +1,5 @@
 # REPRODUCIBLE BUILD SPECIFICATION
-## PRIVATE PROTECTION — Production Release v0.1.0
+## PRIVEX — Production Release v0.1.0
 
 > **DOCUMENT ID:** `docs/REPRODUCIBLE_BUILD.md`  
 > **STANDARD:** Reproducible Builds Initiative, SLSA Level 3 Alignment  
@@ -12,7 +12,7 @@
 
 A build is reproducible if given the exact same source code, environment, and build instructions, any engineer or automated system generates byte-for-byte identical distribution artifacts.
 
-Private Protection guarantees:
+Privex guarantees:
 1. **Zero Secret Requirements:** The build requires no external credentials, API keys, or cloud access tokens.
 2. **Deterministic Lockfiles:** Every dependency version is cryptographically locked via `package-lock.json`.
 3. **Air-Gapped Compilation:** Once dependencies are installed, compilation and test execution can proceed in a 100% network-disabled environment.

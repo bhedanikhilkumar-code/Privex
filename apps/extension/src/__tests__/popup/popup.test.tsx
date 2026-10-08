@@ -57,7 +57,7 @@ describe('Popup UI Component', () => {
     render(<PopupApp />);
 
     await waitFor(() => {
-      expect(screen.getByText(/PRIVATE PROTECTION/i)).toBeDefined();
+      expect(screen.getByText(/PRIVEX/i)).toBeDefined();
       expect(screen.getByText('example.com')).toBeDefined();
       expect(screen.getByText(/SAFE \/ ALLOWED/i)).toBeDefined();
     });

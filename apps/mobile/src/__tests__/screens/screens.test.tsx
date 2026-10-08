@@ -24,7 +24,7 @@ describe('Mobile Screen Components & Presentation Layer', () => {
     const navSpy = vi.fn();
     render(<HomeScreen onNavigate={navSpy} onSelectResult={() => {}} />);
 
-    expect(screen.getByText(/PRIVATE PROTECTION/i)).toBeDefined();
+    expect(screen.getByText(/PRIVEX/i)).toBeDefined();
     expect(screen.getByText(/Scan URL/i)).toBeDefined();
     expect(screen.getByText(/Scan Message/i)).toBeDefined();
     expect(screen.getByText(/Inspect File/i)).toBeDefined();

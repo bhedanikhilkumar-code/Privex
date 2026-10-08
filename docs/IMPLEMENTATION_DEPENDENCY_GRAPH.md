@@ -1,7 +1,7 @@
 # IMPLEMENTATION_DEPENDENCY_GRAPH.md — Dependency DAG, Agent Ownership & Exit Criteria
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION IMPLEMENTATION DEPENDENCY GRAPH**  
+> **CANONICAL SPECIFICATION — PRIVEX IMPLEMENTATION DEPENDENCY GRAPH**  
 > This document specifies the precise, phase-by-phase directed acyclic graph (DAG) governing all future implementation work. No phase may begin until all prerequisite phases have satisfied their exit criteria.
 
 ---

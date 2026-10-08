@@ -1,6 +1,6 @@
-# Performance Requirements - PRIVATE PROTECTION
+# Performance Requirements - PRIVEX
 
-This document defines the performance targets, budgets, and testing methodologies for the PRIVATE PROTECTION on-device AI security assistant.
+This document defines the performance targets, budgets, and testing methodologies for the PRIVEX on-device AI security assistant.
 
 ## Performance Targets
 

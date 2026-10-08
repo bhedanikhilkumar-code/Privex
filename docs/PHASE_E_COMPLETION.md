@@ -46,7 +46,7 @@ Phase E has been fully implemented and verified according to canonical requireme
 6. **Windows System Tray & Background Continuity**:
    - Implemented in `apps/desktop/src/main/electron-main.ts`.
    - Embedded 16x16 RGBA shield icon generated programmatically in native memory.
-   - Context menu: `Open Dashboard`, `Run Quick Scan`, `Protection Status`, `Exit Private Protection`.
+   - Context menu: `Open Dashboard`, `Run Quick Scan`, `Protection Status`, `Exit Privex`.
    - Window close events hide the dashboard to tray while real-time filesystem watchers continue active background monitoring.
    - Rate-limited OS toast notifications ($\le 3$ notifications per 10s window).
 

@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-Phase H implements the production-grade **Desktop Notification System & Storm Rate-Limiter** (`NotificationService`) for Private Protection Windows Desktop Antivirus. The service provides native Windows OS Toast Notifications with headless fallback, System Tray icon badge/status updates, a persistent In-App Notification Inbox, token-bucket storm rate-limiting (`RULE-15`), threat burst coalescing, fullscreen-aware suppression, and strict directional override (RTLO) sanitization.
+Phase H implements the production-grade **Desktop Notification System & Storm Rate-Limiter** (`NotificationService`) for Privex Windows Desktop Antivirus. The service provides native Windows OS Toast Notifications with headless fallback, System Tray icon badge/status updates, a persistent In-App Notification Inbox, token-bucket storm rate-limiting (`RULE-15`), threat burst coalescing, fullscreen-aware suppression, and strict directional override (RTLO) sanitization.
 
 All **40 tests across 5 test suites** pass with 100% success rate, sub-millisecond dispatch latency ($0.029\text{ ms}$ avg), zero memory leaks under 1,000-event storms, and clean TypeScript compilation across all 6 workspaces.
 

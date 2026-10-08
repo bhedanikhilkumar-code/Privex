@@ -2,7 +2,7 @@
 
 > **SYSTEM STATUS: PHASE 2 INDEPENDENT AUDIT COMPLETE**  
 > **CANONICAL GOVERNANCE REPORT — 5-ROLE INDEPENDENT AUDIT COMMITTEE**  
-> Project: PRIVATE PROTECTION (PS-05)  
+> Project: PRIVEX (PS-05)  
 > Scope: `@private-protection/core` (Threat Intelligence, Offline Rule Engine & Shared Detection Hardening)  
 > Date of Audit: 2026-10-02  
 > Final Committee Verdict: **UNANIMOUS PASS (5 / 5)**

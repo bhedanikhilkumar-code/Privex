@@ -1,6 +1,6 @@
 # PHASE K: FINAL INDEPENDENT ZERO-TRUST SECURITY AUDIT & RELEASE GATE
 
-**PROJECT:** Private Protection — Windows Desktop Strong Antivirus  
+**PROJECT:** Privex — Windows Desktop Strong Antivirus  
 **PHASE:** K — Practical Email (.EML/.MSG) & Network Socket Protection  
 **AUDIT DATE:** 2026-10-07  
 **VERDICT:** **GO — PHASE K APPROVED**

@@ -1,4 +1,4 @@
-# Subagent Orchestration Plan: PRIVATE PROTECTION
+# Subagent Orchestration Plan: PRIVEX
 
 This document defines how future implementation work should be delegated to specialist agents, their responsibilities, file ownership, and coordination rules.
 

@@ -9,7 +9,7 @@
 
 ## 1. Permission Minimization Principle
 
-PRIVATE PROTECTION operates under a strict data minimization doctrine. The mobile client asks for **zero** permissions to launch, and prompts for platform permissions strictly just-in-time when a user explicitly initiates an action that requires them.
+PRIVEX operates under a strict data minimization doctrine. The mobile client asks for **zero** permissions to launch, and prompts for platform permissions strictly just-in-time when a user explicitly initiates an action that requires them.
 
 ---
 
@@ -17,7 +17,7 @@ PRIVATE PROTECTION operates under a strict data minimization doctrine. The mobil
 
 | Permission | Protection Level | Purpose | Data Accessed | User-Facing Explanation | Mandatory / Optional |
 |---|---|---|---|---|---|
-| `android.permission.POST_NOTIFICATIONS` | `dangerous` (Runtime prompt on Android 13+) | Deliver instant heads-up warning banners when a scanned link or message is flagged as critical/dangerous. | None. Displays local notifications. | "Private Protection uses notifications to warn you when a scanned link or message poses an immediate danger." | **Optional (User Opt-in)** |
+| `android.permission.POST_NOTIFICATIONS` | `dangerous` (Runtime prompt on Android 13+) | Deliver instant heads-up warning banners when a scanned link or message is flagged as critical/dangerous. | None. Displays local notifications. | "Privex uses notifications to warn you when a scanned link or message poses an immediate danger." | **Optional (User Opt-in)** |
 | `android.permission.VIBRATE` | `normal` (Install-time) | Provide immediate haptic warning vibration feedback when a dangerous threat or scam is identified. | None. Hardware motor control only. | "Haptic feedback alerts you immediately if a malicious threat is detected." | **Mandatory** |
 | `android.permission.INTERNET` | `normal` (Install-time) | Reserved strictly for future differential threat intelligence Bloom filter delta updates (OTA). | None during scans. 0 bytes sent during local scanning. | "Used only for downloading signed offline threat database updates if enabled." | **Normal (Air-gapped during scans)** |
 

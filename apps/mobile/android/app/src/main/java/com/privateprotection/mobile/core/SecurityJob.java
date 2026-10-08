@@ -7,7 +7,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Canonical Security Job Model for Private Protection Android (Phase T1).
+ * Canonical Security Job Model for Privex Android (Phase T1).
  *
  * Encapsulates job metadata, thread-safe atomic state transitions,
  * progress tracking, cancellation tracking, and JSON serialization.

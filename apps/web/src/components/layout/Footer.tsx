@@ -20,7 +20,7 @@ export const Footer: React.FC = () => {
       }}
     >
       <div>
-        <span style={{ fontWeight: 700, letterSpacing: '0.04em' }}>PRIVATE PROTECTION v0.1.1</span>
+        <span style={{ fontWeight: 700, letterSpacing: '0.04em' }}>PRIVEX v0.1.1</span>
         <span style={{ margin: '0 0.5rem', opacity: 0.5 }}>•</span>
         <span>Engine: </span>
         <code style={{ color: 'var(--color-accent)', backgroundColor: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.4rem', border: '1px solid rgba(255,255,255,0.2)' }}>

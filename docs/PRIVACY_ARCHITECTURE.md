@@ -1,7 +1,7 @@
-# Privacy Architecture: PRIVATE PROTECTION
+# Privacy Architecture: PRIVEX
 
 ## 1. Overview
-PRIVATE PROTECTION is designed as a **privacy-first, on-device AI security assistant**. The core philosophy is that user data, especially sensitive content like personal messages, browsing history, and files, must remain under the user's control and ideally never leave the device.
+PRIVEX is designed as a **privacy-first, on-device AI security assistant**. The core philosophy is that user data, especially sensitive content like personal messages, browsing history, and files, must remain under the user's control and ideally never leave the device.
 
 ## 2. Data Classification
 To ensure appropriate handling, all data processed by the system is classified into three tiers:

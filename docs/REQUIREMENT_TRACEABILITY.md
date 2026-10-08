@@ -1,8 +1,8 @@
-# Requirement Traceability Matrix: PRIVATE PROTECTION
+# Requirement Traceability Matrix: PRIVEX
 
 ## 1. Overview & Purpose
 
-This document establishes the end-to-end traceability of all eleven foundational capabilities mandated by the PRIVATE PROTECTION problem statement. Every requirement is mapped across the entire engineering lifecycle: Architectural Component, Platform Implementation, Detection Mechanism, User Experience, Privacy Mechanism, Offline Strategy, and Test Strategy.
+This document establishes the end-to-end traceability of all eleven foundational capabilities mandated by the PRIVEX problem statement. Every requirement is mapped across the entire engineering lifecycle: Architectural Component, Platform Implementation, Detection Mechanism, User Experience, Privacy Mechanism, Offline Strategy, and Test Strategy.
 
 ---
 

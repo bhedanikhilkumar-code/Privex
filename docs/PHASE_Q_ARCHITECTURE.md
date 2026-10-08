@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary
 
-Phase Q introduces an autonomous resilience, forensic accountability, and tamper-evident integrity layer to the Private Protection Windows Desktop Antivirus. It guarantees that:
+Phase Q introduces an autonomous resilience, forensic accountability, and tamper-evident integrity layer to the Privex Windows Desktop Antivirus. It guarantees that:
 1. All critical security-relevant events, detection verdicts, configuration modifications, and recovery actions are recorded in an append-only, HMAC-SHA256 hash-chained forensic audit log (`audit.log.enc`) with automatic Tier-1 PII and URL credential scrubbing.
 2. The system continuously verifies its own health across all subsystems via a unified 4-State Health Model (`HEALTHY`, `WARNING`, `DEGRADED`, `CRITICAL`), generating actionable 1-click remediation operations without compromising security boundaries.
 3. A non-blocking background watchdog actively supervises core protection services every 2,000 ms, detecting dropped watchers or hung subsystems, executing automatic self-healing recovery, enforcing crash-loop circuit breaking (>3 crashes in 120s triggers Safe Minimal Mode isolation), and ensuring the Real-Time Shield cannot remain permanently silenced via an automatic snooze countdown timer (`RULE-19`).

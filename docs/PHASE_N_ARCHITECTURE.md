@@ -1,5 +1,5 @@
 # PHASE N: SCHEDULED & ON-DEMAND SCANNING ARCHITECTURE
-**PRIVATE PROTECTION WINDOWS DESKTOP ANTIVIRUS**
+**PRIVEX WINDOWS DESKTOP ANTIVIRUS**
 
 **Status:** IMPLEMENTATION ARCHITECTURE SPECIFICATION  
 **Author:** Architecture & Core Security Engineering  
@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary & Goals
 
-Phase N implements production-grade **Scheduled & On-Demand Scanning** for Private Protection Windows Desktop Antivirus. It unifies automated background maintenance with on-demand threat hunting, introducing battery-aware, CPU-aware, and restart-resilient execution that honors the system's core doctrine: **LOCAL-FIRST • PRIVACY-FIRST • LOW-LATENCY • FAIL-CLOSED • RESOURCE-SAFE**.
+Phase N implements production-grade **Scheduled & On-Demand Scanning** for Privex Windows Desktop Antivirus. It unifies automated background maintenance with on-demand threat hunting, introducing battery-aware, CPU-aware, and restart-resilient execution that honors the system's core doctrine: **LOCAL-FIRST • PRIVACY-FIRST • LOW-LATENCY • FAIL-CLOSED • RESOURCE-SAFE**.
 
 ### Core Capabilities:
 1. **Daily & Weekly Scan Schedules:** Configurable local 24-hour time (`HH:mm`), weekday selection for weekly recurrence, timezone and DST safety.

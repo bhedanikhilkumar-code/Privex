@@ -1,7 +1,7 @@
 # BROWSER_TECHNICAL_ARCHITECTURE.md — WebExtension Manifest V3 Architecture & Sandboxing
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION BROWSER EXTENSION**  
+> **CANONICAL SPECIFICATION — PRIVEX BROWSER EXTENSION**  
 > This document specifies the browser extension architecture under Manifest V3 (MV3), covering background service worker lifecycles, WebAssembly integration, pre-navigation interception, isolated Shadow DOM overlays, and browser sandbox constraints.
 
 ---

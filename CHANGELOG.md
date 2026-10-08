@@ -1,5 +1,5 @@
 # CHANGELOG
-## PRIVATE PROTECTION — All Notable Changes
+## PRIVEX — All Notable Changes
 
 All notable changes to this project are documented in this file in adherence to the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) standard and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 

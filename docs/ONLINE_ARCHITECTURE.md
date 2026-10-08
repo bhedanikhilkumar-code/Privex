@@ -1,8 +1,8 @@
 # ONLINE_ARCHITECTURE.md — Connected Services, Privacy Guarantees & Fallbacks
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION ONLINE ARCHITECTURE**  
-> This document specifies the optional, value-add online capabilities of PRIVATE PROTECTION. It provides an exhaustive accounting of every network interaction, detailing data minimization, cryptographic privacy mechanisms, explicit consent gates, and offline fallbacks.
+> **CANONICAL SPECIFICATION — PRIVEX ONLINE ARCHITECTURE**  
+> This document specifies the optional, value-add online capabilities of PRIVEX. It provides an exhaustive accounting of every network interaction, detailing data minimization, cryptographic privacy mechanisms, explicit consent gates, and offline fallbacks.
 
 ---
 

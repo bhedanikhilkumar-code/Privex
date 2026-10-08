@@ -113,7 +113,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     >
       <div style={{ padding: '0 12px 14px 12px', borderBottom: '1px solid #1e293b', marginBottom: '12px' }}>
         <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#38bdf8', letterSpacing: '0.05em' }}>
-          PRIVATE PROTECTION
+          PRIVEX
         </div>
         <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
           Endpoint Security • 100% Offline

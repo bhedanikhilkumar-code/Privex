@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary
 
-Phase P introduces a hardware-adaptive, bounded-memory performance optimization subsystem to the Private Protection Windows Desktop Antivirus. It maximizes filesystem scanning throughput, guarantees sub-millisecond fast-path cache hit lookups, prevents Electron IPC renderer saturation via 20 Hz progress event throttling, dynamically sizes worker concurrency and batch buffers based on physical host resources (with specialized low-memory profiles for $\le 4\text{ GB}$ RAM machines), and strictly prevents cache pollution by refusing non-clean verdicts and unlinking modified files.
+Phase P introduces a hardware-adaptive, bounded-memory performance optimization subsystem to the Privex Windows Desktop Antivirus. It maximizes filesystem scanning throughput, guarantees sub-millisecond fast-path cache hit lookups, prevents Electron IPC renderer saturation via 20 Hz progress event throttling, dynamically sizes worker concurrency and batch buffers based on physical host resources (with specialized low-memory profiles for $\le 4\text{ GB}$ RAM machines), and strictly prevents cache pollution by refusing non-clean verdicts and unlinking modified files.
 
 ---
 

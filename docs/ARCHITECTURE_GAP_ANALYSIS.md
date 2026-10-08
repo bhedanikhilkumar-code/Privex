@@ -1,8 +1,8 @@
-# Architecture Gap Analysis: PRIVATE PROTECTION
+# Architecture Gap Analysis: PRIVEX
 
 ## Executive Summary
 
-This document presents a comprehensive, systematic gap analysis and architectural audit of the PRIVATE PROTECTION system design established during Phase 0. Every identified architectural friction point, boundary ambiguity, security exposure, platform barrier, and failure state is documented below with root cause, affected components, architectural solution, and prioritized impact.
+This document presents a comprehensive, systematic gap analysis and architectural audit of the PRIVEX system design established during Phase 0. Every identified architectural friction point, boundary ambiguity, security exposure, platform barrier, and failure state is documented below with root cause, affected components, architectural solution, and prioritized impact.
 
 ---
 

@@ -1,7 +1,7 @@
 # PHASE E — FRESH INDEPENDENT FINAL AUDIT REPORT
 ### Real-Time Protection Engine & Background Continuity (Post-Remediation Zero-Trust Release Gate)
 
-> **PROJECT:** Private Protection  
+> **PROJECT:** Privex  
 > **PHASE:** E — REAL-TIME PROTECTION ENGINE & BACKGROUND CONTINUITY  
 > **CANONICAL SPECIFICATION:** `phase.md` (Lines 133–148), `Architecture.md`, `PRD.md`, `rules.md`, `design.md`, `memory.md`, `AGENTS.md`  
 > **AUDITED COMMIT (HEAD):** `2ba3ff1b3247eee33a4b367723f91727af386462`  
@@ -201,7 +201,7 @@ The previous independent audit (`docs/PHASE_E_FINAL_INDEPENDENT_AUDIT.md` on com
 
 - Embedded 16x16 RGBA shield icon generated programmatically in native memory without external image dependencies.
 - Window close interception (`win.on('close')`) hides dashboard to tray while background watchers continue monitoring.
-- Context menu options: `Open Dashboard`, `Run Quick Scan`, `Protection Status: Protected`, `Exit Private Protection`.
+- Context menu options: `Open Dashboard`, `Run Quick Scan`, `Protection Status: Protected`, `Exit Privex`.
 - `Run Quick Scan` dispatches canonical IPC `desktop:scan:trigger-quick` to renderer (`SEC-E-02`).
 - Single-instance lock (`SEC-E-01`) ensures only one primary process runs; secondary launches cleanly focus existing window and quit.
 - Toast notifications throttled to $\le 3$ per 10-second sliding window to prevent notification storms.

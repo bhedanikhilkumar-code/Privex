@@ -84,7 +84,7 @@ export const OptionsApp: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
         <span style={{ fontSize: '2rem' }}>🛡️</span>
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Private Protection Settings</h1>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Privex Settings</h1>
           <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
             Manage on-device threat interception, plain-language AI explanation complexity, and local domain allowlists.
           </p>

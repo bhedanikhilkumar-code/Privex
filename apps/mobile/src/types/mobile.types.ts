@@ -498,5 +498,56 @@ export interface PreThreatWarningDecision {
   bypassedWithFrictionGate: boolean;
 }
 
+// ==========================================
+// PHASE T8: SECURE PASSWORD & PASSPHRASE GENERATOR
+// ==========================================
+
+export type PasswordGeneratorPreset = 'STANDARD' | 'STRONG' | 'VERY_STRONG' | 'CUSTOM';
+
+export interface PasswordGeneratorOptions {
+  length: number; // 12 to 128
+  useUppercase: boolean;
+  useLowercase: boolean;
+  useNumbers: boolean;
+  useSpecial: boolean;
+  avoidAmbiguous: boolean; // excludes ambiguous punctuation
+  avoidSimilar: boolean;   // excludes l, 1, I, o, 0, O
+}
+
+export interface PassphraseGeneratorOptions {
+  wordCount: number; // 3 to 10
+  separator: string; // '-', '_', ' ', '.', etc.
+  capitalize: boolean;
+  includeNumber: boolean;
+}
+
+export interface PasswordGenerationResult {
+  secret: string;
+  length: number;
+  poolSize: number;
+  entropyBits: number;
+  entropyExplanation: string;
+  strengthLevel: 'WEAK' | 'MEDIUM' | 'STRONG' | 'VERY_STRONG';
+  mode: 'PASSWORD';
+  characterGroups: {
+    hasUppercase: boolean;
+    hasLowercase: boolean;
+    hasNumbers: boolean;
+    hasSpecial: boolean;
+  };
+}
+
+export interface PassphraseGenerationResult {
+  secret: string;
+  wordCount: number;
+  wordlistSize: number;
+  entropyBits: number;
+  entropyExplanation: string;
+  strengthLevel: 'WEAK' | 'MEDIUM' | 'STRONG' | 'VERY_STRONG';
+  mode: 'PASSPHRASE';
+  separator: string;
+}
+
+
 
 

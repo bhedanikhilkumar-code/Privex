@@ -1,4 +1,4 @@
-# Repository Architecture: Private Protection
+# Repository Architecture: Privex
 
 We use a Monorepo approach (managed via Turborepo or Nx) to maximize code sharing and ensure version consistency across all client platforms and backend services.
 

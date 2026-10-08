@@ -1,8 +1,8 @@
-# Implementation & Documentation Governance: PRIVATE PROTECTION
+# Implementation & Documentation Governance: PRIVEX
 
 ## 1. Governance Principles & Authority Hierarchy
 
-To prevent documentation rot, technical debt, and architectural drift, all engineering activities in PRIVATE PROTECTION are governed by strict documentation authority rules.
+To prevent documentation rot, technical debt, and architectural drift, all engineering activities in PRIVEX are governed by strict documentation authority rules.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐

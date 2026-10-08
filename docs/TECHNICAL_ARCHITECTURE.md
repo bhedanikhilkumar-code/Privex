@@ -1,14 +1,14 @@
 # TECHNICAL_ARCHITECTURE.md — System Topology & Technical Architecture
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION TECHNICAL ARCHITECTURE**  
-> This document specifies the comprehensive technical topology, process boundaries, execution threads, and subsystem interactions of the PRIVATE PROTECTION ecosystem.
+> **CANONICAL SPECIFICATION — PRIVEX TECHNICAL ARCHITECTURE**  
+> This document specifies the comprehensive technical topology, process boundaries, execution threads, and subsystem interactions of the PRIVEX ecosystem.
 
 ---
 
 ## 1. COMPREHENSIVE SYSTEM TOPOLOGY
 
-PRIVATE PROTECTION is structured into six strictly demarcated execution planes:
+PRIVEX is structured into six strictly demarcated execution planes:
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -97,7 +97,7 @@ Acts as the defensive perimeter between untrusted OS inputs and the core detecti
 - **Thread Marshaling**: Offloads heavy parsing from UI threads into background Web Workers (Web/Extension), Tokio tasks (Desktop Rust), or background isolates/threads (Mobile Flutter/Kotlin).
 
 ### 2.3 Plane 3: Shared Core Detection Pipeline (`@private-protection/core`)
-The mathematical heart of PRIVATE PROTECTION. Pure, deterministic, memory-safe, and self-contained:
+The mathematical heart of PRIVEX. Pure, deterministic, memory-safe, and self-contained:
 - **Stage 1 (Normalizer)**: Strips obfuscation, decodes Punycode/IDN homographs, canonicalizes URL components, and strips zero-width spaces.
 - **Stage 2 (Parallel Detectors)**:
   - *Rule Engine*: Evaluates pre-compiled regex and deterministic boolean rules.

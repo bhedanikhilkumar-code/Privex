@@ -1,6 +1,6 @@
-# Backend Architecture: Private Protection
+# Backend Architecture: Privex
 
-The PRIVATE PROTECTION backend is strictly **OPTIONAL**. The core product operates entirely on-device with zero reliance on cloud connectivity. The backend exists solely to improve detection quality over time, distribute updates, and provide a web dashboard for manual analysis.
+The PRIVEX backend is strictly **OPTIONAL**. The core product operates entirely on-device with zero reliance on cloud connectivity. The backend exists solely to improve detection quality over time, distribute updates, and provide a web dashboard for manual analysis.
 
 ## 1. Core Principles
 - **Optionality:** Client apps must function 100% offline.

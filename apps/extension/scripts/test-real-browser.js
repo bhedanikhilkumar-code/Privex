@@ -57,7 +57,7 @@ async function testBrowser(browserPath, browserName) {
     }
 
     // Check if background service worker target exists
-    const swTarget = targets.find(t => t.type === 'service_worker' || t.url.includes('background.js') || t.title.includes('Private Protection'));
+    const swTarget = targets.find(t => t.type === 'service_worker' || t.url.includes('background.js') || t.title.includes('Privex'));
     if (swTarget) {
       console.log(`✓ Extension Service Worker identified: ${swTarget.url}`);
     }

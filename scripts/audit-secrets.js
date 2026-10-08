@@ -5,7 +5,7 @@ import { execSync } from 'node:child_process';
 const ROOT = process.cwd();
 
 console.log('================================================================');
-console.log('PRIVATE PROTECTION — SECURITY & SECRETS AUDIT (PHASE R2-A)');
+console.log('PRIVEX — SECURITY & SECRETS AUDIT (PHASE R2-A)');
 console.log('================================================================\n');
 
 // 1. Audit .gitignore

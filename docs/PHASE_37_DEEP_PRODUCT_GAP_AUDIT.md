@@ -1,6 +1,6 @@
 # PHASE 37 — DEEP PRODUCT GAP AUDIT & MASTER ARCHITECTURAL RECONCILIATION
 
-> **PROJECT:** PRIVATE PROTECTION  
+> **PROJECT:** PRIVEX  
 > **PROBLEM STATEMENT:** PS-05 — On-device threat, phishing and scam detection  
 > **AUDIT STATUS:** COMPLETED (PRE-IMPLEMENTATION GOVERNANCE)  
 > **CANONICAL REFERENCE:** `AGENT.md`  
@@ -10,7 +10,7 @@
 
 ## 1. EXECUTIVE SUMMARY
 
-An exhaustive, multi-dimensional product gap audit was conducted across the entire **PRIVATE PROTECTION** repository, covering all source files, build systems, test suites, packaging configurations, runtime behaviors, and documentation.
+An exhaustive, multi-dimensional product gap audit was conducted across the entire **PRIVEX** repository, covering all source files, build systems, test suites, packaging configurations, runtime behaviors, and documentation.
 
 The codebase implements a sophisticated, privacy-first, on-device security ecosystem composed of a Shared Security Core (`@private-protection/core`), an On-Device AI/ML Assistant runtime (`@private-protection/ml`), and four client application surfaces: Web SPA, Android Native App, Desktop Native App (Electron), and Browser Extension (Manifest V3).
 

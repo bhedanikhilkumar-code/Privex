@@ -14,7 +14,7 @@
 
 ## 1. OBJECTIVE
 
-The primary objective of **Phase R3** is to execute the end-to-end direct distribution verification and physical device validation of the **Private Protection Android Application** (`@private-protection/mobile` / `com.privateprotection.mobile`).
+The primary objective of **Phase R3** is to execute the end-to-end direct distribution verification and physical device validation of the **Privex Android Application** (`@private-protection/mobile` / `com.privateprotection.mobile`).
 
 ### Scope Invariant & Distribution Mandate
 - **Google Play Store Publication:** **EXPLICITLY OUT OF SCOPE**. In accordance with Phase 38-B and Phase R1 directives, Android delivery is engineered and validated exclusively for **Direct Consumer APK Distribution** (`release/private-protection-mobile-0.1.0.apk`).
@@ -187,7 +187,7 @@ All four fundamental input classes were tested against the on-device detection e
 
 ## 8. WARNING RESULTS & FRICTION GATE
 
-When a high-risk threat is identified, Private Protection executes an unambiguous multi-sensory warning protocol:
+When a high-risk threat is identified, Privex executes an unambiguous multi-sensory warning protocol:
 
 ```text
 ┌────────────────────────────────────────────────────────┐
@@ -269,7 +269,7 @@ A core pillar of **Problem Statement PS-05** is 100% offline capability without 
 
 ## 11. PRIVACY RESULTS (0 BYTES EGRESS)
 
-Private Protection enforces a mathematical zero-knowledge privacy architecture. Raw user payloads (visited links, shared messages, scanned QR codes) are never transmitted off the user's physical device.
+Privex enforces a mathematical zero-knowledge privacy architecture. Raw user payloads (visited links, shared messages, scanned QR codes) are never transmitted off the user's physical device.
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -404,4 +404,4 @@ In alignment with strict engineering transparency and zero-overclaiming principl
 ```
 
 ### Sign-Off & Recommendation
-The **Private Protection Mobile Android Release** (`private-protection-mobile-0.1.0.apk`) has satisfied all 16 verification sections. The artifact is hardened, minified, secure, privacy-preserving, and ready for immediate direct consumer distribution.
+The **Privex Mobile Android Release** (`private-protection-mobile-0.1.0.apk`) has satisfied all 16 verification sections. The artifact is hardened, minified, secure, privacy-preserving, and ready for immediate direct consumer distribution.

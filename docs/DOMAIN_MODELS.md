@@ -1,8 +1,8 @@
 # DOMAIN_MODELS.md — Canonical Implementation-Independent Domain Models
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION DOMAIN MODELS**  
-> This document defines the canonical domain models across the PRIVATE PROTECTION platform. These models are implementation-independent, technology-agnostic, and strictly typed. All platform implementations (Dart, Rust, TypeScript, Swift, Kotlin) must conform exactly to these structural contracts.
+> **CANONICAL SPECIFICATION — PRIVEX DOMAIN MODELS**  
+> This document defines the canonical domain models across the PRIVEX platform. These models are implementation-independent, technology-agnostic, and strictly typed. All platform implementations (Dart, Rust, TypeScript, Swift, Kotlin) must conform exactly to these structural contracts.
 
 ---
 

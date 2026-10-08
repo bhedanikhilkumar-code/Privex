@@ -4,7 +4,7 @@
 **Performance & Latency Optimization Specialist**
 
 ## 2. Mission
-Enforce, profile, and optimize the strict real-time performance and resource budgets of PRIVATE PROTECTION across all target hardware platforms. Ensure sub-millisecond core detection, <50ms warning rendering, minimal memory footprints, and near-zero battery drain.
+Enforce, profile, and optimize the strict real-time performance and resource budgets of PRIVEX across all target hardware platforms. Ensure sub-millisecond core detection, <50ms warning rendering, minimal memory footprints, and near-zero battery drain.
 
 ## 3. Responsibilities
 - Maintain `docs/PERFORMANCE_REQUIREMENTS.md` and automated latency benchmark harnesses.

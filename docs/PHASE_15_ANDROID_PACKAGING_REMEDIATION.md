@@ -1,6 +1,6 @@
 # PHASE 15 — ANDROID PACKAGING REMEDIATION & FRESH BINARY VERIFICATION
 
-**Project:** PRIVATE PROTECTION (PS-05)  
+**Project:** PRIVEX (PS-05)  
 **Phase:** Phase 15 — Android Packaging Remediation & Fresh Binary Verification (Master Prompt #32)  
 **Target Defect:** `DEFECT-P14-01` (Stale `app-debug.apk` binary committed in repository)  
 **Status:** **PHASE 15 REMEDIATION COMPLETE**  

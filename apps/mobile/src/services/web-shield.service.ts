@@ -153,7 +153,7 @@ export class WebShieldService {
         categoryB_browserIntegration: true,
         categoryB_description: 'App link verification, custom tab intent filters, user share integration.',
         categoryC_userUrlSharing: true,
-        categoryC_description: 'Share sheet receiver (\'Share with Private Protection\') for instant scanning.',
+        categoryC_description: 'Share sheet receiver (\'Share with Privex\') for instant scanning.',
         categoryD_localVpnShield: true,
         categoryD_description: 'Local DNS TUN filter (10.0.0.1/32). Zero TLS MITM, zero cloud payload transmission.',
         categoryE_systemWideBrowserHookWithoutVpn: false,

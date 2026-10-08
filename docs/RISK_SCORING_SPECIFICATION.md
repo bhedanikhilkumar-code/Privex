@@ -8,7 +8,7 @@
 
 ## 1. MATHEMATICAL FORMULATION & AGGREGATION MODEL
 
-The PRIVATE PROTECTION Risk Engine uses the **Canonical Bounded Non-Linear Diminishing-Returns Aggregation Model with Critical Override Logic** (conforming to `docs/RISK_ENGINE_ARCHITECTURE.md`).
+The PRIVEX Risk Engine uses the **Canonical Bounded Non-Linear Diminishing-Returns Aggregation Model with Critical Override Logic** (conforming to `docs/RISK_ENGINE_ARCHITECTURE.md`).
 
 ### 1.1 Inputs
 - $\mathcal{E} = \{e_1, e_2, \dots, e_n\}$: Set of triggered `Evidence` tokens.

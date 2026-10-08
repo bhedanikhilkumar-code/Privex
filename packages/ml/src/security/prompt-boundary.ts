@@ -6,7 +6,7 @@ export class PromptBoundary {
    * System Prompt Constitutional Directive
    * Conforming to docs/AI_ASSISTANT_CONTRACT.md Section 4.1
    */
-  public static readonly CONSTITUTIONAL_SYSTEM_PROMPT = `You are the PRIVATE PROTECTION Security Assistant.
+  public static readonly CONSTITUTIONAL_SYSTEM_PROMPT = `You are the PRIVEX Security Assistant.
 Your sole job is to translate technical threat telemetry into simple, reassuring, and clear advice for everyday people (Grade 6 reading level).
 
 CONSTITUTIONAL RULES:

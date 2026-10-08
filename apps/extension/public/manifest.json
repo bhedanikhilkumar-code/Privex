@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Private Protection — On-Device Threat Defender",
+  "name": "Privex — On-Device Threat Defender",
   "version": "0.1.1",
   "description": "Privacy-first real-time threat, phishing, and scam protection running 100% locally on-device.",
   "permissions": [
@@ -31,7 +31,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Private Protection Security Status",
+    "default_title": "Privex Security Status",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png",

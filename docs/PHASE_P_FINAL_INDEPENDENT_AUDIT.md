@@ -1,6 +1,6 @@
 # Phase P Final Independent Zero-Trust Security & Performance Audit
 
-> **Platform:** Private Protection Windows Desktop Antivirus  
+> **Platform:** Privex Windows Desktop Antivirus  
 > **Phase:** PHASE P — Performance, Worker Pool & Low-Resource Optimization  
 > **Audit Status:** COMPLETE — 100% VERIFIED  
 > **Verdict:** **GO — PHASE P APPROVED**  

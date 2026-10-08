@@ -260,7 +260,7 @@ export class NotificationService extends EventEmitter {
 
         if (shouldSendCoalescedToast) {
           const coalescedTitle = 'Multiple Threats Blocked';
-          const coalescedMsg = `Private Protection blocked ${burstState.burstCount} threats in the last 5 seconds.`;
+          const coalescedMsg = `Privex blocked ${burstState.burstCount} threats in the last 5 seconds.`;
 
           const tokenResult = this.consumeToastToken(now);
           if (tokenResult.allowed) {

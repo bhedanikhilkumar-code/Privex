@@ -1,6 +1,6 @@
 # PHASE R12 — FINAL HUMAN ACCEPTANCE + DISTRIBUTION UX AUDIT REPORT
 
-**Project Name:** PRIVATE PROTECTION  
+**Project Name:** PRIVEX  
 **Problem Statement Code:** PS-05  
 **Version:** v0.1.0 (Release Candidate)  
 **Date of Audit:** October 4, 2026  
@@ -10,9 +10,9 @@
 
 ## 1. SCOPE OF AUDIT
 
-This audit represents the final phase of validation for Private Protection (PS-05). Having achieved 100% technical, unit, integration, performance, and cryptographic release candidate validation across phases R1 through R11, Phase R12 transitions evaluation entirely to the human end-user perspective:
+This audit represents the final phase of validation for Privex (PS-05). Having achieved 100% technical, unit, integration, performance, and cryptographic release candidate validation across phases R1 through R11, Phase R12 transitions evaluation entirely to the human end-user perspective:
 
-> *"Can a real, non-developer end user discover, obtain, install, understand, and use Private Protection successfully without specialized tooling, developer knowledge, or cloud dependencies?"*
+> *"Can a real, non-developer end user discover, obtain, install, understand, and use Privex successfully without specialized tooling, developer knowledge, or cloud dependencies?"*
 
 The audit evaluated all 4 user-facing release surfaces:
 1. **Production Web Application**: Direct browser access (`https://private-protection.pages.dev`)
@@ -80,7 +80,7 @@ Audited via headless automated CDP browser session and manual DOM evaluation (`s
   3. Tap APK and allow "Install unknown apps" permission for browser.
   4. Complete installation and open app.
   5. Grant runtime notification or SMS filter permission when prompted.
-- **Honest Play Store Disclosure**: Documented clearly: "Google Play Store publication is currently OUT OF SCOPE. Private Protection is distributed exclusively via direct verified APK to preserve open distribution and zero Google Play Services dependence."
+- **Honest Play Store Disclosure**: Documented clearly: "Google Play Store publication is currently OUT OF SCOPE. Privex is distributed exclusively via direct verified APK to preserve open distribution and zero Google Play Services dependence."
 - **Low-End Hardware Disclosure**: Documented clearly: "Validated in software under 1.0 GB RAM memory limits; physical testing conducted on mid-range Android 14 test devices."
 
 ---
@@ -119,7 +119,7 @@ Audited via headless automated CDP browser session and manual DOM evaluation (`s
 3. **Developer Mode**: Toggle "Developer mode" switch in the top-right corner.
 4. **Load Unpacked**: Click "Load unpacked" and select the extracted folder.
 5. **Verification**:
-   - Extension icon appears in browser toolbar with name "Private Protection Security Interceptor".
+   - Extension icon appears in browser toolbar with name "Privex Security Interceptor".
    - Clicking icon opens the quick popup scanner (`popup.html`).
    - Sideloading and security interstitial warnings operate completely offline with zero web store communication.
 6. **Honest Store Disclosure**: Documented clearly: "Direct unpacked developer-mode sideloading only. Chrome Web Store and Edge Add-ons store listings are not published."
@@ -170,7 +170,7 @@ All artifacts are accompanied by cryptographic signatures and SHA-256 hashes in 
 
 A common misconception among non-technical users is that cybersecurity scanners require an active cloud backend to evaluate threats. The documentation and interface clarify this distinction in plain language:
 
-1. **Zero Scan Backends**: There is no Private Protection database or server scanning your links, messages, or files. The engine runs in your browser tab, your phone CPU, or your PC memory.
+1. **Zero Scan Backends**: There is no Privex database or server scanning your links, messages, or files. The engine runs in your browser tab, your phone CPU, or your PC memory.
 2. **Stateless CDN Only**: The web application is hosted on Cloudflare Pages solely to deliver the static HTML/JS/CSS assets to your browser. Once loaded, the engine works even if you pull your Ethernet cable.
 3. **Optional OTA Threat Feeds**: Any future threat intelligence updates are distributed as pre-compiled, cryptographically signed Bloom filter files (< 5 MB) downloaded like static files, never via interactive query APIs.
 
@@ -293,4 +293,4 @@ A complete monorepo regression test suite was executed across all workspace pack
 
 ### OVERALL VERDICT: **GO — APPROVED FOR GENERAL HUMAN DISTRIBUTION**
 
-*Private Protection (v0.1.0) successfully empowers real, non-developer end users to inspect links, messages, and content in real time with 100% local privacy, zero cloud dependence, and complete cryptographic integrity.*
+*Privex (v0.1.0) successfully empowers real, non-developer end users to inspect links, messages, and content in real time with 100% local privacy, zero cloud dependence, and complete cryptographic integrity.*

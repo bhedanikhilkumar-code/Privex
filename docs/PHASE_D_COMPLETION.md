@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-Phase D hardens the desktop threat isolation subsystem of Private Protection into an enterprise-grade, cryptographically verifiable, and crash-resilient quarantine vault.
+Phase D hardens the desktop threat isolation subsystem of Privex into an enterprise-grade, cryptographically verifiable, and crash-resilient quarantine vault.
 
 It transitions the storage engine to the streaming **`PPVAULT2`** format, introducing:
 1. **Streaming 64 KB Chunked AES-256-GCM Encryption:** Eliminates whole-file buffering, strictly bounding memory usage during large-file remediation to $< 4.2\text{ MB}$ peak V8 heap delta on a 100 MB payload (SLA: $< 16\text{ MB}$).

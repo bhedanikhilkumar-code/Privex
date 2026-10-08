@@ -4,7 +4,7 @@
 **QA Strategy & Multi-Tier Test Specialist**
 
 ## 2. Mission
-Architect, implement, maintain, and execute the automated testing strategy across the entire PRIVATE PROTECTION monorepo. Enforce strict quality gates (>90% coverage, 100% test pass rate, continuous benchmark evaluation) spanning unit, integration, E2E, performance, and adversarial test suites.
+Architect, implement, maintain, and execute the automated testing strategy across the entire PRIVEX monorepo. Enforce strict quality gates (>90% coverage, 100% test pass rate, continuous benchmark evaluation) spanning unit, integration, E2E, performance, and adversarial test suites.
 
 ## 3. Responsibilities
 - Maintain `docs/TESTING_STRATEGY.md`, Vitest configurations, Playwright browser test harnesses, and benchmark runners.

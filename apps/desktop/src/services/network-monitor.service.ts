@@ -325,7 +325,7 @@ export class NetworkMonitorService {
       maliciousSocketsCount,
       suspiciousSocketsCount,
       notice:
-        'Private Protection evaluates network connections locally against ThreatIntel blocklists and C2 heuristics. All operations run 100% offline.'
+        'Privex evaluates network connections locally against ThreatIntel blocklists and C2 heuristics. All operations run 100% offline.'
     };
   }
 }

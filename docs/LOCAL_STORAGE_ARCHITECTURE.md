@@ -1,7 +1,7 @@
 # LOCAL_STORAGE_ARCHITECTURE.md — Encrypted Persistence, Schemas & Crypto-Shredding
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION LOCAL STORAGE**  
+> **CANONICAL SPECIFICATION — PRIVEX LOCAL STORAGE**  
 > This document specifies the local storage architecture, encrypted relational schemas, key derivation protocols, retention lifecycles, and cryptographic shredding mechanisms across all client platforms.
 
 ---

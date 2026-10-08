@@ -49,7 +49,7 @@ async function verifyR13Launch() {
   assert(webRes.headers['content-security-policy'] !== undefined, 'Content-Security-Policy header enforced');
   
   const html = webRes.body.toString('utf-8');
-  assert(html.includes('Private Protection'), 'HTML includes brand title');
+  assert(html.includes('Privex'), 'HTML includes brand title');
   assert(html.includes('vite') || html.includes('assets/index'), 'Production bundled assets referenced');
 
   // 2. Direct Public Downloads Verification
@@ -109,8 +109,8 @@ async function verifyR13Launch() {
   }
 
   // Check First-Time User Q&A in README
-  assert(readmeContent.includes('Does Private Protection require a backend server?'), 'README answers: Backend requirement');
-  assert(readmeContent.includes('Does Private Protection require the cloud?'), 'README answers: Cloud requirement');
+  assert(readmeContent.includes('Does Privex require a backend server?'), 'README answers: Backend requirement');
+  assert(readmeContent.includes('Does Privex require the cloud?'), 'README answers: Cloud requirement');
   assert(readmeContent.includes('Does my browsing history, messages, or files ever leave my device?'), 'README answers: Privacy & data handling');
   assert(readmeContent.includes('100% Offline Air-Gapped Test'), 'README answers: Offline functionality');
   assert(readmeContent.includes('Older / Budget Android Devices'), 'README answers: Low-resource / budget device support');

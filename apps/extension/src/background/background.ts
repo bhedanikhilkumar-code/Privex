@@ -19,7 +19,7 @@ if (typeof chrome !== 'undefined' && chrome.webNavigation) {
       }
     } catch (err) {
       // Fail-closed/safe: do not crash background service worker
-      console.error('[Private Protection Background] Navigation scan error:', err);
+      console.error('[Privex Background] Navigation scan error:', err);
     }
   });
 }

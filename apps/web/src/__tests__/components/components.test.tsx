@@ -107,7 +107,7 @@ describe('Web UI Components Testing', () => {
   describe('Header, Navigation & Footer', () => {
     it('renders Header with security badge and local indicator', () => {
       render(<Header />);
-      expect(screen.getByText(/PRIVATE PROTECTION/i)).toBeDefined();
+      expect(screen.getByText(/PRIVEX/i)).toBeDefined();
       expect(screen.getByRole('status')).toBeDefined();
     });
 

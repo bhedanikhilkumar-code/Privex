@@ -1,6 +1,6 @@
 # PHASE J: FINAL INDEPENDENT ZERO-TRUST SECURITY AUDIT & RELEASE GATE
 
-**PROJECT:** Private Protection — Windows Desktop Strong Antivirus  
+**PROJECT:** Privex — Windows Desktop Strong Antivirus  
 **PHASE:** J — Web & Download Mark-of-the-Web (MOTW) Protection  
 **AUDIT DATE:** 2026-10-07  
 **VERDICT:** **GO — PHASE J APPROVED**

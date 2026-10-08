@@ -39,7 +39,7 @@ export const PrivacyView: React.FC = () => {
         </h2>
         <p style={{ color: 'var(--text-muted)', fontSize: '1rem', maxWidth: '750px', lineHeight: 1.5 }}>
           Traditional security services upload your visited URLs, private SMS messages, and emails to remote cloud servers.
-          PRIVATE PROTECTION is architected on a zero-cloud, client-side execution model.
+          PRIVEX is architected on a zero-cloud, client-side execution model.
         </p>
       </div>
 

@@ -1,4 +1,4 @@
-# Agent File Ownership Model: PRIVATE PROTECTION
+# Agent File Ownership Model: PRIVEX
 
 ## 1. Core Ownership Principles
 

@@ -76,7 +76,7 @@ Across all four surfaces, the AI Assistant receives only immutable, sanitized `E
 - **Artifacts:**
   - `release/PrivateProtection-Setup-0.1.0.exe` (158,047,232 bytes)
   - `release/PrivateProtection-0.1.0-win-x64.exe` (245,726,208 bytes)
-- **Windows Integration:** Clean silent install (`/S`) to `%LOCALAPPDATA%\Programs\Private Protection\`, Start Menu & Desktop shortcuts, Add/Remove Programs registry key, and automated self-deleting `Uninstall.exe`.
+- **Windows Integration:** Clean silent install (`/S`) to `%LOCALAPPDATA%\Programs\Privex\`, Start Menu & Desktop shortcuts, Add/Remove Programs registry key, and automated self-deleting `Uninstall.exe`.
 - **Runtime Execution:** Real native execution verified via `--headless-verify`; automated `icacls` AppContainer sandbox ACLs applied; AES-256-GCM quarantine vault operations tested.
 
 ### 3.4 Browser Extension (`@private-protection/extension`)

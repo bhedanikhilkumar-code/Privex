@@ -1,6 +1,6 @@
 # PHASE 38-A — WEB PRODUCTIZATION & DEPLOYMENT REPORT (VERIFIED)
 
-> **PROJECT:** PRIVATE PROTECTION  
+> **PROJECT:** PRIVEX  
 > **PROBLEM STATEMENT:** PS-05 — On-device threat, phishing and scam detection  
 > **PHASE:** 38-A & 38-A.1 — Web Productization, Production Verification & Deployment  
 > **STATUS:** **COMPLETE & PRODUCTION-READY**  
@@ -11,7 +11,7 @@
 
 ## 1. EXECUTIVE SUMMARY
 
-Phase 38-A.1 completes the definitive production verification and edge deployment qualification of the **PRIVATE PROTECTION Web Application**.
+Phase 38-A.1 completes the definitive production verification and edge deployment qualification of the **PRIVEX Web Application**.
 
 All aspects of the Web product have been empirically verified against the core doctrine (**LOCAL-FIRST • PRIVACY-FIRST • DATA-MINIMIZATION • ZERO-KNOWLEDGE • ZERO-CLOUD-DEPENDENCE**):
 - Real HTTP serving of the compiled production distribution (`apps/web/dist`) with strict Content Security Policy (`CSP`), HSTS, and X-Frame-Options headers.

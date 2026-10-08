@@ -1,7 +1,7 @@
 # MOBILE_TECHNICAL_ARCHITECTURE.md — Android & iOS Mobile Client Architecture
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION MOBILE CLIENT**  
+> **CANONICAL SPECIFICATION — PRIVEX MOBILE CLIENT**  
 > This document specifies the mobile client architecture across Android and iOS, detailing the Flutter presentation layer, native OS platform channels, permission models, notification listeners, QR camera scanning, and explicit platform sandboxing restrictions.
 
 ---
@@ -64,7 +64,7 @@
 ### 3.1 SMS & MMS Message Filtering (`IdentityLookup`)
 1. **Apple Sandbox Constraints**:
    - iOS strictly prohibits third-party apps from reading user SMS messages in the background.
-   - PRIVATE PROTECTION utilizes Apple's official `IdentityLookup` framework (`ILMessageFilterExtension`).
+   - PRIVEX utilizes Apple's official `IdentityLookup` framework (`ILMessageFilterExtension`).
 2. **Offline Execution Boundary**:
    - When an SMS from an unknown sender arrives, iOS wakes `MessageFilterExtension` in an isolated, air-gapped sandbox.
    - **Zero Network Entitlement**: The extension is forbidden from accessing the network.
@@ -105,7 +105,7 @@
 
 ## 6. PLATFORM RESTRICTIONS & ARCHITECTURAL HONESTY
 
-> **CONSTITUTIONAL DIRECTIVE**: PRIVATE PROTECTION will never claim impossible mobile capabilities forbidden by OS security models.
+> **CONSTITUTIONAL DIRECTIVE**: PRIVEX will never claim impossible mobile capabilities forbidden by OS security models.
 
 1. **No Background SMS Interception on iOS**: Apple does not allow reading SMS messages in the background. We use the official `IdentityLookup` extension, which filters unknown senders into the Junk tab, but we cannot inspect messages from existing contacts or arbitrary chat apps (iMessage/WhatsApp) on iOS.
 2. **No Whole-Device Network Interception Without VPN**: The mobile app cannot intercept system-wide HTTP traffic from other mobile apps without configuring a local `VpnService` dummy loopback tunnel.

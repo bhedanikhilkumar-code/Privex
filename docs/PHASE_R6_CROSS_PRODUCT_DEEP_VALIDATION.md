@@ -1,6 +1,6 @@
 # PHASE R6 — CROSS-PRODUCT CONSISTENCY & DEEP FUNCTIONAL GAP AUDIT
 
-- **Project:** PRIVATE PROTECTION (PS-05)
+- **Project:** PRIVEX (PS-05)
 - **Phase:** R6 — Cross-Product Consistency + Deep Functional Gap Audit
 - **Execution Date:** 2026-10-04
 - **Audit Scope:** `@private-protection/core`, `@private-protection/ml`, `apps/web`, `apps/mobile` (Android), `apps/desktop` (Windows x64), `apps/extension` (Manifest V3)

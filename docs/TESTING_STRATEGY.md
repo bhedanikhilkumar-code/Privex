@@ -1,6 +1,6 @@
-# Testing Strategy: Private Protection
+# Testing Strategy: Privex
 
-This document outlines the testing methodologies ensuring reliability, privacy, and high detection accuracy across all Private Protection platforms.
+This document outlines the testing methodologies ensuring reliability, privacy, and high detection accuracy across all Privex platforms.
 
 ## 1. Testing Methodologies
 

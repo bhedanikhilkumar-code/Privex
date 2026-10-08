@@ -52,6 +52,6 @@ Memory telemetry was recorded during streaming encryption and decryption of a **
 
 ## 4. Key Architectural Insights & Verification Findings
 
-1. **Chunked Streaming Eliminates OOM:** By chunking file payloads into 64 KB slices with per-chunk AES-256-GCM encryption and streaming directly via file descriptors, Private Protection can isolate multi-gigabyte files with a constant, bounded memory footprint ($<5\text{ MB}$ V8 heap delta).
+1. **Chunked Streaming Eliminates OOM:** By chunking file payloads into 64 KB slices with per-chunk AES-256-GCM encryption and streaming directly via file descriptors, Privex can isolate multi-gigabyte files with a constant, bounded memory footprint ($<5\text{ MB}$ V8 heap delta).
 2. **Cryptographic Integrity & AAD Binding:** Binding `containerUuid || chunkIndex || isFinalChunk` into each chunk's Additional Authenticated Data (AAD) prevents chunk truncation, reordering, or splicing attacks.
 3. **Restore & Trust Fast-Path:** Adding a restored file's SHA-256 to `ThreatIntel` allowlist and `CleanFileCache` takes **0.001 ms**, completely eliminating false-positive re-quarantine loops in subsequent real-time filesystem sweeps.

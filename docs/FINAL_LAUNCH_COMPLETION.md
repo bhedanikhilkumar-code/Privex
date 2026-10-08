@@ -1,6 +1,6 @@
 # FINAL LAUNCH PACKAGING + USER-FACING RELEASE COMPLETION REPORT
 
-**Project Name:** PRIVATE PROTECTION  
+**Project Name:** PRIVEX  
 **Problem Statement Code:** PS-05  
 **Version:** v0.1.0 (Final Launch Release)  
 **Date:** October 4, 2026  
@@ -72,7 +72,7 @@ All user-facing downloadable artifacts are actively published across edge CDN do
 
 - **Download:** Standard Windows Setup wizard (`PrivateProtection-Setup-0.1.0.exe`) and zero-install Portable executable (`PrivateProtection-0.1.0-win-x64.exe`).
 - **Dependencies:** Completely self-contained Electron 44.5.1 runtime. Zero developer dependencies (no Node.js, Python, or Git).
-- **Installation / Launch:** Double-click opens desktop threat scanner immediately. Setup installer cleanly writes to `%LOCALAPPDATA%\Programs\Private Protection\` without requiring administrator privileges.
+- **Installation / Launch:** Double-click opens desktop threat scanner immediately. Setup installer cleanly writes to `%LOCALAPPDATA%\Programs\Privex\` without requiring administrator privileges.
 - **Real-Time Guard:** Watches Downloads directory for suspicious files; automatically quarantines malicious payloads into AES-256-GCM encrypted vault (`PPVAULT1`).
 - **Supported OS:** 64-bit Windows 10 and Windows 11.
 

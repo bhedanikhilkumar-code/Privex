@@ -1,8 +1,8 @@
-# Data Boundaries & Trust Architecture: PRIVATE PROTECTION
+# Data Boundaries & Trust Architecture: PRIVEX
 
 ## 1. Architectural Trust Topology
 
-The PRIVATE PROTECTION architecture enforces strict, non-bypassable **Trust Boundaries** between components. Data crossing any boundary must undergo explicit sanitization, schema validation, and authorization checks.
+The PRIVEX architecture enforces strict, non-bypassable **Trust Boundaries** between components. Data crossing any boundary must undergo explicit sanitization, schema validation, and authorization checks.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐

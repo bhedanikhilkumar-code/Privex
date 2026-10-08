@@ -1,7 +1,7 @@
-# PRIVATE PROTECTION: Project Requirements Specification
+# PRIVEX: Project Requirements Specification
 
 ## Introduction
-This document defines the requirements for the PRIVATE PROTECTION project: an on-device AI security assistant that detects phishing links, scam messages, malicious content, and suspicious communications in real-time, operating entirely locally to preserve user privacy.
+This document defines the requirements for the PRIVEX project: an on-device AI security assistant that detects phishing links, scam messages, malicious content, and suspicious communications in real-time, operating entirely locally to preserve user privacy.
 
 ---
 
@@ -120,7 +120,7 @@ This document defines the requirements for the PRIVATE PROTECTION project: an on
 ## D. Future Requirements
 
 ### D1. Enterprise Fleet Management
-* **Description:** A web dashboard for IT administrators to manage PRIVATE PROTECTION deployments across company devices, configure policies, and view anonymized aggregated threat reports.
+* **Description:** A web dashboard for IT administrators to manage PRIVEX deployments across company devices, configure policies, and view anonymized aggregated threat reports.
 * **User value:** Enables B2B sales and corporate security compliance.
 
 ### D2. Auto-Remediation Actions

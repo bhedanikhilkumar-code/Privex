@@ -1,10 +1,10 @@
 # SECURITY POLICY & VULNERABILITY DISCLOSURE
-## PRIVATE PROTECTION
+## PRIVEX
 
 > **POLICY STATUS:** ACTIVE  
 > **CANONICAL VERSION SUPPORTED:** `>= 0.1.0`  
 
-Private Protection takes security and privacy vulnerabilities with utmost seriousness. As a privacy-first cybersecurity platform operating on user endpoints, maintaining the highest standard of defensive engineering is our constitutional imperative.
+Privex takes security and privacy vulnerabilities with utmost seriousness. As a privacy-first cybersecurity platform operating on user endpoints, maintaining the highest standard of defensive engineering is our constitutional imperative.
 
 ---
 
@@ -21,7 +21,7 @@ Only the latest active minor release receives official security patches and thre
 
 ## 2. REPORTING A VULNERABILITY
 
-If you discover a security vulnerability, privacy leak, or flaw in Private Protection, **please do NOT open a public GitHub issue.** Public disclosure puts users at risk.
+If you discover a security vulnerability, privacy leak, or flaw in Privex, **please do NOT open a public GitHub issue.** Public disclosure puts users at risk.
 
 Instead, report vulnerabilities via one of our private channels:
 

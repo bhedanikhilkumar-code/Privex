@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary & Foundational Invariants
 
-Phase R transforms the Private Protection Windows Desktop application into a production-grade, 20-screen Antivirus Command Center. 
+Phase R transforms the Privex Windows Desktop application into a production-grade, 20-screen Antivirus Command Center. 
 
 ### The Cardinal Constitutional Invariant
 > **THE UI IS NOT A SECURITY AUTHORITY.**  
@@ -32,7 +32,7 @@ The Command Center organizes all 20 screens into 5 logical navigation groups:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│               PRIVATE PROTECTION ANTIVIRUS COMMAND CENTER              │
+│               PRIVEX ANTIVIRUS COMMAND CENTER              │
 ├───────────────────┬────────────────────────────────────────────────────┤
 │ 1. OVERVIEW       │ Screen 01: Home / Dashboard (HomeScreen)           │
 │                   │ Screen 20: About & Security (AboutSecurityScreen)  │

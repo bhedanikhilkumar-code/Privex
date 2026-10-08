@@ -1,8 +1,8 @@
 # TECHNOLOGY_STACK.md — Concrete Technology Selection & Evaluation
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION TECHNOLOGY STACK**  
-> Every technology choice in PRIVATE PROTECTION is governed by the core principles: **Local-First, Privacy-First, Data-Minimization, Zero-Cloud-Dependence, and Extreme Low Latency**. Technologies are selected based on security posture, privacy guarantees, offline reliability, cross-platform compilation capabilities, and strict sandboxing—never popularity.
+> **CANONICAL SPECIFICATION — PRIVEX TECHNOLOGY STACK**  
+> Every technology choice in PRIVEX is governed by the core principles: **Local-First, Privacy-First, Data-Minimization, Zero-Cloud-Dependence, and Extreme Low Latency**. Technologies are selected based on security posture, privacy guarantees, offline reliability, cross-platform compilation capabilities, and strict sandboxing—never popularity.
 
 ---
 

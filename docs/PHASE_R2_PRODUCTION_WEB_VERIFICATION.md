@@ -1,7 +1,7 @@
 # PHASE R2 & R2-A: PRODUCTION WEB VERIFICATION & CLOUDFLARE DEPLOYMENT ACTIVATION
 
 > **DOCUMENT STATUS:** OFFICIALLY SIGNED OFF & LIVE IN PRODUCTION  
-> **EVALUATION TARGET:** PRIVATE PROTECTION — Web Platform Production Distribution  
+> **EVALUATION TARGET:** PRIVEX — Web Platform Production Distribution  
 > **CANONICAL PRODUCTION URL:** `https://private-protection.pages.dev`  
 > **ARTIFACT TESTED & DEPLOYED:** `apps/web/dist` & `release/private-protection-web-0.1.0.zip`  
 > **EVALUATION DATE:** 2026-10-04  
@@ -12,7 +12,7 @@
 
 ## 1. EXECUTIVE SUMMARY & TARGET SPECIFICATION
 
-In accordance with Master Prompt Phase R2 and R2-A, this verification assesses the real-world operational readiness and live public deployment of the **PRIVATE PROTECTION Web Application** (`apps/web`).
+In accordance with Master Prompt Phase R2 and R2-A, this verification assesses the real-world operational readiness and live public deployment of the **PRIVEX Web Application** (`apps/web`).
 
 ### Canonical Target Specification
 * **Canonical Production URL:** `https://private-protection.pages.dev`
@@ -92,7 +92,7 @@ Inspection of `.github/workflows/deploy-pages.yml` reveals:
 
 The production UI was evaluated using real headless Chromium instances with Chrome DevTools Protocol (CDP) mounting `apps/web/dist`:
 
-* **Landing Page:** Renders primary title `"PRIVATE PROTECTION — Security Dashboard"`, brand header, status chips (`ENGINE: v0.1.0`, `RAM: 42MB`, `LATENCY: <1ms`), and `"100% Local On-Device Processing"` badge.
+* **Landing Page:** Renders primary title `"PRIVEX — Security Dashboard"`, brand header, status chips (`ENGINE: v0.1.0`, `RAM: 42MB`, `LATENCY: <1ms`), and `"100% Local On-Device Processing"` badge.
 * **Main Navigation:** All 6 primary navigation tabs render and respond without layout shift:
   1. `🏠 OVERVIEW`
   2. `🔗 URL SCANNER` (`#tab-url_scan`)
@@ -223,7 +223,7 @@ Empirical measurements gathered from real browser test runs:
 ## 11. AUTOMATED TEST SUITE PASS RATES
 
 ```
- RUN  v5.0.3 C:/Users/bheda/Music/Desktop/Private Protection/apps/web
+ RUN  v5.0.3 C:/Users/bheda/Music/Desktop/Privex/apps/web
 
  ✓ src/__tests__/lib/formatters.test.ts (6 tests)
  ✓ src/__tests__/privacy/network-isolation.test.ts (4 tests)

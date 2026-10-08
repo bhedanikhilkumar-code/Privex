@@ -1,7 +1,7 @@
 # PHASE G COMPLETION REPORT
 ## Ransomware Shield & Shadow Vault Rollback
 
-> **PROJECT:** Private Protection  
+> **PROJECT:** Privex  
 > **PHASE:** G — Ransomware Shield & Shadow Vault Rollback  
 > **STATUS:** **READY FOR FRESH INDEPENDENT PHASE G AUDIT**  
 > **COMPLETION DATE:** 2026-10-06  
@@ -11,7 +11,7 @@
 
 ## 1. Executive Summary
 
-Phase G of Private Protection has been implemented, tested, and verified in strict compliance with `phase.md`, `Architecture.md`, and the Phase G Architecture Specification.
+Phase G of Privex has been implemented, tested, and verified in strict compliance with `phase.md`, `Architecture.md`, and the Phase G Architecture Specification.
 
 The deliverables provide real-time ransomware protection and Copy-on-Write encrypted rollback without any cloud dependence or sensitive document telemetry leakage:
 1. **`RansomwareShieldService`** (`apps/desktop/src/services/ransomware-shield.service.ts`):

@@ -56,7 +56,7 @@ export const Header: React.FC<HeaderProps> = ({
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         <h1 style={{ fontSize: '16px', fontWeight: 'bold', margin: 0, color: '#0f172a' }}>
-          PRIVATE PROTECTION
+          PRIVEX
         </h1>
         <span
           style={{

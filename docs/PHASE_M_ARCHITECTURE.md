@@ -2,7 +2,7 @@
 
 ## 1. Executive Overview
 
-Phase M implements production-grade USB & Removable Media Protection for Private Protection Windows Antivirus. It establishes truthful Windows volume discovery, real storage capacity and free-space reporting, non-invasive mount/dismount monitoring, and automatic high-speed ($<200\text{ ms}$) root quick-triage for `autorun.inf` directives, binary `.lnk` shortcut worms, and deceptive root payloads.
+Phase M implements production-grade USB & Removable Media Protection for Privex Windows Antivirus. It establishes truthful Windows volume discovery, real storage capacity and free-space reporting, non-invasive mount/dismount monitoring, and automatic high-speed ($<200\text{ ms}$) root quick-triage for `autorun.inf` directives, binary `.lnk` shortcut worms, and deceptive root payloads.
 
 All threat analysis strictly flows through the unified canonical detection pipeline (`FileAnalyzer` $\rightarrow$ `RiskScorer` $\rightarrow$ `EngineVerdict`), preserving 100% offline air-gap parity, zero external network sockets, and strict system-process immunity (`RULE-09`).
 

@@ -1,8 +1,8 @@
-# Agent Handoff & Conflict Resolution Protocol: PRIVATE PROTECTION
+# Agent Handoff & Conflict Resolution Protocol: PRIVEX
 
 ## 1. Overview & Purpose
 
-To prevent communication drift, unverified side effects, and race conditions, all autonomous agents in the PRIVATE PROTECTION project must communicate completion using the standardized **Structured Handoff Protocol**.
+To prevent communication drift, unverified side effects, and race conditions, all autonomous agents in the PRIVEX project must communicate completion using the standardized **Structured Handoff Protocol**.
 
 The Master Orchestrator enforces this protocol as the mandatory quality gate before integrating any agent output into the main codebase.
 

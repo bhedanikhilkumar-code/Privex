@@ -1,4 +1,4 @@
-# Private Protection ProGuard Rules
+# Privex ProGuard Rules
 # Preserve domain models and native interface contracts
 
 -keep class com.privateprotection.mobile.** { *; }

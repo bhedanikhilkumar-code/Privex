@@ -1,7 +1,7 @@
 # RISK_ENGINE_ARCHITECTURE.md — Multi-Factor Risk Engine & Scoring Mathematics
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION RISK ENGINE**  
+> **CANONICAL SPECIFICATION — PRIVEX RISK ENGINE**  
 > This document specifies the mathematical model, weighting mechanisms, confidence scoring, conflict resolution rules, and uncertainty quantification governing the Multi-Factor Risk Engine.
 
 ---
@@ -10,7 +10,7 @@
 
 The Risk Engine rejects naive linear summation ($R = \sum w_i S_i$) because linear addition either under-represents high-severity critical single indicators or over-represents multiple weak benign signals.
 
-Instead, PRIVATE PROTECTION employs a **Bounded Non-Linear Diminishing-Returns Aggregation Model with Critical Override Logic**:
+Instead, PRIVEX employs a **Bounded Non-Linear Diminishing-Returns Aggregation Model with Critical Override Logic**:
 
 ### 1.1 Base Formulation
 Let $\mathcal{E} = \{e_1, e_2, \dots, e_n\}$ be the set of triggered `Evidence` tokens.

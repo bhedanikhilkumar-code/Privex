@@ -51,7 +51,7 @@ describe('RealtimeDownloadProtectionService (Phase T5)', () => {
           cleanCacheCount: 40,
           isPreOpenInterceptionSupported: false,
           platformLimitationNotice:
-            'Private Protection scans supported downloads as soon as Android makes the file available for inspection.'
+            'Privex scans supported downloads as soon as Android makes the file available for inspection.'
         })
       ),
       reconcileDownloadCatchUp: vi.fn().mockReturnValue(

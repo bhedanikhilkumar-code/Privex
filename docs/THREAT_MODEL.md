@@ -1,6 +1,6 @@
-# Threat Model: PRIVATE PROTECTION
+# Threat Model: PRIVEX
 
-This document uses a STRIDE-based approach to model threats against the PRIVATE PROTECTION product and its users.
+This document uses a STRIDE-based approach to model threats against the PRIVEX product and its users.
 
 ## 1. Malicious URLs / Phishing Pages
 - **Description:** User visits a deceptive site designed to steal credentials.
@@ -129,7 +129,7 @@ This document uses a STRIDE-based approach to model threats against the PRIVATE 
 - **Residual Risk:** Very Low.
 
 ## 15. Social Engineering Against the User About the Tool Itself
-- **Description:** Attacker tricks the user into disabling PRIVATE PROTECTION or ignoring its warnings.
+- **Description:** Attacker tricks the user into disabling PRIVEX or ignoring its warnings.
 - **Attack Surface:** User interface, warnings.
 - **Likelihood:** High.
 - **Impact:** High.

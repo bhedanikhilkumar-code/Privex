@@ -1,8 +1,8 @@
-# Failure Mode & Safe-Fail Architecture: PRIVATE PROTECTION
+# Failure Mode & Safe-Fail Architecture: PRIVEX
 
 ## 1. Foundational Reliability Philosophy
 
-A security product must never fail dangerously. When encountering hardware exhaustion, memory corruption, network partition, or hostile manipulation, PRIVATE PROTECTION adheres strictly to **Safe-Fail Defaults**:
+A security product must never fail dangerously. When encountering hardware exhaustion, memory corruption, network partition, or hostile manipulation, PRIVEX adheres strictly to **Safe-Fail Defaults**:
 - The user is never left with a false sense of security.
 - System failures never allow unverified malicious payloads to execute silently.
 - Graceful degradation maintains maximum possible protection at every failure tier.

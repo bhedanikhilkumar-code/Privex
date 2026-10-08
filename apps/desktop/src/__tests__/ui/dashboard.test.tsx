@@ -12,7 +12,7 @@ describe('Desktop UI & Dashboard Presentation Layer', () => {
   });
   it('renders App shell with header, sidebar, and initial HomeScreen', () => {
     render(<App />);
-    expect(screen.getAllByText('PRIVATE PROTECTION').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('PRIVEX').length).toBeGreaterThan(0);
     expect(screen.getByText('Protection Subsystem Matrix')).toBeDefined();
     expect(screen.getByText('⚡ Quick Scan')).toBeDefined();
     expect(screen.getByText('🔍 Full PC Scan')).toBeDefined();

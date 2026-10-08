@@ -1,4 +1,4 @@
-# PRIVATE PROTECTION
+# PRIVEX
 
 > **Privacy-first, on-device AI security assistant for threat, phishing, scam, and suspicious-content detection.**  
 > **Problem Statement Code:** PS-05 | **Authoritative Version:** `v0.1.0` | **License:** MIT | **Platform Status:** Production Ready & Verified
@@ -7,7 +7,7 @@
 
 ## TABLE OF CONTENTS
 
-1. [WHAT IS PRIVATE PROTECTION?](#1-what-is-private-protection)
+1. [WHAT IS PRIVEX?](#1-what-is-private-protection)
 2. [HOW DOES IT WORK?](#2-how-does-it-work)
 3. [PRIVACY](#3-privacy)
 4. [OFFLINE MODE](#4-offline-mode)
@@ -26,9 +26,9 @@
 
 ---
 
-## 1. WHAT IS PRIVATE PROTECTION?
+## 1. WHAT IS PRIVEX?
 
-**PRIVATE PROTECTION** is a unified, cross-platform cybersecurity platform engineered to protect users from online digital threats—including phishing links, scam messages, deceptive websites, and malicious files—directly on their personal devices.
+**PRIVEX** is a unified, cross-platform cybersecurity platform engineered to protect users from online digital threats—including phishing links, scam messages, deceptive websites, and malicious files—directly on their personal devices.
 
 ### PS-05 Problem Statement:
 > *"On-device threat, phishing and scam detection.*  
@@ -55,7 +55,7 @@
 
 ## 2. HOW DOES IT WORK?
 
-Private Protection employs a defense-in-depth, multi-layer detection architecture where deterministic rules and mathematics govern threat decisions, and the AI Security Assistant synthesizes plain-language explanations:
+Privex employs a defense-in-depth, multi-layer detection architecture where deterministic rules and mathematics govern threat decisions, and the AI Security Assistant synthesizes plain-language explanations:
 
 ```
 RAW UNTRUSTED INPUT (URL, Message, File Header, DOM Tree)
@@ -94,7 +94,7 @@ RAW UNTRUSTED INPUT (URL, Message, File Header, DOM Tree)
 
 ## 3. PRIVACY
 
-Private Protection operates under a strict 3-tier zero-knowledge data classification model:
+Privex operates under a strict 3-tier zero-knowledge data classification model:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -138,7 +138,7 @@ Private Protection operates under a strict 3-tier zero-knowledge data classifica
 
 - **100% Core Threat Detection Parity:** The full detection pipeline operates identically whether you are connected to the internet or completely air-gapped.
 - **Pre-Compiled Threat Intelligence:** Fast $O(1)$ Bloom filter databases and lexical rule matrices are packaged directly into the client applications.
-- **No Network Egress:** Disconnecting your Wi-Fi, Ethernet, or mobile data does not degrade Private Protection's ability to identify phishing links, scam messages, or deceptive domains.
+- **No Network Egress:** Disconnecting your Wi-Fi, Ethernet, or mobile data does not degrade Privex's ability to identify phishing links, scam messages, or deceptive domains.
 
 ---
 
@@ -228,13 +228,13 @@ All release checksums are authoritatively recorded in [`release/SHA256SUMS.txt`]
 2. In your browser, open `chrome://extensions` (or `edge://extensions`).
 3. Toggle on **Developer mode** in the top-right corner.
 4. Click **Load unpacked** and select the extracted folder.
-5. The Private Protection shield will appear in your browser toolbar.
+5. The Privex shield will appear in your browser toolbar.
 
 ---
 
 ## 11. DEMO
 
-Test Private Protection safely using these non-sensitive synthetic test cases:
+Test Privex safely using these non-sensitive synthetic test cases:
 
 ### Scenario A: Legitimate Safe Website
 - **Input:** `https://en.wikipedia.org/wiki/Computer_security`
@@ -257,9 +257,9 @@ Test Private Protection safely using these non-sensitive synthetic test cases:
 
 ## 12. BACKEND / CLOUD
 
-- **Does Private Protection require a backend server?**  
+- **Does Privex require a backend server?**  
   **NO.** The Core Detection Engine, Bayesian scoring, and AI explanation assistant run 100% locally on your computer or phone.
-- **Does Private Protection require the cloud?**  
+- **Does Privex require the cloud?**  
   **NO.** All scanning occurs in volatile device RAM. An optional cloud edge CDN (Cloudflare Pages) is used only to host static web assets and distribute release files.
 - **Does my browsing history, messages, or files ever leave my device?**  
   **NO.** Raw user payloads never cross the device boundary. Zero user data is transmitted to the cloud, logged on remote servers, or sold.

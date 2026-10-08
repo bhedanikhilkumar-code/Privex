@@ -1,4 +1,4 @@
-# Cloudflare Pages / Workers Deployment Configuration for Private Protection Web SPA
+# Cloudflare Pages / Workers Deployment Configuration for Privex Web SPA
 name = "private-protection"
 compatibility_date = "2024-09-23"
 pages_build_output_dir = "dist"

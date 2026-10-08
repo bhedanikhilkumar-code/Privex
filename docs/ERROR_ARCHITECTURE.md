@@ -1,8 +1,8 @@
 # ERROR_ARCHITECTURE.md — Unified Error Taxonomy, Sanitization & Escalation
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION ERROR ARCHITECTURE**  
-> This document specifies the unified error taxonomy, exception handling, data sanitization, retry strategies, and fail-closed safety behaviors across all PRIVATE PROTECTION subsystems.
+> **CANONICAL SPECIFICATION — PRIVEX ERROR ARCHITECTURE**  
+> This document specifies the unified error taxonomy, exception handling, data sanitization, retry strategies, and fail-closed safety behaviors across all PRIVEX subsystems.
 
 ---
 

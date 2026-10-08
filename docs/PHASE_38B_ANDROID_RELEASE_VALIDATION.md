@@ -11,7 +11,7 @@
 
 ## 1. EXECUTIVE SUMMARY
 
-In Phase 38-B, the **Private Protection Mobile Android Application** (`@private-protection/mobile` / `com.privateprotection.mobile`) was packaged for production release, statically and dynamically audited, and validated against all 11 core requirements of **Problem Statement PS-05**.
+In Phase 38-B, the **Privex Mobile Android Application** (`@private-protection/mobile` / `com.privateprotection.mobile`) was packaged for production release, statically and dynamically audited, and validated against all 11 core requirements of **Problem Statement PS-05**.
 
 Key Accomplishments:
 1. **Production Release Build Generated**:

@@ -1,6 +1,6 @@
-# User Flow Specification - PRIVATE PROTECTION
+# User Flow Specification - PRIVEX
 
-This document outlines the conceptual user interaction flows for the PRIVATE PROTECTION on-device AI security assistant.
+This document outlines the conceptual user interaction flows for the PRIVEX on-device AI security assistant.
 
 ## Core Interaction Flows
 
@@ -33,7 +33,7 @@ This document outlines the conceptual user interaction flows for the PRIVATE PRO
 *   **Explanation Panel:** Shows malware type (e.g., "Ransomware signature detected") and potential impact.
 
 ### 4. User scans a QR code
-*   **Trigger:** User points mobile camera at a QR code using the built-in scanner or the Private Protection app.
+*   **Trigger:** User points mobile camera at a QR code using the built-in scanner or the Privex app.
 *   **Detection (Invisible):** URL is extracted and analyzed before opening the browser.
 *   **Warning (Visible):** If suspicious, the scanner UI pauses and overlays a red caution banner on the viewfinder.
 *   **Actions:**

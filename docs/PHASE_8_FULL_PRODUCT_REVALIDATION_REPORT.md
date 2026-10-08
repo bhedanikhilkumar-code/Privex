@@ -11,7 +11,7 @@
 
 ## 1. Executive Summary
 
-This report delivers the authoritative, zero-trust end-to-end product validation of the **PRIVATE PROTECTION** platform across all required client platforms, shared computational engines, and AI/ML layers.
+This report delivers the authoritative, zero-trust end-to-end product validation of the **PRIVEX** platform across all required client platforms, shared computational engines, and AI/ML layers.
 
 In strict compliance with Master Prompt #22, no capability was accepted based on documentation claims, test pass rates, or simulated mock objects. Every capability was traced from user action through runtime execution to concrete empirical evidence.
 
@@ -205,7 +205,7 @@ In strict accordance with Master Prompt #22 Section 24, here are the factual cap
 
 ## 9. Remaining Release Blockers & Prerequisites
 
-Before PRIVATE PROTECTION can be released as a complete multi-platform security ecosystem, the following two release blockers must be resolved:
+Before PRIVEX can be released as a complete multi-platform security ecosystem, the following two release blockers must be resolved:
 
 1. **RELEASE BLOCKER 1: Desktop Native Runtime Container (GAP-04):**
    - Package `apps/desktop` with a genuine desktop runtime (Tauri 2.0 or Electron).

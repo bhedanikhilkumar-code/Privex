@@ -1,8 +1,8 @@
-# Autonomous Agent Orchestration Architecture: PRIVATE PROTECTION
+# Autonomous Agent Orchestration Architecture: PRIVEX
 
 ## 1. System Vision & Organizational Paradigm
 
-The PRIVATE PROTECTION engineering lifecycle utilizes a **hierarchical autonomous agent system** orchestrated by a central **Master Orchestrator**. 
+The PRIVEX engineering lifecycle utilizes a **hierarchical autonomous agent system** orchestrated by a central **Master Orchestrator**. 
 
 Specialist agents are **ephemeral task executors**—dynamically spawned with narrowly defined domain boundaries, explicit file ownership, and clear acceptance criteria. They terminate or idle upon task completion.
 

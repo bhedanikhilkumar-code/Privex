@@ -7,7 +7,7 @@
 
 ## 1. PRINCIPLE OF LEAST PRIVILEGE
 
-PRIVATE PROTECTION enforces strict privilege minimization. Every permission requested in `manifest.json` is audited, technically bounded, and constrained so that the extension cannot exceed its operational necessity.
+PRIVEX enforces strict privilege minimization. Every permission requested in `manifest.json` is audited, technically bounded, and constrained so that the extension cannot exceed its operational necessity.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐

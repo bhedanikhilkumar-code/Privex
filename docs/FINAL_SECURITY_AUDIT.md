@@ -1,5 +1,5 @@
 # FINAL REPOSITORY SECURITY & THREAT AUDIT REPORT
-## PRIVATE PROTECTION — Production Release v0.1.0
+## PRIVEX — Production Release v0.1.0
 
 > **DOCUMENT ID:** `docs/FINAL_SECURITY_AUDIT.md`  
 > **AUDIT STANDARD:** OWASP Top 10, CWE / SANS Top 25, STRIDE Threat Modeling, AGENTS.md Constitution  

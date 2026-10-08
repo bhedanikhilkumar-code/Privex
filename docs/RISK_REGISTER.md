@@ -1,6 +1,6 @@
-# Risk Register: PRIVATE PROTECTION
+# Risk Register: PRIVEX
 
-This register documents identified risks for the PRIVATE PROTECTION project, their mitigation strategies, and ownership.
+This register documents identified risks for the PRIVEX project, their mitigation strategies, and ownership.
 
 ---
 

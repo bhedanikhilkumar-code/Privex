@@ -1,10 +1,10 @@
-# Secure Update Architecture: PRIVATE PROTECTION
+# Secure Update Architecture: PRIVEX
 
 ## 1. Overview & Security Mandate
 
 The update distribution mechanism is the most critical supply-chain vector in any cybersecurity product. A compromised update pipeline can distribute poisoned rules or weaponized models to millions of endpoints.
 
-PRIVATE PROTECTION enforces an **Air-Gapped Cryptographic Update Pipeline**:
+PRIVEX enforces an **Air-Gapped Cryptographic Update Pipeline**:
 1. **Authenticated**: All update payloads must be digitally signed offline using Ed25519 hardware keys.
 2. **Integrity-Checked**: Full SHA-256 Merkle root verification before any byte touches persistent storage.
 3. **Monotonically Versioned**: Strictly increasing sequence integers prevent downgrade attacks.

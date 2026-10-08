@@ -1,8 +1,8 @@
-# Platform Validation & Feasibility Specification: PRIVATE PROTECTION
+# Platform Validation & Feasibility Specification: PRIVEX
 
 ## 1. Overview
 
-This document provides a rigorous, platform-by-platform engineering validation for every capability within the PRIVATE PROTECTION ecosystem. Each subsystem is assessed across six foundational questions:
+This document provides a rigorous, platform-by-platform engineering validation for every capability within the PRIVEX ecosystem. Each subsystem is assessed across six foundational questions:
 1. **WHERE** does it run?
 2. **WHY** does it run there?
 3. **WHAT** data does it require?

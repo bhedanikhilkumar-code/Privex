@@ -38,7 +38,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
       >
         <div>
           <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#38bdf8' }}>
-            PRIVATE PROTECTION
+            PRIVEX
           </h2>
           <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
             On-Device AI Security Engine (Android)

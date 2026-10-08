@@ -1,8 +1,8 @@
-# Data Classification Specification: PRIVATE PROTECTION
+# Data Classification Specification: PRIVEX
 
 ## 1. Overview & Data Philosophy
 
-PRIVATE PROTECTION operates under an uncompromising data protection framework designed to guarantee that users never surrender their digital privacy in exchange for cybersecurity.
+PRIVEX operates under an uncompromising data protection framework designed to guarantee that users never surrender their digital privacy in exchange for cybersecurity.
 
 Every piece of data generated, processed, or persisted within the ecosystem is strictly categorized into one of four immutable security classifications:
 1. **HIGHLY SENSITIVE (Class 1)**

@@ -1,5 +1,5 @@
 # RELEASE VERSIONING & SYNCHRONIZATION POLICY
-## PRIVATE PROTECTION — Production Release v0.1.0
+## PRIVEX — Production Release v0.1.0
 
 > **DOCUMENT ID:** `docs/RELEASE_VERSIONING.md`  
 > **STANDARD:** Semantic Versioning 2.0.0 (SemVer)  
@@ -10,7 +10,7 @@
 
 ## 1. CANONICAL RELEASE VERSION
 
-Private Protection adopts a **unified lockstep versioning strategy** for all core engines, platform clients, and release documentation.
+Privex adopts a **unified lockstep versioning strategy** for all core engines, platform clients, and release documentation.
 
 The canonical release version across the entire monorepo is:
 ```text

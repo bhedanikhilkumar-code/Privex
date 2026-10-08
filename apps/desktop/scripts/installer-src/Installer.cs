@@ -10,9 +10,9 @@ namespace PrivateProtection.Installer
 {
     static class Program
     {
-        private const string AppName = "Private Protection Desktop Security";
+        private const string AppName = "Privex Desktop Security";
         private const string AppVersion = "0.1.0";
-        private const string PublisherName = "Private Protection Project";
+        private const string PublisherName = "Privex Project";
         private const string ExeName = "PrivateProtection.exe";
         private const string UninstallExeName = "Uninstall.exe";
 
@@ -53,9 +53,9 @@ namespace PrivateProtection.Installer
                     }
                 }
 
-                // Default install target: %LOCALAPPDATA%\Programs\Private Protection
+                // Default install target: %LOCALAPPDATA%\Programs\Privex
                 string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                string installDir = Path.Combine(localAppData, "Programs", "Private Protection");
+                string installDir = Path.Combine(localAppData, "Programs", "Privex");
 
                 // If running instance exists, attempt graceful termination or prompt
                 Process[] existingProcesses = Process.GetProcessesByName("PrivateProtection");
@@ -211,24 +211,24 @@ namespace PrivateProtection.Installer
                 dynamic shell = Activator.CreateInstance(shellType);
 
                 // 1. Start Menu Shortcut
-                string startMenuDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "Private Protection");
+                string startMenuDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "Privex");
                 Directory.CreateDirectory(startMenuDir);
-                string startMenuLink = Path.Combine(startMenuDir, "Private Protection.lnk");
+                string startMenuLink = Path.Combine(startMenuDir, "Privex.lnk");
 
                 dynamic smShortcut = shell.CreateShortcut(startMenuLink);
                 smShortcut.TargetPath = targetExePath;
                 smShortcut.WorkingDirectory = installDir;
-                smShortcut.Description = "Private Protection Desktop Security";
+                smShortcut.Description = "Privex Desktop Security";
                 smShortcut.Save();
 
                 // 2. Desktop Shortcut
                 string desktopDir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-                string desktopLink = Path.Combine(desktopDir, "Private Protection.lnk");
+                string desktopLink = Path.Combine(desktopDir, "Privex.lnk");
 
                 dynamic dtShortcut = shell.CreateShortcut(desktopLink);
                 dtShortcut.TargetPath = targetExePath;
                 dtShortcut.WorkingDirectory = installDir;
-                dtShortcut.Description = "Private Protection Desktop Security";
+                dtShortcut.Description = "Privex Desktop Security";
                 dtShortcut.Save();
             }
             catch (Exception ex)

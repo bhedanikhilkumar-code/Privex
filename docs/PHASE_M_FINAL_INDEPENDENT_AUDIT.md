@@ -1,5 +1,5 @@
 # PHASE M — FINAL INDEPENDENT ZERO-TRUST AUDIT & RELEASE GATE
-## Private Protection — USB & Removable Media Protection
+## Privex — USB & Removable Media Protection
 
 **Status:** GO — PHASE M APPROVED  
 **Date:** 2026-10-07  

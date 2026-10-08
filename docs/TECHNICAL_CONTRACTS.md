@@ -1,8 +1,8 @@
-# Technical Contracts Specification: PRIVATE PROTECTION
+# Technical Contracts Specification: PRIVEX
 
 ## 1. Executive Summary & Purpose
 
-This document defines the implementation-independent, cross-platform technical contracts and data schemas for all seventeen core subsystems in the PRIVATE PROTECTION architecture. 
+This document defines the implementation-independent, cross-platform technical contracts and data schemas for all seventeen core subsystems in the PRIVEX architecture. 
 
 These contracts serve as the canonical contract boundary between the shared core library (`@private-protection/core`), on-device AI/ML layers (`@private-protection/ml`), client platforms (Mobile, Desktop, Extension, Web), and optional backend infrastructure.
 

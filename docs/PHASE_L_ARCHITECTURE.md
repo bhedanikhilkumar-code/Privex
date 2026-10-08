@@ -1,5 +1,5 @@
 # PHASE L ARCHITECTURE SPECIFICATION
-## Private Protection — Windows Startup & Persistence Protection
+## Privex — Windows Startup & Persistence Protection
 
 **Status:** CANONICAL ARCHITECTURAL SPECIFICATION  
 **Target Platform:** Windows 10/11 Desktop (Electron + TypeScript + @private-protection/core)  
@@ -9,7 +9,7 @@
 
 ## 1. System Vision & Purpose
 
-Phase L implements production-grade, local-first, offline-first **Startup & Persistence Protection** for Private Protection Windows Antivirus. Its mission is to audit, inspect, monitor, explain, and safely remediate persistence mechanisms that malware and threat actors use to achieve execution across reboots, user logons, and application restarts.
+Phase L implements production-grade, local-first, offline-first **Startup & Persistence Protection** for Privex Windows Antivirus. Its mission is to audit, inspect, monitor, explain, and safely remediate persistence mechanisms that malware and threat actors use to achieve execution across reboots, user logons, and application restarts.
 
 Unlike legacy utilities that treat every startup entry as suspicious or rely on destructive registry deletions, Phase L enforces:
 1. **Zero-Trust Input Parsing:** Command lines and paths are parsed without execution, shell expansion, or child processes.

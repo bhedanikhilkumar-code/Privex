@@ -291,7 +291,7 @@ async function runLiveTest() {
     await new Promise(r => setTimeout(r, 1500));
 
     const newTabEval = await cdp.send('Runtime.evaluate', {
-      expression: `!!document.getElementById('root') && document.title.includes('PRIVATE PROTECTION')`,
+      expression: `!!document.getElementById('root') && document.title.includes('PRIVEX')`,
       returnByValue: true
     }, newSessionId);
     console.log('[+] New Tab Loaded Cleanly:', newTabEval.result.value);

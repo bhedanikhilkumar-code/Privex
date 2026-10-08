@@ -1,14 +1,14 @@
 # TRUST_BOUNDARIES.md — Trust Boundary Model & Component Isolation
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION TRUST BOUNDARIES**  
-> This document defines the zero-trust boundary model of PRIVATE PROTECTION, detailing the separation between untrusted inputs, privileged host components, the trusted core, and external network services.
+> **CANONICAL SPECIFICATION — PRIVEX TRUST BOUNDARIES**  
+> This document defines the zero-trust boundary model of PRIVEX, detailing the separation between untrusted inputs, privileged host components, the trusted core, and external network services.
 
 ---
 
 ## 1. TRUST BOUNDARY ARCHITECTURE OVERVIEW
 
-PRIVATE PROTECTION operates under the principle that **all inputs are potentially malicious payloads attempting to compromise the security tool itself**. The architecture enforces five strict trust boundaries:
+PRIVEX operates under the principle that **all inputs are potentially malicious payloads attempting to compromise the security tool itself**. The architecture enforces five strict trust boundaries:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐

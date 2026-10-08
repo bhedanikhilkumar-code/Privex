@@ -10,7 +10,7 @@
 
 ## 1. BASELINE REPOSITORY VERIFICATION
 
-An independent audit of the entire Private Protection monorepo was executed to verify that Phase 6 introduces zero regressions across Phases 1 through 5.
+An independent audit of the entire Privex monorepo was executed to verify that Phase 6 introduces zero regressions across Phases 1 through 5.
 
 ### Monorepo Test Execution Baseline
 - **Execution Command:** `npm test` across all 5 workspace packages (`packages/core`, `packages/ml`, `apps/web`, `apps/extension`, `apps/mobile`).

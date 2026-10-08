@@ -1,6 +1,6 @@
 # Phase 10: Mobile Native Architecture Decision
 
-**Project:** PRIVATE PROTECTION (PS-05)  
+**Project:** PRIVEX (PS-05)  
 **Phase:** 10 — Mobile Native Implementation & Real Device Validation  
 **Date:** October 2026  
 **Status:** APPROVED & ACTIVE  
@@ -11,7 +11,7 @@
 
 Phase 8 and Phase 9 audits identified `GAP-03` (**Mobile Native Implementation**): the mobile project contained TypeScript domain logic and test mocks, but lacked concrete native runtime compilation and real OS platform integration.
 
-The objective of Phase 10 is to resolve `GAP-03` by establishing a **fully functional native Android implementation** and real platform integration for PRIVATE PROTECTION while rigorously adhering to the constitutional mandates:
+The objective of Phase 10 is to resolve `GAP-03` by establishing a **fully functional native Android implementation** and real platform integration for PRIVEX while rigorously adhering to the constitutional mandates:
 - **LOCAL-FIRST • PRIVACY-FIRST • DATA-MINIMIZATION • ZERO-KNOWLEDGE • ZERO-CLOUD-DEPENDENCE**
 
 ---
@@ -33,7 +33,7 @@ The objective of Phase 10 is to resolve `GAP-03` by establishing a **fully funct
 
 ## 3. Native Architecture & Bridge Topology
 
-To maximize performance, security, and offline deterministic execution while retaining shared core engine parity across platforms, PRIVATE PROTECTION Mobile employs a **Sandboxed Native WebView Host + Direct Native Security Bridge**:
+To maximize performance, security, and offline deterministic execution while retaining shared core engine parity across platforms, PRIVEX Mobile employs a **Sandboxed Native WebView Host + Direct Native Security Bridge**:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐

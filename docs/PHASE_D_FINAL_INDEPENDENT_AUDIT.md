@@ -1,7 +1,7 @@
 # Phase D Final Independent Audit Report: Quarantine Hardening (PPVAULT2)
 
 **Document:** `docs/PHASE_D_FINAL_INDEPENDENT_AUDIT.md`  
-**Project:** PRIVATE PROTECTION  
+**Project:** PRIVEX  
 **Phase:** D — QUARANTINE HARDENING (PPVAULT2)  
 **Audit Date:** 2026-10-06  
 **Audit Type:** FINAL INDEPENDENT SECURITY / ARCHITECTURE / INTEGRITY / PERFORMANCE / PRIVACY / REGRESSION AUDIT  

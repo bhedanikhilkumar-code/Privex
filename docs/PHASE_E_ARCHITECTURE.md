@@ -90,7 +90,7 @@ Phase E extends the verified Phase D PPVAULT2 quarantine container foundation by
   - **Open Dashboard**: Restores and focuses the main window.
   - **Run Quick Scan**: Triggers background quick scan of active user profile.
   - **Protection Status**: Displays real-time shield status (`Active • Monitored Roots: 6`).
-  - **Exit Private Protection**: Gracefully stops watchers, flushes encrypted manifests, and exits.
+  - **Exit Privex**: Gracefully stops watchers, flushes encrypted manifests, and exits.
 - Window `close` event is intercepted (`event.preventDefault()`; `win.hide()`) unless the user explicitly triggers exit via the tray menu.
 - Toast notifications are throttled by a sliding-window rate limiter ensuring $\le 3$ notifications per 10-second storm window.
 

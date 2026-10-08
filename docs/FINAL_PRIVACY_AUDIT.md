@@ -1,5 +1,5 @@
 # FINAL MULTI-PLATFORM PRIVACY AUDIT REPORT
-## PRIVATE PROTECTION — Production Release v0.1.0
+## PRIVEX — Production Release v0.1.0
 
 > **DOCUMENT ID:** `docs/FINAL_PRIVACY_AUDIT.md`  
 > **AUDIT STANDARD:** GDPR (General Data Protection Regulation), CCPA/CPRA, AGENTS.md Constitution  
@@ -12,7 +12,7 @@
 
 ## 1. PRIVACY CONSTITUTIONAL PRINCIPLES
 
-Private Protection was designed from inception around the foundational doctrine:
+Privex was designed from inception around the foundational doctrine:
 **LOCAL-FIRST • PRIVACY-FIRST • DATA-MINIMIZATION • ZERO-KNOWLEDGE • ZERO-CLOUD-DEPENDENCE**
 
 The cardinal mandate dictates that **no sensitive user data ever leaves the user's endpoint** to any remote cloud, analytics server, or third-party endpoint.
@@ -82,6 +82,6 @@ Each platform includes an automated tripwire test suite (`network-isolation.test
 
 ## 6. FINAL PRIVACY SIGN-OFF
 
-The Private Protection platform complies 100% with constitutional data minimization mandates. User payloads remain strictly on-device in volatile memory.
+The Privex platform complies 100% with constitutional data minimization mandates. User payloads remain strictly on-device in volatile memory.
 
 **PRIVACY STATUS:** **VERIFIED & SIGNED OFF (PASS)**

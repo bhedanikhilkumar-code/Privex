@@ -1,8 +1,8 @@
-# Test Contract & Verification Strategy: PRIVATE PROTECTION
+# Test Contract & Verification Strategy: PRIVEX
 
 ## 1. Overview & Verification Philosophy
 
-PRIVATE PROTECTION mandates an uncompromising, multi-tier testing framework. No pull request or subagent handoff may be merged without meeting explicit verification contracts.
+PRIVEX mandates an uncompromising, multi-tier testing framework. No pull request or subagent handoff may be merged without meeting explicit verification contracts.
 
 Every subsystem is verified across eleven distinct testing dimensions:
 

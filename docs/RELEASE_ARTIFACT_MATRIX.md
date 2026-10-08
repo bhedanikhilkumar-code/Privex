@@ -1,5 +1,5 @@
 # RELEASE ARTIFACT MATRIX
-## PRIVATE PROTECTION — Production Release v0.1.0
+## PRIVEX — Production Release v0.1.0
 
 > **DOCUMENT ID:** `docs/RELEASE_ARTIFACT_MATRIX.md`  
 > **CANONICAL VERSION:** `0.1.0`  

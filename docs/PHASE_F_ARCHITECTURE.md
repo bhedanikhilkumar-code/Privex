@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary & Architectural Topology
 
-Phase F implements behavioral process monitoring, lineage reconstruction, and containment within Private Protection's Desktop Security Engine. It inspects runtime process creation events, reconstructs execution lineage trees (parent-child PID relationships), identifies Living-off-the-Land Binaries (LOLBins) and deceptive path masquerading, and enables safe containment of confirmed malicious user-mode processes without risking operating system stability.
+Phase F implements behavioral process monitoring, lineage reconstruction, and containment within Privex's Desktop Security Engine. It inspects runtime process creation events, reconstructs execution lineage trees (parent-child PID relationships), identifies Living-off-the-Land Binaries (LOLBins) and deceptive path masquerading, and enables safe containment of confirmed malicious user-mode processes without risking operating system stability.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐

@@ -4,7 +4,7 @@
 **Privacy Architecture & Zero-Knowledge Specialist**
 
 ## 2. Mission
-Guarantee that PRIVATE PROTECTION mathematically enforces zero-knowledge privacy across all client platforms and network interactions. Ensure that sensitive user data (messages, visited URLs, screenshots, files) never leaves the host device under any circumstance.
+Guarantee that PRIVEX mathematically enforces zero-knowledge privacy across all client platforms and network interactions. Ensure that sensitive user data (messages, visited URLs, screenshots, files) never leaves the host device under any circumstance.
 
 ## 3. Responsibilities
 - Maintain `docs/PRIVACY_ARCHITECTURE.md` and enforce the 3-Tier Data Classification Model across all subsystems.

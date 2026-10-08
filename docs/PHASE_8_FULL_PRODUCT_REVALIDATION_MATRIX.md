@@ -1,6 +1,6 @@
 # PHASE 8 FULL PRODUCT RE-VALIDATION MATRIX
 
-**Project:** PRIVATE PROTECTION (PS-05)  
+**Project:** PRIVEX (PS-05)  
 **Document ID:** `MATRIX-PHASE-8-REVALIDATION-001`  
 **Evaluation Date:** October 2, 2026  
 **Auditing Entity:** Phase 8 Independent Product Validation Committee & Red-Team  

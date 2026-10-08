@@ -17,11 +17,11 @@ Phase 38-C completed the end-to-end transformation of the Electron desktop appli
 The delivery satisfies every PS-05 invariant and all Master Prompt #38-C directives:
 1. **Desktop UI Frozen**: Zero cosmetic or layout changes made to the desktop frontend.
 2. **Native Windows Consumer Installer Generated**: Built a zero-dependency, self-contained Windows setup executable `PrivateProtection-Setup-0.1.0.exe` using native C# compiler (`csc.exe`) with embedded resource compression and atomic extraction.
-3. **Clean Windows Installation**: Installs silently (`/S`) or interactively to `%LOCALAPPDATA%\Programs\Private Protection\` without requiring administrator elevation.
+3. **Clean Windows Installation**: Installs silently (`/S`) or interactively to `%LOCALAPPDATA%\Programs\Privex\` without requiring administrator elevation.
 4. **AppContainer ACL Sandbox Enforcement**: Automatically grants read and execute permissions (`*S-1-15-2-1:(OI)(CI)(RX)`) to `ALL APPLICATION PACKAGES` on the target directory, preventing Electron Chromium AppContainer sandbox permission faults.
 5. **System Integration**:
-   - Start Menu shortcut: `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Private Protection\Private Protection.lnk`
-   - Desktop shortcut: `Desktop\Private Protection.lnk`
+   - Start Menu shortcut: `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Privex\Privex.lnk`
+   - Desktop shortcut: `Desktop\Privex.lnk`
    - Add/Remove Programs Registry Key: `HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\PrivateProtection` with complete metadata (DisplayVersion, Publisher, DisplayIcon, UninstallString, EstimatedSize).
 6. **Execution Proof of Installed Binary**: Verified real native execution of the installed binary with `--headless-verify`, validating:
    - Real-time filesystem threat interceptor (`RealtimeMonitorService`)
@@ -53,7 +53,7 @@ All official release artifacts have been synchronized and recorded into `release
 ## 3. Windows Lifecycle Validation Matrix
 
 ### 3.1 Installation (`PrivateProtection-Setup-0.1.0.exe /S`)
-- **Target Folder:** `C:\Users\bheda\AppData\Local\Programs\Private Protection\`
+- **Target Folder:** `C:\Users\bheda\AppData\Local\Programs\Privex\`
 - **Permissions Applied:** `icacls "..." /grant "*S-1-15-2-1:(OI)(CI)(RX)" /T /Q`
 - **Exit Code:** `0`
 - **Result:** Successfully extracted 150MB payload, compiled standalone `Uninstall.exe`, configured Registry and Start Menu / Desktop shortcuts.
@@ -106,9 +106,9 @@ All official release artifacts have been synchronized and recorded into `release
 
 ### 3.3 Uninstallation (`Uninstall.exe /S`)
 - **Registry Key Removed:** `HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\PrivateProtection` -> `False`
-- **Start Menu Shortcut Removed:** `...Programs\Private Protection` -> `False`
-- **Desktop Shortcut Removed:** `...Desktop\Private Protection.lnk` -> `False`
-- **Directory Removed:** Delayed self-deletion via background script cleanly purged `%LOCALAPPDATA%\Programs\Private Protection\` -> `False`
+- **Start Menu Shortcut Removed:** `...Programs\Privex` -> `False`
+- **Desktop Shortcut Removed:** `...Desktop\Privex.lnk` -> `False`
+- **Directory Removed:** Delayed self-deletion via background script cleanly purged `%LOCALAPPDATA%\Programs\Privex\` -> `False`
 
 ### 3.4 Reinstallation
 - Re-ran `PrivateProtection-Setup-0.1.0.exe /S`

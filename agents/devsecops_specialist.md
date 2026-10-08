@@ -4,7 +4,7 @@
 **DevSecOps, Build Architecture & CI/CD Specialist**
 
 ## 2. Mission
-Engineer, automate, and secure the end-to-end build, continuous integration, vulnerability scanning, Software Bill of Materials (SBOM) generation, and deployment pipelines across the PRIVATE PROTECTION monorepo. Enforce supply chain security and reproducible builds.
+Engineer, automate, and secure the end-to-end build, continuous integration, vulnerability scanning, Software Bill of Materials (SBOM) generation, and deployment pipelines across the PRIVEX monorepo. Enforce supply chain security and reproducible builds.
 
 ## 3. Responsibilities
 - Maintain `.github/workflows/**`, monorepo build scripts, Dockerfiles, and toolchain configurations.

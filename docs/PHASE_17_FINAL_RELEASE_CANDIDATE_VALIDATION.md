@@ -1,5 +1,5 @@
 # PHASE 17 — CLEAN-MACHINE RELEASE CANDIDATE VALIDATION + FINAL REGRESSION REPORT
-**PROJECT: PRIVATE PROTECTION (PS-05)**  
+**PROJECT: PRIVEX (PS-05)**  
 **DATE:** 2026-10-03  
 **GOVERNANCE: AGENTS.md Constitution & Master Prompt #35**  
 **VERDICT: PHASE 17 FINAL RELEASE CANDIDATE PASSED (100% CLEAN-MACHINE VALIDATION)**
@@ -273,4 +273,4 @@ Execution of the full automated monorepo test suite across all 6 workspaces:
 ╚══════════════════════════════════════════════════════════════════════════════╝
 ```
 
-The PRIVATE PROTECTION (PS-05) platform has completed clean-machine release candidate validation. Every supported client surface is verified fully operational, secure, private, offline-capable, and completely faithful to the core PS-05 doctrine.
+The PRIVEX (PS-05) platform has completed clean-machine release candidate validation. Every supported client surface is verified fully operational, secure, private, offline-capable, and completely faithful to the core PS-05 doctrine.

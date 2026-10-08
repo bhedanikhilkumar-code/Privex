@@ -1,8 +1,8 @@
 # DATA_FLOW_ARCHITECTURE.md — Comprehensive Data Flows & Processing Pipelines
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION DATA FLOWS**  
-> This document specifies the exact, step-by-step data flows across all eight primary operations in the PRIVATE PROTECTION ecosystem. Each flow documents input, normalization, processing stages, detectors, AI involvement, threat intelligence, risk aggregation, output, storage, network transmission, and privacy boundaries.
+> **CANONICAL SPECIFICATION — PRIVEX DATA FLOWS**  
+> This document specifies the exact, step-by-step data flows across all eight primary operations in the PRIVEX ecosystem. Each flow documents input, normalization, processing stages, detectors, AI involvement, threat intelligence, risk aggregation, output, storage, network transmission, and privacy boundaries.
 
 ---
 
@@ -202,7 +202,7 @@ sequenceDiagram
 ---
 
 ### FLOW E: Mobile Screenshot & Live Camera QR Code Scan
-*User scans a QR code with the device camera or shares a screenshot to PRIVATE PROTECTION.*
+*User scans a QR code with the device camera or shares a screenshot to PRIVEX.*
 
 ```mermaid
 sequenceDiagram

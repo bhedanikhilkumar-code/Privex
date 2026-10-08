@@ -2,7 +2,7 @@
 
 > **Audit Classification:** Zero-Trust Independent Desktop Native Runtime & Security Re-Audit (Master Prompt #24)  
 > **Audit Date:** 2026-10-02  
-> **Target Repository:** `Private Protection` (`apps/desktop/`, `packages/core/`, `packages/ml/`)  
+> **Target Repository:** `Privex` (`apps/desktop/`, `packages/core/`, `packages/ml/`)  
 > **Target Claim Document:** `docs/PHASE_11_DESKTOP_NATIVE_IMPLEMENTATION.md`  
 > **Packaged Binary Audited:** `apps/desktop/release/PrivateProtection-win32-x64/PrivateProtection.exe`  
 > **Independent Audit Verdict:** **`PHASE 11 INDEPENDENT DESKTOP RE-AUDIT FAILED`**
@@ -73,8 +73,8 @@ $ npm run package
 > @private-protection/desktop@1.0.0 package
 > node scripts/build-desktop.js --package
 
-[build-desktop] Built Main, Preload, and Renderer bundles into C:\Users\bheda\Music\Desktop\Private Protection\apps\desktop\dist
-[build-desktop] Packaged Windows x64 release at: C:\Users\bheda\Music\Desktop\Private Protection\apps\desktop\release\PrivateProtection-win32-x64\PrivateProtection.exe
+[build-desktop] Built Main, Preload, and Renderer bundles into C:\Users\bheda\Music\Desktop\Privex\apps\desktop\dist
+[build-desktop] Packaged Windows x64 release at: C:\Users\bheda\Music\Desktop\Privex\apps\desktop\release\PrivateProtection-win32-x64\PrivateProtection.exe
 Exit Code: 0
 ```
 - **Why `npm run package` Succeeded While `npm run build` Failed:** `npm run package` invokes `node scripts/build-desktop.js --package` directly without running `tsc --noEmit`. Because `esbuild` strips TypeScript type annotations without performing type checking, `IPC_CHANNELS.REALTIME_THREAT_EVENT` silently evaluates to `undefined` at runtime inside `ALLOWED_EVENT_CHANNELS`.

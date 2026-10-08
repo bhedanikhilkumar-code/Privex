@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-Phase C establishes the deep static file-analysis engine of Private Protection. It implements the canonical 10-layer static detection model and the 4-Stage Short-Circuit Sieve across `@private-protection/core`, wiring Stage 0 clean-file caching directly into the `apps/desktop` file analysis adapter.
+Phase C establishes the deep static file-analysis engine of Privex. It implements the canonical 10-layer static detection model and the 4-Stage Short-Circuit Sieve across `@private-protection/core`, wiring Stage 0 clean-file caching directly into the `apps/desktop` file analysis adapter.
 
 All static file detectors adhere to the foundational constitutional invariants:
 - **Core Decision Authority Maintained:** All detectors emit structured `Evidence[]` signals with canonical `DetectorLayer` categories (`STRUCTURAL_PARSER`, `STATIC_HEURISTIC`, `METADATA_ANALYZER`, `SIGNATURE_ENGINE`, `HASH_INTEL`). No static detector or UI component produces final security verdicts directly.

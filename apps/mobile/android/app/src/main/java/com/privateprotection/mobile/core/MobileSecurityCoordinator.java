@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * MobileSecurityCoordinator: The central native execution coordinator for Private Protection Android (Phase T1).
+ * MobileSecurityCoordinator: The central native execution coordinator for Privex Android (Phase T1).
  *
  * Responsibilities:
  * - Thread-safe security worker coordination

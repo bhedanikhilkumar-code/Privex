@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary & Constitutional Alignment
 
-Phase O delivers the production-grade, local-first, offline-first threat intelligence update subsystem for the **Private Protection** Windows Desktop Antivirus. It enables secure, air-gapped importation and over-the-air (OTA) ingestion of cryptographically signed `.ppdb` (Private Protection Database) threat definition bundles without ever transmitting user data, files, URLs, or browsing history off-device.
+Phase O delivers the production-grade, local-first, offline-first threat intelligence update subsystem for the **Privex** Windows Desktop Antivirus. It enables secure, air-gapped importation and over-the-air (OTA) ingestion of cryptographically signed `.ppdb` (Privex Database) threat definition bundles without ever transmitting user data, files, URLs, or browsing history off-device.
 
 ### Core Guarantees:
 1. **Pinned Ed25519 Trust Anchor:** Updates are signed with pure Ed25519 signatures and verified strictly against a compiled-in production Root Public Key (`PRODUCTION_ROOT_PUBLIC_KEY`).

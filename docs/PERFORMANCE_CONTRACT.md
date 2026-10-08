@@ -1,10 +1,10 @@
-# Performance Contract & Latency Budgets: PRIVATE PROTECTION
+# Performance Contract & Latency Budgets: PRIVEX
 
 ## 1. Overview & Performance Doctrine
 
 Cybersecurity software that degrades host system performance, freezes user input, or drains battery will inevitably be disabled by users.
 
-PRIVATE PROTECTION treats performance as a foundational security feature. Every critical path must conform to strict, measurable latency budgets validated on target hardware.
+PRIVEX treats performance as a foundational security feature. Every critical path must conform to strict, measurable latency budgets validated on target hardware.
 
 ---
 

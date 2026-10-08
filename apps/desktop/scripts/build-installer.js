@@ -75,7 +75,7 @@ async function buildInstaller() {
 
   // Update installer manifest
   const manifest = {
-    productName: 'Private Protection Desktop Security',
+    productName: 'Privex Desktop Security',
     version: version,
     platform: 'win32',
     arch: 'x64',

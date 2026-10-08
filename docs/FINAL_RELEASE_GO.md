@@ -1,6 +1,6 @@
 # PHASE 36 — FINAL INDEPENDENT GO / NO-GO AUDIT
 
-**PROJECT:** PRIVATE PROTECTION (PS-05)  
+**PROJECT:** PRIVEX (PS-05)  
 **AUDIT PHASE:** Phase 36 — Final Independent Release Audit  
 **DATE:** 2026-10-03  
 **GOVERNANCE:** AGENTS.md Constitution & Master Prompt #36  

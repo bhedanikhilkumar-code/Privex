@@ -263,7 +263,7 @@ public class WebShieldService {
             capabilities.put("categoryB_browserIntegration", true);
             capabilities.put("categoryB_description", "App link verification, custom tab intent filters, user share integration.");
             capabilities.put("categoryC_userUrlSharing", true);
-            capabilities.put("categoryC_description", "Share sheet receiver ('Share with Private Protection') for instant scanning.");
+            capabilities.put("categoryC_description", "Share sheet receiver ('Share with Privex') for instant scanning.");
             capabilities.put("categoryD_localVpnShield", true);
             capabilities.put("categoryD_description", "Local DNS TUN filter (10.0.0.1/32). Zero TLS MITM, zero cloud payload transmission.");
             capabilities.put("categoryE_systemWideBrowserHookWithoutVpn", false);
@@ -318,7 +318,7 @@ public class WebShieldService {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext, NOTIF_CHANNEL_ID)
                     .setSmallIcon(android.R.drawable.stat_sys_warning)
                     .setContentTitle("Malicious Domain Blocked: " + domain)
-                    .setContentText("Private Protection Web Shield blocked an attempted connection to a known phishing/scam site.")
+                    .setContentText("Privex Web Shield blocked an attempted connection to a known phishing/scam site.")
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .setAutoCancel(true);
 

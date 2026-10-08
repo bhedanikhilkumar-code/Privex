@@ -7,7 +7,7 @@
 
 ## 1. THE CONSTITUTIONAL DOCTRINE OF ON-DEVICE AI
 
-In PRIVATE PROTECTION, artificial intelligence is an **assistive, interpretative layer**, never the sovereign security authority:
+In PRIVEX, artificial intelligence is an **assistive, interpretative layer**, never the sovereign security authority:
 
 1. **Security Engine Precedence**: The deterministic and heuristic engines in `@private-protection/core` (rules, lexical analysis, Bloom filter reputation, non-linear risk math) establish the canonical threat verdict (`ALLOW`, `INFORM`, `CAUTION`, `SUSPICIOUS`, `DANGEROUS`). The AI layer cannot overrule or downgrade this verdict.
 2. **Data-Not-Instructions Invariant**: Untrusted inputs (URLs, SMS bodies, web DOM snapshots) are treated strictly as passive data. Direct concatenation into executable prompt context is architecturally prohibited.

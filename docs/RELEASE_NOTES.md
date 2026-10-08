@@ -1,4 +1,4 @@
-# RELEASE NOTES — PRIVATE PROTECTION v0.1.0
+# RELEASE NOTES — PRIVEX v0.1.0
 ## Initial Production Release Candidate
 
 > **RELEASE VERSION:** `0.1.0`  
@@ -10,9 +10,9 @@
 
 ## 1. OVERVIEW
 
-We are proud to present **PRIVATE PROTECTION v0.1.0**, the initial production-ready release of the privacy-first, on-device digital threat protection platform.
+We are proud to present **PRIVEX v0.1.0**, the initial production-ready release of the privacy-first, on-device digital threat protection platform.
 
-Private Protection fulfills Problem Statement PS-05 by engineering a defense-in-depth cybersecurity assistant capable of detecting phishing links, scam messages, deceptive websites, and malicious files in real time without sending sensitive user data to the cloud.
+Privex fulfills Problem Statement PS-05 by engineering a defense-in-depth cybersecurity assistant capable of detecting phishing links, scam messages, deceptive websites, and malicious files in real time without sending sensitive user data to the cloud.
 
 ---
 

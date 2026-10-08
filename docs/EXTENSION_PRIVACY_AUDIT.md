@@ -9,7 +9,7 @@
 
 ## 1. Foundational Privacy Mandate
 
-The primary constitutional invariant of the PRIVATE PROTECTION platform is:
+The primary constitutional invariant of the PRIVEX platform is:
 > **Zero User Data Exfiltration:** Visited URLs, browsing histories, page text, form entries, and keystrokes are mathematically kept on-device. No telemetry containing raw user payloads is ever transmitted off-device.
 
 This audit evaluates the extension's data lifecycle, storage mechanisms, telemetry policies, and network isolation guarantees.

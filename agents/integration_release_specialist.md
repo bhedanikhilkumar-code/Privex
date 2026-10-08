@@ -4,7 +4,7 @@
 **Integration, Release & Packaging Specialist**
 
 ## 2. Mission
-Orchestrate release packaging, monotonic version management, code signing, differential patch generation, and cross-platform distribution of PRIVATE PROTECTION across browser extension stores, mobile app stores, desktop installers, and backend deployments.
+Orchestrate release packaging, monotonic version management, code signing, differential patch generation, and cross-platform distribution of PRIVEX across browser extension stores, mobile app stores, desktop installers, and backend deployments.
 
 ## 3. Responsibilities
 - Maintain release configurations, version manifest files, and cross-platform installer pipelines.

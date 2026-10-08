@@ -1,9 +1,9 @@
-# PRIVATE PROTECTION v0.1.0 — OFFICIAL PUBLIC RELEASE
+# PRIVEX v0.1.0 — OFFICIAL PUBLIC RELEASE
 
 > **Problem Statement:** PS-05 — On-device threat, phishing and scam detection  
 > **Doctrine:** LOCAL-FIRST • PRIVACY-FIRST • DATA-MINIMIZATION • ZERO-KNOWLEDGE • ZERO-CLOUD-DEPENDENCE  
 
-Private Protection `v0.1.0` is the official initial public release of the on-device cybersecurity platform.
+Privex `v0.1.0` is the official initial public release of the on-device cybersecurity platform.
 
 ## Official Release Packages & Checksums
 - `private-protection-web-0.1.0.zip` (124,973 bytes)  

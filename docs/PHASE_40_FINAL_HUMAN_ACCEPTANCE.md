@@ -1,6 +1,6 @@
 # PHASE 40: FINAL HUMAN ACCEPTANCE TEST & REAL-WORLD RELEASE GATE REPORT
 
-**Product:** PRIVATE PROTECTION  
+**Product:** PRIVEX  
 **Problem Statement:** PS-05 — On-device threat, phishing and scam detection  
 **Phase:** 40 (Final Human Acceptance Test + Real-World Release Gate)  
 **Release Candidate Version:** `v0.1.0`  
@@ -13,14 +13,14 @@
 
 ## 1. Executive Assessment
 
-Private Protection was subjected to the complete **Final Human Acceptance Test** protocol across all four client surfaces:
+Privex was subjected to the complete **Final Human Acceptance Test** protocol across all four client surfaces:
 1. **Web Application** (`@private-protection/web`)
 2. **Android Application** (`@private-protection/mobile`)
 3. **Desktop Application** (`@private-protection/desktop`)
 4. **Browser Extension** (`@private-protection/extension`)
 
 ### Core Question Answered:
-> *"Can a real user install, open, and use Private Protection across the supported product surfaces and successfully complete all critical user journeys without developer assistance?"*
+> *"Can a real user install, open, and use Privex across the supported product surfaces and successfully complete all critical user journeys without developer assistance?"*
 > 
 > **Answer: YES. All user journeys (Journeys A through F) succeed independently in clean user environments.**
 
@@ -79,7 +79,7 @@ All six production release artifacts match their frozen SHA-256 checksums record
 ### Journey E — Fresh Installation Flow
 - **Scenario:** New user installs application on clean Windows / Android system without developer tools.
 - **Observed Result:**
-  - Desktop installer extracts silently or interactively to `%LOCALAPPDATA%\Programs\Private Protection\`, creates Start Menu and Desktop shortcuts, sets registry entries, and launches cleanly.
+  - Desktop installer extracts silently or interactively to `%LOCALAPPDATA%\Programs\Privex\`, creates Start Menu and Desktop shortcuts, sets registry entries, and launches cleanly.
   - Android APK installs directly with standard package installer.
   - Zero terminal, Node.js, or developer dependencies required.
 
@@ -126,4 +126,4 @@ All six production release artifacts match their frozen SHA-256 checksums record
 ## 8. Final Decision
 
 **DECISION: GO FOR PUBLIC RELEASE**  
-Private Protection `v0.1.0` has satisfied all 11 PS-05 capabilities, preserves absolute privacy-first local processing, and is fully verified across Web, Android, Desktop, and Extension.
+Privex `v0.1.0` has satisfied all 11 PS-05 capabilities, preserves absolute privacy-first local processing, and is fully verified across Web, Android, Desktop, and Extension.

@@ -1,7 +1,7 @@
 # INTERFACE_CONTRACTS.md — Concrete Subsystem Technical Interface Contracts
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION INTERFACE CONTRACTS**  
+> **CANONICAL SPECIFICATION — PRIVEX INTERFACE CONTRACTS**  
 > This document defines the exact, typed technical contracts for all 18 core subsystems. These contracts are technology-agnostic and implementation-independent, serving as the binding specifications for all future implementations across TypeScript, Rust, Dart, Kotlin, and Swift.
 
 ---

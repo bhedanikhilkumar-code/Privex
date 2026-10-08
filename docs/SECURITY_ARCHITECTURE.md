@@ -1,7 +1,7 @@
-# Security Architecture: PRIVATE PROTECTION
+# Security Architecture: PRIVEX
 
 ## 1. Overview
-This document outlines the security architecture of the PRIVATE PROTECTION product itself. While the product is designed to secure the user from external threats, the product itself must be highly resilient against tampering, reverse engineering, and exploitation.
+This document outlines the security architecture of the PRIVEX product itself. While the product is designed to secure the user from external threats, the product itself must be highly resilient against tampering, reverse engineering, and exploitation.
 
 ## 2. Secure Development Principles
 - **Memory Safety:** Critical system components and parsers are written in memory-safe languages (e.g., Rust) to prevent buffer overflows and memory corruption vulnerabilities.

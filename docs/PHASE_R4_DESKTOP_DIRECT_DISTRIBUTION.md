@@ -14,7 +14,7 @@
 The Desktop product is distributed via two self-contained Windows consumer artifacts:
 - **Primary Consumer Setup Installer:** `release/PrivateProtection-Setup-0.1.0.exe` (158,047,232 bytes / 150.73 MB)
 - **Standalone Portable Binary:** `release/PrivateProtection-0.1.0-win-x64.exe` (245,726,208 bytes / 234.37 MB)
-- **Installed Target Executable:** `%LOCALAPPDATA%\Programs\Private Protection\PrivateProtection.exe` (245,726,208 bytes)
+- **Installed Target Executable:** `%LOCALAPPDATA%\Programs\Privex\PrivateProtection.exe` (245,726,208 bytes)
 
 ---
 
@@ -22,7 +22,7 @@ The Desktop product is distributed via two self-contained Windows consumer artif
 
 | Property | Value |
 |---|---|
-| Application Name | Private Protection Desktop Security (`@private-protection/desktop`) |
+| Application Name | Privex Desktop Security (`@private-protection/desktop`) |
 | Application Version | `0.1.0` |
 | Core Engine Version | `1.0.0-verified` |
 | Threat Database Seed | `2026.10-offline-seed` |
@@ -81,20 +81,20 @@ Verified via `certutil -hashfile` against `release/SHA256SUMS.txt`:
 ## 7. Installation
 
 - **Command Executed:** `release/PrivateProtection-Setup-0.1.0.exe /S`
-- **Target Installation Directory:** `C:\Users\bheda\AppData\Local\Programs\Private Protection\`
+- **Target Installation Directory:** `C:\Users\bheda\AppData\Local\Programs\Privex\`
 - **Payload Extracted:** 21 distribution items (`PrivateProtection.exe`, `Uninstall.exe`, `resources/`, `locales/`, `ARTIFACT_MANIFEST.json`, Chromium PAKs, `ffmpeg.dll`, Vulkan/SwiftShader DLLs, V8 snapshots).
 - **AppContainer Sandbox ACLs:** Verified via `icacls`. Grants `APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(OI)(CI)(RX)` (`*S-1-15-2-1`) so Chromium sandboxed renderers launch without permission faults.
-- **Registry Registration:** `HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\PrivateProtection` populated with `DisplayName`, `DisplayVersion` (`0.1.0`), `Publisher` (`Private Protection Project`), `UninstallString`, and `EstimatedSize` (`376245`).
+- **Registry Registration:** `HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\PrivateProtection` populated with `DisplayName`, `DisplayVersion` (`0.1.0`), `Publisher` (`Privex Project`), `UninstallString`, and `EstimatedSize` (`376245`).
 - **Shortcuts Created:**
-  - Start Menu: `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Private Protection\Private Protection.lnk` (`True`)
-  - Desktop: `%USERPROFILE%\Desktop\Private Protection.lnk` (`True`)
+  - Start Menu: `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Privex\Privex.lnk` (`True`)
+  - Desktop: `%USERPROFILE%\Desktop\Privex.lnk` (`True`)
 - **Result:** **PASS**
 
 ---
 
 ## 8. Launch
 
-- **Execution:** Launched installed binary `C:\Users\bheda\AppData\Local\Programs\Private Protection\PrivateProtection.exe`.
+- **Execution:** Launched installed binary `C:\Users\bheda\AppData\Local\Programs\Privex\PrivateProtection.exe`.
 - **Zero-Dependency Verification:** Executed in an isolated shell with `$env:PATH = "C:\Windows\system32;C:\Windows"` (stripping Node.js, Python, Git, VS Code, and repo paths).
 - **Observed State:**
   - Process exits cleanly with code `0` after verification.
@@ -184,7 +184,7 @@ Verified via `certutil -hashfile` against `release/SHA256SUMS.txt`:
 ## 15. Uninstall / Reinstall
 
 - **Executed Lifecycle on Real Machine:**
-  1. **Uninstall:** Ran `& "$env:LOCALAPPDATA\Programs\Private Protection\Uninstall.exe" /S`.
+  1. **Uninstall:** Ran `& "$env:LOCALAPPDATA\Programs\Privex\Uninstall.exe" /S`.
   2. **Post-Uninstall Verification:**
      - `PrivateProtection.exe` exists: `False`
      - Registry key `HKCU:\...\Uninstall\PrivateProtection` exists: `False`
@@ -264,5 +264,5 @@ Executed full per-workspace regression suite across the monorepo:
 
 **R4 COMPLETE — PASS**
 
-The Private Protection Desktop application (`v0.1.0`) has been empirically validated on a real Windows 11 x64 machine. Installation, launch, safe/malicious scanning, AES-256-GCM quarantine lifecycle, Grade 6 read-only AI explanations, 100% air-gapped offline parity, zero-byte network egress privacy, and clean uninstall/reinstall operations all pass with zero release-blocking defects.
+The Privex Desktop application (`v0.1.0`) has been empirically validated on a real Windows 11 x64 machine. Installation, launch, safe/malicious scanning, AES-256-GCM quarantine lifecycle, Grade 6 read-only AI explanations, 100% air-gapped offline parity, zero-byte network egress privacy, and clean uninstall/reinstall operations all pass with zero release-blocking defects.
 

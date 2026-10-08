@@ -72,7 +72,7 @@ describe('Web Production Runtime E2E & Server Verification (Phase 38-A.1)', () =
     expect(res.headers.get('x-frame-options')).toBe('DENY');
 
     const html = await res.text();
-    expect(html).toContain('<title>PRIVATE PROTECTION — Security Dashboard</title>');
+    expect(html).toContain('<title>PRIVEX — Security Dashboard</title>');
     expect(html).toContain('rel="icon" type="image/svg+xml" href="/favicon.svg"');
     expect(html).toContain('rel="manifest" href="/manifest.json"');
   });
@@ -110,7 +110,7 @@ describe('Web Production Runtime E2E & Server Verification (Phase 38-A.1)', () =
       const res = await fetch(`${BASE_URL}${route}`);
       expect(res.status).toBe(200);
       const text = await res.text();
-      expect(text).toContain('PRIVATE PROTECTION — Security Dashboard');
+      expect(text).toContain('PRIVEX — Security Dashboard');
     }
   });
 

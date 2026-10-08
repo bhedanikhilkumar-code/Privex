@@ -1,7 +1,7 @@
-# PRIVATE PROTECTION: Product Scope Specification
+# PRIVEX: Product Scope Specification
 
 ## 1. Product Vision & Overview
-PRIVATE PROTECTION is a multi-platform security ecosystem designed to provide an intelligent, conversational AI Security Assistant. Its primary directive is to detect phishing, scams, and malicious content purely on-device, prioritizing user privacy, low latency, and offline availability.
+PRIVEX is a multi-platform security ecosystem designed to provide an intelligent, conversational AI Security Assistant. Its primary directive is to detect phishing, scams, and malicious content purely on-device, prioritizing user privacy, low latency, and offline availability.
 
 ---
 
@@ -47,7 +47,7 @@ PRIVATE PROTECTION is a multi-platform security ecosystem designed to provide an
 
 ## 3. Out-of-Scope (Excluded from Current Vision)
 
-The following areas are explicitly **out-of-scope** for the PRIVATE PROTECTION product suite:
+The following areas are explicitly **out-of-scope** for the PRIVEX product suite:
 1. **Cloud Data Processing Engines:** Any architecture that requires sending user messages, emails, or browsing history to a remote server for AI inference or analysis.
 2. **Kernel-Mode Endpoint Detection and Response (Kernel EDR):** Ring-0 kernel drivers, OS registry hooking, or invasive kernel process injection/termination (note: standard user-space filesystem scanning, ingress directory monitoring, and AES-256-GCM quarantine are **in-scope** under Section 2.3).
 3. **Network Level Firewall / VPN:** Routing user traffic, deep packet inspection (DPI) of network streams, or IP/port blocking.
@@ -58,6 +58,6 @@ The following areas are explicitly **out-of-scope** for the PRIVATE PROTECTION p
 ## 4. Future Scope
 
 The following items are deferred for future iterations:
-1. **Web Application / Enterprise Dashboard:** A centralized management console for IT teams to deploy PRIVATE PROTECTION to employee fleets and manage security policies.
+1. **Web Application / Enterprise Dashboard:** A centralized management console for IT teams to deploy PRIVEX to employee fleets and manage security policies.
 2. **Deep Voice/Audio Deepfake Detection:** Expanding on-device models to analyze live audio streams for AI-generated voice scams.
 3. **Automated Incident Remediation:** Allowing the assistant to take autonomous actions (e.g., automatically deleting confirmed scam emails from an inbox via API).

@@ -80,7 +80,7 @@ export class RealtimeDownloadProtectionService {
       cleanCacheCount: 0,
       isPreOpenInterceptionSupported: false,
       platformLimitationNotice:
-        'Private Protection scans supported downloads as soon as Android makes the file available for inspection. System-wide pre-open interception is not supported by Android for third-party applications.'
+        'Privex scans supported downloads as soon as Android makes the file available for inspection. System-wide pre-open interception is not supported by Android for third-party applications.'
     };
   }
 

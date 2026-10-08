@@ -1,5 +1,5 @@
 /**
- * PRIVATE PROTECTION — CORE STATIC MALWARE ENGINE
+ * PRIVEX — CORE STATIC MALWARE ENGINE
  * Script Analyzer (PowerShell, VBScript, Batch, and JavaScript Heuristic & In-Memory De-obfuscation Engine)
  *
  * Implements Layer 6 analysis:

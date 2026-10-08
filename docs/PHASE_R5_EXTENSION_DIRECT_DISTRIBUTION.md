@@ -12,7 +12,7 @@
 
 ## 1. Objective
 
-Prove that the actual distributed Private Protection browser extension (`release/private-protection-extension-0.1.0.zip` and `apps/extension/dist/`) works as a real user-facing product across real Chromium browsers without modifying UI design, introducing cloud dependencies, or overclaiming untested browser compatibility.
+Prove that the actual distributed Privex browser extension (`release/private-protection-extension-0.1.0.zip` and `apps/extension/dist/`) works as a real user-facing product across real Chromium browsers without modifying UI design, introducing cloud dependencies, or overclaiming untested browser compatibility.
 
 ---
 
@@ -35,7 +35,7 @@ Prove that the actual distributed Private Protection browser extension (`release
 
 | Property | Value |
 |---|---|
-| Extension Name | `Private Protection — On-Device Threat Defender` |
+| Extension Name | `Privex — On-Device Threat Defender` |
 | Workspace Package | `@private-protection/extension` |
 | Extension Version | `0.1.0` |
 | Manifest Version | `3` (Chromium Manifest V3) |
@@ -60,7 +60,7 @@ Verified in `apps/extension/dist/manifest.json`:
 - **`manifest_version`:** `3`
 - **`background`:** `{ "service_worker": "background.js", "type": "module" }`
 - **`content_scripts`:** `[{ "matches": ["<all_urls>"], "js": ["content.js"], "run_at": "document_start" }]`
-- **`action`:** `default_popup: "popup.html"`, `default_title: "Private Protection Security Status"`, `default_icon` (`16`, `32`, `48`, `128`)
+- **`action`:** `default_popup: "popup.html"`, `default_title: "Privex Security Status"`, `default_icon` (`16`, `32`, `48`, `128`)
 - **`options_ui`:** `page: "options.html"`, `open_in_tab: true`
 - **`web_accessible_resources`:** `["interstitial.html", "assets/*"]` matched to `["<all_urls>"]`
 - **`content_security_policy`:** `"extension_pages": "script-src 'self'; object-src 'none'; default-src 'self'; connect-src 'none'; style-src 'self' 'unsafe-inline';"`
@@ -144,7 +144,7 @@ Every permission in `manifest.json` was audited against the Principle of Least P
 
 - **Entrypoint:** `popup.html` (`src/popup/popup.tsx`)
 - **Verified Elements & Flows:**
-  - Header (`🛡️ PRIVATE PROTECTION`) and `⚙️ Settings` button (`chrome.runtime.openOptionsPage()`).
+  - Header (`🛡️ PRIVEX`) and `⚙️ Settings` button (`chrome.runtime.openOptionsPage()`).
   - Active Tab Status Card displaying domain, color-coded verdict badge (`SAFE / ALLOWED`, `SUSPICIOUS (CAUTION)`, `DANGEROUS THREAT`), Risk Index meter (`0–100`), top 3 detected evidence signals, `🤖 AI Threat Briefing`, and `+ Trust This Domain Locally` button.
   - Restricted system page notice (`🔒 Browser System Page`) when opened on `chrome://`, `edge://`, `brave://`, or `about:` tabs.
   - Manual URL Quick Scanner (`input[placeholder="Scan another link..."]`) with inline result reset and re-scan support.
@@ -310,4 +310,4 @@ Full per-workspace regression suite executed after the `vite.config.ts` IIFE con
 
 **R5 COMPLETE — PASS**
 
-The Private Protection Browser Extension (`v0.1.0`, `release/private-protection-extension-0.1.0.zip`, SHA-256 `d4de2c9af0fde12056cae1dac1d593a00a907e3e14676b4a31e39aa75fa54b99`) is verified across Google Chrome, Microsoft Edge, and Brave Browser with 100% functional, page-interaction (closed Shadow DOM), offline, privacy, and security compliance.
+The Privex Browser Extension (`v0.1.0`, `release/private-protection-extension-0.1.0.zip`, SHA-256 `d4de2c9af0fde12056cae1dac1d593a00a907e3e14676b4a31e39aa75fa54b99`) is verified across Google Chrome, Microsoft Edge, and Brave Browser with 100% functional, page-interaction (closed Shadow DOM), offline, privacy, and security compliance.

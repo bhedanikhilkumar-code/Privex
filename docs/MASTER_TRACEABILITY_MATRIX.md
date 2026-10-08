@@ -1,7 +1,7 @@
 # MASTER_TRACEABILITY_MATRIX.md — End-to-End Requirement Traceability
 
 > **SYSTEM STATUS: PRE-CODING AUDIT PHASE (MASTER PROMPT #5)**  
-> **CANONICAL TRACEABILITY MATRIX — PRIVATE PROTECTION**  
+> **CANONICAL TRACEABILITY MATRIX — PRIVEX**  
 > This document maps every capability from the original Problem Statement (PS-05) through requirements, concrete features, target platforms, architectural components, technical interface contracts, specialist agents, test tiers, and quantifiable acceptance criteria.
 
 ---

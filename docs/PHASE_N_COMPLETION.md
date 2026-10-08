@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary
 
-Phase N implements the production-grade **Scheduled & On-Demand Scanning Subsystem** for the Private Protection Windows Desktop Antivirus. It guarantees scheduled scans execute automatically and safely based on user preferences while respecting endpoint resource availability (battery and CPU load), handling missed-scan startup catch-ups, and expanding on-demand Quick Scans to active user-mode process binaries and registered persistence locations.
+Phase N implements the production-grade **Scheduled & On-Demand Scanning Subsystem** for the Privex Windows Desktop Antivirus. It guarantees scheduled scans execute automatically and safely based on user preferences while respecting endpoint resource availability (battery and CPU load), handling missed-scan startup catch-ups, and expanding on-demand Quick Scans to active user-mode process binaries and registered persistence locations.
 
 All threat detection and remediation actions strictly flow through the canonical detection pipeline (`FileAnalyzer` $\rightarrow$ `RiskScorer` $\rightarrow$ `EngineVerdict` $\rightarrow$ `QuarantineService` $\rightarrow$ `NotificationService`), preserving 100% offline functionality, zero cloud dependencies, and zero-knowledge privacy invariants.
 

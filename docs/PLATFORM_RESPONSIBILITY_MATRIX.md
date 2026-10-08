@@ -1,7 +1,7 @@
 # Platform Responsibility Matrix
 
 ## Overview
-PRIVATE PROTECTION is designed to run across multiple platforms, providing seamless, on-device AI security. This document details the exact responsibilities, boundaries, and capabilities of each platform in the ecosystem.
+PRIVEX is designed to run across multiple platforms, providing seamless, on-device AI security. This document details the exact responsibilities, boundaries, and capabilities of each platform in the ecosystem.
 
 ## Platforms
 1. **Mobile App** (Android/iOS)

@@ -1,6 +1,6 @@
 # Phase I — Final Independent Zero-Trust Audit Report
 
-**Project:** Private Protection — Windows Desktop Antivirus  
+**Project:** Privex — Windows Desktop Antivirus  
 **Phase:** PHASE I — Automatic Response Ladder & False-Positive Exclusion Management  
 **Status:** **GO — PHASE I APPROVED**  
 **Audit Date:** October 7, 2026  

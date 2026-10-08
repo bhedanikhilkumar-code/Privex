@@ -52,7 +52,7 @@ export const PrivacyScreen: React.FC<PrivacyScreenProps> = ({ onCryptoShred }) =
         <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '13px', color: '#475569', lineHeight: 1.8 }}>
           <li><strong>Tier 1 Data Isolation:</strong> Your personal files, photos, code, and documents are inspected purely in volatile RAM and zeroed immediately upon scan completion.</li>
           <li><strong>Zero Cloud AI:</strong> Threat briefings are synthesized locally on this computer via `@private-protection/ml`. No prompt or evidence is sent to external LLM APIs.</li>
-          <li><strong>No User Tracking:</strong> Private Protection contains no user identifiers, usage telemetry beacons, or advertising SDKs.</li>
+          <li><strong>No User Tracking:</strong> Privex contains no user identifiers, usage telemetry beacons, or advertising SDKs.</li>
         </ul>
       </div>
 
@@ -89,7 +89,7 @@ export const PrivacyScreen: React.FC<PrivacyScreenProps> = ({ onCryptoShred }) =
       <FrictionGateModal
         isOpen={isModalOpen}
         title="Execute Complete Cryptographic Erasure?"
-        description="This action will permanently delete all quarantined files, clear all settings, and reset Private Protection to factory defaults. Quarantined threats cannot be recovered after this action."
+        description="This action will permanently delete all quarantined files, clear all settings, and reset Privex to factory defaults. Quarantined threats cannot be recovered after this action."
         confirmLabel="Permanent Crypto-Shred"
         countdownSeconds={3}
         onConfirm={handleConfirmShred}

@@ -1,4 +1,4 @@
-# AI Security Boundary & Adversarial Content Containment: PRIVATE PROTECTION
+# AI Security Boundary & Adversarial Content Containment: PRIVEX
 
 ## 1. Threat Landscape: The Adversarial Content Dilemma
 
@@ -84,7 +84,7 @@ The raw input string is completely omitted from the model prompt whenever possib
 ### Layer 3: System Prompt Hardening
 The system prompt contains explicit guardrails enforced by local quantized model fine-tuning:
 ```markdown
-You are the Private Protection Security Assistant.
+You are the Privex Security Assistant.
 Your sole function is to explain pre-identified cybersecurity threats in plain English.
 CRITICAL SECURITY CONSTRAINTS:
 1. You MUST NEVER override, diminish, or question the pre-computed threat verdict.

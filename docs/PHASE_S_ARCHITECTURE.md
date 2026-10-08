@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary & Release Scope
 
-Phase S is the final, comprehensive system verification, adversarial audit, accelerated soak testing, and independent release gate phase of the Private Protection Windows Desktop Antivirus and multi-platform digital-threat protection platform.
+Phase S is the final, comprehensive system verification, adversarial audit, accelerated soak testing, and independent release gate phase of the Privex Windows Desktop Antivirus and multi-platform digital-threat protection platform.
 
 Phase S establishes mathematical proof that:
 1. **The 11 Core PS-05 Requirements** are 100% satisfied across all platforms without cloud reliance, external network calls, or telemetry leakage.

@@ -1,7 +1,7 @@
 # PHASE R10: FINAL SECURITY + RELEASE HARDENING AUDIT REPORT
 
 > **SYSTEM STATUS: RELEASE HARDENING & FINAL VERIFICATION COMPLETE**  
-> **PROJECT:** PRIVATE PROTECTION  
+> **PROJECT:** PRIVEX  
 > **PROBLEM STATEMENT:** PS-05 — On-Device Threat, Phishing, and Scam Detection  
 > **RELEASE VERSION:** `v0.1.0`  
 > **AUDIT DATE:** October 4, 2026  
@@ -11,7 +11,7 @@
 
 ## 1. EXECUTIVE SUMMARY & RELEASE VERDICT
 
-Phase R10 is the culminating security, release, and hardening verification milestone for the **PRIVATE PROTECTION** project. Across all previous phases (R1 through R9), the platform's four client surfaces—**Web Application**, **Android Direct Distribution APK**, **Desktop Software (Windows)**, and **Browser Extension (Manifest V3)**—along with the Shared Security Core (`@private-protection/core`) and Machine Learning Assistant (`@private-protection/ml`) were developed, integrated, cross-validated, and verified in real-world environments.
+Phase R10 is the culminating security, release, and hardening verification milestone for the **PRIVEX** project. Across all previous phases (R1 through R9), the platform's four client surfaces—**Web Application**, **Android Direct Distribution APK**, **Desktop Software (Windows)**, and **Browser Extension (Manifest V3)**—along with the Shared Security Core (`@private-protection/core`) and Machine Learning Assistant (`@private-protection/ml`) were developed, integrated, cross-validated, and verified in real-world environments.
 
 Phase R10 conducted a comprehensive, adversarial, multi-surface security audit to identify and resolve vulnerabilities, credential leaks, network leakage, insecure release configurations, and artifact inconsistencies.
 
@@ -28,7 +28,7 @@ Phase R10 conducted a comprehensive, adversarial, multi-surface security audit t
 ### Official Release Verdict
 $$\mathbf{FINAL\ VERDICT:}\quad \mathbf{GO}$$
 
-*Production release of Private Protection v0.1.0 is unconditionally authorized for direct distribution.*
+*Production release of Privex v0.1.0 is unconditionally authorized for direct distribution.*
 
 ---
 
@@ -73,7 +73,7 @@ A comprehensive vulnerability audit was executed across all package manifests us
 
 ## 4. NETWORK EXPOSURE & CLOUD BOUNDARY AUDIT
 
-Private Protection's core doctrine is **Zero Cloud Dependence** and **Zero Network Egress for User Payloads**. An exhaustive static analysis and dynamic runtime inspection was conducted for network egress points (`fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`, `navigator.sendBeacon`, socket connections).
+Privex's core doctrine is **Zero Cloud Dependence** and **Zero Network Egress for User Payloads**. An exhaustive static analysis and dynamic runtime inspection was conducted for network egress points (`fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`, `navigator.sendBeacon`, socket connections).
 
 ### Surface-by-Surface Verification
 1. **Shared Core (`@private-protection/core`):**
@@ -196,7 +196,7 @@ The Browser Extension (`apps/extension`) was audited against Google Chrome Exten
 
 ## 9. PRIVACY & DATA MINIMIZATION VERIFICATION
 
-Private Protection enforces a mathematical three-tier data classification model:
+Privex enforces a mathematical three-tier data classification model:
 
 1. **Tier 1 (Raw User Payloads):**
    - Visited URLs, SMS text, clipboard data, QR bitmaps, scanned file contents.

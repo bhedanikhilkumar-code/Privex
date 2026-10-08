@@ -1,8 +1,8 @@
-# PRIVATE PROTECTION: AI/ML Architecture
+# PRIVEX: AI/ML Architecture
 
 ## 1. Model Portfolio
 
-To achieve an effective on-device AI security assistant, PRIVATE PROTECTION utilizes an ensemble of optimized, specialized models rather than a single monolithic architecture.
+To achieve an effective on-device AI security assistant, PRIVEX utilizes an ensemble of optimized, specialized models rather than a single monolithic architecture.
 
 ### 1.1 Specialized Models
 *   **NLP Text Classifier (Spam/Scam/Phishing):**

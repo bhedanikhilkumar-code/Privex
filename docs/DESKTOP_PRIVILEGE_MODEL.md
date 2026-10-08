@@ -1,5 +1,5 @@
 # DESKTOP PRIVILEGE & PROCESS BOUNDARY MODEL (Phase 7)
-## Least Privilege Architecture for Private Protection Desktop
+## Least Privilege Architecture for Privex Desktop
 
 > **SYSTEM STATUS: SECURITY SPECIFICATION ACTIVE**  
 > **Target Component:** `apps/desktop/` (Desktop Architecture & IPC)  
@@ -9,7 +9,7 @@
 
 ## 1. CORE PRINCIPLE: USER-MODE LEAST PRIVILEGE
 
-PRIVATE PROTECTION Desktop operates strictly under the principle of least privilege:
+PRIVEX Desktop operates strictly under the principle of least privilege:
 1. **No Kernel Drivers**: The application does **NOT** install or require kernel-mode drivers (`.sys` on Windows, KEXTs on macOS). It operates completely in user mode.
 2. **Unprivileged UI Renderer**: The UI dashboard executes in a heavily sandboxed Chromium renderer with zero Node.js integration and zero direct filesystem access.
 3. **No Unnecessary Elevation**: Standard user operations (scanning user files, quarantining user downloads, displaying threat explanations) execute under standard user rights without prompting for UAC elevation.

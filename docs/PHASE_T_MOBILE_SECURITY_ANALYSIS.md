@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-Private Protection has successfully completed Phases A through S for Windows Desktop (`apps/desktop/`), establishing a verified, local-first endpoint protection suite. The objective of Phase T is to translate and expand these capabilities to real physical Android smartphones (`apps/mobile/`), meeting the core mandate of **Problem Statement PS-05**: on-device, real-time threat, phishing, scam, and malware protection without cloud dependency.
+Privex has successfully completed Phases A through S for Windows Desktop (`apps/desktop/`), establishing a verified, local-first endpoint protection suite. The objective of Phase T is to translate and expand these capabilities to real physical Android smartphones (`apps/mobile/`), meeting the core mandate of **Problem Statement PS-05**: on-device, real-time threat, phishing, scam, and malware protection without cloud dependency.
 
 However, an enterprise-grade antivirus cannot be ported from Windows to Android by naive analogy. Windows grants privileged user-mode services broad filesystem visibility (`ReadDirectoryChangesW`, direct disk handles, full path traversal) and process inspection primitives (`Win32_ProcessStartTrace`, ETW). In stark contrast, modern Android (Android 8.0 Oreo through Android 14/15, API levels 26–35) enforces a rigorous zero-trust sandbox:
 1. **Linux UID Process Isolation:** Every application executes in its own distinct Linux UID (`u0_aXXX`). Direct process inspection, memory access, or cross-app execution blocking is prohibited by Linux kernel permissions and SELinux policies.

@@ -1,14 +1,14 @@
 # UPDATE_SECURITY_ARCHITECTURE.md — Cryptographic Verification, Anti-Downgrade & OTA Updates
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
-> **CANONICAL SPECIFICATION — PRIVATE PROTECTION UPDATE SECURITY**  
+> **CANONICAL SPECIFICATION — PRIVEX UPDATE SECURITY**  
 > This document specifies the cryptographic update pipeline, air-gapped signing authority, monotonic versioning, atomic staging, and anti-downgrade protections governing all OTA differential updates.
 
 ---
 
 ## 1. THE THREAT MODEL FOR OTA UPDATES
 
-Software update channels represent a tier-1 critical attack vector. A compromised update channel could allow an adversary to disable detection rules, push trojaned model weights, or compromise user endpoints. PRIVATE PROTECTION mitigates this with a zero-trust update architecture:
+Software update channels represent a tier-1 critical attack vector. A compromised update channel could allow an adversary to disable detection rules, push trojaned model weights, or compromise user endpoints. PRIVEX mitigates this with a zero-trust update architecture:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐

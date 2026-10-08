@@ -1,5 +1,5 @@
 # DEPENDENCY & SUPPLY CHAIN SECURITY AUDIT
-## PRIVATE PROTECTION — Production Release v0.1.0
+## PRIVEX — Production Release v0.1.0
 
 > **DOCUMENT ID:** `docs/DEPENDENCY_SECURITY_AUDIT.md`  
 > **AUDIT STANDARD:** NIST SP 800-161 (Cybersecurity Supply Chain Risk Management), OWASP Top 10 A06:2021 (Vulnerable and Outdated Components)  
@@ -82,4 +82,4 @@ All dependencies in the production and client distribution pipelines were audite
 
 ## 6. CONCLUSION & SIGN-OFF
 
-The dependency footprint of Private Protection is minimal, secure, and free from vulnerabilities. Dependency health is certified as **PRODUCTION READY**.
+The dependency footprint of Privex is minimal, secure, and free from vulnerabilities. Dependency health is certified as **PRODUCTION READY**.

@@ -21,7 +21,7 @@
 - **Design Tokens:**
   - Shell geometry: 240px sidebar, 60px header, `#0f172a` slate sidebar, `#f8fafc` canvas, `#ffffff` cards with `#e2e8f0` border.
   - 3-Tier Posture Hero Banner: `🟢 PROTECTED` (`#dcfce7`), `🟡 ATTENTION REQUIRED` (`#fef3c7`), `🔴 ACTION REQUIRED` (`#fee2e2`).
-  - 4-Pillar Plain Language Contract: WHAT happened, WHY it matters, WHAT Private Protection did, WHAT user should do.
+  - 4-Pillar Plain Language Contract: WHAT happened, WHY it matters, WHAT Privex did, WHAT user should do.
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## High-Level Architecture Overview
 
-PRIVATE PROTECTION employs a localized, privacy-first, edge-computing architecture. The core logic relies on a **Shared Detection Engine** deployed across multiple front-end clients, backed by an optional backend for threat intelligence updates.
+PRIVEX employs a localized, privacy-first, edge-computing architecture. The core logic relies on a **Shared Detection Engine** deployed across multiple front-end clients, backed by an optional backend for threat intelligence updates.
 
 ```mermaid
 flowchart TD

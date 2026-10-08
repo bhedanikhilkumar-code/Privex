@@ -1,6 +1,6 @@
 # PHASE F FINAL INDEPENDENT AUDIT — GO
 
-> **PROJECT:** Private Protection  
+> **PROJECT:** Privex  
 > **PHASE:** F — Process & Behavior Monitoring  
 > **AUDITED HEAD:** `73ec786f19eff38f3186f1a4c389e7e799a00984`  
 > **AUDIT POSTURE:** Zero-Trust Independent Security, Correctness & Architecture Audit  
@@ -12,7 +12,7 @@
 
 ## 1. Executive Summary & Verification Posture
 
-This document constitutes the final, zero-trust independent verification and security audit of **Phase F (Process & Behavior Monitoring)** in the Private Protection repository, conducted strictly against git commit `73ec786f19eff38f3186f1a4c389e7e799a00984`.
+This document constitutes the final, zero-trust independent verification and security audit of **Phase F (Process & Behavior Monitoring)** in the Privex repository, conducted strictly against git commit `73ec786f19eff38f3186f1a4c389e7e799a00984`.
 
 Prior independent audits identified five security and architectural blockers (designated `SEC-F-01` through `SEC-F-05`), including critical issues in containment authorization, process-start event capture mechanisms, startup callback registration races, default binary inspection configuration, and memory privacy. Subsequent remediation iterations transitioned the Windows process-creation event infrastructure from intrinsic WMI polling to native `Win32_ProcessStartTrace` event subscription with bounded startup FIFO buffering and strict authorization tokens.
 

@@ -1,5 +1,5 @@
 # RELEASE BASELINE VERIFICATION REPORT
-## PRIVATE PROTECTION — Release Candidate v0.1.0
+## PRIVEX — Release Candidate v0.1.0
 
 > **DOCUMENT ID:** `docs/RELEASE_BASELINE.md`  
 > **EVALUATION STANDARD:** AGENTS.md Constitution & Master Prompt #16 Hardening Protocol  
@@ -11,7 +11,7 @@
 
 ## 1. EXECUTIVE SUMMARY
 
-The entire Private Protection codebase across all six workspaces (`packages/core`, `packages/ml`, `apps/web`, `apps/extension`, `apps/mobile`, and `apps/desktop`) has been systematically executed, typechecked, linted, and built in the host environment.
+The entire Privex codebase across all six workspaces (`packages/core`, `packages/ml`, `apps/web`, `apps/extension`, `apps/mobile`, and `apps/desktop`) has been systematically executed, typechecked, linted, and built in the host environment.
 
 - **Total Test Files:** 81
 - **Total Unit & Integration Tests:** 413

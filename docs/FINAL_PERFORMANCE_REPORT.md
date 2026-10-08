@@ -1,5 +1,5 @@
 # FINAL PERFORMANCE & BENCHMARK AUDIT REPORT
-## PRIVATE PROTECTION — Production Release v0.1.0
+## PRIVEX — Production Release v0.1.0
 
 > **DOCUMENT ID:** `docs/FINAL_PERFORMANCE_REPORT.md`  
 > **STANDARD:** Requirement 6 (Real-Time Detection SLA), Requirement 11 (Low Latency SLA)  

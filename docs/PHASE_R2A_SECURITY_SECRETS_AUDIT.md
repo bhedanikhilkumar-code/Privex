@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary
 
-As part of Phase R2-A governance, an exhaustive multi-vector credential and secret audit was conducted across all files, configuration layers, automation scripts, CI/CD pipelines, and git commit history in the **Private Protection** repository.
+As part of Phase R2-A governance, an exhaustive multi-vector credential and secret audit was conducted across all files, configuration layers, automation scripts, CI/CD pipelines, and git commit history in the **Privex** repository.
 
 ### Key Audit Verdicts:
 1. **Repository & Source Code Audit:** **PASS** (Zero hardcoded credentials, API keys, bearer tokens, or private keys).

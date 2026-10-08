@@ -6,13 +6,13 @@
 **Status:** **PHASE 16 FINAL RELEASE HARDENING PASSED**  
 **Canonical Release Version:** `0.1.0`  
 **Git Base Commit:** `4f014449d524a64e44478d0b75c79a370f18b483`  
-**Target Product Code:** PS-05 (Private Protection)  
+**Target Product Code:** PS-05 (Privex)  
 
 ---
 
 ## 1. EXECUTIVE SUMMARY & MISSION COMPLETION
 
-Phase 16 represents the culmination of all architectural, detection, user-journey, and platform validation efforts across PRIVATE PROTECTION. Following the successful completion of Phase 12 (Independent Re-Validation), Phase 13 (Full Product User-Journey Validation), Phase 14 (Android Validation), and Phase 15 (Android Packaging Remediation), the product entered **Final Release Hardening**.
+Phase 16 represents the culmination of all architectural, detection, user-journey, and platform validation efforts across PRIVEX. Following the successful completion of Phase 12 (Independent Re-Validation), Phase 13 (Full Product User-Journey Validation), Phase 14 (Android Validation), and Phase 15 (Android Packaging Remediation), the product entered **Final Release Hardening**.
 
 Under strict governance rules:
 - **No Feature Creep:** Zero new features, UI redesigns, or unrelated detection categories were introduced.

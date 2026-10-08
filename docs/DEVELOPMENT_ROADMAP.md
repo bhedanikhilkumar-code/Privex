@@ -1,8 +1,8 @@
-# Master Phased Implementation Roadmap: PRIVATE PROTECTION
+# Master Phased Implementation Roadmap: PRIVEX
 
 ## 1. Roadmap Architecture & Execution Philosophy
 
-The development of PRIVATE PROTECTION strictly follows a **dependency-aware, bottom-up phased sequence**. Lower-level shared engines and security contracts are fully implemented and verified before higher-level platform shells or UI integrations are built.
+The development of PRIVEX strictly follows a **dependency-aware, bottom-up phased sequence**. Lower-level shared engines and security contracts are fully implemented and verified before higher-level platform shells or UI integrations are built.
 
 ```
 PHASE 0: Pre-Coding Architecture & Technical Contracts

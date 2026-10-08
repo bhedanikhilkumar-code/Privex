@@ -2,13 +2,13 @@
 
 > **SYSTEM STATUS: PRE-CODING GOVERNANCE PHASE ACTIVE**  
 > **CANONICAL INSTRUCTION DOCUMENT FOR ALL AI AGENTS & SUBAGENTS**  
-> Every agent, subagent, and human engineer must read and comply with this document before planning, modifying, or executing tasks within the **PRIVATE PROTECTION** project.
+> Every agent, subagent, and human engineer must read and comply with this document before planning, modifying, or executing tasks within the **PRIVEX** project.
 
 ---
 
 ## 1. PROJECT IDENTITY
 
-- **Project Name:** PRIVATE PROTECTION
+- **Project Name:** PRIVEX
 - **Project Category:** Privacy-First Cybersecurity & Digital-Threat Protection Platform
 - **Problem Statement Code:** PS-05
 - **Primary Goal:** Detect and help users understand phishing links, scam messages, malicious content, and suspicious communications in real time with local/on-device processing wherever technically feasible.
@@ -28,7 +28,7 @@
 
 ## 3. THE 11 CORE REQUIREMENTS
 
-Every subsystem, interface, and test in PRIVATE PROTECTION must directly serve and trace back to these eleven mandatory capabilities:
+Every subsystem, interface, and test in PRIVEX must directly serve and trace back to these eleven mandatory capabilities:
 
 1. **On-Device AI Security Assistant:** A local Small Language Model (SLM) or deterministic template engine that translates technical threat telemetry into actionable, jargon-free explanations directly on the user's endpoint.
 2. **Phishing Link Detection:** Lexical feature analysis, Shannon entropy, brand typosquatting distance, Punycode/IDN homograph parsing, and local Bloom filter lookups to detect deceptive URLs before interaction.
@@ -46,7 +46,7 @@ Every subsystem, interface, and test in PRIVATE PROTECTION must directly serve a
 
 ## 4. COMPLETE PRODUCT VISION & ARCHITECTURE TOPOLOGY
 
-PRIVATE PROTECTION is an integrated, multi-platform cybersecurity platform—not a single website or isolated script. The ecosystem consists of:
+PRIVEX is an integrated, multi-platform cybersecurity platform—not a single website or isolated script. The ecosystem consists of:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
@@ -157,7 +157,7 @@ RAW UNTRUSTED INPUT (URL, Message, File, DOM)
 
 ## 7. PRIVACY RULES & DATA CLASSIFICATION
 
-PRIVATE PROTECTION operates under strict data classification boundaries:
+PRIVEX operates under strict data classification boundaries:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -238,7 +238,7 @@ PRIVATE PROTECTION operates under strict data classification boundaries:
 
 > *"Code exists" does NOT mean "Feature is done."*
 
-A task or feature in PRIVATE PROTECTION is declared **DONE** only when all 11 criteria are met:
+A task or feature in PRIVEX is declared **DONE** only when all 11 criteria are met:
 1. **Implementation Complete**: Production-quality implementation exists without stubs, dummy returns, or TODOs.
 2. **Behavioral Correctness**: Intended threat detection, warning, or explanation behavior operates accurately.
 3. **Automated Tests Exist**: Comprehensive unit, integration, or benchmark tests are committed.
@@ -377,9 +377,9 @@ In the event of ambiguity or conflicting information, documentation authority is
 
 ---
 
-## 1. WHAT PRIVATE PROTECTION WAS DESIGNED TO ACHIEVE
+## 1. WHAT PRIVEX WAS DESIGNED TO ACHIEVE
 
-Private Protection is designed to provide on-device cyber threat, phishing link, scam message, and malicious content detection with instant warnings and plain-language explanations without transmitting sensitive user data to the cloud.
+Privex is designed to provide on-device cyber threat, phishing link, scam message, and malicious content detection with instant warnings and plain-language explanations without transmitting sensitive user data to the cloud.
 
 ### The 7 Core Architectural Pillars Across 4 Client Surfaces
 1. **LOCAL-FIRST:** Core security decision authority executes exclusively on the user endpoint.
@@ -515,7 +515,7 @@ All 18 foundational capabilities are fully completed, verified against actual re
   - Setup Installer: `release/PrivateProtection-Setup-0.1.0.exe` (158,047,232 bytes, SHA-256: `7bf197ff...`)
   - Portable Executable: `release/PrivateProtection-0.1.0-win-x64.exe` (245,726,208 bytes, SHA-256: `49b61a03...`)
 - **Lifecycle:**
-  - Installs silently (`/S`) or interactively to `%LOCALAPPDATA%\Programs\Private Protection\` without admin rights.
+  - Installs silently (`/S`) or interactively to `%LOCALAPPDATA%\Programs\Privex\` without admin rights.
   - Grants Chromium AppContainer sandbox ACL permissions (`*S-1-15-2-1:(OI)(CI)(RX)`).
   - Registers Start Menu shortcut, Desktop shortcut, and Add/Remove Programs registry key `HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\PrivateProtection`.
   - Uninstaller (`Uninstall.exe /S`) cleanly removes files, shortcuts, and registry entries.
@@ -538,7 +538,7 @@ All 18 foundational capabilities are fully completed, verified against actual re
 
 ### Phase R7 — Backend Decision
 - **Status:** **NO MANDATORY BACKEND (CONFIRMED)**.
-- **Policy:** Private Protection operates 100% locally on-device. Zero backend servers are required for core protection.
+- **Policy:** Privex operates 100% locally on-device. Zero backend servers are required for core protection.
 - **Status:** **NOT REQUIRED (CONFIRMED)**.
 
 ### Phase R8 — Real-World Performance

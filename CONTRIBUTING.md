@@ -1,7 +1,7 @@
-# CONTRIBUTING TO PRIVATE PROTECTION
+# CONTRIBUTING TO PRIVEX
 ## Autonomous Agent & Developer Contribution Guidelines
 
-Thank you for your interest in contributing to **PRIVATE PROTECTION**!  
+Thank you for your interest in contributing to **PRIVEX**!  
 Before submitting code or proposing architectural changes, please read this document and the canonical project constitution in [`AGENTS.md`](./AGENTS.md).
 
 ---

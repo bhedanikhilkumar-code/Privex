@@ -45,7 +45,7 @@ npx vitest run tests/validation/phase8-audit.test.ts
 
 ### Test Output Log
 ```
- RUN  v5.0.3 c:/Users/bheda/Music/Desktop/Private Protection
+ RUN  v5.0.3 c:/Users/bheda/Music/Desktop/Privex
 
  ✓ tests/validation/phase8-audit.test.ts (24 tests) 142ms
    ✓ Phase 8 Independent Validation Suite (24)

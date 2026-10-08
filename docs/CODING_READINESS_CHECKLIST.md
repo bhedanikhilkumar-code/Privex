@@ -1,7 +1,7 @@
-# Coding Readiness Checklist: PRIVATE PROTECTION (Master Prompt #5 Red-Team Edition)
+# Coding Readiness Checklist: PRIVEX (Master Prompt #5 Red-Team Edition)
 
 > **SYSTEM STATUS: PRE-CODING AUDIT COMPLETE (MASTER PROMPT #5)**  
-> **CANONICAL CHECKLIST — PRIVATE PROTECTION CODING READINESS VERIFICATION**  
+> **CANONICAL CHECKLIST — PRIVEX CODING READINESS VERIFICATION**  
 > In accordance with Section I of `AGENTS.md` and Master Prompt #5 Section 28, every verification gate is audited and verified with STATUS (PASS, FAIL, NOT APPLICABLE), EVIDENCE, DOCUMENT, and AUDITOR.
 
 ---

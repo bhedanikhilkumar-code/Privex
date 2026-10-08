@@ -1,5 +1,5 @@
 /**
- * PRIVATE PROTECTION — CORE STATIC MALWARE ENGINE
+ * PRIVEX — CORE STATIC MALWARE ENGINE
  * Document Analyzer (OOXML, OLE2 Compound Document, and PDF Structural Parser)
  *
  * Implements Layer 5 & Layer 3 analysis for Office documents and PDFs:

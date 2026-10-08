@@ -13,7 +13,7 @@
 
 ## 1. Executive Summary
 
-Phase S has successfully conducted full-system verification, adversarial penetration testing, accelerated soak testing, performance benchmarking, low-resource validation, and release-build packaging for the Private Protection antivirus platform.
+Phase S has successfully conducted full-system verification, adversarial penetration testing, accelerated soak testing, performance benchmarking, low-resource validation, and release-build packaging for the Privex antivirus platform.
 
 All claims in this report are substantiated by concrete test executions, real Windows OS service interactions, real cryptographic signatures, empirical latency measurements, and production build outputs in `release/`.
 

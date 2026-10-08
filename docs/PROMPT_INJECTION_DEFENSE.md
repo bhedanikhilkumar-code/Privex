@@ -7,7 +7,7 @@
 
 ## 1. THE 11 ATTACK CATEGORIES & TAXONOMY
 
-The on-device assistant must withstand malicious directives embedded in untrusted payloads. PRIVATE PROTECTION implements dedicated defenses across 11 adversarial categories:
+The on-device assistant must withstand malicious directives embedded in untrusted payloads. PRIVEX implements dedicated defenses across 11 adversarial categories:
 
 | Category | Attack Vector Description | Example Payload | Defense Mechanism |
 |---|---|---|---|

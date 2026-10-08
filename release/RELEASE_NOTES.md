@@ -1,4 +1,4 @@
-# Private Protection v0.1.1
+# Privex v0.1.1
 
 ## Release status
 Official public release.
@@ -23,7 +23,7 @@ Official public release.
 | `private-protection-mobile-0.1.1.aab` | Android Build Archive AAB (Build Artifact) | `0e1117b2dbd0653191935de6578c2f4c73bbbe62651cf428e352195662134a32` |
 
 ## Privacy
-Private Protection remains 100% privacy-first and offline-capable. All threat detection, AI briefing synthesis, URL tokenization, and quarantine operations execute locally on-device in volatile RAM without transmitting user payloads off-device.
+Privex remains 100% privacy-first and offline-capable. All threat detection, AI briefing synthesis, URL tokenization, and quarantine operations execute locally on-device in volatile RAM without transmitting user payloads off-device.
 
 ## Distribution
 Available for Windows, Web, Browser Extension, and Android direct distribution via verified GitHub release assets. No publication has occurred on the Google Play Store.

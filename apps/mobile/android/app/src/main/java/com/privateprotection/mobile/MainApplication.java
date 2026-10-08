@@ -6,7 +6,7 @@ import android.util.Log;
 import com.privateprotection.mobile.core.MobileSecurityCoordinator;
 
 /**
- * Main application class for Private Protection on Android.
+ * Main application class for Privex on Android.
  * Enforces zero-knowledge, local-only processing in memory.
  */
 public class MainApplication extends Application {
@@ -27,7 +27,7 @@ public class MainApplication extends Application {
     public void onCreate() {
         super.onCreate();
         sInstance = this;
-        Log.i(TAG, "Private Protection Android Application initialized with local zero-knowledge configuration.");
+        Log.i(TAG, "Privex Android Application initialized with local zero-knowledge configuration.");
 
         // Initialize Native Mobile Security Coordinator (Phase T1)
         securityCoordinator = MobileSecurityCoordinator.getInstance(this);

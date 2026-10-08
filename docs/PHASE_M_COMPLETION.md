@@ -1,5 +1,5 @@
 # PHASE M COMPLETION REPORT
-## Private Protection — USB & Removable Media Protection
+## Privex — USB & Removable Media Protection
 
 **Status:** COMPLETE & VERIFIED  
 **Date:** 2026-10-07  
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-Phase M implements production-grade, local-first, offline-first, zero-trust **USB & Removable Media Protection** for Private Protection Windows Desktop Antivirus. The system accurately identifies Windows removable USB drives using OS volume queries (`Win32_LogicalDisk` with `DriveType=2` / `DRIVE_REMOVABLE`), reports real capacity and free storage bytes, monitors drive attachment and detachment events in the background, executes sub-200ms non-recursive root quick-triage for `autorun.inf` and `.lnk` shortcut worms, and routes all detected threats through the canonical detection pipeline (`FileAnalyzer` $\rightarrow$ `RiskScorer` $\rightarrow$ `EngineVerdict`) with automated `PPVAULT2` quarantine for malicious payloads.
+Phase M implements production-grade, local-first, offline-first, zero-trust **USB & Removable Media Protection** for Privex Windows Desktop Antivirus. The system accurately identifies Windows removable USB drives using OS volume queries (`Win32_LogicalDisk` with `DriveType=2` / `DRIVE_REMOVABLE`), reports real capacity and free storage bytes, monitors drive attachment and detachment events in the background, executes sub-200ms non-recursive root quick-triage for `autorun.inf` and `.lnk` shortcut worms, and routes all detected threats through the canonical detection pipeline (`FileAnalyzer` $\rightarrow$ `RiskScorer` $\rightarrow$ `EngineVerdict`) with automated `PPVAULT2` quarantine for malicious payloads.
 
 ---
 

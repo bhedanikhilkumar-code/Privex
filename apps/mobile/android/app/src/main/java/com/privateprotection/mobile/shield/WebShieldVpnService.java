@@ -99,7 +99,7 @@ public class WebShieldVpnService extends VpnService implements Runnable {
 
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_lock_lock)
-                .setContentTitle("Private Protection Web Shield Active")
+                .setContentTitle("Privex Web Shield Active")
                 .setContentText("Local on-device DNS threat filter active. Zero data leaves your device.")
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -110,7 +110,7 @@ public class WebShieldVpnService extends VpnService implements Runnable {
     public void run() {
         try {
             Builder builder = new Builder();
-            builder.setSession("Private Protection Local Web Shield");
+            builder.setSession("Privex Local Web Shield");
             builder.setMtu(1500);
 
             // Configure TUN interface with local dummy address

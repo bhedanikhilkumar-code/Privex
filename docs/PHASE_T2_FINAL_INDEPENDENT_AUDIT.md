@@ -1,6 +1,6 @@
 # PHASE T2 — FINAL INDEPENDENT ZERO-TRUST SECURITY & CORRECTNESS AUDIT
 
-**Target:** Private Protection — Phase T2: App Installation Shield  
+**Target:** Privex — Phase T2: App Installation Shield  
 **Scope:** `apps/mobile/android/` & `apps/mobile/`  
 **Auditor:** Independent Principal Android Security Auditor  
 **Date:** October 8, 2026  
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary & Audit Scope
 
-Phase T2 of Private Protection implements an on-device, privacy-first App Installation Safety Shield for the Android platform. This audit evaluated the implementation against:
+Phase T2 of Privex implements an on-device, privacy-first App Installation Safety Shield for the Android platform. This audit evaluated the implementation against:
 1. **Canonical Governance Rules:** `rules.md`, `phase.md` (Section T2), `memory.md`, `design.md`, `PRD.md`, `Architecture.md`.
 2. **Android Capability Honesty:** Verified that no unprivileged application claims impossible OS-level pre-commit installation blocking or silent uninstallation.
 3. **Execution Safety:** Zero dynamic code execution (`DexClassLoader`, ART runtime invocation, reflection loading) during APK inspection.

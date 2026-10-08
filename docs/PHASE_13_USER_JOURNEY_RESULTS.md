@@ -8,7 +8,7 @@
 > **AUDIT MODE:** STRICT READ-ONLY AUDIT (Zero Production Code Modified, Zero Tests Modified)  
 > **OVERALL JOURNEY STATUS:** **8 / 8 USER JOURNEYS PASS (100% OPERATIONAL INTEGRITY)**  
 > **SURFACES VALIDATED:** Web Dashboard, Android Mobile Client, Desktop Software (Electron), Browser Extension (MV3), Core Engine, AI Assistant  
-> **CORE QUESTION ANSWERED:** **CAN A REAL USER ACTUALLY USE PRIVATE PROTECTION SUCCESSFULLY, SAFELY, PRIVATELY, AND END-TO-END? — YES.**
+> **CORE QUESTION ANSWERED:** **CAN A REAL USER ACTUALLY USE PRIVEX SUCCESSFULLY, SAFELY, PRIVATELY, AND END-TO-END? — YES.**
 
 ---
 
@@ -28,7 +28,7 @@ Each journey was evaluated under strict non-simulated conditions:
 ## 2. Detailed Audit Trace of the 8 End-to-End User Journeys
 
 ### JOURNEY 1 — PHISHING LINK DETECTION & USER ACTION
-* **Scenario:** User receives suspicious link -> opens Private Protection -> scans link -> threat detected -> warning shown -> explanation shown -> recommended action shown.
+* **Scenario:** User receives suspicious link -> opens Privex -> scans link -> threat detected -> warning shown -> explanation shown -> recommended action shown.
 * **Target Platforms:** Web Dashboard (`apps/web`), Desktop App (`apps/desktop`), Mobile App (`apps/mobile`), Browser Extension (`apps/extension`).
 * **Step-by-Step Flow:**
   1. **User Action:** User encounters a deceptive link (`http://secure-paypa1.com/login?token=urgent` or `http://192.168.1.1/login`) and pastes it into the scanner input field.
@@ -229,4 +229,4 @@ Each journey was evaluated under strict non-simulated conditions:
 
 ## 4. Certification
 
-All eight user journeys were audited and verified end-to-end. Real users can use Private Protection across all intended surfaces successfully, safely, privately, and completely offline.
+All eight user journeys were audited and verified end-to-end. Real users can use Privex across all intended surfaces successfully, safely, privately, and completely offline.

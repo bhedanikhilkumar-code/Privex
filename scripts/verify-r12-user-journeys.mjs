@@ -251,7 +251,7 @@ async function main() {
       expression: `({
         title: document.title,
         heading: document.querySelector('h1, h2, div')?.innerText,
-        hasShieldBadge: document.body.innerText.includes('PRIVATE PROTECTION'),
+        hasShieldBadge: document.body.innerText.includes('PRIVEX'),
         hasStatus: document.body.innerText.includes('SAFE / ALLOWED'),
         hasRiskIndex: document.body.innerText.includes('Risk Index'),
         hasZeroBrowsingPrivacyNotice: document.body.innerText.includes('Zero Browsing History Collected') || document.body.innerText.includes('100% On-Device'),

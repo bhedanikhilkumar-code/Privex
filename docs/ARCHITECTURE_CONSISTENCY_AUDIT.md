@@ -1,8 +1,8 @@
-# Architecture Consistency Audit: PRIVATE PROTECTION
+# Architecture Consistency Audit: PRIVEX
 
 ## 1. Executive Summary & Audit Scope
 
-This document records the comprehensive **Cross-Dimensional Consistency Audit** conducted across all fourteen primary architectural axes of the PRIVATE PROTECTION system blueprint prior to coding authorization.
+This document records the comprehensive **Cross-Dimensional Consistency Audit** conducted across all fourteen primary architectural axes of the PRIVEX system blueprint prior to coding authorization.
 
 Every cross-cutting dependency, interface contract, privacy guarantee, and platform requirement was audited for contradictions, circular dependencies, ungrounded assumptions, and scope drift.
 

@@ -1,6 +1,6 @@
-# RELEASE CANDIDATE v0.1.0 — PRIVATE PROTECTION
+# RELEASE CANDIDATE v0.1.0 — PRIVEX
 
-**Project:** PRIVATE PROTECTION  
+**Project:** PRIVEX  
 **Problem Statement:** PS-05 — On-device threat, phishing and scam detection  
 **Release Candidate Version:** `v0.1.0`  
 **Git Commit:** `8b52ec0`  
@@ -11,7 +11,7 @@
 
 ## 1. Executive Summary
 
-Private Protection `v0.1.0` is the first unified, production-sealed Release Candidate across all 4 client platforms:
+Privex `v0.1.0` is the first unified, production-sealed Release Candidate across all 4 client platforms:
 1. **Web Application** (`@private-protection/web`)
 2. **Android Application** (`@private-protection/mobile`)
 3. **Desktop Application** (`@private-protection/desktop`)
@@ -54,7 +54,7 @@ All official release artifacts are stored in `release/` and matched against `rel
 
 ### 3.3 Desktop Application (Windows)
 - **Distribution Channels:**
-  1. **Consumer Installer:** `PrivateProtection-Setup-0.1.0.exe` provides a zero-dependency setup executable installing to `%LOCALAPPDATA%\Programs\Private Protection\`, registering Start Menu and Desktop shortcuts, writing Add/Remove Programs registry key, configuring AppContainer sandbox ACLs, and providing a clean self-deleting `Uninstall.exe`.
+  1. **Consumer Installer:** `PrivateProtection-Setup-0.1.0.exe` provides a zero-dependency setup executable installing to `%LOCALAPPDATA%\Programs\Privex\`, registering Start Menu and Desktop shortcuts, writing Add/Remove Programs registry key, configuring AppContainer sandbox ACLs, and providing a clean self-deleting `Uninstall.exe`.
   2. **Portable Executable:** `PrivateProtection-0.1.0-win-x64.exe` provides zero-install execution for enterprise / air-gapped environments.
 
 ### 3.4 Browser Extension
@@ -77,15 +77,15 @@ The product owner can manually verify each surface following this protocol:
 
 ### Android Application Checklist
 - [ ] 1. Copy `private-protection-mobile-0.1.0.apk` to an Android device (Android 8.0+ / API 26+) and tap to install.
-- [ ] 2. Launch Private Protection. Verify clean home dashboard renders.
+- [ ] 2. Launch Privex. Verify clean home dashboard renders.
 - [ ] 3. Tap **URL Scanner**, scan a sample phishing link; verify red alert card and cognitive threat explanation.
 - [ ] 4. Toggle device to **Airplane Mode** (no Wi-Fi, no mobile data); repeat scan; verify **100% offline functionality**.
 
 ### Desktop Application Checklist
-- [ ] 1. Run `PrivateProtection-Setup-0.1.0.exe`. Verify clean installation to `%LOCALAPPDATA%\Programs\Private Protection\`.
+- [ ] 1. Run `PrivateProtection-Setup-0.1.0.exe`. Verify clean installation to `%LOCALAPPDATA%\Programs\Privex\`.
 - [ ] 2. Check that Start Menu and Desktop shortcuts are created.
 - [ ] 3. Launch application. Trigger a scan; verify live progress and threat detection.
-- [ ] 4. Open Windows Settings -> Apps -> Installed Apps; verify **Private Protection Desktop Security** appears.
+- [ ] 4. Open Windows Settings -> Apps -> Installed Apps; verify **Privex Desktop Security** appears.
 - [ ] 5. Click **Uninstall**; verify program files, shortcuts, and registry entries are cleanly removed.
 
 ### Browser Extension Checklist

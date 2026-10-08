@@ -1,6 +1,6 @@
 # PHASE 41: PUBLIC DISTRIBUTION & PRODUCTION LAUNCH REPORT
 
-**Product:** PRIVATE PROTECTION  
+**Product:** PRIVEX  
 **Problem Statement:** PS-05 — On-device threat, phishing and scam detection  
 **Phase:** 41 (Public Distribution + Production Launch)  
 **Release Version:** `v0.1.0`  
@@ -15,7 +15,7 @@
 
 ## 1. Executive Summary
 
-Private Protection `v0.1.0` has achieved complete **Public Distribution and Production Launch Readiness**. All four client surfaces—**Web Application**, **Android Application**, **Desktop Application**, and **Browser Extension**—are packaged, cryptographically signed, verified against frozen SHA-256 digests, and published to production distribution channels without requiring manual engineering intervention.
+Privex `v0.1.0` has achieved complete **Public Distribution and Production Launch Readiness**. All four client surfaces—**Web Application**, **Android Application**, **Desktop Application**, and **Browser Extension**—are packaged, cryptographically signed, verified against frozen SHA-256 digests, and published to production distribution channels without requiring manual engineering intervention.
 
 Every capability adheres strictly to the constitutional invariants defined in `AGENTS.md`:
 - **100% Local Processing:** Core threat analysis runs purely in volatile endpoint memory.

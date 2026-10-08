@@ -1,7 +1,7 @@
 # FINAL_ARCHITECTURE_SCORECARD.md — 20-Dimension Architecture Scorecard
 
 > **SYSTEM STATUS: PRE-CODING AUDIT PHASE (MASTER PROMPT #5)**  
-> **CANONICAL SCORECARD — PRIVATE PROTECTION ARCHITECTURAL READINESS**  
+> **CANONICAL SCORECARD — PRIVEX ARCHITECTURAL READINESS**  
 > Evaluated by the 12-role independent technical audit committee across twenty mandatory dimensions. Every area is classified as **PASS**, **PASS WITH REQUIRED FIX**, or **BLOCKED**. A single BLOCKED item halts coding authorization.
 
 ---

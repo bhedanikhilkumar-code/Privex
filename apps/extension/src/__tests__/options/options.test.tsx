@@ -17,7 +17,7 @@ describe('Options / Settings UI Component', () => {
     render(<OptionsApp />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Private Protection Settings/i)).toBeDefined();
+      expect(screen.getByText(/Privex Settings/i)).toBeDefined();
       expect(screen.getByText(/Real-Time Navigation Defense/i)).toBeDefined();
       expect(screen.getByText(/AI Security Assistant Reading Complexity/i)).toBeDefined();
     });
@@ -27,7 +27,7 @@ describe('Options / Settings UI Component', () => {
     render(<OptionsApp />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Private Protection Settings/i)).toBeDefined();
+      expect(screen.getByText(/Privex Settings/i)).toBeDefined();
     });
 
     const input = screen.getByPlaceholderText(/e\.g\. internal\.corp\.local/i);

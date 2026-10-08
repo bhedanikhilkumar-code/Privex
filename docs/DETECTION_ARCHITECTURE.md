@@ -1,8 +1,8 @@
-# PRIVATE PROTECTION: Detection Architecture
+# PRIVEX: Detection Architecture
 
 ## 1. Layered Detection System
 
-To ensure a robust, low-latency, and privacy-preserving security posture, the PRIVATE PROTECTION assistant employs a 7-layered detection architecture. This structure ensures fast paths for known threats while reserving computationally expensive AI models for novel or ambiguous scenarios.
+To ensure a robust, low-latency, and privacy-preserving security posture, the PRIVEX assistant employs a 7-layered detection architecture. This structure ensures fast paths for known threats while reserving computationally expensive AI models for novel or ambiguous scenarios.
 
 ### 1.1 Deterministic Rules
 - **Purpose:** Immediate classification of known threats with zero false positives.
