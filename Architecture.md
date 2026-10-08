@@ -362,3 +362,147 @@ To ensure the 10-Layer Engine never makes the PC slow:
 | **T-08** | **Silent Configuration Weakening / Exclusion Abuse** | T, R | A-04, A-08 | DPAPI + HMAC `storage.enc` failing closed to Maximum Protection on tamper; Friction Gate challenge + mandatory Auto-Re-Enable timer; hard block on excluding `C:\`/`Downloads`/`%TEMP%`. |
 | **T-09** | **Resource Exhaustion (Zip Bomb / Giant File OOM)** | D | A-09 | 64 KB header slicing; 64 KB streaming SHA-256 & `PPVAULT2` cipher ($<16\text{ MB}$ heap delta); zip-bomb ratio ($\le 100:1$) and depth ($\le 3$) hard abort; notification storm limiter ($\le 3$ toasts/10s). |
 | **T-10** | **Evasion & Prompt Injection** | S, T, R | A-01, A-06, A-09 | Precomputed sliding-window entropy defeats null-byte padding; Base64/charcode script de-obfuscation; strict `CORE -> VERDICT -> AI EXPLANATION` boundary (`0%` AI verdict authority). |
+
+
+---
+
+# MOBILE ANDROID SECURITY ARCHITECTURE — PHASE T
+
+## 1. Architecture Goal
+The Android application is a security client built around the existing canonical detection engine. Platform adapters provide Android-specific evidence; they never create an independent verdict authority.
+
+Android Events / User Actions
+  |
+  +--> Package Install Observer ----> APK Analyzer
+  |
+  +--> Downloads / MediaStore ------> Universal File Analyzer
+  |
+  +--> SAF / Shared Storage --------> Full Scan Coordinator
+  |
+  +--> Browser / URL Input ----------> URL & Phishing Analyzer
+  |
+  +--> Local Threat DB --------------> Threat Intelligence
+  |
+  v
+Canonical Evidence -> RiskScorer -> EngineVerdict
+                                  |
+                    +-------------+-------------+
+                    |             |             |
+                  Notify      Quarantine     User Guidance
+
+## 2. Mobile Components
+
+### M-01 Mobile Security Coordinator
+Owns lifecycle, scan scheduling, cancellation, battery/thermal adaptation and canonical service wiring.
+
+### M-02 Package Safety Service
+Uses Android PackageManager/package lifecycle APIs to observe installed/updated packages. When APK bytes are available, sends them through APK Analyzer. It records whether analysis occurred pre-install, immediate post-install, or could not be performed.
+
+### M-03 APK Analyzer
+Stages:
+1. SHA-256.
+2. ZIP/APK central-directory inspection.
+3. AndroidManifest parsing.
+4. certificate/signing metadata.
+5. DEX structural indicators.
+6. native-library inspection.
+7. permission/component risk analysis.
+8. local signature/hash/threat-intel lookup.
+9. deterministic risk score.
+No APK is executed for analysis.
+
+### M-04 Universal File Shield
+Uses Android-supported file event/MediaStore/Downloads observation plus user-selected SAF scopes. It canonicalizes file identity and sends stabilized files to the existing scanner. File type is detected from content.
+
+### M-05 Full Scan Coordinator
+Maintains a queue of accessible roots. Uses SAF for user-granted trees and platform APIs for shared media/files. Reports scanned, skipped, permission denied, inaccessible, threat count and completion state.
+
+### M-06 Archive & Document Parser Layer
+Bounded parsers for ZIP/Office/PDF/image metadata. Never executes macros, scripts, embedded objects or external links. Nested content is treated as data only.
+
+### M-07 URL & Phishing Shield
+Pipeline:
+Raw URL -> Unicode Normalize -> Punycode/IDN Analysis -> Scheme Check -> Host Canonicalization -> Redirect Evidence -> Local Threat DB -> Heuristic Evidence -> RiskScorer.
+HTTPS content is not decrypted by default. Optional VPNService mode, if implemented, inspects only privacy-safe metadata that Android exposes and must not become a covert traffic proxy.
+
+### M-08 Pre-Threat Warning Manager
+Maps deterministic risk states to user warnings. Critical warnings must appear before risky actions whenever the Android/browser integration exposes a pre-action hook.
+
+### M-09 Password Generator
+Uses Android CSPRNG / SecureRandom. The generator is isolated from telemetry and security logs. Clipboard contents are Tier-1 sensitive data.
+
+### M-10 Mobile Threat Database
+Stores signed local hashes/domains/rules. Update flow:
+Bundle -> Signature -> SHA-256 -> VersionSequence -> Structural Validation -> Self-Test -> Atomic Swap -> Cache Invalidation -> Active.
+
+### M-11 Mobile Quarantine
+Uses an app-private encrypted quarantine area where permitted. Original evidence is retained locally. For installed apps, remediation becomes user-guided OS settings/uninstall when privileged silent control is unavailable.
+
+### M-12 Battery/Thermal Manager
+Inputs Android BatteryManager/PowerManager/thermal state. Outputs worker concurrency and scan scheduling limits. Critical scan events have priority over background optimization.
+
+### M-13 Permission & Privacy Manager
+Tracks runtime permission state and displays truthful protection coverage. No sensitive permission is requested without a mapped requirement.
+
+### M-14 Mobile Notification Manager
+Uses notification channels and batching. CRITICAL threats are prioritized; repetitive informational findings are coalesced.
+
+## 3. Install-Time Reality Model
+The architecture MUST explicitly distinguish:
+- System/Device Owner/Installer role: stronger pre-install control may be possible.
+- Normal third-party app: cannot guarantee interception of every installation before package commit.
+The product must not simulate a pre-install block by simply claiming success after installation.
+
+## 4. Download/File Reality Model
+Android scoped-storage and background execution rules mean "every file on the phone" cannot be promised without necessary user-granted access. The UI therefore reports exact scan coverage. User-selected SAF roots become durable scan scopes where Android permits persisted URI permission.
+
+## 5. Security Boundaries
+- Android UI -> Security Coordinator: strict typed boundary.
+- Platform event -> Analyzer: untrusted metadata.
+- APK/file/document parsers: bounded untrusted-data boundary.
+- Threat DB: signed read-only state.
+- Quarantine: encrypted isolated state.
+- Password generator: Tier-1 secret boundary.
+- URL data: Tier-1 sensitive boundary.
+- AI explanation: read-only after EngineVerdict.
+
+## 6. Mobile Threat Model
+Key threats:
+- malicious APK installation,
+- sideloaded dropper,
+- disguised downloads,
+- archive bombs,
+- malicious Office/PDF content,
+- phishing/homograph URLs,
+- permission abuse,
+- storage traversal,
+- notification spoofing,
+- database rollback/tampering,
+- battery/resource exhaustion,
+- ANR/OOM,
+- privacy leakage,
+- fake protection claims.
+Countermeasures must be covered by RULE-30..42 and tested on a real phone.
+
+## 7. Performance & Reliability
+- bounded queues,
+- cancellable scans,
+- streaming file reads,
+- no unbounded decompression,
+- cache keyed to secure file identity + engine/db versions,
+- background throttling,
+- watchdog recovery,
+- truthful progress,
+- crash-safe scan checkpoints where useful.
+
+## 8. AI Boundary
+Core Evidence -> EngineVerdict -> AI Explanation. The mobile AI layer never decides whether an APK/file/URL is safe.
+
+## 9. Release Architecture
+Mobile release artifacts:
+- signed APK for direct installation/testing,
+- AAB only as a build artifact if desired,
+- release metadata and SHA-256 manifest,
+- physical-device test report,
+- security audit report.
+No Google Play publication is required unless separately authorized.
