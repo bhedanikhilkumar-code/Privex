@@ -64,16 +64,16 @@ This independent zero-trust audit examined all components against the project co
 
 3. **Full Monorepo Regression Suite:**
    - Packages Tested: `@private-protection/core`, `@private-protection/ml`, `@private-protection/desktop`, `@private-protection/extension`, `@private-protection/mobile`, `@private-protection/web`.
-   - Total Tests: **511 passed (511)** across all monorepo workspaces.
+   - Total Tests: **537 passed (537)** across all monorepo workspaces.
    - Pass Rate: **100%**.
 
 4. **Monorepo Static Analysis (TypeScript):**
    - Command: `npm run typecheck`
    - Errors: **0 errors** across all 6 packages.
 
-5. **Production Release Build (R8 ProGuard):**
-   - Command: `./gradlew.bat assembleRelease`
-   - Outcome: **BUILD SUCCESSFUL** (in 3m 58s with R8 full minification, resource shrinking, and lint vital passed).
+5. **Android Builds:**
+   - Debug Build (`./gradlew.bat assembleDebug`): **BUILD SUCCESSFUL**.
+   - Production Release Build (`./gradlew.bat assembleRelease`): **BUILD SUCCESSFUL** (with R8 full minification, resource shrinking, and lint vital passed).
 
 6. **Physical Android Device Testing:**
    - Status: **NOT EXECUTED**
