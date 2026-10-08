@@ -1,4 +1,9 @@
 import {
+  DetectionPipeline,
+  InputType,
+  Verdict,
+} from '@private-protection/core';
+import {
   UrlInspectionReport,
   RedirectChainReport,
   WebShieldStatus,
@@ -21,7 +26,7 @@ declare global {
  *
  * Coordinates on-device URL and domain safety assessment:
  * 1. Native Android bridge integration when running in Android WebView.
- * 2. Fallback in-memory simulation for local web dashboard/testing.
+ * 2. Canonical @private-protection/core DetectionPipeline when running in web/TypeScript mode.
  * 3. Transparent boundary reporting adhering to Android platform security constraints:
  *    - Zero TLS MITM
  *    - Zero HTTPS decryption or Root CA installation
@@ -31,12 +36,15 @@ declare global {
 export class WebShieldService {
   private static instance: WebShieldService;
 
+  private pipeline: DetectionPipeline;
   private simActive: boolean = false;
   private simTotalQueries: number = 0;
   private simBlockedQueries: number = 0;
   private simLastThreatTs: number = 0;
 
-  private constructor() {}
+  private constructor() {
+    this.pipeline = new DetectionPipeline();
+  }
 
   public static getInstance(): WebShieldService {
     if (!WebShieldService.instance) {
@@ -154,7 +162,7 @@ export class WebShieldService {
     };
   }
 
-  private simulateUrlInspection(url: string): UrlInspectionReport {
+  private async simulateUrlInspection(url: string): Promise<UrlInspectionReport> {
     const trimmed = (url || '').trim();
     if (!trimmed) {
       return {
@@ -199,17 +207,62 @@ export class WebShieldService {
       };
     }
 
-    this.simTotalQueries++;
-    return {
-      normalizedUrl: trimmed,
-      domain: 'example.com',
-      scheme: 'https',
-      riskScore: 10,
-      verdict: 'SAFE',
-      threatType: 'NONE',
-      indicators: [],
-      explanation: 'No known security threats detected for this URL.',
-    };
+    try {
+      const coreResult = await this.pipeline.scan({
+        input: trimmed,
+        inputType: InputType.URL,
+      });
+
+      this.simTotalQueries++;
+      const isDangerous = coreResult.verdict === Verdict.DANGEROUS || String(coreResult.verdict) === 'BLOCK';
+      const isSuspicious = coreResult.verdict === Verdict.SUSPICIOUS || String(coreResult.verdict) === 'WARN';
+      if (isDangerous || isSuspicious) {
+        this.simBlockedQueries++;
+        this.simLastThreatTs = Date.now();
+      }
+
+      let parsedDomain = 'example.com';
+      let parsedScheme = 'https';
+      try {
+        const u = new URL(trimmed.includes('://') ? trimmed : `https://${trimmed}`);
+        parsedDomain = u.hostname;
+        parsedScheme = u.protocol.replace(':', '');
+      } catch {
+        parsedDomain = trimmed.split('/')[0];
+      }
+
+      const verdictStr = isDangerous ? 'DANGEROUS' : isSuspicious ? 'SUSPICIOUS' : 'SAFE';
+      const threatTypeStr = isDangerous ? 'MALICIOUS_DOMAIN' : isSuspicious ? 'TYPOSQUATTING' : 'NONE';
+
+      const indicators = (coreResult.threats || []).map(t => t.description || String(t.category) || 'Threat detected');
+      const score = coreResult.riskAssessment ? coreResult.riskAssessment.overallScore : (isDangerous ? 85 : isSuspicious ? 50 : 10);
+      const explanationText = typeof coreResult.explanation === 'string'
+        ? coreResult.explanation
+        : coreResult.explanation?.plainTextSummary || 'Analysis complete.';
+
+      return {
+        normalizedUrl: trimmed,
+        domain: parsedDomain,
+        scheme: parsedScheme,
+        riskScore: score,
+        verdict: verdictStr,
+        threatType: threatTypeStr as any,
+        indicators,
+        explanation: explanationText,
+      };
+    } catch {
+      this.simTotalQueries++;
+      return {
+        normalizedUrl: trimmed,
+        domain: 'example.com',
+        scheme: 'https',
+        riskScore: 10,
+        verdict: 'SAFE',
+        threatType: 'NONE',
+        indicators: [],
+        explanation: 'No known security threats detected for this URL.',
+      };
+    }
   }
 
   private simulateRedirectInspection(urls: string[]): RedirectChainReport {
