@@ -148,3 +148,38 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from a basic 
 - **System Release Status:** **PRODUCTION READY & CERTIFIED FOR RELEASE**.
 
 
+
+
+---
+
+# MOBILE SECURITY ROADMAP — DECISION MEMORY
+
+Decision date: 2026-10-08  
+Status: PLANNED — Phase T  
+Scope: Android/mobile security transformation
+
+The project now intentionally shifts implementation priority from the completed desktop release track to a dedicated mobile security track.
+
+## Locked Mobile Product Goals
+1. Play-Protect-like App Safety: inspect installed/newly installed applications using Android APIs and APK analysis; pre-install blocking is used only where the OS/app role permits it. Never fake privileged interception.
+2. Automatic Full Device Scan: scan all storage locations actually accessible to the app, including user-granted SAF trees, with truthful skipped-scope reporting.
+3. Universal Download/File Shield: automatically inspect downloaded/new files across APK, ZIP, PDF, Office, image, video, text, web and generic binary formats.
+4. Pre-Threat Warnings: warn before opening/navigating when deterministic evidence is available.
+5. Phishing Protection: local URL normalization, IDN/homograph detection, signed local reputation, redirect analysis and privacy-preserving browser/network integration.
+6. Strong Password Generator: CSPRNG-based, local-only, configurable 12–128 character passwords and passphrases, with entropy measurement and clipboard hygiene.
+7. Mobile Privacy: no raw file, URL, credential, document or browsing-history upload by default.
+8. Real Phone Validation: security-critical claims require physical Android-device verification.
+
+## Non-Negotiable Android Reality
+A normal third-party Android app does NOT automatically receive the same privileged control surface as Google Play Protect/system components. Therefore:
+- do not claim guaranteed pre-install interception for every installer path;
+- do not claim silent uninstall/disable unless a supported privileged role is actually provisioned;
+- do not claim unrestricted filesystem access on modern Android;
+- do not decrypt HTTPS traffic merely to simulate web protection;
+- when an OS limitation exists, implement the strongest safe alternative and expose the limitation.
+
+## Product Direction
+The mobile app should feel like a complete security product rather than a desktop companion. Core security decisions remain deterministic and local; UI and AI explain the result but do not decide it.
+
+## Release Gate Memory
+A mobile release is not considered complete from CI alone. Required evidence includes physical-device logs, test results, APK/AAB build integrity, offline parity, permission audit, battery/thermal behavior, and an independent zero-trust audit.
