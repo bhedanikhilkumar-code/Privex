@@ -21,7 +21,7 @@ describe('Web Application Accessibility (WCAG 2.1 AA Compliance)', () => {
     render(<Navigation activeTab="URL_SCAN" onTabChange={onTabChange} />);
 
     const tabs = screen.getAllByRole('tab');
-    expect(tabs.length).toBe(6);
+    expect(tabs.length).toBe(7);
 
     const activeTab = tabs.find((t) => t.getAttribute('aria-selected') === 'true');
     expect(activeTab).toBeDefined();

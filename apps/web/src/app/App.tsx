@@ -10,6 +10,7 @@ import { TextScannerView } from '../components/scanner/TextScannerView';
 import { AssistantView } from '../components/assistant/AssistantView';
 import { PrivacyView } from '../components/privacy/PrivacyView';
 import { SettingsView } from '../components/settings/SettingsView';
+import { SecurityDashboardView } from '../components/security/SecurityDashboardView';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('HOME');
@@ -282,6 +283,29 @@ export const App: React.FC = () => {
                 </h3>
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
                   Receive Grade 6 jargon-free explanations detailing why content is deceptive and specific defensive steps to take.
+                </p>
+              </div>
+
+              <div
+                onClick={() => setActiveTab('SECURITY_MONITOR')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter') setActiveTab('SECURITY_MONITOR'); }}
+                style={{
+                  padding: '1.75rem',
+                  backgroundColor: '#FFFFFF',
+                  border: '2px solid var(--border-dark)',
+                  boxShadow: 'var(--shadow-brutal)',
+                  cursor: 'pointer',
+                  transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+                }}
+              >
+                <div style={{ fontSize: '2.25rem', marginBottom: '0.75rem' }}>🛡️</div>
+                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.4rem' }}>
+                  Password &amp; Network Protection
+                </h3>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
+                  Check password security, generate high-entropy keys, monitor outbound application requests, and detect traffic spikes.
                 </p>
               </div>
             </div>
@@ -607,6 +631,10 @@ export const App: React.FC = () => {
 
         {activeTab === 'ASSISTANT' && (
           <AssistantView preferences={preferences} />
+        )}
+
+        {activeTab === 'SECURITY_MONITOR' && (
+          <SecurityDashboardView />
         )}
 
         {activeTab === 'PRIVACY' && (

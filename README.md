@@ -147,6 +147,15 @@ Private Protection operates under a strict 3-tier zero-knowledge data classifica
 - **Zero-Install Client PWA:** Access the fully functional web dashboard at [`https://private-protection.pages.dev`](https://private-protection.pages.dev).
 - **Client-Side Execution:** The web application downloads static assets from the edge CDN and executes all threat analysis locally inside a dedicated Web Worker sandbox in your browser's volatile RAM.
 - **Installable PWA:** Can be installed directly to your desktop or mobile home screen as a standalone Progressive Web App with full offline caching via Service Worker.
+- **Password Security & Network Protection Module:**
+  - **Password Security Checker:** Real-time client-side password entropy, sequential walk, and common breach dictionary analysis with visual strength meter and criteria checklist. 100% volatile memory evaluation with zero server transmission or storage.
+  - **Strong Password Generator:** Cryptographically secure credential generation using `crypto.getRandomValues()` (no `Math.random()`), length selection (8-48 chars), character set toggles, and ambiguous/similar character exclusions.
+  - **URL / Request Security Monitor:** Background application network request telemetry monitoring first-party, third-party, and unknown/suspicious destinations.
+  - **Request Overload Detection:** Real-time sliding window frequency analyzer that identifies sudden request bursts (e.g., >50 requests in 10s) and alerts users to potential traffic anomalies.
+  - **Suspicious Third-Party Detection:** Identifies unverified external endpoints, numeric IP destinations, and high-abuse TLDs without misclassifying benign CDNs.
+  - **Security Alerts & Password Notifications:** Dismissible security banners with prompt actions to review activity or update account credentials when suspicious traffic is detected.
+  - **Privacy Protections:** Strict client-side sanitization automatically redacts all query credentials, tokens, session IDs, and API keys before logging or display.
+  - **Browser Limitations:** Network monitoring operates non-intrusively on application-level fetch/XHR traffic within the browser security sandbox; cross-origin requests adhere to standard CORS policies.
 
 ---
 

@@ -17,6 +17,7 @@ const NAV_ITEMS: NavItem[] = [
   { key: 'URL_SCAN', label: 'URL Scanner', icon: '🔗' },
   { key: 'TEXT_SCAN', label: 'Message Scanner', icon: '💬' },
   { key: 'ASSISTANT', label: 'AI Security Assistant', icon: '🤖' },
+  { key: 'SECURITY_MONITOR', label: 'Password & Network', icon: '🛡️' },
   { key: 'PRIVACY', label: 'Privacy & Architecture', icon: '🔒' },
   { key: 'SETTINGS', label: 'Settings', icon: '⚙️' }
 ];

@@ -9,7 +9,7 @@ import { AssistantOutput } from '@private-protection/ml';
 
 export type ScanType = 'URL' | 'TEXT';
 export type ScanStatus = 'IDLE' | 'SCANNING' | 'COMPLETED' | 'ERROR';
-export type ActiveTab = 'HOME' | 'URL_SCAN' | 'TEXT_SCAN' | 'ASSISTANT' | 'PRIVACY' | 'SETTINGS';
+export type ActiveTab = 'HOME' | 'URL_SCAN' | 'TEXT_SCAN' | 'ASSISTANT' | 'SECURITY_MONITOR' | 'PRIVACY' | 'SETTINGS';
 
 export interface ScanResultViewData {
   readonly id: string;
