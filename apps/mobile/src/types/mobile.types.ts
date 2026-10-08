@@ -82,3 +82,49 @@ export interface DeepLinkPayload {
   target?: string;
   error?: string;
 }
+
+// ==========================================
+// PHASE T1: NATIVE SECURITY COORDINATOR
+// ==========================================
+
+export type SecurityJobState =
+  | 'QUEUED'
+  | 'RUNNING'
+  | 'CANCELLING'
+  | 'CANCELLED'
+  | 'COMPLETED'
+  | 'FAILED';
+
+export type SecurityJobType =
+  | 'FILE_SCAN'
+  | 'URL_SCAN'
+  | 'PACKAGE_AUDIT'
+  | 'DOWNLOAD_INSPECT'
+  | 'STORAGE_SCAN'
+  | 'HEALTH_CHECK'
+  | 'MAINTENANCE';
+
+export interface SecurityJobDescriptor {
+  id: string;
+  type: SecurityJobType;
+  state: SecurityJobState;
+  progress: number;
+  createdAtMs: number;
+  startedAtMs?: number;
+  completedAtMs?: number;
+  cancellationReason?: string;
+  errorReason?: string;
+  metadata?: Record<string, any>;
+  result?: Record<string, any>;
+}
+
+export interface CoordinatorStats {
+  isShutdown: boolean;
+  isThrottled: boolean;
+  activeJobsCount: number;
+  workerActiveThreads: number;
+  workerPoolSize: number;
+  workerMaxPoolSize: number;
+  workerQueueSize: number;
+  totalPersistedJobs: number;
+}

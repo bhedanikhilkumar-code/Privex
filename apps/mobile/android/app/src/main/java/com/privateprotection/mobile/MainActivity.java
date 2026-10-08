@@ -26,10 +26,16 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.webkit.WebViewAssetLoader;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+
+import com.privateprotection.mobile.core.JobType;
+import com.privateprotection.mobile.core.MobileSecurityCoordinator;
+import com.privateprotection.mobile.core.SecurityJob;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * MainActivity: The primary Android UI container and native security bridge for Private Protection.
@@ -534,6 +540,86 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 Log.e(TAG, "Failed to inspect device security posture", e);
                 return "{\"overallHealth\":\"UNKNOWN\",\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        // ==========================================
+        // NATIVE SECURITY COORDINATOR (PHASE T1)
+        // ==========================================
+
+        @JavascriptInterface
+        public String submitSecurityJob(String jobTypeStr, String metadataJsonStr) {
+            try {
+                if (metadataJsonStr != null && metadataJsonStr.length() > 65536) {
+                    return "{\"error\":\"METADATA_PAYLOAD_TOO_LARGE\"}";
+                }
+                JobType type = JobType.fromString(jobTypeStr);
+                JSONObject meta = (metadataJsonStr != null && !metadataJsonStr.trim().isEmpty())
+                        ? new JSONObject(metadataJsonStr) : new JSONObject();
+
+                MobileSecurityCoordinator coordinator = MobileSecurityCoordinator.getInstance(activity);
+                SecurityJob job = coordinator.submitJob(type, meta, (j, ctrl) -> {
+                    JSONObject res = new JSONObject();
+                    res.put("status", "ACKNOWLEDGED");
+                    res.put("jobId", j.getId());
+                    res.put("type", j.getType().name());
+                    res.put("timestamp", System.currentTimeMillis());
+                    return res;
+                });
+                return job.toJSON().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to submit security job via native bridge", e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public boolean cancelSecurityJob(String jobId, String reason) {
+            try {
+                MobileSecurityCoordinator coordinator = MobileSecurityCoordinator.getInstance(activity);
+                return coordinator.cancelJob(jobId, reason);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to cancel security job " + jobId, e);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public String getSecurityJobStatus(String jobId) {
+            try {
+                MobileSecurityCoordinator coordinator = MobileSecurityCoordinator.getInstance(activity);
+                SecurityJob job = coordinator.getJob(jobId);
+                if (job == null) {
+                    return "{\"error\":\"JOB_NOT_FOUND\"}";
+                }
+                return job.toJSON().toString();
+            } catch (Exception e) {
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public String listActiveSecurityJobs() {
+            try {
+                MobileSecurityCoordinator coordinator = MobileSecurityCoordinator.getInstance(activity);
+                List<SecurityJob> active = coordinator.getActiveJobs();
+                JSONArray arr = new JSONArray();
+                for (SecurityJob j : active) {
+                    arr.put(j.toJSON());
+                }
+                return arr.toString();
+            } catch (Exception e) {
+                return "[]";
+            }
+        }
+
+        @JavascriptInterface
+        public String getCoordinatorStats() {
+            try {
+                MobileSecurityCoordinator coordinator = MobileSecurityCoordinator.getInstance(activity);
+                return coordinator.getCoordinatorStats().toString();
+            } catch (Exception e) {
+                return "{}";
             }
         }
     }
