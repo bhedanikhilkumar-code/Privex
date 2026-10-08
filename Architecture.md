@@ -1,7 +1,7 @@
-# Architecture.md — Complete System & Security Architecture for Private Protection Windows Antivirus
+# Architecture.md — Complete System & Security Architecture for Privex Windows Antivirus
 
 > **DOCUMENT STATUS:** CANONICAL SYSTEM & SECURITY ARCHITECTURE SPECIFICATION — PHASE S FULLY VERIFIED & RELEASE APPROVED  
-> **PROJECT:** Private Protection — Windows Desktop Strong Antivirus Transformation  
+> **PROJECT:** Privex — Windows Desktop Strong Antivirus Transformation  
 > **MILESTONE:** Phase S Complete & Approved (GO Release Gate)  
 > **ARCHITECTURAL DOCTRINE:** Local-First • Offline-First • Zero-Knowledge • Fail-Closed • Architectural Honesty (`RULE-26`)
 
@@ -11,7 +11,7 @@
 
 ### 1.1 Architectural Honesty: High-Speed User-Mode Service vs. Kernel Driver (`RULE-26`)
 - **`[SOURCE-DERIVED FACT]`** (`https://learn.microsoft.com/en-us/windows-hardware/drivers/install/kernel-mode-code-signing-requirements--windows-vista-and-later-`): Deploying a Windows Kernel File System Minifilter Driver (`FltMgr.sys`), Early Launch Antimalware (`ELAM`) boot driver, or Protected Process Light (`PPL`) kernel callback driver requires a hardware-backed Extended Validation (EV) Code Signing Certificate, Microsoft Partner Center Hardware Dashboard WHQL attestation signing, and carries catastrophic Blue Screen of Death (`BSOD`) liability if any pointer fault occurs in Ring 0.
-- **`[PROJECT DECISION]`:** Private Protection Windows Desktop is engineered as a **Hardened User-Mode Antivirus Architecture** (`Electron 44 + TypeScript/Node.js Worker Pool + Native Windows OS APIs / Background Service`) that achieves **near-real-time detection, sub-50ms ingress containment, process tree arrest, and 100% file recovery** without kernel-driver BSOD risk or disabling Microsoft Defender:
+- **`[PROJECT DECISION]`:** Privex Windows Desktop is engineered as a **Hardened User-Mode Antivirus Architecture** (`Electron 44 + TypeScript/Node.js Worker Pool + Native Windows OS APIs / Background Service`) that achieves **near-real-time detection, sub-50ms ingress containment, process tree arrest, and 100% file recovery** without kernel-driver BSOD risk or disabling Microsoft Defender:
   1. **Recursive `ReadDirectoryChangesW` + NTFS USN Journal (`FSCTL_READ_USN_JOURNAL`):** Captures every file creation, write completion, and rename across watched directories in $<5\text{ ms}$, with USN journal catch-up across boots and sleep cycles.
   2. **Canary Honeypot Files + Sliding-Window Entropy/Velocity Detection:** Detects ransomware encryption bursts within $<500\text{ ms}$ (before $>3$ user files are touched).
   3. **User-Mode Process Arrest (`NtSuspendProcess` / `TerminateProcess` / Job Objects) + Copy-on-Write `ShadowVault`:** Immediately freezes/terminates offending user-space process trees and restores any modified personal document from an encrypted, ACL-protected local Shadow Vault (`~/.private-protection/shadow-vault/`).
@@ -184,7 +184,7 @@
 - **Trust Boundary:** **Tier 2 UI & OS Presentation Boundary.** Must sanitize untrusted filenames/URLs before rendering in OS notifications.
 - **Failure Behavior:** If Windows OS notifications are disabled by OS policy or Electron runs headless, seamlessly records the alert in the In-App Notification Center and top alert banner without throwing.
 - **Security Requirements:**
-  1. **Storm Rate Limiting (`RULE-15`):** Token-bucket limiter caps native OS toasts at **$\le 3$ toasts per 10-second window**. When $\ge 3$ threats occur within 5 seconds, coalesces subsequent threats into a single **Batch Threat Summary Toast** (*"Private Protection blocked N threats in Downloads"*).
+  1. **Storm Rate Limiting (`RULE-15`):** Token-bucket limiter caps native OS toasts at **$\le 3$ toasts per 10-second window**. When $\ge 3$ threats occur within 5 seconds, coalesces subsequent threats into a single **Batch Threat Summary Toast** (*"Privex blocked N threats in Downloads"*).
   2. **Privacy & Bidi Scrubbing:** Strip Unicode bidirectional override characters (`\u202A`–`\u202E`) and never display raw Tier-1 document/message body text in lock-screen OS toasts.
 - **Performance Requirements:** Alert dispatch latency $<50\text{ ms}$ from verdict to UI/Toast trigger; $<2\text{ MB}$ memory for bounded 500-item notification inbox.
 - **Offline Behavior:** **100% Offline.**
@@ -425,8 +425,13 @@ Pipeline:
 Raw URL -> Unicode Normalize -> Punycode/IDN Analysis -> Scheme Check -> Host Canonicalization -> Redirect Evidence -> Local Threat DB -> Heuristic Evidence -> RiskScorer.
 HTTPS content is not decrypted by default. Optional VPNService mode, if implemented, inspects only privacy-safe metadata that Android exposes and must not become a covert traffic proxy.
 
-### M-08 Pre-Threat Warning Manager
-Maps deterministic risk states to user warnings. Critical warnings must appear before risky actions whenever the Android/browser integration exposes a pre-action hook.
+### M-08 Pre-Threat Warning Manager (`PreThreatWarningCoordinator.java` & `pre-threat-warning.service.ts`)
+- **Responsibility:** Evidence-backed predictive warning synthesis across URLs (T6), files/downloads (T3/T5), and packages (T2).
+- **Confidence Taxonomy:** Separates `CONFIRMED_MALWARE` (signatures, droppers, zip bombs, dangerous schemes) from `STRONG_SUSPICION` (homoglyphs, excessive permissions) and `HEURISTIC_ANOMALY`.
+- **Grounded Explanations:** Explains trigger reasons and factual potential consequences in plain language without fear-based hyperbole.
+- **Defensive Recommendations:** Prioritizes safe defaults (`GO_BACK`, `CANCEL_INSTALL`, `DELETE_DOWNLOAD`, `QUARANTINE`) with a mandatory 5-second countdown friction gate for dangerous bypass (`CONTINUE_AT_OWN_RISK`).
+- **Notification Integration:** Emits high-priority Android notifications linking directly into `PreThreatWarningModal` alertdialog via `PRE_THREAT_WARNING` intent.
+- **Rate-Limiting & Deduplication:** 30-second deduplication cache prevents warning storm fatigue while preserving bounded local decision history.
 
 ### M-09 Password Generator
 Uses Android CSPRNG / SecureRandom. The generator is isolated from telemetry and security logs. Clipboard contents are Tier-1 sensitive data.

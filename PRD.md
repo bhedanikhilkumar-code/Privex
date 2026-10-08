@@ -1,7 +1,7 @@
-# PRD.md — Product Requirements Document: Private Protection Windows Antivirus Transformation
+# PRD.md — Product Requirements Document: Privex Windows Antivirus Transformation
 
 > **DOCUMENT STATUS:** CANONICAL PRODUCT REQUIREMENTS DOCUMENT (PRD) — FULLY VERIFIED & RELEASE APPROVED  
-> **PROJECT:** Private Protection — Windows Desktop Strong Antivirus Transformation  
+> **PROJECT:** Privex — Windows Desktop Strong Antivirus Transformation  
 > **MILESTONE:** Phase S Complete & Approved (GO Release Gate)  
 > **PROBLEM STATEMENT:** PS-05 (Local-First, Offline-First, Low-Latency, Privacy-First Endpoint Protection)  
 > **SOURCE POLICY:** Every external claim in this document is explicitly labeled as **`[SOURCE-DERIVED FACT]`** (with official vendor/Microsoft documentation URLs), **`[MODEL/ENGINEERING INFERENCE]`**, or **`[PROJECT DECISION]`**.
@@ -11,7 +11,7 @@
 ## 1. Executive Vision & Product Transformation Goal
 
 ### 1.1 Primary Objective
-Transform **Private Protection Windows Desktop** (`apps/desktop/`) from an on-demand file/URL security scanner into a **real, strong, local-first Windows Antivirus and Endpoint Protection product** capable of continuous background protection, multi-layered malware detection, behavioral process monitoring, ransomware containment and rollback, download/MOTW inspection, encrypted quarantine, and plain-language on-device explanations.
+Transform **Privex Windows Desktop** (`apps/desktop/`) from an on-demand file/URL security scanner into a **real, strong, local-first Windows Antivirus and Endpoint Protection product** capable of continuous background protection, multi-layered malware detection, behavioral process monitoring, ransomware containment and rollback, download/MOTW inspection, encrypted quarantine, and plain-language on-device explanations.
 
 ### 1.2 Non-Negotiable Constitutional Principles
 1. **LOCAL-FIRST:** All file analysis, signature matching, PE structural parsing, behavioral monitoring, ransomware protection, quarantine encryption, and AI explanation synthesis execute 100% locally on the user's Windows PC.
@@ -54,7 +54,7 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from an on-de
 
 ### 2.2 Competitor Feature & Mechanism Matrix
 
-| Feature / Capability | Avast Free Antivirus `[SOURCE-DERIVED FACT]` | AVG AntiVirus Free `[SOURCE-DERIVED FACT]` | Bitdefender Antivirus Free `[SOURCE-DERIVED FACT]` | Private Protection (Current Verified State) | Private Protection (Target Antivirus Architecture) `[PROJECT DECISION]` |
+| Feature / Capability | Avast Free Antivirus `[SOURCE-DERIVED FACT]` | AVG AntiVirus Free `[SOURCE-DERIVED FACT]` | Bitdefender Antivirus Free `[SOURCE-DERIVED FACT]` | Privex (Current Verified State) | Privex (Target Antivirus Architecture) `[PROJECT DECISION]` |
 |---|---|---|---|---|---|
 | **Real-time protection** | Yes (`File Shield` via `aswMonFlt.sys` + `AvastSvc.exe` on open/exec/write) | Yes (`File Shield` via `avgSvc.exe` on open/modify/save/exec) | Yes (`Bitdefender Shield` on open/create/modify/exec with new/changed file cache) | **EXISTS + WEAK** (`fs.watch` non-recursive on `Downloads`/`Temp` only; stops when UI closes) | **YES — Strong User-Mode Service (`pp-guard-service`)**: Recursive `ReadDirectoryChangesW` + NTFS USN Journal catch-up + `CleanFileCache` |
 | **File scanning** | Yes (PE, scripts, docs, archives; repair $\rightarrow$ quarantine $\rightarrow$ delete cascade) | Yes (PE, scripts, docs, archives; transient & persistent safe-file cache) | Yes (Multi-layer signature + B-HAVE static/dynamic heuristics + Photon cache) | **EXISTS + WEAK** (64KB magic byte + global entropy + double-extension check only; 0 hash/YARA/PE-import rules) | **YES — 10-Layer Engine**: Hash Bloom + Exact Table, Aho-Corasick/YARA signatures, Magic/MOTW/RTLO, PE32/PE32+ sections/IAT/Authenticode, ZIP/Office parsers |
@@ -82,19 +82,19 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from an on-de
 
 ### Research Area 01: File Protection
 - **How Competitors Work `[SOURCE-DERIVED FACT]`:** Avast (`aswMonFlt.sys`), AVG (`avgSvc.exe`), and Bitdefender (`Bitdefender Shield`) intercept file open, execution, creation, and modification events, inspect magic headers rather than trusting file extensions, scan PE structures and scripts, and cache clean files keyed by file ID and modification timestamp so unchanged files are not rescanned until definitions update.
-- **What Private Protection Must Implement `[PROJECT DECISION]`:**
+- **What Privex Must Implement `[PROJECT DECISION]`:**
   1. **4-Stage Sieve Architecture:** Stage 0 (`CleanFileCache` stat check in $<0.08\text{ ms}$) $\rightarrow$ Stage 1 (`4 KB` header slice: Magic Header vs. Extension, RTLO `\u202E` check, NTFS `:Zone.Identifier` MOTW check, SHA-256 Bloom/Exact lookup) $\rightarrow$ Stage 2 (`64 KB` head + `16 KB` tail: Single-pass Aho-Corasick byte/string signature automaton + Zero-allocation `DataView` PE32/PE32+, ZIP Central Directory, and Office OLE/OOXML macro parser) $\rightarrow$ Stage 3 (Section/Sliding-window entropy, `W+X` section check, suspicious IAT API clusters, script de-obfuscation, cross-layer correlation).
   2. **Archive & Document Safety:** Inspect `.zip` central directories and extract/scan inner executables/scripts in bounded memory streams with strict zip-bomb guards (max recursion depth `3`, max compression ratio `100:1`, max decompressed stream `50 MB`). Inspect `.docx/.docm/.xlsx/.xlsm/.pptx/.pptm` for `vbaProject.bin` and external template relationships, OLE2 documents for `VBA`/`Equation Native`, and PDFs for `/JavaScript`, `/JS`, `/Launch`, and `/OpenAction`.
 
 ### Research Area 02: Real-Time Protection
 - **How Competitors Work `[SOURCE-DERIVED FACT]`:** Run as persistent Windows Services (`AvastSvc.exe`, `avgSvc.exe`, `bdservicehost.exe`) configured with Service Control Manager (`SCM`) auto-restart policies so protection remains active even when the GUI window is closed.
-- **What Private Protection Must Implement `[PROJECT DECISION]`:**
+- **What Privex Must Implement `[PROJECT DECISION]`:**
   1. **Decoupled Background Protection Daemon / Windows Service (`pp-guard-service`) + System Tray Agent:** Closing the Electron dashboard window minimizes to the Windows System Tray while the background protection service continues running uninterrupted.
   2. **Recursive `ReadDirectoryChangesW` + NTFS USN Journal Catch-Up:** Replace non-recursive `fs.watch` with recursive Windows directory watching across `Downloads`, `Desktop`, `Documents`, `Pictures`, `%TEMP%`, `%APPDATA%`, and Startup folders, paired with NTFS USN Change Journal (`FSCTL_READ_USN_JOURNAL`) checkpointing to catch files created while the service was starting or resuming from sleep.
 
 ### Research Area 03: Process & Behavior Protection
 - **How Competitors Work `[SOURCE-DERIVED FACT]`:** Bitdefender ATD (`Process Inspector`) and Avast/AVG `Behavior Shield` track process creation, parent-child trees (e.g., `winword.exe` spawning `powershell.exe`), command-line arguments, and file modification velocity, accumulating a behavioral danger score and terminating the process tree when the threshold is crossed.
-- **What Private Protection Must Implement `[PROJECT DECISION]`:**
+- **What Privex Must Implement `[PROJECT DECISION]`:**
   1. **Real-Time Process Monitor:** Subscribe to Windows process creation events (`Win32_ProcessStartTrace` / ETW / CIM `Win32_Process` with `ProcessId`, `ParentProcessId`, `ExecutablePath`, `CommandLine`) and maintain an in-memory `ProcessLineageGraph`.
   2. **Parent-Child & LOLBin Anomaly Engine:** Flag high-risk chains (`winword.exe`/`excel.exe`/`outlook.exe`/`acrord32.exe` $\rightarrow$ `powershell.exe`/`cmd.exe`/`mshta.exe`/`wscript.exe`/`rundll32.exe`/`certutil.exe`/`regsvr32.exe`), system binary path masquerading (`svchost.exe` or `lsass.exe` outside `C:\Windows\System32`), encoded PowerShell download cradles (`-enc`, `IEX`, `DownloadString`), and shadow-copy deletion commands (`vssadmin delete shadows`).
   3. **Safe Process Containment:** Suspend (`NtSuspendProcess`) or terminate (`TerminateProcess` / Job Object kill) user-space processes scoring $\ge 90$ (`CONTAIN_PROCESS`), while strictly protecting signed OS system processes (`RULE-09`).
@@ -122,7 +122,7 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from an on-de
 ### Research Area 07: Web Protection
 - **How Desktop + Extension + Web Share the Same Protection Core `[PROJECT DECISION]`:**
   - All platforms share `@private-protection/core` (`URLAnalyzer`, `RuleEngine`, `BloomFilter`, `ThreatIntel`, `RiskScorer`).
-  - On Windows Desktop, Web Protection operates through three zero-MITM layers: (1) Native Messaging / local IPC synchronization with the Private Protection MV3 Browser Extension; (2) Desktop **Mark-of-the-Web (`:Zone.Identifier`) URL Inspector** that automatically extracts `HostUrl` and `ReferrerUrl` from every downloaded file on NTFS and scans them through `URLAnalyzer` + `ThreatIntel`; and (3) Interactive On-Device URL & Phishing Scanner in the Desktop UI.
+  - On Windows Desktop, Web Protection operates through three zero-MITM layers: (1) Native Messaging / local IPC synchronization with the Privex MV3 Browser Extension; (2) Desktop **Mark-of-the-Web (`:Zone.Identifier`) URL Inspector** that automatically extracts `HostUrl` and `ReferrerUrl` from every downloaded file on NTFS and scans them through `URLAnalyzer` + `ThreatIntel`; and (3) Interactive On-Device URL & Phishing Scanner in the Desktop UI.
 
 ### Research Area 08: Download Protection
 - **When a Downloaded File Must Be Scanned `[PROJECT DECISION]`:**
@@ -216,7 +216,7 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from an on-de
 
 ### Research Area 25: User Experience & Clear Explanations
 - **Calm, Authoritative, Plain-Language UX `[PROJECT DECISION]`:**
-  - Every alert and hero banner answers 4 questions at a Grade 6–8 reading level: **WHAT HAPPENED**, **WHY IT MATTERS**, **WHAT PRIVATE PROTECTION DID**, and **WHAT THE USER SHOULD DO**.
+  - Every alert and hero banner answers 4 questions at a Grade 6–8 reading level: **WHAT HAPPENED**, **WHY IT MATTERS**, **WHAT PRIVEX DID**, and **WHAT THE USER SHOULD DO**.
 
 ### Research Area 26: AI Assistant Role & Strict Boundary
 - **Immutable Unidirectional Pipeline `[PROJECT DECISION]`:**
@@ -269,7 +269,7 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from an on-de
 
 | Priority Tier | Definition | Included Capabilities |
 |---|---|---|
-| **P0: Must-Have Core Antivirus** | Essential capabilities required for Private Protection to function as a real, trustworthy Windows Antivirus. | • **10-Layer Malware Detection Engine** (Hash Bloom/Exact table, EICAR, Aho-Corasick/YARA byte & string signatures, Magic/RTLO/Double-Ext, Zero-Alloc PE32/PE32+ sections/IAT/Authenticode, Script & Office Macro analysis, ZIP Central Directory & inner scan)<br>• **Recursive Real-Time File & Download Shield** (`ReadDirectoryChangesW` / recursive watcher, `.crdownload` completion hook, NTFS `:Zone.Identifier` MOTW URL correlation, System Tray background persistence)<br>• **Hardened `PPVAULT2` Quarantine Vault** (Streaming 64KB AES-256-GCM, DPAPI key protection, atomic encrypted manifest, TOCTOU handle locking, Restore + SHA-256 Trust)<br>• **False-Positive Immunity** (Signed OS binary protection, CleanFileCache, SHA-256/Path Exclusions) |
+| **P0: Must-Have Core Antivirus** | Essential capabilities required for Privex to function as a real, trustworthy Windows Antivirus. | • **10-Layer Malware Detection Engine** (Hash Bloom/Exact table, EICAR, Aho-Corasick/YARA byte & string signatures, Magic/RTLO/Double-Ext, Zero-Alloc PE32/PE32+ sections/IAT/Authenticode, Script & Office Macro analysis, ZIP Central Directory & inner scan)<br>• **Recursive Real-Time File & Download Shield** (`ReadDirectoryChangesW` / recursive watcher, `.crdownload` completion hook, NTFS `:Zone.Identifier` MOTW URL correlation, System Tray background persistence)<br>• **Hardened `PPVAULT2` Quarantine Vault** (Streaming 64KB AES-256-GCM, DPAPI key protection, atomic encrypted manifest, TOCTOU handle locking, Restore + SHA-256 Trust)<br>• **False-Positive Immunity** (Signed OS binary protection, CleanFileCache, SHA-256/Path Exclusions) |
 | **P1: High-Value Protection** | Active behavioral defense, ransomware containment, and core operational visibility. | • **Ransomware Shield** (Protected Folders `Documents`/`Pictures`/`Desktop`, Smart/Strict app access control, Canary trap files, Sliding-Window Velocity & Entropy Spike detector, Copy-on-Write Shadow Vault 1-click rollback)<br>• **Real-Time Process & Behavior Monitor** (WMI/CIM full path, PPID lineage tree, LOLBin command-line analysis, process suspension/termination containment)<br>• **Startup & Persistence Protection** (Both Startup folders + `.lnk` parser, Registry `HKCU`/`HKLM` `Run`/`RunOnce`, Scheduled Tasks)<br>• **Native Windows Toast Notifications & Storm Rate-Limiter** ($\le 3$ toasts / 10s, batch coalescing)<br>• **Tamper-Evident Audit History & 4-State Health/Watchdog Monitor** |
 | **P2: Important Supporting Features** | Unattended automation, removable media defense, and extended file/network visibility. | • **Battery & Idle-Aware Scheduled Scanning** (Daily Quick, Weekly Full, Startup Catch-Up)<br>• **USB & Removable Media Auto-Protection** (`DRIVE_REMOVABLE` detection, `autorun.inf` & hidden `.lnk` worm scanner, USB scan prompt)<br>• **Local Email (`.eml`/`.msg`) & Attachment Scanner**<br>• **User-Mode Network Socket & Windows Firewall Posture Auditor** (`netstat -ano` PID mapping + C2 IP lookup + Firewall profile status)<br>• **Signed Offline Update Bundle Import (`.ppdb`) & Last-Known-Good Rollback UI** |
 | **P3: Advanced Features** | Deep optimization and cross-platform desktop synergy. | • **Worker Thread Pool Adaptive Scaling & Low-End PC Mode** (`CleanFileCache` persistence across restarts, fullscreen/battery auto-throttling)<br>• **Browser Extension Local Sync Status & Shared Allowlist/Blocklist Management** |
@@ -291,7 +291,7 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from an on-de
 ### 6.2 Real-Time & Download Protection (`AV-REALTIME-*`)
 - **`AV-REALTIME-001` (Recursive Multi-Directory File Shield):** `RealtimeMonitorService` SHALL monitor `Downloads`, `Desktop`, `Documents`, `Pictures`, `%TEMP%`, Startup folders, and user-configured paths using recursive `ReadDirectoryChangesW` (`fs.watch(..., { recursive: true })`) with automatic watcher health recovery.
 - **`AV-REALTIME-002` (Download Completion & NTFS MOTW Correlation):** `RealtimeMonitorService` SHALL track in-progress browser downloads (`.crdownload`, `.part`, `.download`), trigger immediate inspection ($<50\text{ ms}$) upon rename/completion, and parse NTFS `:Zone.Identifier` (`ZoneId`, `HostUrl`, `ReferrerUrl`) through `@private-protection/core` `URLAnalyzer`.
-- **`AV-REALTIME-003` (System Tray & Continuous Background Protection):** Closing the main window SHALL minimize Private Protection to the Windows System Tray with live posture icon badges while keeping all real-time shields active in the background.
+- **`AV-REALTIME-003` (System Tray & Continuous Background Protection):** Closing the main window SHALL minimize Privex to the Windows System Tray with live posture icon badges while keeping all real-time shields active in the background.
 - **`AV-REALTIME-004` (USB & Removable Media Shield):** `RemovableMediaService` SHALL detect newly mounted removable drives (`DRIVE_REMOVABLE`), report accurate storage capacity, automatically inspect root `autorun.inf` and hidden `.lnk` worms within $<200\text{ ms}$, and surface a 1-click USB Scan action.
 
 ### 6.3 Process, Behavior & Persistence Protection (`AV-BEHAVIOR-*`)
@@ -337,7 +337,7 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from an on-de
 - **`AV-SEC-003` (Immutable AI Security Boundary):** The AI Assistant SHALL remain strictly read-only (`CORE -> VERDICT -> AI EXPLANATION`), receiving only sanitized `Evidence` tokens and validated against Flesch-Kincaid Grade $\le 8$ JSON schemas.
 
 ### 6.12 Desktop Antivirus User Experience (`AV-UX-*`)
-- **`AV-UX-001` (20-Screen Antivirus Command Center & 4-Pillar Explanations):** The Desktop UI SHALL implement all 20 required antivirus screens/components with the 3-tier posture hero banner (`🟢 PROTECTED`, `🟡 ATTENTION REQUIRED`, `🔴 ACTION REQUIRED`), 4-Pillar plain-language alerts (*What Happened*, *Why It Matters*, *What Private Protection Did*, *What You Should Do*), virtualized lists, and WCAG AA accessibility.
+- **`AV-UX-001` (20-Screen Antivirus Command Center & 4-Pillar Explanations):** The Desktop UI SHALL implement all 20 required antivirus screens/components with the 3-tier posture hero banner (`🟢 PROTECTED`, `🟡 ATTENTION REQUIRED`, `🔴 ACTION REQUIRED`), 4-Pillar plain-language alerts (*What Happened*, *Why It Matters*, *What Privex Did*, *What You Should Do*), virtualized lists, and WCAG AA accessibility.
 
 ---
 
@@ -417,7 +417,7 @@ Status: Planned / Not Started
 Priority: High
 
 ## Product Objective
-Private Protection Mobile shall provide a local-first Android security layer covering application safety, downloaded-file scanning, full-device scanning, phishing prevention, pre-threat warnings, password generation, and safe remediation while respecting Android sandbox and permission boundaries.
+Privex Mobile shall provide a local-first Android security layer covering application safety, downloaded-file scanning, full-device scanning, phishing prevention, pre-threat warnings, password generation, and safe remediation while respecting Android sandbox and permission boundaries.
 
 ## Functional Requirements
 
@@ -465,8 +465,16 @@ The product shall provide privacy-first URL protection with:
 - supported browser integration,
 - optional domain/IP metadata inspection without default TLS MITM.
 
-### MOB-009 — Pre-Threat Warning
-High-confidence threats shall trigger a warning before the risky action whenever technically possible. Warnings must identify evidence and recommended action.
+### MOB-009 — Pre-Threat Warning (Phase T7)
+- **Status:** IMPLEMENTED & VERIFIED
+- **Capabilities:**
+  - High-confidence threats trigger evidence-backed predictive warnings before opening URLs, launching downloaded files, or installing apps.
+  - Granular confidence level taxonomy (`CONFIRMED_MALWARE`, `STRONG_SUSPICION`, `HEURISTIC_ANOMALY`).
+  - Plain-language explanation of what triggered the detection and factual consequence disclosure.
+  - Safe default actions (`GO_BACK`, `CANCEL_INSTALL`, `DELETE_DOWNLOAD`, `QUARANTINE`) with supported choices.
+  - Mandatory 5-second countdown friction gate for dangerous bypass (`CONTINUE_AT_OWN_RISK`).
+  - 30-second deduplication cache to prevent notification storm fatigue.
+  - Zero raw user data uploaded; 100% on-device synthesis and bounded local decision history.
 
 ### MOB-010 — Password Generator
 The product shall provide a local CSPRNG password generator supporting 12–128 characters, configurable character sets, strong presets, passphrases, entropy measurement and clipboard hygiene. Generated passwords shall never be uploaded or logged.

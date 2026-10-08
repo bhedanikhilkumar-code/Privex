@@ -1,4 +1,4 @@
-# memory.md — Long-Term Project & Architectural Memory for Private Protection
+# memory.md — Long-Term Project & Architectural Memory for Privex
 
 > **DOCUMENT STATUS:** CANONICAL LONG-TERM PROJECT MEMORY  
 > **LAST UPDATED:** 2026-10-05  
@@ -8,7 +8,7 @@
 
 ## 1. Product Goal
 
-Transform **Private Protection Windows Desktop** (`apps/desktop/`) from a basic on-device file/URL security scanner into a **real, strong, local-first, offline-first Windows Antivirus & Endpoint Protection product** while preserving 100% compatibility and shared core architecture (`@private-protection/core`, `@private-protection/ml`) across the Web App (`apps/web/`), Android App (`apps/mobile/`), and Browser Extension (`apps/extension/`).
+Transform **Privex Windows Desktop** (`apps/desktop/`) from a basic on-device file/URL security scanner into a **real, strong, local-first, offline-first Windows Antivirus & Endpoint Protection product** while preserving 100% compatibility and shared core architecture (`@private-protection/core`, `@private-protection/ml`) across the Web App (`apps/web/`), Android App (`apps/mobile/`), and Browser Extension (`apps/extension/`).
 
 ---
 
@@ -94,7 +94,7 @@ Transform **Private Protection Windows Desktop** (`apps/desktop/`) from a basic 
 
 1. **`DECISION-01` (Preserve & Harden Electron + TypeScript Monorepo):** Keep the working Electron 44 + TypeScript + React 18 architecture in `apps/desktop/` and `@private-protection/core` rather than rewriting from scratch in Tauri/Rust, ensuring zero regressions while adding deep byte-level `DataView` parsers and Windows OS integrations.
 2. **`DECISION-02` (4-Stage Short-Circuit Sieve for CPU Efficiency):** Gate expensive full-file SHA-256 hashing and deep PE/heuristic parsing behind Stage 0 (`CleanFileCache`, $<0.08\text{ ms}$) and Stage 1 (4 KB/64 KB header & magic triage, $<0.50\text{ ms}$).
-3. **`DECISION-03` (VSS-Independent Copy-on-Write `ShadowVault`):** Because ransomware routinely executes `vssadmin delete shadows /all /quiet`, Private Protection maintains its own encrypted Copy-on-Write backup cache (`~/.private-protection/shadow-vault/`) alongside blocking `vssadmin` command lines.
+3. **`DECISION-03` (VSS-Independent Copy-on-Write `ShadowVault`):** Because ransomware routinely executes `vssadmin delete shadows /all /quiet`, Privex maintains its own encrypted Copy-on-Write backup cache (`~/.private-protection/shadow-vault/`) alongside blocking `vssadmin` command lines.
 4. **`DECISION-04` (SHA-256 Hash-Bound Trust & Exclusions):** Bind false-positive quarantine restorations and Trusted Applications to exact **SHA-256 file hashes** by default so if an excluded/trusted binary is later modified or replaced by malware, trust is automatically revoked.
 5. **`DECISION-05` (`RULE-29` — Atomic Git Commit & Push on Every Step & Prompt):** Every step, architectural document, and implementation phase across every prompt must be committed atomically with an informative commit message and immediately pushed to `origin/main`.
 
@@ -212,3 +212,14 @@ A mobile release is not considered complete from CI alone. Required evidence inc
   - Implemented `WebShieldService` (native coordinator, foreground service notifications, thread pool, domain stats).
   - Implemented `web-shield.service.ts` and `WebShieldCapabilities` reporting honest Android sandboxing limitation (no unprivileged system-wide browser interception without VPN).
   - Verified with 141/141 Android unit tests passing, 116/116 mobile Vitest tests passing across 19 test files, 511/511 monorepo tests passing, 0 typecheck errors, and clean R8 release build (`assembleRelease` passed). Physical device validation honestly reported as NOT EXECUTED due to no attached USB handset.
+- **Phase T7 (Predictive Pre-Threat Warning):** COMPLETE & CERTIFIED (`docs/PHASE_T7_FINAL_INDEPENDENT_AUDIT.md`).
+  - Implemented `PreThreatWarningCoordinator.java`: native warning engine that synthesizes evidence-backed warnings across URLs (T6), files/downloads (T3/T5), and packages (T2).
+  - Grounded confidence taxonomy (`CONFIRMED_MALWARE`, `STRONG_SUSPICION`, `HEURISTIC_ANOMALY`) based on concrete detector evidence tokens.
+  - Actionable, non-fear-based explanations: Plain-language trigger explanations ("What was detected") and factual consequence disclosures ("Potential consequences").
+  - Safe recommendations: Enforces safe defaults (`GO_BACK`, `CANCEL_INSTALL`, `DELETE_DOWNLOAD`, `QUARANTINE`) and supported user choices.
+  - Friction gate: Mandatory 5-second countdown timer for high-risk/dangerous bypass (`CONTINUE_AT_OWN_RISK`).
+  - Notification and intent integration: `MainActivity.java` routes `PRE_THREAT_WARNING` notification intents into WebView CustomEvents and exposes bridge endpoints.
+  - WCAG 2.1 AA accessible UI: `PreThreatWarningModal.tsx` provides an alertdialog modal with keyboard navigation, ARIA attributes, collapsible technical evidence tokens, and integrated friction gate.
+  - TypeScript Service: `pre-threat-warning.service.ts` provides lifecycle management, fallback deterministic evaluation, and bounded decision history.
+  - Verified with 151/151 Android unit tests passing (+10 new tests), 131/131 mobile Vitest tests passing across 21 test files (+15 new tests), 552/552 monorepo tests passing, 0 typecheck errors, and clean R8 release build (`assembleRelease` passed). Physical device validation honestly reported as NOT EXECUTED due to no attached USB handset.
+

@@ -38,7 +38,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
- * MainActivity: The primary Android UI container and native security bridge for Private Protection.
+ * MainActivity: The primary Android UI container and native security bridge for Privex.
  * 
  * Implements:
  * 1. Sandboxed, air-gapped WebView UI loaded via WebViewAssetLoader (https://appassets.androidplatform.net/assets/index.html).
@@ -262,6 +262,22 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        // Notification Pre-Threat Warning Trigger (Phase T7)
+        if ("PRE_THREAT_WARNING".equals(action)) {
+            String warningPayload = intent.getStringExtra("warning_payload");
+            if (warningPayload != null && !warningPayload.trim().isEmpty()) {
+                Log.i(TAG, "Received pre-threat warning from notification payload");
+                try {
+                    intentData = new JSONObject();
+                    intentData.put("action", "PRE_THREAT_WARNING");
+                    intentData.put("payload", warningPayload);
+                    intentData.put("timestamp", System.currentTimeMillis());
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to serialize pre-threat warning intent", e);
+                }
+            }
+        }
+
         if (intentData != null) {
             String serialized = intentData.toString();
             if (isClientReady) {
@@ -290,6 +306,11 @@ public class MainActivity extends AppCompatActivity {
             } else if ("DEEP_LINK_URL".equals(action)) {
                 webView.post(() -> webView.evaluateJavascript(
                         "window.dispatchEvent(new CustomEvent('privateprotection:deep_link_url', { detail: { url: " + safePayload + " } }));",
+                        null
+                ));
+            } else if ("PRE_THREAT_WARNING".equals(action)) {
+                webView.post(() -> webView.evaluateJavascript(
+                        "window.dispatchEvent(new CustomEvent('privateprotection:pre_threat_warning', { detail: { warning: " + safePayload + " } }));",
                         null
                 ));
             }
@@ -919,6 +940,80 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 Log.e(TAG, "getWebShieldStatus failed", e);
                 return "{\"isWebShieldActive\":false,\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        // ==========================================
+        // PHASE T7: PREDICTIVE PRE-THREAT WARNING
+        // ==========================================
+
+        @JavascriptInterface
+        public String synthesizePreThreatWarning(String targetType, String inspectionJson) {
+            try {
+                com.privateprotection.mobile.shield.PreThreatWarningCoordinator coordinator =
+                        com.privateprotection.mobile.shield.PreThreatWarningCoordinator.getInstance(activity);
+                org.json.JSONObject input = new org.json.JSONObject(inspectionJson);
+                org.json.JSONObject result;
+
+                if ("URL".equalsIgnoreCase(targetType)) {
+                    String url = input.optString("url", input.optString("normalizedUrl", ""));
+                    com.privateprotection.mobile.shield.UrlThreatDetector.UrlThreatResult urlResult =
+                            com.privateprotection.mobile.shield.WebShieldService.getInstance(activity).inspectUrl(url);
+                    result = coordinator.synthesizeUrlWarning(urlResult);
+                } else if ("FILE".equalsIgnoreCase(targetType) || "DOWNLOAD".equalsIgnoreCase(targetType)) {
+                    result = coordinator.synthesizeFileWarning(input);
+                } else if ("APP_PACKAGE".equalsIgnoreCase(targetType) || "PACKAGE".equalsIgnoreCase(targetType)) {
+                    result = coordinator.synthesizePackageWarning(input);
+                } else {
+                    return "{\"error\":\"UNSUPPORTED_TARGET_TYPE\"}";
+                }
+                return result != null ? result.toString() : "{\"error\":\"SYNTHESIS_FAILED\"}";
+            } catch (Exception e) {
+                Log.e(TAG, "synthesizePreThreatWarning failed", e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public boolean showPreThreatWarningNotification(String warningJson) {
+            try {
+                com.privateprotection.mobile.shield.PreThreatWarningCoordinator coordinator =
+                        com.privateprotection.mobile.shield.PreThreatWarningCoordinator.getInstance(activity);
+                org.json.JSONObject warning = new org.json.JSONObject(warningJson);
+                return coordinator.dispatchPreThreatNotification(warning);
+            } catch (Exception e) {
+                Log.e(TAG, "showPreThreatWarningNotification failed", e);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public boolean recordPreThreatWarningDecision(String decisionJson) {
+            try {
+                com.privateprotection.mobile.shield.PreThreatWarningCoordinator coordinator =
+                        com.privateprotection.mobile.shield.PreThreatWarningCoordinator.getInstance(activity);
+                org.json.JSONObject dec = new org.json.JSONObject(decisionJson);
+                return coordinator.recordDecision(
+                        dec.optString("warningId"),
+                        dec.optString("targetIdentifier"),
+                        dec.optString("selectedAction"),
+                        dec.optBoolean("bypassedWithFrictionGate", false)
+                );
+            } catch (Exception e) {
+                Log.e(TAG, "recordPreThreatWarningDecision failed", e);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public String getPreThreatWarningDecisionHistory() {
+            try {
+                com.privateprotection.mobile.shield.PreThreatWarningCoordinator coordinator =
+                        com.privateprotection.mobile.shield.PreThreatWarningCoordinator.getInstance(activity);
+                return coordinator.getDecisionHistory().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "getPreThreatWarningDecisionHistory failed", e);
+                return "[]";
             }
         }
     }

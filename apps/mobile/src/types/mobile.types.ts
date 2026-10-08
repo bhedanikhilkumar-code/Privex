@@ -446,5 +446,57 @@ export interface WebShieldStatus {
   error?: string;
 }
 
+// ==========================================
+// PHASE T7: PREDICTIVE PRE-THREAT WARNING
+// ==========================================
+
+export type PreThreatTargetType = 'URL' | 'FILE' | 'APP_PACKAGE' | 'DOWNLOAD';
+
+export type WarningConfidenceLevel =
+  | 'CONFIRMED_MALWARE'
+  | 'STRONG_SUSPICION'
+  | 'HEURISTIC_ANOMALY';
+
+export type PreThreatActionType =
+  | 'GO_BACK'
+  | 'CANCEL_INSTALL'
+  | 'DELETE_DOWNLOAD'
+  | 'QUARANTINE'
+  | 'RESCAN'
+  | 'INSPECT_DETAILS'
+  | 'CONTINUE_AT_OWN_RISK';
+
+export interface PreThreatWarningEvidenceItem {
+  code: string;
+  severity: string;
+  description: string;
+  scoreContribution?: number;
+}
+
+export interface PreThreatWarningPayload {
+  warningId: string;
+  targetType: PreThreatTargetType;
+  targetIdentifier: string;
+  riskScore: number;
+  verdict: 'ALLOW' | 'CAUTION' | 'SUSPICIOUS' | 'DANGEROUS';
+  confidenceLevel: WarningConfidenceLevel;
+  whatDetected: string;
+  potentialConsequences: string;
+  recommendedAction: PreThreatActionType;
+  supportedChoices: PreThreatActionType[];
+  evidenceDetails: PreThreatWarningEvidenceItem[];
+  requiresFrictionGate: boolean;
+  frictionGateSeconds: number;
+  timestamp: number;
+}
+
+export interface PreThreatWarningDecision {
+  warningId: string;
+  targetIdentifier: string;
+  selectedAction: PreThreatActionType;
+  timestamp: number;
+  bypassedWithFrictionGate: boolean;
+}
+
 
 

@@ -1,7 +1,7 @@
 # design.md — Complete 20-Screen Desktop Antivirus UX & Design Specification
 
 > **DOCUMENT STATUS:** CANONICAL UX & INTERFACE SPECIFICATION  
-> **PROJECT:** Private Protection — Windows Desktop Strong Antivirus Transformation  
+> **PROJECT:** Privex — Windows Desktop Strong Antivirus Transformation  
 > **DESIGN PHILOSOPHY:** Calm Authority • Plain-Language Clarity (Grade $\le 8$) • Zero Alarmism • Instant Actionability • Friction-Gated Security Mutations
 
 ---
@@ -29,7 +29,7 @@ Inspection of `apps/desktop/src/renderer/` (`App.tsx`, `Sidebar.tsx`, `Header.ts
 Every status hero banner, threat detection modal, and notification card MUST structure its communication into four plain-language pillars (Flesch-Kincaid Grade $\le 6$ default, toggleable to Grade 8 Technical):
 1. **WHAT HAPPENED:** Concrete description of the file, process, or URL event without cryptic hex dumps.
 2. **WHY IT MATTERS:** Clear explanation of the real-world risk to personal documents, passwords, or system stability.
-3. **WHAT PRIVATE PROTECTION DID:** Exact automated defense action already taken (`Quarantined in PPVAULT2`, `Terminated process PID`, `Blocked phishing link`).
+3. **WHAT PRIVEX DID:** Exact automated defense action already taken (`Quarantined in PPVAULT2`, `Terminated process PID`, `Blocked phishing link`).
 4. **WHAT THE USER SHOULD DO:** Unambiguous next step (`No action needed`, `Review quarantined file`, `Restore clean copy from Shadow Vault`).
 
 ---
@@ -140,8 +140,15 @@ Every status hero banner, threat detection modal, and notification card MUST str
 
 ---
 
-### Screen 07: Threat Detection — Active Alert & Interstitial (`ThreatDetectionModal.tsx` & Alert Banner)
-- **Purpose:** Instant ($<50\text{ ms}$) high-visibility interception modal and top banner displayed when a real-time file, download, or process threat is caught.
+### Screen 07: Threat Detection — Active Alert & Interstitial (`ThreatDetectionModal.tsx` & `PreThreatWarningModal.tsx`)
+- **Purpose:** Instant ($<50\text{ ms}$) high-visibility interception modal and top banner displayed when a real-time file, download, process threat, or predictive pre-threat (URL, file, package) is caught.
+- **Mobile Pre-Threat Warning (`PreThreatWarningModal.tsx` — Phase T7):**
+  - Displays evidence-backed warning before risky actions across URLs, downloads, or unverified app packages.
+  - Distinct badge taxonomy: `CONFIRMED_MALWARE`, `STRONG_SUSPICION`, `HEURISTIC_ANOMALY`.
+  - Grounded trigger summary ("What was detected") and factual consequence disclosure ("Potential consequences").
+  - Auto-focused primary safe recommendation CTA (`← Go Back to Safety`, `Delete Download`, `Cancel Installation`).
+  - Integrated 5-second countdown friction gate for hazardous bypass (`Continue at your own risk...`).
+  - Collapsible technical evidence token list.
 - **User Actions:**
   - Click auto-focused primary safe CTA: `Keep in Quarantine (Recommended)` or `Quarantine Threat Now`.
   - Click `Inspect Evidence & AI Explanation` (opens **Screen 08: Threat Details**).
@@ -475,7 +482,7 @@ Use high-priority notifications only for active threats. Batch repetitive findin
 
 ## 8. Permission UX
 Each permission screen must answer:
-- Why does Private Protection need this?
+- Why does Privex need this?
 - What functionality stops if denied?
 - What data remains local?
 - How can the user revoke it?

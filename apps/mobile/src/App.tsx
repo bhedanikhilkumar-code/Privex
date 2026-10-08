@@ -15,6 +15,10 @@ import { ProtectionStatusScreen } from './screens/ProtectionStatusScreen';
 import { PrivacyScreen } from './screens/PrivacyScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 
+import { PreThreatWarningModal } from './components/PreThreatWarningModal';
+import { PreThreatWarningService } from './services/pre-threat-warning.service';
+import { PreThreatWarningPayload, PreThreatActionType } from './types/mobile.types';
+
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<MobileTab>('HOME');
 
@@ -23,11 +27,13 @@ export const App: React.FC = () => {
   const [textService] = useState(() => new TextScannerService(adapter));
   const [fileService] = useState(() => new FileScannerService());
   const [cameraService] = useState(() => new CameraScannerService(adapter));
+  const [preThreatService] = useState(() => PreThreatWarningService.getInstance());
 
   // Inbound Intent state (cold-start or warm-start)
   const [inboundUrl, setInboundUrl] = useState<string | undefined>(undefined);
   const [inboundText, setInboundText] = useState<string | undefined>(undefined);
   const [autoScanTrigger, setAutoScanTrigger] = useState<boolean>(false);
+  const [activePreThreatWarning, setActivePreThreatWarning] = useState<PreThreatWarningPayload | null>(null);
 
   useEffect(() => {
     // 1. Notify native Android bridge that UI is ready (BLOCKER-05)
@@ -39,7 +45,12 @@ export const App: React.FC = () => {
       }
     }
 
-    // 2. Consume any pending cold-start intent atomically
+    // 2. Subscribe to Pre-Threat Warning service
+    const unsubscribeWarnings = preThreatService.subscribeToWarnings((warning) => {
+      setActivePreThreatWarning(warning);
+    });
+
+    // 3. Consume any pending cold-start intent atomically
     if (typeof window !== 'undefined' && (window as any).AndroidSecurityBridge?.consumePendingIntent) {
       try {
         const rawPending = (window as any).AndroidSecurityBridge.consumePendingIntent();
@@ -53,6 +64,9 @@ export const App: React.FC = () => {
             setInboundUrl(parsed.payload);
             setAutoScanTrigger(true);
             setCurrentTab('URL_SCAN');
+          } else if (parsed.action === 'PRE_THREAT_WARNING' && parsed.payload) {
+            const warningPayload = typeof parsed.payload === 'string' ? JSON.parse(parsed.payload) : parsed.payload;
+            preThreatService.setActiveWarning(warningPayload);
           }
         }
       } catch (err) {
@@ -60,7 +74,7 @@ export const App: React.FC = () => {
       }
     }
 
-    // 3. Register warm-start listeners for runtime Intents
+    // 4. Register warm-start listeners for runtime Intents
     const handleSharedText = (event: any) => {
       const text = event.detail?.text;
       if (text && typeof text === 'string') {
@@ -83,10 +97,30 @@ export const App: React.FC = () => {
     window.addEventListener('privateprotection:deep_link_url', handleDeepLink);
 
     return () => {
+      unsubscribeWarnings();
       window.removeEventListener('privateprotection:shared_text', handleSharedText);
       window.removeEventListener('privateprotection:deep_link_url', handleDeepLink);
     };
-  }, []);
+  }, [preThreatService]);
+
+  const handlePreThreatAction = async (action: PreThreatActionType, bypassed: boolean) => {
+    if (!activePreThreatWarning) return;
+
+    await preThreatService.recordDecision({
+      warningId: activePreThreatWarning.warningId,
+      targetIdentifier: activePreThreatWarning.targetIdentifier,
+      selectedAction: action,
+      timestamp: Date.now(),
+      bypassedWithFrictionGate: bypassed
+    });
+
+    preThreatService.clearActiveWarning();
+    setActivePreThreatWarning(null);
+
+    if (action === 'GO_BACK' || action === 'CANCEL_INSTALL' || action === 'DELETE_DOWNLOAD') {
+      setCurrentTab('HOME');
+    }
+  };
 
   return (
     <div
@@ -156,6 +190,11 @@ export const App: React.FC = () => {
           setAutoScanTrigger(false);
           setCurrentTab(tab);
         }}
+      />
+
+      <PreThreatWarningModal
+        warning={activePreThreatWarning}
+        onActionSelected={handlePreThreatAction}
       />
     </div>
   );
