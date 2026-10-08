@@ -350,6 +350,10 @@ public class PackageAuditService {
                     addEvidence(evidenceList, "MISSING_DEX_FILE", "MEDIUM", 25,
                             "APK archive contains no compiled Android DEX executable code.");
                 }
+            } else if (!meta.isSystemApp()) {
+                // Inaccessible or deleted APK archive on filesystem
+                addEvidence(evidenceList, "APK_ARCHIVE_INACCESSIBLE", "LOW", 5,
+                        "Base APK binary file could not be read directly from filesystem; static bytecode scan unavailable.");
             }
 
             // System apps are inherently safe unless heavily tampered

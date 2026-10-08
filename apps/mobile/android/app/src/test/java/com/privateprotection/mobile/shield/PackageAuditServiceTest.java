@@ -113,6 +113,41 @@ public class PackageAuditServiceTest {
     }
 
     @Test
+    public void testInaccessibleApkDoesNotMarkAsClean() {
+        PackageMetadata meta = new PackageMetadata(
+                "com.sideload.app",
+                "Sideload App",
+                "1.0.0",
+                1L,
+                1000L,
+                1000L,
+                "", // Sideloaded
+                "/data/app/deleted.apk",
+                false,
+                Collections.emptyList(),
+                Collections.emptyList(),
+                Collections.emptyList(),
+                Collections.emptyList()
+        );
+
+        // Null apkInspection simulates inaccessible/deleted file on disk
+        JSONObject report = auditService.evaluateRisk(meta, null);
+        assertNotNull(report);
+        JSONArray evidence = report.optJSONArray("evidence");
+        assertNotNull(evidence);
+
+        boolean foundInaccessibleSignal = false;
+        for (int i = 0; i < evidence.length(); i++) {
+            JSONObject ev = evidence.optJSONObject(i);
+            if (ev != null && "APK_ARCHIVE_INACCESSIBLE".equals(ev.optString("code"))) {
+                foundInaccessibleSignal = true;
+                break;
+            }
+        }
+        assertTrue("Inaccessible APK must generate APK_ARCHIVE_INACCESSIBLE evidence", foundInaccessibleSignal);
+    }
+
+    @Test
     public void testCreateUninstallIntent() {
         Intent intent = auditService.createUninstallIntent("com.malicious.app");
         assertNotNull(intent);
