@@ -109,7 +109,8 @@ public class MobileSecurityCoordinator {
         stateStore.persistJob(job);
 
         try {
-            workerExecutor.execute(() -> runWorkerTask(job, task));
+            Future<?> future = workerExecutor.submit(() -> runWorkerTask(job, task));
+            runningFutures.put(job.getId(), future);
         } catch (RejectedExecutionException e) {
             job.transitionTo(JobState.FAILED, "System under backpressure: worker queue full");
             activeJobs.remove(job.getId());
@@ -132,6 +133,7 @@ public class MobileSecurityCoordinator {
             job.transitionTo(JobState.FAILED, err);
             stateStore.persistJob(job);
             activeJobs.remove(job.getId());
+            runningFutures.remove(job.getId());
             return;
         }
 
@@ -141,6 +143,7 @@ public class MobileSecurityCoordinator {
             job.transitionTo(JobState.CANCELLED, job.getCancellationReason());
             stateStore.persistJob(job);
             activeJobs.remove(job.getId());
+            runningFutures.remove(job.getId());
             return;
         }
 
@@ -148,6 +151,7 @@ public class MobileSecurityCoordinator {
         if (!started) {
             Log.w(TAG, "Failed to transition job " + job.getId() + " to RUNNING; current state=" + job.getState());
             activeJobs.remove(job.getId());
+            runningFutures.remove(job.getId());
             return;
         }
         stateStore.persistJob(job);
@@ -189,9 +193,18 @@ public class MobileSecurityCoordinator {
             Log.i(TAG, "Security job " + job.getId() + " cooperative cancellation confirmed: " + e.getReason());
             job.transitionTo(JobState.CANCELLED, e.getReason());
         } catch (Throwable t) {
-            String err = t.getMessage() != null ? t.getMessage() : t.getClass().getSimpleName();
-            Log.e(TAG, "Security job " + job.getId() + " failed with exception: " + err, t);
-            job.transitionTo(JobState.FAILED, err);
+            if (job.isCancelled() || t instanceof InterruptedException) {
+                String reason = job.getCancellationReason();
+                if (reason == null || reason.trim().isEmpty()) {
+                    reason = "Cancelled / Thread interrupted";
+                }
+                Log.i(TAG, "Security job " + job.getId() + " interrupted or cancelled during execution");
+                job.transitionTo(JobState.CANCELLED, reason);
+            } else {
+                String err = t.getMessage() != null ? t.getMessage() : t.getClass().getSimpleName();
+                Log.e(TAG, "Security job " + job.getId() + " failed with exception: " + err, t);
+                job.transitionTo(JobState.FAILED, err);
+            }
         } finally {
             activeJobs.remove(job.getId());
             runningFutures.remove(job.getId());

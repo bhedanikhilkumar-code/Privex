@@ -124,4 +124,23 @@ public class JobStateStoreTest {
         // The newest jobs must be present
         assertTrue(store.getAllJobs().stream().anyMatch(j -> j.getId().equals("job-59")));
     }
+
+    @Test
+    public void testCorruptedIndividualRecordHandling() {
+        // Populate backingStore with one valid job, one malformed JSON job, and one valid job
+        backingStore.put("job_valid_1", "{\"id\":\"valid_1\",\"type\":\"FILE_SCAN\",\"state\":\"COMPLETED\",\"progress\":1.0,\"createdAtMs\":1000}");
+        backingStore.put("job_corrupted", "{this is malformed json!@#$}");
+        backingStore.put("job_valid_2", "{\"id\":\"valid_2\",\"type\":\"URL_SCAN\",\"state\":\"FAILED\",\"progress\":0.0,\"createdAtMs\":2000}");
+        backingStore.put("job_ids_index", "[\"valid_1\",\"corrupted\",\"valid_2\"]");
+
+        JobStateStore store = new JobStateStore(mockPrefs);
+        List<SecurityJob> loaded = store.getAllJobs();
+
+        // The store must skip the corrupted record and load the two valid ones
+        assertEquals(2, loaded.size());
+        assertNotNull(store.getJob("valid_1"));
+        assertNotNull(store.getJob("valid_2"));
+        assertEquals(JobState.COMPLETED, store.getJob("valid_1").getState());
+        assertEquals(JobState.FAILED, store.getJob("valid_2").getState());
+    }
 }

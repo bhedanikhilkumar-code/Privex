@@ -43,14 +43,18 @@ public class JobStateStore {
         try {
             JSONArray arr = new JSONArray(indexRaw);
             for (int i = 0; i < arr.length(); i++) {
-                String id = arr.getString(i);
-                String jobRaw = prefs.getString("job_" + id, null);
-                if (jobRaw != null) {
-                    JSONObject obj = new JSONObject(jobRaw);
-                    SecurityJob job = SecurityJob.fromJSON(obj);
-                    if (job != null) {
-                        memoryIndex.put(job.getId(), job);
+                try {
+                    String id = arr.getString(i);
+                    String jobRaw = prefs.getString("job_" + id, null);
+                    if (jobRaw != null) {
+                        JSONObject obj = new JSONObject(jobRaw);
+                        SecurityJob job = SecurityJob.fromJSON(obj);
+                        if (job != null) {
+                            memoryIndex.put(job.getId(), job);
+                        }
                     }
+                } catch (Exception e) {
+                    Log.w(TAG, "Skipping corrupted individual job record in index", e);
                 }
             }
         } catch (Exception e) {

@@ -4,6 +4,7 @@ import android.os.Process;
 import android.util.Log;
 
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
@@ -79,6 +80,13 @@ public class BoundedWorkerExecutor {
             throw new IllegalArgumentException("Runnable command cannot be null");
         }
         executor.execute(command);
+    }
+
+    public Future<?> submit(Runnable command) {
+        if (command == null) {
+            throw new IllegalArgumentException("Runnable command cannot be null");
+        }
+        return executor.submit(command);
     }
 
     /**

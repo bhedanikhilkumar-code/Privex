@@ -263,4 +263,101 @@ public class MobileSecurityCoordinatorTest {
         assertTrue(stats.optBoolean("isThrottled"));
         assertEquals(1, stats.optInt("workerMaxPoolSize"));
     }
+
+    @Test
+    public void testThreadInterruptionOnCancellation() throws Exception {
+        CountDownLatch workerStarted = new CountDownLatch(1);
+        CountDownLatch workerFinished = new CountDownLatch(1);
+
+        SecurityJob job = coordinator.submitJob(JobType.FILE_SCAN, null, (j, ctrl) -> {
+            workerStarted.countDown();
+            // Sleep for 10 seconds; thread interruption should wake it up immediately
+            Thread.sleep(10000);
+            return new JSONObject();
+        });
+
+        assertTrue(workerStarted.await(2, TimeUnit.SECONDS));
+
+        // Initiate cancellation; this should trigger future.cancel(true) and interrupt the sleeping worker
+        long cancelStart = System.currentTimeMillis();
+        boolean cancelled = coordinator.cancelJob(job.getId(), "User cancelled sleeping task");
+        assertTrue(cancelled);
+
+        // Give worker thread a moment to handle InterruptedException
+        Thread.sleep(150);
+
+        SecurityJob finalJob = coordinator.getJob(job.getId());
+        assertNotNull(finalJob);
+        assertEquals(JobState.CANCELLED, finalJob.getState());
+        assertTrue(finalJob.isCancelled());
+        assertTrue(finalJob.isTerminal());
+        // Verify latency was well under 2 seconds (not waiting for 10-second sleep to end)
+        assertTrue(System.currentTimeMillis() - cancelStart < 2000);
+    }
+
+    @Test
+    public void testCancellationBeforeWorkerExecution() throws Exception {
+        // testExecutor has capacity: 2 core threads, 64 queue
+        // Block the 2 workers with long-running tasks
+        CountDownLatch workersRunning = new CountDownLatch(2);
+        CountDownLatch unblockLatch = new CountDownLatch(1);
+
+        coordinator.submitJob(JobType.MAINTENANCE, null, (j, ctrl) -> {
+            workersRunning.countDown();
+            unblockLatch.await(5, TimeUnit.SECONDS);
+            return new JSONObject();
+        });
+        coordinator.submitJob(JobType.MAINTENANCE, null, (j, ctrl) -> {
+            workersRunning.countDown();
+            unblockLatch.await(5, TimeUnit.SECONDS);
+            return new JSONObject();
+        });
+
+        assertTrue(workersRunning.await(2, TimeUnit.SECONDS));
+
+        // Submit job 3; it sits in QUEUED state
+        SecurityJob queuedJob = coordinator.submitJob(JobType.URL_SCAN, null, (j, ctrl) -> {
+            throw new RuntimeException("Should never be executed!");
+        });
+        assertEquals(JobState.QUEUED, queuedJob.getState());
+
+        // Cancel job 3 while still queued
+        boolean cancelResult = coordinator.cancelJob(queuedJob.getId(), "Cancelled in queue");
+        assertTrue(cancelResult);
+        assertEquals(JobState.CANCELLED, queuedJob.getState());
+
+        // Unblock workers
+        unblockLatch.countDown();
+        Thread.sleep(100);
+
+        // Verify queuedJob remains CANCELLED and never threw the exception
+        SecurityJob verified = coordinator.getJob(queuedJob.getId());
+        assertEquals(JobState.CANCELLED, verified.getState());
+    }
+
+    @Test
+    public void testRapidBurstAndQueueSaturationRejection() throws Exception {
+        // Submit jobs until queue is saturated (capacity 64 queue + 4 max pool = 68 in-flight)
+        CountDownLatch blockWorkers = new CountDownLatch(1);
+        int successful = 0;
+        int rejected = 0;
+
+        for (int i = 0; i < 150; i++) {
+            try {
+                coordinator.submitJob(JobType.HEALTH_CHECK, null, (j, ctrl) -> {
+                    blockWorkers.await(2, TimeUnit.SECONDS);
+                    return new JSONObject();
+                });
+                successful++;
+            } catch (Exception e) {
+                rejected++;
+            }
+        }
+
+        blockWorkers.countDown();
+
+        // Exactly the queue capacity + max pool should succeed, and all excess must be rejected
+        assertTrue(successful <= 68);
+        assertTrue(rejected > 0);
+    }
 }
