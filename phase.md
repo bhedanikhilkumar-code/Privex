@@ -415,3 +415,197 @@ Download (MOTW)      Shield & ShadowVault  Persistence Protection  │          
 - **7. Exit Criteria:** Zero failing tests, zero stub/TODO violations, 100% clean TypeScript build, and Independent Zero-Trust Release Gate Sign-off.
 - **8. Rollback Strategy:** Pinned Ed25519 root signatures, LKG rollback, and Factory Seed database fallback.
 
+
+
+---
+
+# PHASE T — MOBILE SECURITY PROTECTION PLATFORM
+
+> Status: PLANNED / NOT STARTED  
+> Priority: HIGH  
+> Target: apps/mobile + shared packages/core security primitives  
+> Purpose: Transform the Android application from a companion/mobile client into a real, privacy-first mobile security product.
+
+## T-00 — Scope & Capability Contract
+Before implementation, freeze a capability matrix against the Android version range actually supported. Every requirement MUST be classified as:
+- PRE-INSTALL POSSIBLE — Private Protection can inspect the APK before package commit in the supported flow.
+- POST-INSTALL IMMEDIATE — OS does not allow third-party interception, so the app scans immediately after installation.
+- BACKGROUND OBSERVABLE — Android exposes the event/file through supported APIs.
+- USER-GRANTED STORAGE — SAF-selected location.
+- NOT POSSIBLE WITHOUT PRIVILEGED ROLE — documented limitation; never faked.
+
+## T1 — Mobile Security Core
+- Reuse the canonical local detection/risk engine wherever platform-neutral.
+- Add Android-native adapters for package, storage, URL, media, notification, battery, and lifecycle signals.
+- Preserve the single canonical verdict authority.
+- AI remains explanation-only.
+
+## T2 — Play-Protect-Like App Installation Shield
+Build a mobile App Safety pipeline:
+1. Detect package installation/update lifecycle.
+2. Resolve installed package metadata.
+3. Analyze APK when accessible: SHA-256, package identity, certificate chain, version, signing scheme, requested permissions, exported components, services/receivers/providers, native libraries, DEX indicators, embedded URLs, suspicious strings and local signatures.
+4. Compare against signed local threat intelligence.
+5. Produce SAFE / INFORM / WARN / BLOCK according to deterministic evidence.
+6. Notify the user immediately for suspicious/high-risk packages.
+7. If pre-install interception is technically unavailable, use the strongest safe post-install flow and explicitly report the limitation.
+8. Never claim Google Play Protect parity at the privileged OS level.
+
+## T3 — Universal Download & File Shield
+Create an automatic file-ingress pipeline:
+Download/Media Event → Canonical File Identity → Magic-Type Detection → Fast Hash/Threat DB → Type Parser → Deep Heuristics → RiskScorer → EngineVerdict → Notification/Quarantine
+Supported corpus MUST include APK, ZIP, PDF, DOC/DOCX, XLS/XLSX, PPT/PPTX, JPG/JPEG, PNG, GIF, WEBP, MP4, TXT, CSV, HTML, JS and generic binaries.
+- Extension spoofing must be detected.
+- ZIP and nested archives must be recursively inspected within strict limits.
+- File scans must not execute files.
+- Images/media must receive safe structural/hash/metadata analysis; no unnecessary full decoding.
+- Files denied by Android storage rules must be shown as skipped, never falsely marked clean.
+
+## T4 — Full Device Scan
+Provide Quick, Standard and Full Device Scan:
+- Quick: high-risk/Downloads/recently changed/installed-app paths.
+- Standard: common user-accessible shared-storage locations.
+- Full: every location the OS and user-granted SAF permissions expose.
+- Show exact coverage and skipped scopes.
+- Resume/retry after transient access failures.
+- Deduplicate by secure file identity and CleanFileCache.
+- Maintain bounded worker queues and battery/thermal awareness.
+
+## T5 — Real-Time Download Protection
+Implement supported Android observers for Downloads/MediaStore/file-ingress changes.
+- Debounce duplicate events.
+- Wait for file stabilization before deep scanning.
+- Scan before user-facing "safe" notification where possible.
+- If the OS delivers only a completed file event, warn immediately and race to scan before normal user opening where technically possible.
+- Never pretend an OS-level pre-open hook exists if Android does not provide one.
+
+## T6 — Phishing & Web Protection
+Create a privacy-first Web Shield:
+- URL normalization.
+- Punycode/IDN homograph detection.
+- Unicode/control-character and deceptive-character detection.
+- Suspicious TLD/domain reputation signals only when locally available.
+- Credential-harvesting form indicators where browser integration exposes them.
+- Redirect-chain analysis where the URL is available.
+- Dangerous scheme detection.
+- Local signed phishing/malware domain database.
+- Browser integration for supported browsers.
+- Optional local VPNService domain/IP metadata protection only if necessary and clearly disclosed; no TLS MITM by default.
+- Warning levels before navigation/download where technically possible.
+
+## T7 — Predictive Pre-Threat Warning
+Before opening a high-risk URL or launching a downloaded file/app, surface:
+- what triggered the warning,
+- confidence/risk level,
+- what could happen,
+- recommended safe action,
+- Go back / Remove / Quarantine / Continue at your own risk controls where appropriate.
+Warnings MUST be evidence-backed, not fear-based.
+
+## T8 — Password Generator
+Add a local cryptographic password generator:
+- CSPRNG only.
+- Presets: Standard 20, Strong 32, Very Strong 48, Custom 12–128.
+- Character-set controls.
+- Passphrase mode with local wordlist.
+- Entropy estimate.
+- Clipboard timeout/auto-clear where platform allows.
+- No cloud sync.
+- No password logging.
+- Optional integration with Android autofill only after explicit user opt-in and platform compliance.
+
+## T9 — Mobile Threat Intelligence
+- Signed local .ppdb database.
+- Separate APK hashes, file hashes, phishing domains, malicious URLs, certificate reputation, and heuristic rules.
+- Factory Seed + LKG.
+- Atomic update and cache invalidation.
+- Offline operation must remain useful.
+
+## T10 — Mobile Quarantine & Remediation
+- Isolate suspicious downloaded files where Android permits.
+- For installed apps, provide supported remediation: disable/uninstall/settings guidance, never claim silent uninstall when unavailable.
+- Preserve original evidence metadata.
+- Reversible actions first.
+- Strong friction gate for destructive actions.
+
+## T11 — Permissions & Privacy Center
+Show:
+- storage access,
+- notification access,
+- VPN/Web Shield status,
+- app install source visibility,
+- background scanning status,
+- battery optimization status,
+- telemetry status,
+- threat DB freshness.
+Every permission has explanation + revoke path.
+
+## T12 — Battery / Thermal / Low-RAM Mode
+- <20% battery: defer scheduled deep scans.
+- Thermal pressure: reduce worker count.
+- Foreground heavy usage: background scan throttling.
+- Low RAM: bounded queues and smaller buffers.
+- Critical active threat events remain prioritized.
+- No indefinite wakelocks.
+
+## T13 — Mobile Notifications
+Use notification categories:
+- CRITICAL THREAT
+- APP INSTALL WARNING
+- DOWNLOAD BLOCKED
+- PHISHING WARNING
+- SCAN COMPLETE
+- PROTECTION DEGRADED
+- UPDATE AVAILABLE
+Avoid notification storms with batching and rate limits.
+
+## T14 — Security Test Matrix
+Mandatory physical-device tests:
+- clean APK install
+- suspicious synthetic APK
+- known-bad EICAR file
+- ZIP with nested benign fixtures
+- ZIP bomb fixture
+- PDF/Office/image/media corpus
+- extension spoofing
+- Downloads event
+- MediaStore event
+- full-device scan
+- SAF-granted directory scan
+- denied-permission behavior
+- phishing URLs
+- IDN/punycode
+- redirect chains
+- offline mode
+- signed DB update
+- bad signature / bad hash / downgrade
+- LKG rollback
+- low battery
+- thermal throttling
+- low RAM
+- notification delivery
+- password entropy
+- ANR/OOM resilience.
+
+## T15 — Performance Targets
+Initial targets for supported mid/low-range Android devices:
+- app launch overhead for protection services <500 ms after warm start,
+- fast file-ingress triage p50 <20 ms for small local files,
+- no unbounded memory growth during 1,000-file burst,
+- no ANR during full scan,
+- bounded background CPU and battery usage,
+- scan queue remains cancellable and resumable.
+
+## T16 — Independent Mobile Zero-Trust Audit
+No Phase T completion until:
+1. implementation is complete,
+2. physical-device tests pass,
+3. offline/privacy audit passes,
+4. Android capability audit confirms no fake privileges,
+5. security adversarial tests pass,
+6. performance/battery/thermal tests pass,
+7. typecheck/build pass,
+8. fresh independent audit returns GO.
+
+### Phase T Definition of Done
+COMPLETE only when the mobile app demonstrably provides the strongest technically possible equivalent of modern mobile security protection, with honest Android limitations, real-device evidence, zero fake protection, and full documentation sync across all six canonical documents.
