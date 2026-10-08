@@ -12,6 +12,9 @@ jobs:
     permissions:
       contents: read
       deployments: write
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
     steps:
       - name: Checkout Code
@@ -41,7 +44,7 @@ jobs:
           test -f apps/web/dist/_headers
           test -f apps/web/dist/_redirects
 
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy to Cloudflare Pages (Direct Wrangler)
         uses: cloudflare/wrangler-action@v3
         if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
         with:
@@ -51,3 +54,14 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Deployment Instructions Note
+        if: env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == ''
+        run: |
+          echo "=========================================================================="
+          echo "Notice: CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID secrets not found."
+          echo "If Cloudflare Pages is connected directly via Git repository integration,"
+          echo "Cloudflare automatically builds and deploys from branch main."
+          echo "To enable direct GitHub Actions deployment via wrangler, add these secrets"
+          echo "in GitHub Repository Settings -> Secrets and variables -> Actions."
+          echo "=========================================================================="
