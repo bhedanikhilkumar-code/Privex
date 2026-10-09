@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ActiveTab, UserPreferences } from '../scanner/types';
+import { ActiveTab, UserPreferences, AppTheme } from '../scanner/types';
 import { WorkerBridge } from '../workers/worker-bridge';
 import { PreferenceStorage } from '../lib/storage';
 import { Header } from '../components/layout/Header';
@@ -15,10 +15,30 @@ import { SecurityDashboardView } from '../components/security/SecurityDashboardV
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('HOME');
   const [preferences, setPreferences] = useState<UserPreferences>(() => PreferenceStorage.loadPreferences());
+  const [theme, setTheme] = useState<AppTheme>(() => preferences.theme || PreferenceStorage.loadTheme());
   const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
   // Initialize WorkerBridge
   const scannerBridge = useMemo(() => new WorkerBridge(), []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  const handleThemeChange = (newTheme: AppTheme) => {
+    setTheme(newTheme);
+    const updated = { ...preferences, theme: newTheme };
+    setPreferences(updated);
+    PreferenceStorage.saveTheme(newTheme);
+  };
+
+  const handlePreferencesChange = (newPrefs: UserPreferences) => {
+    setPreferences(newPrefs);
+    if (newPrefs.theme && newPrefs.theme !== theme) {
+      setTheme(newPrefs.theme);
+      PreferenceStorage.saveTheme(newPrefs.theme);
+    }
+  };
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -36,8 +56,9 @@ export const App: React.FC = () => {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)' }}>
-      <Header />
+      <Header theme={theme} onThemeChange={handleThemeChange} />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+
 
       {/* Air-gapped / Offline alert banner if offline */}
       {!isOnline && (
@@ -151,7 +172,7 @@ export const App: React.FC = () => {
             {/* Featured Sample Card (from Landing Page design) */}
             <div
               style={{
-                backgroundColor: '#FFFFFF',
+                backgroundColor: 'var(--bg-card)',
                 border: '2px solid var(--border-dark)',
                 boxShadow: 'var(--shadow-brutal-lg)',
                 padding: '1.5rem',
@@ -179,7 +200,7 @@ export const App: React.FC = () => {
                   >
                     SAFE / VERIFIED
                   </span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 700 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                     amazon.com/order-history
                   </span>
                 </div>
@@ -196,7 +217,7 @@ export const App: React.FC = () => {
                   backgroundColor: 'var(--color-brand)',
                   color: '#FFFFFF',
                   border: '2px solid var(--border-dark)',
-                  boxShadow: '3px 3px 0px #111111',
+                  boxShadow: '3px 3px 0px var(--border-dark)',
                   fontFamily: 'var(--font-mono)',
                   fontSize: '0.85rem',
                   fontWeight: 800,
@@ -224,7 +245,7 @@ export const App: React.FC = () => {
                 onKeyDown={(e) => { if (e.key === 'Enter') setActiveTab('URL_SCAN'); }}
                 style={{
                   padding: '1.75rem',
-                  backgroundColor: '#FFFFFF',
+                  backgroundColor: 'var(--bg-card)',
                   border: '2px solid var(--border-dark)',
                   boxShadow: 'var(--shadow-brutal)',
                   cursor: 'pointer',
@@ -232,7 +253,7 @@ export const App: React.FC = () => {
                 }}
               >
                 <div style={{ fontSize: '2.25rem', marginBottom: '0.75rem' }}>🔗</div>
-                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.4rem' }}>
+                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.4rem', color: 'var(--text-primary)' }}>
                   URL &amp; Link Scanner
                 </h3>
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
@@ -247,7 +268,7 @@ export const App: React.FC = () => {
                 onKeyDown={(e) => { if (e.key === 'Enter') setActiveTab('TEXT_SCAN'); }}
                 style={{
                   padding: '1.75rem',
-                  backgroundColor: '#FFFFFF',
+                  backgroundColor: 'var(--bg-card)',
                   border: '2px solid var(--border-dark)',
                   boxShadow: 'var(--shadow-brutal)',
                   cursor: 'pointer',
@@ -255,7 +276,7 @@ export const App: React.FC = () => {
                 }}
               >
                 <div style={{ fontSize: '2.25rem', marginBottom: '0.75rem' }}>💬</div>
-                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.4rem' }}>
+                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.4rem', color: 'var(--text-primary)' }}>
                   Message &amp; Scam Analyzer
                 </h3>
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
@@ -270,7 +291,7 @@ export const App: React.FC = () => {
                 onKeyDown={(e) => { if (e.key === 'Enter') setActiveTab('ASSISTANT'); }}
                 style={{
                   padding: '1.75rem',
-                  backgroundColor: '#FFFFFF',
+                  backgroundColor: 'var(--bg-card)',
                   border: '2px solid var(--border-dark)',
                   boxShadow: 'var(--shadow-brutal)',
                   cursor: 'pointer',
@@ -278,7 +299,7 @@ export const App: React.FC = () => {
                 }}
               >
                 <div style={{ fontSize: '2.25rem', marginBottom: '0.75rem' }}>🤖</div>
-                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.4rem' }}>
+                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.4rem', color: 'var(--text-primary)' }}>
                   AI Security Assistant
                 </h3>
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
@@ -293,7 +314,7 @@ export const App: React.FC = () => {
                 onKeyDown={(e) => { if (e.key === 'Enter') setActiveTab('SECURITY_MONITOR'); }}
                 style={{
                   padding: '1.75rem',
-                  backgroundColor: '#FFFFFF',
+                  backgroundColor: 'var(--bg-card)',
                   border: '2px solid var(--border-dark)',
                   boxShadow: 'var(--shadow-brutal)',
                   cursor: 'pointer',
@@ -301,7 +322,7 @@ export const App: React.FC = () => {
                 }}
               >
                 <div style={{ fontSize: '2.25rem', marginBottom: '0.75rem' }}>🛡️</div>
-                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.4rem' }}>
+                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.4rem', color: 'var(--text-primary)' }}>
                   Password &amp; Network Protection
                 </h3>
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
@@ -642,7 +663,7 @@ export const App: React.FC = () => {
         )}
 
         {activeTab === 'SETTINGS' && (
-          <SettingsView preferences={preferences} onPreferencesChange={setPreferences} />
+          <SettingsView preferences={preferences} onPreferencesChange={handlePreferencesChange} />
         )}
       </main>
 

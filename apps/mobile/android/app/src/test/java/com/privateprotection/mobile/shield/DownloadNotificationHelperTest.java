@@ -17,7 +17,6 @@ public class DownloadNotificationHelperTest {
 
     @Before
     public void setUp() {
-        MobileNotificationDispatcher.resetInstanceForTest();
         mockContext = Mockito.mock(Context.class);
         mockNotificationManager = Mockito.mock(NotificationManager.class);
         when(mockContext.getApplicationContext()).thenReturn(mockContext);

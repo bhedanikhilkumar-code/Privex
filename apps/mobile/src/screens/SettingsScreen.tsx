@@ -92,39 +92,6 @@ export const SettingsScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* Phase T13: Android Notification Channels & Storm Defense */}
-      <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '16px', padding: '1.25rem' }}>
-        <strong style={{ display: 'block', fontSize: '0.95rem', marginBottom: '0.25rem', color: '#38bdf8' }}>
-          🛡️ Notification Channels & Storm Rate Limiting
-        </strong>
-        <p style={{ margin: '0 0 0.75rem 0', fontSize: '0.75rem', color: '#94a3b8' }}>
-          Token-bucket rate limiting caps alerts at 3 per 10s window. Rapid repetitive bursts coalesce into a single summary alert to prevent notification fatigue while critical threats remain prioritized.
-        </p>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0.6rem', backgroundColor: '#0f172a', borderRadius: '6px' }}>
-            <span><strong>Critical Threats:</strong> Malicious APKs, Trojans</span>
-            <span style={{ color: '#f87171', fontWeight: 600 }}>IMPORTANCE_HIGH</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0.6rem', backgroundColor: '#0f172a', borderRadius: '6px' }}>
-            <span><strong>Download Shield:</strong> Quarantined files, blocked archives</span>
-            <span style={{ color: '#fbbf24', fontWeight: 600 }}>IMPORTANCE_HIGH</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0.6rem', backgroundColor: '#0f172a', borderRadius: '6px' }}>
-            <span><strong>Web & Phishing:</strong> Deceptive links, homograph attacks</span>
-            <span style={{ color: '#fbbf24', fontWeight: 600 }}>IMPORTANCE_HIGH</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0.6rem', backgroundColor: '#0f172a', borderRadius: '6px' }}>
-            <span><strong>Scans & Health:</strong> Device scan results, degraded modes</span>
-            <span style={{ color: '#38bdf8', fontWeight: 600 }}>IMPORTANCE_DEFAULT</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0.6rem', backgroundColor: '#0f172a', borderRadius: '6px' }}>
-            <span><strong>Threat DB Updates:</strong> Verified .ppdb sequence changes</span>
-            <span style={{ color: '#94a3b8', fontWeight: 600 }}>IMPORTANCE_LOW</span>
-          </div>
-        </div>
-      </div>
-
       {/* AI Assistant Reading Level */}
       <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '16px', padding: '1.25rem' }}>
         <strong style={{ display: 'block', fontSize: '0.95rem', marginBottom: '0.25rem' }}>

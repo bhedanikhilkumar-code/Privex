@@ -135,20 +135,54 @@ public class PackageInstallReceiver extends BroadcastReceiver {
 
     /**
      * Dispatches an instant warning notification with an immediate uninstall friction action.
-     * Routes through MobileNotificationDispatcher for consolidated rate limiting, channel mapping and storm defense.
      */
     private void dispatchHighRiskNotification(Context context, String packageName, String appLabel, String verdict, int score) {
         try {
-            MobileNotificationDispatcher dispatcher = MobileNotificationDispatcher.getInstance(context);
+            NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (nm == null) return;
+
+            // Check if notifications are enabled on the OS level
+            if (!nm.areNotificationsEnabled()) {
+                Log.w(TAG, "Notification permission denied or blocked on device; threat alert logged locally for " + packageName);
+                return;
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                android.app.NotificationChannel chan = nm.getNotificationChannel(MainActivity.CHANNEL_ID);
+                if (chan != null && chan.getImportance() == NotificationManager.IMPORTANCE_NONE) {
+                    Log.w(TAG, "Notification channel " + MainActivity.CHANNEL_ID + " is muted; threat alert logged locally for " + packageName);
+                    return;
+                }
+            }
+
+            // 1. Content Intent: Opens main app dashboard
+            Intent mainIntent = new Intent(context, MainActivity.class);
+            mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            PendingIntent mainPending = PendingIntent.getActivity(context, (int) System.currentTimeMillis(),
+                    mainIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+
+            // 2. Uninstall Action Intent: Launches system uninstall dialog
+            Intent uninstallIntent = new Intent(Intent.ACTION_DELETE);
+            uninstallIntent.setData(Uri.parse("package:" + packageName));
+            uninstallIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            PendingIntent uninstallPending = PendingIntent.getActivity(context, (int) System.currentTimeMillis() + 1,
+                    uninstallIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+
             String title = "⚠️ Dangerous App Detected: " + appLabel;
             String text = "Risk Score: " + score + "/100 (" + verdict + "). Sideloaded or requests excessive permissions.";
 
-            MobileNotificationDispatcher.Category cat = "DANGEROUS".equals(verdict)
-                    ? MobileNotificationDispatcher.Category.CRITICAL_THREAT
-                    : MobileNotificationDispatcher.Category.APP_INSTALL_WARNING;
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, MainActivity.CHANNEL_ID)
+                    .setSmallIcon(android.R.drawable.ic_dialog_alert)
+                    .setContentTitle(title)
+                    .setContentText(text)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setAutoCancel(true)
+                    .setContentIntent(mainPending)
+                    .addAction(android.R.drawable.ic_menu_delete, "Uninstall Now", uninstallPending);
 
-            MobileNotificationDispatcher.DispatchResult result = dispatcher.dispatch(cat, title, text, packageName);
-            Log.w(TAG, "Notification result for " + packageName + ": " + result.outcome);
+            nm.notify(packageName.hashCode(), builder.build());
+            Log.w(TAG, "Dispatched threat warning notification for " + packageName);
         } catch (Exception e) {
             Log.e(TAG, "Failed to dispatch notification for high-risk package " + packageName, e);
         }

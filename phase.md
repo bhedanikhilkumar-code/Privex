@@ -625,99 +625,60 @@ Build a mobile App Safety pipeline:
   - Physical Android Device Validation: NOT EXECUTED (Honestly reported; 0 USB devices attached).
 
 ## T12 — Battery / Thermal / Low-RAM Mode
-- Status: COMPLETE & INDEPENDENTLY AUDITED GO
-- Implementation:
-  - Adaptive Resource Management (`AdaptiveResourceManager.java`): Central singleton monitoring battery level, charging state, thermal status via `PowerManager.OnThermalStatusChangedListener` (API 29+ with `UNAVAILABLE` fallback), low-RAM signals via `ComponentCallbacks2`, and foreground heavy workload state.
-  - Dynamic Concurrency Throttling (`MobileSecurityCoordinator.java`): Observes resource state changes and dynamically scales `BoundedWorkerExecutor` concurrency ($N \to N-1$ on `MODERATE`, clamps to 1 thread on `SEVERE`/`CRITICAL`/`EMERGENCY` or low-RAM).
-  - Battery-Aware Deferral: Defer non-urgent scheduled batch scans (`STORAGE_SCAN` with `isScheduled=true`) to `JobState.DEFERRED` with reason `BATTERY_LOW_DEFERRED` when battery is $< 20\%$ while discharging. Charging and manual user-initiated scans bypass deferral.
-  - Memory-Scaled Streaming Buffers: `UniversalFileShieldService` dynamically sizes chunk buffers between 64 KB (normal) and 16 KB (low-RAM), reducing peak memory allocation by 75% during memory pressure events.
-  - Foreground Workload Pacing: Throttles background scans when the user actively interacts with heavy UI workloads, preventing frame drops.
-  - Critical Threat Invariant: Real-time file inspection, in-flight download inspection, live URL filtering, and APK audits are never deferred or converted to `ALLOW`.
-  - Native Bridge & UI: Added `@JavascriptInterface` bridge methods in `MainActivity.java`, typed client service `adaptive-protection.service.ts`, and "Adaptive Power & Thermal Shield" status card in `ProtectionStatusScreen.tsx`.
-- Verification:
-  - Android Unit Tests: 200/200 PASS (100% pass rate across 25 JUnit test suites, including `AdaptiveResourceManagerTest` and `AdaptiveCoordinatorIntegrationTest`).
-  - Mobile Vitest Tests: 180/180 PASS (100% pass rate across 27 test files, including `adaptive-protection.test.ts`).
-  - Monorepo Regression: 100% PASS across all workspaces (core, ml, desktop, extension, mobile, web).
-  - Typecheck: 0 errors across all 6 workspaces (`npm run typecheck`).
-  - Debug Build: BUILD SUCCESSFUL (`assembleDebug`).
-  - Release / R8 Build: BUILD SUCCESSFUL (`assembleRelease` with full R8 minification, lintVital, and resource shrinking).
-  - Physical Android Device Validation: NOT EXECUTED / NOT VERIFIED (Honestly reported; 0 USB devices attached).
+- <20% battery: defer scheduled deep scans.
+- Thermal pressure: reduce worker count.
+- Foreground heavy usage: background scan throttling.
+- Low RAM: bounded queues and smaller buffers.
+- Critical active threat events remain prioritized.
+- No indefinite wakelocks.
 
 ## T13 — Mobile Notifications
-- Status: COMPLETE & INDEPENDENTLY AUDITED GO
-- Implementation:
-  - Central Notification Dispatcher (`MobileNotificationDispatcher.java`): Central thread-safe singleton managing all native notifications across 7 canonical categories (`CRITICAL_THREAT`, `APP_INSTALL_WARNING`, `DOWNLOAD_BLOCKED`, `PHISHING_WARNING`, `SCAN_COMPLETE`, `PROTECTION_DEGRADED`, `UPDATE_AVAILABLE`) mapped to 5 stable system channels (`threat_alerts_channel`, `downloads_protection_channel`, `web_shield_alerts`, `scans_and_health_channel`, `threat_updates_channel`).
-  - Token-Bucket Storm Defense: Rolling 10-second window limiting individual native OS alerts to a maximum of 3, suppressing excess spam from the system notification shade.
-  - Burst Coalescing: When an alert storm reaches the threshold ($\ge 3$ events), synthesizes a single consolidated summary alert (notification ID `99999`) reporting the total blocked threat count and the latest threat target name.
-  - 30-Second Per-Target Cooldown: Suppresses repetitive duplicate alerts for the identical target (package name, URL, or file path) within 30 seconds.
-  - Critical Threat Priority Invariant: `CRITICAL_THREAT` notifications are exempt from token-bucket suppression and always reach the user immediately.
-  - Strict Content Sanitization: Strips Unicode bidirectional override characters (`\u202E`, etc.), control characters, and newlines; truncates titles to 100 characters and bodies to 250 characters; falls back to safe text for null/blank strings.
-  - Native Bridge & Settings UI: Added `@JavascriptInterface` endpoints `dispatchCategorizedNotification` and `getNotificationDispatcherStats` in `MainActivity.java`, typed client service `notification.service.ts`, and a live "Notification Channels & Storm Rate Limiting" card in `SettingsScreen.tsx`.
-- Verification:
-  - Android Unit Tests: 208/208 PASS (100% pass rate across 26 JUnit test suites, including 8/8 in `MobileNotificationDispatcherTest` with 200 synthetic detection storm test).
-  - Mobile Vitest Tests: 183/183 PASS (100% pass rate across 27 test files, including 9/9 in `notification.test.ts`).
-  - Monorepo Regression: 100% PASS across all workspaces (core, ml, desktop, extension, mobile, web).
-  - Typecheck: 0 errors across all 6 workspaces (`npm run typecheck`).
-  - Debug Build: BUILD SUCCESSFUL (`assembleDebug`).
-  - Release / R8 Build: BUILD SUCCESSFUL (`assembleRelease` with full R8 minification, lintVital, and resource shrinking).
-  - Physical Android Device Validation: NOT EXECUTED / NOT VERIFIED (Honestly reported; 0 USB devices attached).
+Use notification categories:
+- CRITICAL THREAT
+- APP INSTALL WARNING
+- DOWNLOAD BLOCKED
+- PHISHING WARNING
+- SCAN COMPLETE
+- PROTECTION DEGRADED
+- UPDATE AVAILABLE
+Avoid notification storms with batching and rate limits.
 
 ## T14 — Security Test Matrix
-- Status: COMPLETE & INDEPENDENTLY AUDITED GO
-- Implementation:
-  - 15-Category Master Security Test Matrix (`SecurityTestMatrixT14Test.java` & `security-matrix-t14.test.ts`):
-    - CAT-01: APK & Sideloading Analysis (`PackageAuditService`, suspicious permission clusters, C2 telemetry detection, OS package protection).
-    - CAT-02: EICAR Test Detection & Isolation (`UniversalMagicDetector`, `UniversalFileShieldService`, `MobileQuarantineVault` AES-256-GCM chunked isolation).
-    - CAT-03: Archive Containers & Bounds (`BoundedArchiveInspector`, zip-slip relative path escaping rejection, entry bounds).
-    - CAT-04: Multi-Format Media & Documents (`UniversalMagicDetector`, magic byte classification for PDF/DOCX, clean document status).
-    - CAT-05: Extension Disguise & Spoofing (binary masked as document, double extensions, RTLO unicode `\u202E` spoofing).
-    - CAT-06: Real-Time Download Stabilization (`DownloadStabilizer`, partial `.crdownload`/`.part` tracking, stabilization state machine).
-    - CAT-07: Full-Device Scan & Scoping Truthfulness (`FullDeviceScanService`, MediaStore scoping, `/data/data` protected path declaration, cooperative cancellation).
-    - CAT-08: SAF Directory Traversal (`SafManager`, boundary validation, simulated permission denial).
-    - CAT-09: Phishing, Homoglyphs & Dangerous Schemes (`UrlThreatDetector`, Cyrillic IDN homoglyphs, brand typosquatting, `javascript:`/`intent:` schemes).
-    - CAT-10: Signed Threat Intelligence & Anti-Downgrade (`MobileThreatDatabase`, placeholder zero-key rejection, invalid signatures, anti-downgrade fallback to factory seed).
-    - CAT-11: Adaptive Power, Thermal & Low-RAM (`AdaptiveResourceManager`, battery <20%, thermal throttling worker limits, memory trim streaming limits).
-    - CAT-12: Notification Channels & Rate Limiting (`MobileNotificationDispatcher`, Rule 45 burst threshold 3 coalescing, critical threat bypass).
-    - CAT-13: Secure Password & Passphrase Generation (`SecurePasswordGenerator`, CSPRNG unbiased rejection sampling, BIP-0039 entropy >= 55 bits, zeroization).
-    - CAT-14: Encrypted Quarantine Vault & Tamper Detection (`MobileQuarantineVault`, AES-256-GCM chunked streaming, bit-flip tamper rejection, AAD binding).
-    - CAT-15: ANR / OOM Resilience & Bounded Resources (`DownloadEventDeduplicator`, bounded LRU cache max 5,000 entries, memory trim buffer downscaling).
-  - Rule 45 Notification Burst Inconsistency Resolution:
-    - Updated `COALESCE_BURST_THRESHOLD = 3` in `MobileNotificationDispatcher.java` (in strict accordance with Rule 45).
-    - Added dedicated regression test `testRule45CoalescingThresholdRegression()` in `MobileNotificationDispatcherTest.java`.
-- Verification:
-  - Android JVM Security Matrix Tests: 224/224 PASS (100% pass rate across 27 JUnit test suites, including 15/15 in `SecurityTestMatrixT14Test`).
-  - Mobile TypeScript Matrix Tests: 197/197 PASS (100% pass rate across 28 test files, including 15/15 in `security-matrix-t14.test.ts`).
-  - Monorepo Regression: 100% PASS across all workspaces (core, ml, desktop, extension, mobile, web).
-  - Typecheck: 0 errors across all 6 workspaces (`npm run typecheck`).
-  - Debug Build: BUILD SUCCESSFUL (`assembleDebug`).
-  - Release / R8 Build: BUILD SUCCESSFUL (`assembleRelease` with full R8 minification, lintVital, and resource shrinking).
-  - Physical Android Device Acceptance: NOT EXECUTED / NOT VERIFIED (Honestly reported; 0 USB devices attached to ADB per Rule 41).
+Mandatory physical-device tests:
+- clean APK install
+- suspicious synthetic APK
+- known-bad EICAR file
+- ZIP with nested benign fixtures
+- ZIP bomb fixture
+- PDF/Office/image/media corpus
+- extension spoofing
+- Downloads event
+- MediaStore event
+- full-device scan
+- SAF-granted directory scan
+- denied-permission behavior
+- phishing URLs
+- IDN/punycode
+- redirect chains
+- offline mode
+- signed DB update
+- bad signature / bad hash / downgrade
+- LKG rollback
+- low battery
+- thermal throttling
+- low RAM
+- notification delivery
+- password entropy
+- ANR/OOM resilience.
 
-## T15 — Performance Engine, Memory Bounds & Battery Efficiency
-- Status: COMPLETE & INDEPENDENTLY AUDITED GO
-- Implementation:
-  - Eliminated artificial 150 ms `Thread.sleep` in `UniversalFileShieldService.isStabilized()`, implementing non-blocking file readiness checks.
-  - Implemented zero-allocation `bytesToHex(byte[])` table lookup in `UniversalFileShieldService.java` replacing per-byte string formatter allocations during rapid hashing.
-  - Integrated `MobileCleanFileCache` fast-path lookup in `UniversalFileShieldService.java` with instant `ALLOW` cache hit acceleration (<1.02 ms) and explicit cache bypass for disguised/threat files.
-  - Added low-power scan deferral logic `canExecuteScheduledScan(batteryPct, isCharging)` in `AdaptiveProtectionService.ts`.
-  - Guarded `window.AndroidBridge` accesses in `web-shield.service.ts` with `typeof window !== 'undefined'` check.
-  - Authored comprehensive Android benchmark suite `PerformanceEngineT15Test.java` (9 benchmark & functional tests).
-  - Authored comprehensive TypeScript benchmark suite `performance-engine-t15.test.ts` (6 benchmark & security parity tests).
-- Empirical Measurements & SLAs Met:
-  - Target 1: Protection-service warm-start overhead: **1.00 ms (JVM)** / **1.43 ms (TS)** (SLA < 500 ms) — PASS.
-  - Target 2: Small local-file triage latency: **p50 = 6.00 ms, p95 = 49.00 ms (JVM)** / **p50 = 0.04 ms, p95 = 0.10 ms (TS)** (SLA p50 < 20 ms, p95 < 50 ms) — PASS.
-  - Target 3: Clean-file cache hit acceleration: **1.02 ms (1021 µs)** (SLA < 2.0 ms) — PASS.
-  - Target 4: 1,000-file burst ingress memory bounds: **ΔHeap = 0.00 MB (JVM)** / **ΔHeap = 0.12 MB (TS)** (SLA < 32 MB) — PASS.
-  - Target 5: ANR prevention & cooperative cancellation: Clean cancellation without UI thread blocking or thread leaks — PASS.
-  - Target 6: Bounded background CPU & battery usage: Scheduled scans deferred at 15% discharging, allowed when charging — PASS.
-- Verification:
-  - Android JVM Unit Tests: 233/233 PASS (100% pass rate across 28 JUnit test suites, including 9/9 in `PerformanceEngineT15Test`).
-  - Mobile Vitest Tests: 203/203 PASS (100% pass rate across 29 test files, including 6/6 in `performance-engine-t15.test.ts`).
-  - Monorepo Regression: 100% PASS across all workspaces (core, ml, desktop, extension, mobile, web).
-  - Typecheck: 0 errors across all 6 workspaces (`npm run typecheck`).
-  - Debug Build: BUILD SUCCESSFUL (`assembleDebug`).
-  - Release / R8 Build: BUILD SUCCESSFUL (`assembleRelease` with full R8 minification, lintVital, and resource shrinking).
-  - Physical Android Device Acceptance: NOT EXECUTED / NOT VERIFIED (Honestly reported; 0 USB devices attached per Rule 41).
+## T15 — Performance Targets
+Initial targets for supported mid/low-range Android devices:
+- app launch overhead for protection services <500 ms after warm start,
+- fast file-ingress triage p50 <20 ms for small local files,
+- no unbounded memory growth during 1,000-file burst,
+- no ANR during full scan,
+- bounded background CPU and battery usage,
+- scan queue remains cancellable and resumable.
 
 ## T16 — Independent Mobile Zero-Trust Audit
 No Phase T completion until:

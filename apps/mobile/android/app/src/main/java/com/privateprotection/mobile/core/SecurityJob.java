@@ -100,7 +100,7 @@ public class SecurityJob {
             completedAtMs = System.currentTimeMillis();
         }
 
-        if (next == JobState.CANCELLING || next == JobState.CANCELLED || next == JobState.DEFERRED || next == JobState.PARTIAL) {
+        if (next == JobState.CANCELLING || next == JobState.CANCELLED) {
             if (reason != null && !reason.trim().isEmpty()) {
                 this.cancellationReason = reason;
             }
