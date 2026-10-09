@@ -197,6 +197,22 @@ public class FullDeviceScanService {
             }
             report.put("threats", threatsArr);
 
+            // Dispatch Scan Complete / Threat Alert via MobileNotificationDispatcher
+            try {
+                MobileNotificationDispatcher dispatcher = MobileNotificationDispatcher.getInstance(context);
+                if (!threatsFound.isEmpty()) {
+                    String title = "⚠️ " + threatsFound.size() + " Threat(s) Found During Scan";
+                    String body = "Full scan completed: action required for " + threatsFound.size() + " detected threat items.";
+                    dispatcher.dispatch(MobileNotificationDispatcher.Category.CRITICAL_THREAT, title, body, "scan_threats_" + endTime);
+                } else {
+                    String title = "✅ " + (mode == ScanMode.QUICK_SCAN ? "Quick Scan" : "Device Scan") + " Complete";
+                    String body = totalScanned + " files inspected clean. No active threats detected.";
+                    dispatcher.dispatch(MobileNotificationDispatcher.Category.SCAN_COMPLETE, title, body, "scan_clean_" + endTime);
+                }
+            } catch (Exception ex) {
+                Log.w(TAG, "Failed to dispatch scan completion notification: " + ex.getMessage());
+            }
+
         } catch (JSONException ignored) {}
 
         return report;

@@ -556,3 +556,21 @@ The UI must never say "fully protected" if Android denied required access.
   - Scheduled Scan Status: Informs user whether background scans are currently eligible to run or safely deferred to preserve battery and device stability.
   - Transparent Explanation: Jargon-free explanation reminding the user that active real-time threat detection is never disabled or reduced regardless of power mode.
 
+## 15. Notification Channels & Storm Defense UX (`SettingsScreen.tsx`)
+- **Notification Channels & Rate Limiting Card:**
+  - Channel Mapping Grid: Displays live Android notification channels with their exact OS importance tiers:
+    - `threat_alerts_channel` (`CRITICAL_THREAT`, `APP_INSTALL_WARNING` — High Priority / Heads-Up)
+    - `downloads_protection_channel` (`DOWNLOAD_BLOCKED` — High Priority)
+    - `web_shield_alerts` (`PHISHING_WARNING` — High Priority)
+    - `scans_and_health_channel` (`SCAN_COMPLETE`, `PROTECTION_DEGRADED` — Default Priority)
+    - `threat_updates_channel` (`UPDATE_AVAILABLE` — Low Priority / Silent)
+  - Token-Bucket Storm Defense Indicators:
+    - Real-time rate limiter metrics: displays active window status, maximum allowed alerts (3 per 10s), burst coalescing threshold, and 30-second target cooldown period.
+    - Storm suppression counter: truthfully shows the number of duplicate/excess alerts suppressed from spamming the system notification shade.
+    - Summary coalescing notice: clarifies that when $\ge 3$ alerts trigger rapidly, Privex consolidates them into a single summary alert showing the total blocked threat count and the latest target.
+  - Critical Priority Invariant Callout:
+    - Reassures the user with an explicit invariant disclosure: `CRITICAL_THREAT` alerts (such as active malware or ransomware) are never suppressed or delayed by rate limiting.
+  - Native System Settings Deep Link:
+    - "Configure in Android Settings" button routing directly into the native OS notification channel manager (`Settings.ACTION_APP_NOTIFICATION_SETTINGS`) so users can customize sounds and vibrations per channel.
+
+

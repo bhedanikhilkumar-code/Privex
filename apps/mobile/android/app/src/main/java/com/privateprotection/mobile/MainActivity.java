@@ -474,37 +474,51 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public boolean dispatchNativeNotification(String title, String body, String priority) {
             try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    if (ContextCompat.checkSelfPermission(activity, android.Manifest.permission.POST_NOTIFICATIONS)
-                            != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(activity,
-                                new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
-                                PERMISSION_REQUEST_POST_NOTIFICATIONS);
-                        return false;
-                    }
-                }
-
-                NotificationManager manager = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
-                if (manager == null) return false;
-
-                Intent intent = new Intent(activity, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, intent,
-                        PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(activity, CHANNEL_ID)
-                        .setSmallIcon(android.R.drawable.ic_dialog_alert)
-                        .setContentTitle(title)
-                        .setContentText(body)
-                        .setPriority(NotificationCompat.PRIORITY_HIGH)
-                        .setAutoCancel(true)
-                        .setContentIntent(pendingIntent);
-
-                manager.notify((int) System.currentTimeMillis(), builder.build());
-                return true;
+                com.privateprotection.mobile.shield.MobileNotificationDispatcher dispatcher =
+                        com.privateprotection.mobile.shield.MobileNotificationDispatcher.getInstance(activity);
+                com.privateprotection.mobile.shield.MobileNotificationDispatcher.Category cat =
+                        "HIGH".equalsIgnoreCase(priority)
+                                ? com.privateprotection.mobile.shield.MobileNotificationDispatcher.Category.CRITICAL_THREAT
+                                : com.privateprotection.mobile.shield.MobileNotificationDispatcher.Category.PHISHING_WARNING;
+                com.privateprotection.mobile.shield.MobileNotificationDispatcher.DispatchResult res =
+                        dispatcher.dispatch(cat, title, body, title);
+                return res.outcome == com.privateprotection.mobile.shield.MobileNotificationDispatcher.DispatchOutcome.DISPATCHED
+                        || res.outcome == com.privateprotection.mobile.shield.MobileNotificationDispatcher.DispatchOutcome.COALESCED_BATCH;
             } catch (Exception e) {
                 Log.e(TAG, "Failed to dispatch native notification", e);
                 return false;
+            }
+        }
+
+        @JavascriptInterface
+        public String dispatchCategorizedNotification(String categoryStr, String title, String body, String dedupKey) {
+            try {
+                com.privateprotection.mobile.shield.MobileNotificationDispatcher dispatcher =
+                        com.privateprotection.mobile.shield.MobileNotificationDispatcher.getInstance(activity);
+                com.privateprotection.mobile.shield.MobileNotificationDispatcher.Category category;
+                try {
+                    category = com.privateprotection.mobile.shield.MobileNotificationDispatcher.Category.valueOf(categoryStr);
+                } catch (Exception ex) {
+                    category = com.privateprotection.mobile.shield.MobileNotificationDispatcher.Category.CRITICAL_THREAT;
+                }
+                com.privateprotection.mobile.shield.MobileNotificationDispatcher.DispatchResult res =
+                        dispatcher.dispatch(category, title, body, dedupKey);
+                return res.toJSON().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to dispatch categorized notification", e);
+                return "{\"outcome\":\"ERROR\",\"reason\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public String getNotificationDispatcherStats() {
+            try {
+                com.privateprotection.mobile.shield.MobileNotificationDispatcher dispatcher =
+                        com.privateprotection.mobile.shield.MobileNotificationDispatcher.getInstance(activity);
+                return dispatcher.getDispatcherStats().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to get notification dispatcher stats", e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
             }
         }
 

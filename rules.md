@@ -340,3 +340,18 @@ Privex mobile protection MUST adapt dynamically to host hardware constraints wit
 3. **Low-RAM Buffer Scaling:** System memory pressure events (`ComponentCallbacks2.onTrimMemory` / `onLowMemory`) MUST dynamically scale streaming inspection and crypto buffers down from 64 KB to 16 KB and reduce worker threads to 1, bounding heap allocations.
 4. **Foreground Priority:** When heavy user interaction is detected in the foreground, background scan tasks MUST yield CPU time slices to prevent UI stutter.
 5. **Critical Threat Preservation Invariant:** Active real-time threat evaluations (in-flight downloads, user-initiated file scans, APK installation inspections, live URL filtering) MUST NEVER be deferred, cancelled, or downgraded to `ALLOW` due to resource pressure.
+
+## RULE-45: Mobile Notification Channels & Storm Defense Rule
+All native notifications dispatched on Android MUST strictly route through typed channels, respect notification volume constraints, and remain reliable during detection bursts:
+1. **Canonical Notification Channels:** Native channels MUST correspond to the 5 stable channel IDs with exact importance tiers:
+   - `threat_alerts_channel` (`IMPORTANCE_HIGH`) for critical malware, trojans, ransomware, and exploits.
+   - `downloads_protection_channel` (`IMPORTANCE_HIGH`) for suspicious/blocked downloads.
+   - `web_shield_alerts` (`IMPORTANCE_HIGH`) for phishing domains and malicious network intercepts.
+   - `scans_and_health_channel` (`IMPORTANCE_DEFAULT`) for scan completion and protection degraded/warning states.
+   - `threat_updates_channel` (`IMPORTANCE_LOW`) for background signed database updates.
+2. **Token-Bucket Storm Defense:** Burst notifications MUST be capped at a maximum of 3 individual native OS notifications within any rolling 10-second window. Any subsequent notifications within that window MUST be suppressed from spamming the system tray.
+3. **Burst Coalescing:** When a burst threshold ($\ge 3$ events) is reached within the rolling window, the dispatcher MUST synthesize a single consolidated summary notification (notification ID `99999`) displaying the total blocked threat count and the most recent threat name.
+4. **Per-Target Deduplication & Cooldown:** Notifications targeting the identical threat target (same package name, URL, or file path) MUST enforce a 30-second cooldown period before re-alerting, preventing infinite notification loops.
+5. **Critical Threat Priority Invariant:** Active `CRITICAL_THREAT` events (e.g. active ransomware or confirmed malicious APKs) MUST NEVER be suppressed or dropped by the rate limiter; they must always reach the user immediately.
+6. **Payload Sanitization & Unicode Shielding:** Notification titles and bodies MUST be strictly sanitized before presentation: strip Unicode bidirectional override characters (`U+202E`, etc.), control characters, and newlines; truncate titles to 100 characters and bodies to 250 characters; replace empty strings with safe default text.
+

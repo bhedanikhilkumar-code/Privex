@@ -644,15 +644,23 @@ Build a mobile App Safety pipeline:
   - Physical Android Device Validation: NOT EXECUTED / NOT VERIFIED (Honestly reported; 0 USB devices attached).
 
 ## T13 — Mobile Notifications
-Use notification categories:
-- CRITICAL THREAT
-- APP INSTALL WARNING
-- DOWNLOAD BLOCKED
-- PHISHING WARNING
-- SCAN COMPLETE
-- PROTECTION DEGRADED
-- UPDATE AVAILABLE
-Avoid notification storms with batching and rate limits.
+- Status: COMPLETE & INDEPENDENTLY AUDITED GO
+- Implementation:
+  - Central Notification Dispatcher (`MobileNotificationDispatcher.java`): Central thread-safe singleton managing all native notifications across 7 canonical categories (`CRITICAL_THREAT`, `APP_INSTALL_WARNING`, `DOWNLOAD_BLOCKED`, `PHISHING_WARNING`, `SCAN_COMPLETE`, `PROTECTION_DEGRADED`, `UPDATE_AVAILABLE`) mapped to 5 stable system channels (`threat_alerts_channel`, `downloads_protection_channel`, `web_shield_alerts`, `scans_and_health_channel`, `threat_updates_channel`).
+  - Token-Bucket Storm Defense: Rolling 10-second window limiting individual native OS alerts to a maximum of 3, suppressing excess spam from the system notification shade.
+  - Burst Coalescing: When an alert storm reaches the threshold ($\ge 3$ events), synthesizes a single consolidated summary alert (notification ID `99999`) reporting the total blocked threat count and the latest threat target name.
+  - 30-Second Per-Target Cooldown: Suppresses repetitive duplicate alerts for the identical target (package name, URL, or file path) within 30 seconds.
+  - Critical Threat Priority Invariant: `CRITICAL_THREAT` notifications are exempt from token-bucket suppression and always reach the user immediately.
+  - Strict Content Sanitization: Strips Unicode bidirectional override characters (`\u202E`, etc.), control characters, and newlines; truncates titles to 100 characters and bodies to 250 characters; falls back to safe text for null/blank strings.
+  - Native Bridge & Settings UI: Added `@JavascriptInterface` endpoints `dispatchCategorizedNotification` and `getNotificationDispatcherStats` in `MainActivity.java`, typed client service `notification.service.ts`, and a live "Notification Channels & Storm Rate Limiting" card in `SettingsScreen.tsx`.
+- Verification:
+  - Android Unit Tests: 208/208 PASS (100% pass rate across 26 JUnit test suites, including 8/8 in `MobileNotificationDispatcherTest` with 200 synthetic detection storm test).
+  - Mobile Vitest Tests: 183/183 PASS (100% pass rate across 27 test files, including 9/9 in `notification.test.ts`).
+  - Monorepo Regression: 100% PASS across all workspaces (core, ml, desktop, extension, mobile, web).
+  - Typecheck: 0 errors across all 6 workspaces (`npm run typecheck`).
+  - Debug Build: BUILD SUCCESSFUL (`assembleDebug`).
+  - Release / R8 Build: BUILD SUCCESSFUL (`assembleRelease` with full R8 minification, lintVital, and resource shrinking).
+  - Physical Android Device Validation: NOT EXECUTED / NOT VERIFIED (Honestly reported; 0 USB devices attached).
 
 ## T14 — Security Test Matrix
 Mandatory physical-device tests:

@@ -531,6 +531,18 @@ The product shall provide privacy-first URL protection with:
   - Deterministic cache invalidation via `DatabaseChangeListener` across `WebShieldService`, `UniversalFileShieldService`, and `PackageAuditService`.
   - Atomic LKG / factory seed rollback and live UI diagnostics on `ProtectionStatusScreen`.
 
+### MOB-017 — Mobile Notifications & Storm Rate Limiting (Phase T13)
+- **Status:** IMPLEMENTED & VERIFIED
+- **Capabilities:**
+  - 7 Canonical notification categories: `CRITICAL_THREAT`, `APP_INSTALL_WARNING`, `DOWNLOAD_BLOCKED`, `PHISHING_WARNING`, `SCAN_COMPLETE`, `PROTECTION_DEGRADED`, `UPDATE_AVAILABLE`.
+  - 5 Typed Android Notification Channels: `threat_alerts_channel` (`IMPORTANCE_HIGH`), `downloads_protection_channel` (`IMPORTANCE_HIGH`), `web_shield_alerts` (`IMPORTANCE_HIGH`), `scans_and_health_channel` (`IMPORTANCE_DEFAULT`), `threat_updates_channel` (`IMPORTANCE_LOW`).
+  - Token-Bucket Storm Rate Limiting: max 3 individual native OS alerts per 10-second rolling window.
+  - Burst Coalescing: when $\ge 3$ events occur in a burst, combines subsequent alerts into a single consolidated summary notification (ID `99999`) reporting total count and recent target name.
+  - 30-Second Per-Target Cooldown: suppresses duplicate alerts for the identical target (package name, URL, or file path) within 30s.
+  - Critical Threat Priority Invariant: `CRITICAL_THREAT` events are never dropped or suppressed by rate limiting.
+  - Unicode & Payload Sanitization: strips bidirectional override characters (`\u202E`, etc.), control characters, and newlines; truncates titles to 100 chars and bodies to 250 chars.
+  - Native Bridge & UI: `@JavascriptInterface` endpoints `dispatchCategorizedNotification` and `getNotificationDispatcherStats` exposed to TypeScript `notification.service.ts` and visualized in `SettingsScreen.tsx`.
+
 ### MOB-016 — Physical Device Acceptance
 At least one real supported Android phone must pass the complete security acceptance matrix before release.
 
@@ -543,4 +555,4 @@ At least one real supported Android phone must pass the complete security accept
 - No cloud-only security dependency.
 
 ## Success Criteria
-Phase T can reach release-ready status only when all MOB-001..016 requirements have implementation evidence, physical-device tests pass, offline/privacy parity passes, security adversarial corpus passes, battery/thermal/low-RAM tests pass, typecheck/build pass, and a fresh independent mobile zero-trust audit returns GO.
+Phase T can reach release-ready status only when all MOB-001..017 requirements have implementation evidence, physical-device tests pass, offline/privacy parity passes, security adversarial corpus passes, battery/thermal/low-RAM tests pass, typecheck/build pass, and a fresh independent mobile zero-trust audit returns GO.

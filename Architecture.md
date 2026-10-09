@@ -506,8 +506,22 @@ Uses Android CSPRNG / SecureRandom. The generator is isolated from telemetry and
   - Provides typed native intent generators for App Notification Settings, Application Details Settings, and Battery Optimization Settings.
   - `MainActivity.onResume` dispatches `privateprotection:app_resume` event into the WebView container, triggering automatic state re-check when the user returns from system Settings.
 
-### M-14 Mobile Notification Manager
-Uses notification channels and batching. CRITICAL threats are prioritized; repetitive informational findings are coalesced.
+### M-14 Mobile Notification Manager (`MobileNotificationDispatcher.java`)
+- **Central Singleton Architecture:** Thread-safe notification manager coordinating all native alerts dispatched from `DownloadNotificationHelper`, `PackageInstallReceiver`, `WebShieldService`, and `FullDeviceScanService`.
+- **7 Canonical Notification Categories:**
+  - `CRITICAL_THREAT`: Confirmed malware, active ransomware, and critical exploit payloads (`threat_alerts_channel`, `IMPORTANCE_HIGH`). Exempt from rate-limiting suppression.
+  - `APP_INSTALL_WARNING`: Suspicious or unverified newly installed application or sideloaded APK (`threat_alerts_channel`, `IMPORTANCE_HIGH`).
+  - `DOWNLOAD_BLOCKED`: Dangerous file download blocked and isolated (`downloads_protection_channel`, `IMPORTANCE_HIGH`).
+  - `PHISHING_WARNING`: Deceptive phishing URL, IDN homograph, or credential harvesting intercept (`web_shield_alerts`, `IMPORTANCE_HIGH`).
+  - `SCAN_COMPLETE`: Background full/quick scan finished with clean results (`scans_and_health_channel`, `IMPORTANCE_DEFAULT`).
+  - `PROTECTION_DEGRADED`: Protection subsystem disabled or service failure (`scans_and_health_channel`, `IMPORTANCE_DEFAULT`).
+  - `UPDATE_AVAILABLE`: Signed threat intelligence database update ready or staged (`threat_updates_channel`, `IMPORTANCE_LOW`).
+- **5 Typed Android Notification Channels:** Created deterministically on API 26+ (`threat_alerts_channel`, `downloads_protection_channel`, `web_shield_alerts`, `scans_and_health_channel`, `threat_updates_channel`) with user-configurable vibration and sound profiles per category.
+- **Token-Bucket Storm Defense:** Rolling 10-second window limiting individual native alerts to $\le 3$. Excess alerts within the window are suppressed from system tray flooding.
+- **Storm Burst Coalescing:** When $\ge 3$ events occur in a burst, synthesizes a consolidated batch summary notification (ID `99999`) displaying total blocked count and latest target name.
+- **30-Second Per-Target Cooldown:** Suppresses duplicate alerts for the identical target key (`category:targetKey`) within 30 seconds.
+- **Unicode RTLO & Control Character Sanitization:** Strips bidirectional overrides (`\u202E`, etc.), control characters, and newlines; truncates titles to 100 characters and bodies to 250 characters; safely falls back for empty strings.
+- **Native Bridge & UI:** `@JavascriptInterface` endpoints `dispatchCategorizedNotification` and `getNotificationDispatcherStats` consumed by TypeScript `notification.service.ts` and surfaced in `SettingsScreen.tsx`.
 
 ## 3. Install-Time Reality Model
 The architecture MUST explicitly distinguish:

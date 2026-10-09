@@ -315,18 +315,13 @@ public class WebShieldService {
 
     private void dispatchThreatNotification(UrlThreatDetector.UrlThreatResult threat) {
         try {
-            NotificationManager nm = (NotificationManager) appContext.getSystemService(Context.NOTIFICATION_SERVICE);
-            if (nm == null) return;
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext, NOTIF_CHANNEL_ID)
-                    .setSmallIcon(android.R.drawable.stat_sys_warning)
-                    .setContentTitle("Suspicious Link Warning: " + threat.threatType.name())
-                    .setContentText(threat.explanation)
-                    .setStyle(new NotificationCompat.BigTextStyle().bigText(threat.explanation + "\n\nIndicators: " + String.join(", ", threat.indicators)))
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setAutoCancel(true);
-
-            nm.notify((int) System.currentTimeMillis(), builder.build());
+            MobileNotificationDispatcher dispatcher = MobileNotificationDispatcher.getInstance(appContext);
+            String title = "Suspicious Link Warning: " + threat.threatType.name();
+            String body = threat.explanation;
+            MobileNotificationDispatcher.Category cat = threat.verdict == UrlThreatDetector.Verdict.DANGEROUS
+                    ? MobileNotificationDispatcher.Category.CRITICAL_THREAT
+                    : MobileNotificationDispatcher.Category.PHISHING_WARNING;
+            dispatcher.dispatch(cat, title, body, threat.domain != null ? threat.domain : threat.normalizedUrl);
         } catch (Exception e) {
             Log.w(TAG, "Notification dispatch failed: " + e.getMessage());
         }
@@ -334,17 +329,10 @@ public class WebShieldService {
 
     private void dispatchBlockedDnsNotification(String domain) {
         try {
-            NotificationManager nm = (NotificationManager) appContext.getSystemService(Context.NOTIFICATION_SERVICE);
-            if (nm == null) return;
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext, NOTIF_CHANNEL_ID)
-                    .setSmallIcon(android.R.drawable.stat_sys_warning)
-                    .setContentTitle("Malicious Domain Blocked: " + domain)
-                    .setContentText("Privex Web Shield blocked an attempted connection to a known phishing/scam site.")
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setAutoCancel(true);
-
-            nm.notify(domain.hashCode(), builder.build());
+            MobileNotificationDispatcher dispatcher = MobileNotificationDispatcher.getInstance(appContext);
+            String title = "Malicious Domain Blocked: " + domain;
+            String body = "Privex Web Shield blocked an attempted connection to a known phishing/scam site.";
+            dispatcher.dispatch(MobileNotificationDispatcher.Category.PHISHING_WARNING, title, body, domain);
         } catch (Exception e) {
             Log.w(TAG, "Notification dispatch failed: " + e.getMessage());
         }

@@ -37,7 +37,7 @@ describe('NotificationService (Security Alerts & Channels)', () => {
 
     const notif = await NotificationService.notifyScanResult(dangerous);
     expect(notif).not.toBeNull();
-    expect(notif?.channelId).toBe('threat_alerts');
+    expect(notif?.channelId).toBe('threat_alerts_channel');
     expect(notif?.priority).toBe('HIGH');
     expect(notif?.title).toContain('Dangerous Threat Blocked');
   });
@@ -125,6 +125,85 @@ describe('NotificationService (Security Alerts & Channels)', () => {
     expect(notif).not.toBeNull();
     expect(triggerWarningHaptics).not.toHaveBeenCalled();
     expect(dispatchNativeNotification).toHaveBeenCalled();
+
+    delete (window as any).AndroidSecurityBridge;
+  });
+
+  // ==========================================
+  // PHASE T13: CATEGORIZED DISPATCH & STATS
+  // ==========================================
+
+  it('dispatches categorized notifications across all seven canonical categories', async () => {
+    const categories: Array<'CRITICAL_THREAT' | 'APP_INSTALL_WARNING' | 'DOWNLOAD_BLOCKED' | 'PHISHING_WARNING' | 'SCAN_COMPLETE' | 'PROTECTION_DEGRADED' | 'UPDATE_AVAILABLE'> = [
+      'CRITICAL_THREAT',
+      'APP_INSTALL_WARNING',
+      'DOWNLOAD_BLOCKED',
+      'PHISHING_WARNING',
+      'SCAN_COMPLETE',
+      'PROTECTION_DEGRADED',
+      'UPDATE_AVAILABLE'
+    ];
+
+    for (const cat of categories) {
+      const res = await NotificationService.dispatchCategory(cat, `Title for ${cat}`, `Body for ${cat}`);
+      expect(res.outcome).toBe('DISPATCHED');
+    }
+
+    const list = NotificationService.getDispatchedNotifications();
+    expect(list.length).toBe(7);
+  });
+
+  it('delegates to native bridge dispatchCategorizedNotification when available', async () => {
+    const dispatchCategorizedNotification = vi.fn().mockReturnValue(JSON.stringify({
+      outcome: 'DISPATCHED',
+      reason: 'Dispatched successfully',
+      notificationId: 12345,
+      channelId: 'threat_alerts_channel'
+    }));
+
+    (window as any).AndroidSecurityBridge = {
+      dispatchCategorizedNotification
+    };
+
+    const res = await NotificationService.dispatchCategory(
+      'CRITICAL_THREAT',
+      'Malware Alert',
+      'Trojan detected'
+    );
+
+    expect(dispatchCategorizedNotification).toHaveBeenCalledWith(
+      'CRITICAL_THREAT',
+      'Malware Alert',
+      'Trojan detected',
+      'Malware Alert'
+    );
+    expect(res.outcome).toBe('DISPATCHED');
+    expect(res.notificationId).toBe(12345);
+
+    delete (window as any).AndroidSecurityBridge;
+  });
+
+  it('fetches dispatcher stats from native bridge', async () => {
+    const mockStats = {
+      totalAttempted: 10,
+      totalDispatched: 3,
+      totalSuppressedRateLimit: 7,
+      totalSuppressedPermission: 0,
+      totalCoalesced: 1,
+      activeInWindow: 3,
+      maxEventsInWindow: 3,
+      windowMs: 10000
+    };
+
+    (window as any).AndroidSecurityBridge = {
+      getNotificationDispatcherStats: vi.fn().mockReturnValue(JSON.stringify(mockStats))
+    };
+
+    const stats = await NotificationService.getDispatcherStats();
+    expect(stats.totalAttempted).toBe(10);
+    expect(stats.totalDispatched).toBe(3);
+    expect(stats.totalSuppressedRateLimit).toBe(7);
+    expect(stats.totalCoalesced).toBe(1);
 
     delete (window as any).AndroidSecurityBridge;
   });

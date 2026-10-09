@@ -22,6 +22,8 @@ declare global {
       decodeQrFrame?: (base64Image: string) => string;
       triggerWarningHaptics?: (severity: string) => void;
       dispatchNativeNotification?: (title: string, body: string, priority: string) => boolean;
+      dispatchCategorizedNotification?: (category: string, title: string, body: string, dedupKey: string) => string;
+      getNotificationDispatcherStats?: () => string;
       hasCameraPermission?: () => boolean;
       requestCameraPermission?: () => void;
       getDeviceSecurityPosture?: () => string;
@@ -790,6 +792,45 @@ export interface AdaptiveResourceStatusDTO {
   canExecuteScheduledDeepScan: boolean;
   transitionReason: string;
   disclaimer: string;
+}
+
+// ==========================================
+// PHASE T13: MOBILE NOTIFICATIONS
+// ==========================================
+
+export type NotificationCategoryType =
+  | 'CRITICAL_THREAT'
+  | 'APP_INSTALL_WARNING'
+  | 'DOWNLOAD_BLOCKED'
+  | 'PHISHING_WARNING'
+  | 'SCAN_COMPLETE'
+  | 'PROTECTION_DEGRADED'
+  | 'UPDATE_AVAILABLE';
+
+export type NotificationOutcomeType =
+  | 'DISPATCHED'
+  | 'SUPPRESSED_RATE_LIMIT'
+  | 'SUPPRESSED_PERMISSION'
+  | 'SUPPRESSED_CHANNEL_MUTED'
+  | 'COALESCED_BATCH'
+  | 'ERROR';
+
+export interface NotificationDispatchResultDTO {
+  outcome: NotificationOutcomeType;
+  reason: string;
+  notificationId: number;
+  channelId: string;
+}
+
+export interface NotificationDispatcherStatsDTO {
+  totalAttempted: number;
+  totalDispatched: number;
+  totalSuppressedRateLimit: number;
+  totalSuppressedPermission: number;
+  totalCoalesced: number;
+  activeInWindow: number;
+  maxEventsInWindow: number;
+  windowMs: number;
 }
 
 
