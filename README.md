@@ -324,5 +324,4 @@ In strict adherence to our engineering transparency doctrine:
 - **Phase R10 Security Hardening Report:** [`docs/PHASE_R10_FINAL_SECURITY_RELEASE_HARDENING.md`](./docs/PHASE_R10_FINAL_SECURITY_RELEASE_HARDENING.md)
 - **Vulnerability Disclosure Policy:** [`SECURITY.md`](./SECURITY.md)
 - **Changelog History:** [`CHANGELOG.md`](./CHANGELOG.md)
-- **Release Checksums:** [`release/SHA256SUMS.txt`](./release/SHA256SUMS.txt)
-
+- **Release Checksums:** [`release/SHA256SUMS.txt`](./release/SHA256SUMS.txt) 
