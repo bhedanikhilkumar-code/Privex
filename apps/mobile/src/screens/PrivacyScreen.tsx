@@ -4,7 +4,11 @@ import { SecureStorageService } from '../services/secure-storage.service';
 import { NotificationService } from '../services/notification.service';
 import type { PermissionsPrivacyReportDTO } from '../types/mobile.types';
 
-export const PrivacyScreen: React.FC = () => {
+interface PrivacyScreenProps {
+  onBack?: () => void;
+}
+
+export const PrivacyScreen: React.FC<PrivacyScreenProps> = ({ onBack }) => {
   const [report, setReport] = useState<PermissionsPrivacyReportDTO | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [shredded, setShredded] = useState<boolean>(false);
@@ -28,7 +32,6 @@ export const PrivacyScreen: React.FC = () => {
   useEffect(() => {
     loadReport();
 
-    // Listen for app resume event from native MainActivity
     const handleResume = () => {
       loadReport();
     };
@@ -73,14 +76,54 @@ export const PrivacyScreen: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '1rem', color: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-      <div>
-        <h2 style={{ margin: '0 0 0.25rem 0', fontSize: '1.25rem', color: '#38bdf8' }}>
-          Permissions & Privacy Center
-        </h2>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8' }}>
-          Privacy Architecture & Guarantees · Ground-truth audit of device permissions, platform access boundaries, and zero-knowledge guarantees.
-        </p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '1rem', color: '#f8fafc' }}>
+      {/* Top Header matching Privacy Center.png */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              aria-label="Back"
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                backgroundColor: '#111b2e',
+                border: '1px solid #27364b',
+                color: '#38bdf8',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                fontSize: '1rem'
+              }}
+            >
+              ←
+            </button>
+          )}
+          <div>
+            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              PRIVACY CENTER
+            </span>
+            <h1 style={{ margin: '0.1rem 0 0 0', fontSize: '1.5rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
+              Privacy Audit
+            </h1>
+          </div>
+        </div>
+        <span
+          style={{
+            fontSize: '0.7rem',
+            padding: '0.25rem 0.65rem',
+            borderRadius: '9999px',
+            backgroundColor: 'rgba(16, 185, 129, 0.15)',
+            color: '#34d399',
+            border: '1px solid #10b981',
+            fontWeight: 700
+          }}
+        >
+          100% PRIVATE
+        </span>
       </div>
 
       {error && (
@@ -89,209 +132,161 @@ export const PrivacyScreen: React.FC = () => {
         </div>
       )}
 
-      {loading && !report ? (
-        <div style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
-          Auditing Android security & permission state...
+      {/* Hero Zero-Knowledge Card matching Privacy Center.png */}
+      <div
+        style={{
+          backgroundColor: '#111b2e',
+          border: '1px solid #27364b',
+          borderRadius: '20px',
+          padding: '1.25rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div
+            style={{
+              width: '44px',
+              height: '44px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(16, 185, 129, 0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.5rem',
+              color: '#34d399'
+            }}
+          >
+            🔒
+          </div>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc' }}>
+              Zero-Knowledge Architecture
+            </h3>
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+              Privacy Architecture & Guarantees
+            </span>
+          </div>
         </div>
-      ) : report ? (
-        <>
-          {/* 1. Storage & SAF Access */}
-          <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <strong style={{ fontSize: '0.95rem' }}>1. Storage & File Access</strong>
-              {report.storage.status === 'GRANTED_SAF' && renderBadge('SAF GRANTED', 'GREEN')}
-              {report.storage.status === 'GRANTED_LEGACY' && renderBadge('LEGACY GRANTED', 'GREEN')}
-              {report.storage.status === 'LIMITED' && renderBadge('MEDIASTORE (LIMITED)', 'YELLOW')}
-              {report.storage.status === 'DENIED' && renderBadge('DENIED', 'RED')}
+        <p style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+          Your data never leaves this device. All detection models, URL heuristics, text analysis, and password entropy operations run completely on-device without cloud telemetry.
+        </p>
+      </div>
+
+      {/* Data Boundaries Section matching Privacy Center.png */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc' }}>
+          Data Boundaries
+        </h3>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          <div style={{ backgroundColor: '#111b2e', border: '1px solid #27364b', borderRadius: '16px', padding: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+              <span style={{ fontSize: '1.1rem' }}>📱</span>
+              <strong style={{ fontSize: '0.85rem', color: '#f8fafc' }}>On-Device Only</strong>
             </div>
-            <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>
-              <strong>Mechanism:</strong> {report.storage.mechanism} | <strong>SAF Trees:</strong> {report.storage.persistedSafTreesCount}
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-              <strong>Accessible Scope:</strong> {report.storage.accessibleScope}
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-              <strong>OS Limitation:</strong> {report.storage.inaccessibleScope}
-            </div>
-            <button
-              type="button"
-              onClick={() => service.openAppDetailsSettings()}
-              style={{
-                alignSelf: 'flex-start',
-                marginTop: '0.35rem',
-                padding: '0.4rem 0.75rem',
-                backgroundColor: '#0f172a',
-                color: '#38bdf8',
-                border: '1px solid #0284c7',
-                borderRadius: '6px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              Open Android App Settings
-            </button>
+            <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.4 }}>
+              URLs, messages, file hashes & clipboard content
+            </p>
           </div>
 
-          {/* 2. Notification Permission */}
-          <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <strong style={{ fontSize: '0.95rem' }}>2. Security Notifications</strong>
-              {report.notifications.areNotificationsEnabled ? renderBadge('ENABLED', 'GREEN') : renderBadge('DISABLED', 'RED')}
+          <div style={{ backgroundColor: '#111b2e', border: '1px solid #27364b', borderRadius: '16px', padding: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+              <span style={{ fontSize: '1.1rem' }}>🚫</span>
+              <strong style={{ fontSize: '0.85rem', color: '#f8fafc' }}>Zero Cloud Sync</strong>
             </div>
-            <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>
-              <strong>Runtime Permission:</strong> {report.notifications.runtimePermission}
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-              <strong>Dependent Security Alerts:</strong> {report.notifications.dependentFeatures}
-            </div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-              ⚠️ {report.notifications.alertDeliveryDisclaimer}
-            </div>
-            <button
-              type="button"
-              onClick={() => service.openNotificationSettings()}
-              style={{
-                alignSelf: 'flex-start',
-                marginTop: '0.35rem',
-                padding: '0.4rem 0.75rem',
-                backgroundColor: '#0f172a',
-                color: '#38bdf8',
-                border: '1px solid #0284c7',
-                borderRadius: '6px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              Configure Notification Channels
-            </button>
+            <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.4 }}>
+              No analytics, no ad tracking & no user telemetry
+            </p>
           </div>
+        </div>
+      </div>
 
-          {/* 3. VPN / Web Shield */}
-          <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <strong style={{ fontSize: '0.95rem' }}>3. Web Shield (DNS Filter VPN)</strong>
-              {report.vpnWebShield.serviceState === 'ACTIVE' && renderBadge('ACTIVE', 'GREEN')}
-              {report.vpnWebShield.serviceState === 'CONSENT_PENDING' && renderBadge('CONSENT PENDING', 'YELLOW')}
-              {report.vpnWebShield.serviceState === 'COEXISTENCE_CONFLICT' && renderBadge('EXTERNAL VPN ACTIVE', 'YELLOW')}
-              {report.vpnWebShield.serviceState === 'STOPPED' && renderBadge('STOPPED', 'BLUE')}
-            </div>
-            <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>
-              <strong>State:</strong> {report.vpnWebShield.serviceState} | <strong>Queries Filtered:</strong> {report.vpnWebShield.totalDnsQueries} | <strong>Blocked:</strong> {report.vpnWebShield.blockedDnsQueries}
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-              {report.vpnWebShield.vpnCoexistenceExplanation}
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#34d399' }}>
-              🛡️ {report.vpnWebShield.privacyGuarantee}
-            </div>
+      {/* Permissions Audit Group */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc' }}>
+          Permissions Audit
+        </h3>
+
+        {loading && !report ? (
+          <div style={{ textAlign: 'center', padding: '1.5rem', color: '#94a3b8' }}>
+            Auditing Android security & permission state...
           </div>
+        ) : report ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {/* Storage & SAF */}
+            <div style={{ backgroundColor: '#111b2e', border: '1px solid #27364b', borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <strong style={{ fontSize: '0.9rem', color: '#f8fafc' }}>Storage & Scoped Files</strong>
+                {report.storage.status === 'GRANTED_SAF' && renderBadge('SAF GRANTED', 'GREEN')}
+                {report.storage.status === 'GRANTED_LEGACY' && renderBadge('LEGACY GRANTED', 'GREEN')}
+                {report.storage.status === 'LIMITED' && renderBadge('MEDIASTORE', 'YELLOW')}
+                {report.storage.status === 'DENIED' && renderBadge('DENIED', 'RED')}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.4 }}>
+                {report.storage.accessibleScope}
+              </div>
+            </div>
 
-          {/* 4. App Installation Source Visibility */}
-          <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <strong style={{ fontSize: '0.95rem' }}>4. App Install Source Visibility</strong>
-              {renderBadge('STANDARD APP SANDBOX', 'BLUE')}
+            {/* Notifications */}
+            <div style={{ backgroundColor: '#111b2e', border: '1px solid #27364b', borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <strong style={{ fontSize: '0.9rem', color: '#f8fafc' }}>Security Notifications</strong>
+                {report.notifications.areNotificationsEnabled ? renderBadge('ENABLED', 'GREEN') : renderBadge('DISABLED', 'RED')}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.4 }}>
+                {report.notifications.dependentFeatures}
+              </div>
             </div>
-            <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>
-              <strong>Detected Installer:</strong> {report.installSource.installerPackage}
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-              {report.installSource.scopeExplanation}
-            </div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-              ℹ️ {report.installSource.privilegeTruth}
-            </div>
-          </div>
 
-          {/* 5. Background Scanning */}
-          <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <strong style={{ fontSize: '0.95rem' }}>5. Background Scanning & Observers</strong>
-              {report.backgroundScanning.status === 'MONITORING_ACTIVE' ? renderBadge('MONITORING ACTIVE', 'GREEN') : renderBadge('STOPPED', 'YELLOW')}
+            {/* VPN / Web Shield */}
+            <div style={{ backgroundColor: '#111b2e', border: '1px solid #27364b', borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <strong style={{ fontSize: '0.9rem', color: '#f8fafc' }}>Local DNS Web Shield</strong>
+                {report.vpnWebShield.serviceState === 'ACTIVE' && renderBadge('ACTIVE', 'GREEN')}
+                {report.vpnWebShield.serviceState === 'CONSENT_PENDING' && renderBadge('CONSENT PENDING', 'YELLOW')}
+                {report.vpnWebShield.serviceState === 'COEXISTENCE_CONFLICT' && renderBadge('COEXISTENCE CONFLICT', 'YELLOW')}
+                {report.vpnWebShield.serviceState === 'STOPPED' && renderBadge('STOPPED', 'BLUE')}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.4 }}>
+                {report.vpnWebShield.privacyGuarantee}
+              </div>
             </div>
-            <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>
-              <strong>Downloads Observer:</strong> {report.backgroundScanning.isDownloadObserverActive ? 'Registered' : 'Inactive'} | <strong>Events Processed:</strong> {report.backgroundScanning.eventsProcessed}
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-              {report.backgroundScanning.restrictionsNotice}
+
+            {/* Telemetry Collection Guarantee */}
+            <div style={{ backgroundColor: '#111b2e', border: '1px solid #10b981', borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <strong style={{ fontSize: '0.9rem', color: '#34d399' }}>Network Telemetry Collection</strong>
+                {renderBadge('ZERO COLLECTION', 'GREEN')}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#cbd5e1', lineHeight: 1.4 }}>
+                Payloads Transmitted: 0 Bytes • {report.telemetry.explanation}
+              </div>
             </div>
           </div>
+        ) : null}
+      </div>
 
-          {/* 6. Battery Optimization */}
-          <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <strong style={{ fontSize: '0.95rem' }}>6. Battery Optimization</strong>
-              {report.batteryOptimization.isIgnoringBatteryOptimizations ? renderBadge('EXEMPTED', 'BLUE') : renderBadge('ENFORCED (STANDARD)', 'GREEN')}
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-              {report.batteryOptimization.explanation}
-            </div>
-            <button
-              type="button"
-              onClick={() => service.openBatteryOptimizationSettings()}
-              style={{
-                alignSelf: 'flex-start',
-                marginTop: '0.35rem',
-                padding: '0.4rem 0.75rem',
-                backgroundColor: '#0f172a',
-                color: '#38bdf8',
-                border: '1px solid #0284c7',
-                borderRadius: '6px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              System Battery Optimization Settings
-            </button>
+      {/* Crypto-Shredder Card matching Privacy Center.png */}
+      <div style={{ backgroundColor: '#111b2e', border: '1px solid #ef4444', borderRadius: '20px', padding: '1.25rem', marginTop: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+          <span style={{ fontSize: '1.5rem' }}>🗑️</span>
+          <div>
+            <h4 style={{ margin: 0, fontSize: '1rem', color: '#f87171', fontWeight: 800 }}>
+              One-Click Crypto-Shredder
+            </h4>
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+              Cryptographic shredding of volatile state
+            </span>
           </div>
-
-          {/* 7. Telemetry & Data Collection */}
-          <div style={{ backgroundColor: '#1e293b', border: '1px solid #10b981', borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <strong style={{ fontSize: '0.95rem', color: '#34d399' }}>7. Telemetry & Network Data Collection</strong>
-              {renderBadge('ZERO COLLECTION', 'GREEN')}
-            </div>
-            <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>
-              <strong>Telemetry Implemented:</strong> {report.telemetry.isTelemetryImplemented ? 'Yes' : 'No'} | <strong>Payloads Transmitted:</strong> 0 Bytes
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-              {report.telemetry.explanation}
-            </div>
-          </div>
-
-          {/* 8. Threat Database Freshness */}
-          <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <strong style={{ fontSize: '0.95rem' }}>8. Threat Database Freshness</strong>
-              {report.threatDatabase.staleness === 'FRESH' && renderBadge('FRESH', 'GREEN')}
-              {report.threatDatabase.staleness === 'AGED' && renderBadge('AGED (7+ d)', 'YELLOW')}
-              {report.threatDatabase.staleness === 'STALE' && renderBadge('STALE (14+ d)', 'YELLOW')}
-              {report.threatDatabase.staleness === 'EXPIRED_CACHE' && renderBadge('EXPIRED (30+ d)', 'RED')}
-            </div>
-            <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>
-              <strong>Sequence:</strong> #{report.threatDatabase.activeSequence} | <strong>Records:</strong> {report.threatDatabase.recordCount} | <strong>Age:</strong> {report.threatDatabase.ageDays} days
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-              <strong>Verification:</strong> {report.threatDatabase.isCryptographicallyVerified ? 'Verified' : 'Unverified'} ({report.threatDatabase.verificationMechanism})
-            </div>
-          </div>
-        </>
-      ) : null}
-
-      {/* Crypto-Shredding Card */}
-      <div style={{ backgroundColor: '#1e293b', border: '1px solid #ef4444', borderRadius: '16px', padding: '1.25rem' }}>
-        <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem', color: '#f87171' }}>
-          One-Click Crypto-Shredder
-        </h4>
-        <p style={{ margin: '0 0 1rem 0', fontSize: '0.85rem', color: '#cbd5e1' }}>
+        </div>
+        <p style={{ margin: '0 0 1rem 0', fontSize: '0.8rem', color: '#cbd5e1', lineHeight: 1.4 }}>
           Instantly purge all local application state, custom allowlists, preferences, and scan history records from this device.
         </p>
 
         {shredded ? (
-          <div style={{ padding: '0.75rem', backgroundColor: 'rgba(16, 185, 129, 0.2)', color: '#34d399', borderRadius: '8px', textAlign: 'center', fontSize: '0.85rem', fontWeight: 600 }}>
+          <div style={{ padding: '0.75rem', backgroundColor: 'rgba(16, 185, 129, 0.2)', color: '#34d399', borderRadius: '10px', textAlign: 'center', fontSize: '0.85rem', fontWeight: 700 }}>
             ✓ All local data and memory purged successfully.
           </div>
         ) : (
@@ -303,11 +298,12 @@ export const PrivacyScreen: React.FC = () => {
               backgroundColor: '#dc2626',
               color: '#ffffff',
               fontWeight: 700,
-              borderRadius: '8px',
+              borderRadius: '10px',
               border: 'none',
               cursor: 'pointer',
               fontSize: '0.9rem',
-              width: '100%'
+              width: '100%',
+              boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)'
             }}
           >
             Crypto-Shred All Local Data
