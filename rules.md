@@ -321,3 +321,14 @@ Privex MUST prefer reversible actions. Quarantine must be isolated and recoverab
    - Routes user actions through explicit, standard OS intents (`Settings.ACTION_APPLICATION_DETAILS_SETTINGS`, `Intent.ACTION_DELETE`).
    - Critical system packages (`android`, `com.android.systemui`, `com.google.android.packageinstaller`, etc.) are classified as `SYSTEM_APP_PROTECTED` and cannot be targeted for destructive removal.
 5. **Crash-Consistent Atomic Manifest:** Vault state is persisted in `quarantine_manifest.json` with `.tmp` fsync writing and automatic `.bak` recovery on corruption.
+
+## RULE-43: Permissions & Privacy Center Ground-Truth Rule
+Privex MUST display ground-truth Android platform state across all 8 security and privacy areas without simulated, fabricated, or optimistic statuses:
+1. **Storage & SAF Truth:** Clearly state available access mechanisms (MediaStore, SAF trees, or legacy storage) and explicitly disclose inaccessible scopes (other app sandboxes `/data/data/*` and protected OS directories).
+2. **Notification Delivery Truth:** Distinguish runtime permission state from actual delivery. Never claim alerts are guaranteed solely because permission is granted.
+3. **VPN & Web Shield Truth:** Service state (`ACTIVE`, `CONSENT_PENDING`, `COEXISTENCE_CONFLICT`, `STOPPED`) must reflect live service instances, never cached flags. Reiterate single-active-VPN platform limit and 100% on-device DNS filtering.
+4. **Install-Source Scope Truth:** Truthfully acknowledge third-party app sandbox boundaries; never claim universal pre-install interception or Google Play Protect system privileges.
+5. **Background Scanning Reality:** Acknowledge OEM battery savers and background execution limitations. Distinguish live observer state from background limits; rely on on-resume catch-up reconciliation.
+6. **Battery Optimization Honesty:** Report real OS exemption status; clarify that exemption is optional and non-mandatory.
+7. **Zero-Telemetry Integrity:** Truthfully report that telemetry is completely uncollected and unimplemented. Never show fake toggles for non-existent telemetry.
+8. **Threat-DB Freshness & Integrity:** Report actual sequence numbers, record counts, and last updated timestamps. Trust requires successful cryptographic verification.

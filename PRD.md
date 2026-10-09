@@ -484,11 +484,19 @@ The product shall provide privacy-first URL protection with:
   - Zero clipboard persistence leakage: timed auto-clearing clipboard after 45 seconds.
   - Passwords are Tier-1 secrets: never persisted, logged, or uploaded off-device.
 
-### MOB-011 — Privacy
-Raw files, document contents, credentials, browsing history and URL query secrets shall remain on-device. Telemetry is disabled by default.
+### MOB-011 — Privacy & Permissions Center (Phase T11)
+- **Status:** IMPLEMENTED & VERIFIED
+- **Capabilities:**
+  - Audited 8-point ground-truth inspection covering Storage & SAF, Notifications, VPN/Web Shield, Install Source visibility, Background Scanning, Battery Optimization, Telemetry, and Threat Database freshness.
+  - Zero-Knowledge & Zero-Telemetry integrity: truthfully discloses zero remote tracking or analytics SDKs with zero fake toggles.
+  - Transparent OS limitation boundaries: explicitly explains accessible scopes vs inaccessible scopes (other app sandboxes `/data/data/*` and OS directories).
 
-### MOB-012 — Permissions
-The product shall request only necessary Android permissions and must gracefully degrade when permissions are denied.
+### MOB-012 — Least Privilege & Permission Lifecycle (Phase T11)
+- **Status:** IMPLEMENTED & VERIFIED
+- **Capabilities:**
+  - Strict least-privilege model requesting only essential permissions on demand.
+  - Safe native system intent launchers for App Notification Settings, Application Details Settings, and Battery Optimization Settings.
+  - Automatic `onResume` lifecycle re-check: returning from Android Settings immediately refreshes the UI without requiring an app restart.
 
 ### MOB-013 — Battery & Performance
 Background scanning shall adapt to battery, thermal and memory state. Critical threat detection remains prioritized. No unbounded worker queue or persistent wakelock.

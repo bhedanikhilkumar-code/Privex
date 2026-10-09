@@ -213,6 +213,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (webView != null) {
+            webView.post(() -> webView.evaluateJavascript(
+                    "window.dispatchEvent(new CustomEvent('privateprotection:app_resume'));",
+                    null
+            ));
+        }
+    }
+
     /**
      * Handles inbound Intents (Share Target text and Deep links) with cold-start queueing (BLOCKER-05).
      */
@@ -1187,6 +1198,61 @@ public class MainActivity extends AppCompatActivity {
                 return db.rollbackToFactorySeed();
             } catch (Exception e) {
                 Log.e(TAG, "rollbackThreatDatabaseToFactorySeed bridge error", e);
+                return false;
+            }
+        }
+
+        // ==========================================
+        // PHASE T11: PERMISSIONS & PRIVACY CENTER
+        // ==========================================
+
+        @JavascriptInterface
+        public String getPermissionsPrivacyReport() {
+            try {
+                com.privateprotection.mobile.shield.PrivacyCenterService service =
+                        com.privateprotection.mobile.shield.PrivacyCenterService.getInstance(activity);
+                return service.getPermissionsPrivacyReport().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "getPermissionsPrivacyReport bridge error", e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public boolean openAppNotificationSettings() {
+            try {
+                com.privateprotection.mobile.shield.PrivacyCenterService service =
+                        com.privateprotection.mobile.shield.PrivacyCenterService.getInstance(activity);
+                activity.startActivity(service.createAppNotificationSettingsIntent());
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "openAppNotificationSettings error", e);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public boolean openAppDetailsSettings() {
+            try {
+                com.privateprotection.mobile.shield.PrivacyCenterService service =
+                        com.privateprotection.mobile.shield.PrivacyCenterService.getInstance(activity);
+                activity.startActivity(service.createAppDetailsSettingsIntent());
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "openAppDetailsSettings error", e);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public boolean openBatteryOptimizationSettings() {
+            try {
+                com.privateprotection.mobile.shield.PrivacyCenterService service =
+                        com.privateprotection.mobile.shield.PrivacyCenterService.getInstance(activity);
+                activity.startActivity(service.createBatteryOptimizationSettingsIntent());
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "openBatteryOptimizationSettings error", e);
                 return false;
             }
         }
