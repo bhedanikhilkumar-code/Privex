@@ -3,13 +3,14 @@ import { DeviceAuditService } from '../services/device-audit.service';
 import { SecureStorageService, ScanHistoryRecord } from '../services/secure-storage.service';
 import { DeviceSecurityPosture, MobileSettings } from '../types/mobile.types';
 import { DevicePostureCard } from '../components/DevicePostureCard';
+import { MobileTab } from '../components/TabBar';
 
 interface HomeScreenProps {
-  onNavigate: (tab: any) => void;
+  onNavigate: (tab: MobileTab) => void;
   onSelectResult: (record: ScanHistoryRecord) => void;
 }
 
-export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
+export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onSelectResult }) => {
   const [posture, setPosture] = useState<DeviceSecurityPosture | null>(null);
   const [settings, setSettings] = useState<MobileSettings | null>(null);
   const [history, setHistory] = useState<ScanHistoryRecord[]>([]);
@@ -21,6 +22,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
     SecureStorageService.getSettings().then(setSettings);
     SecureStorageService.getScanHistory().then(setHistory);
   }, []);
+
+  const handleHistoryItemClick = (record: ScanHistoryRecord) => {
+    if (onSelectResult) {
+      onSelectResult(record);
+    } else {
+      if (record.targetType === 'URL') {
+        onNavigate('URL_SCAN');
+      } else if (record.targetType === 'TEXT') {
+        onNavigate('TEXT_SCAN');
+      } else if (record.targetType === 'FILE') {
+        onNavigate('FILE_SCAN');
+      }
+    }
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '1rem', color: '#f8fafc' }}>
@@ -52,8 +67,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Quick Action Buttons */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+      {/* Main Scanners Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
         <button
           type="button"
           onClick={() => onNavigate('URL_SCAN')}
@@ -64,12 +79,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
             borderRadius: '12px',
             color: '#f8fafc',
             cursor: 'pointer',
-            textAlign: 'left'
+            textAlign: 'left',
+            minHeight: '48px'
           }}
         >
           <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.25rem' }}>🔗</span>
           <strong style={{ display: 'block', fontSize: '0.95rem' }}>Scan URL</strong>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Analyze links for phishing</span>
+          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Homographs & Bloom lookup</span>
         </button>
 
         <button
@@ -82,7 +98,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
             borderRadius: '12px',
             color: '#f8fafc',
             cursor: 'pointer',
-            textAlign: 'left'
+            textAlign: 'left',
+            minHeight: '48px'
           }}
         >
           <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.25rem' }}>📷</span>
@@ -100,7 +117,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
             borderRadius: '12px',
             color: '#f8fafc',
             cursor: 'pointer',
-            textAlign: 'left'
+            textAlign: 'left',
+            minHeight: '48px'
           }}
         >
           <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.25rem' }}>💬</span>
@@ -118,7 +136,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
             borderRadius: '12px',
             color: '#f8fafc',
             cursor: 'pointer',
-            textAlign: 'left'
+            textAlign: 'left',
+            minHeight: '48px'
           }}
         >
           <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.25rem' }}>📁</span>
@@ -136,7 +155,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
             borderRadius: '12px',
             color: '#f8fafc',
             cursor: 'pointer',
-            textAlign: 'left'
+            textAlign: 'left',
+            minHeight: '48px'
           }}
         >
           <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.25rem' }}>🔐</span>
@@ -154,12 +174,51 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
             borderRadius: '12px',
             color: '#f8fafc',
             cursor: 'pointer',
-            textAlign: 'left'
+            textAlign: 'left',
+            minHeight: '48px'
           }}
         >
           <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.25rem' }}>⚙️</span>
           <strong style={{ display: 'block', fontSize: '0.95rem' }}>Engine Diagnostics</strong>
           <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Offline Bloom filter health</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigate('PRIVACY')}
+          style={{
+            padding: '1rem',
+            backgroundColor: '#1e293b',
+            border: '1px solid #a855f7',
+            borderRadius: '12px',
+            color: '#f8fafc',
+            cursor: 'pointer',
+            textAlign: 'left',
+            minHeight: '48px'
+          }}
+        >
+          <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.25rem' }}>🔒</span>
+          <strong style={{ display: 'block', fontSize: '0.95rem' }}>Privacy Center</strong>
+          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Zero-knowledge & shredder</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigate('SETTINGS')}
+          style={{
+            padding: '1rem',
+            backgroundColor: '#1e293b',
+            border: '1px solid #eab308',
+            borderRadius: '12px',
+            color: '#f8fafc',
+            cursor: 'pointer',
+            textAlign: 'left',
+            minHeight: '48px'
+          }}
+        >
+          <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.25rem' }}>⚡</span>
+          <strong style={{ display: 'block', fontSize: '0.95rem' }}>Protection Settings</strong>
+          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Shields & custom allowlists</span>
         </button>
       </div>
 
@@ -176,16 +235,27 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {history.slice(0, 5).map((rec, i) => (
-              <div
-                key={i}
+              <button
+                key={rec.scanId || i}
+                type="button"
+                role="button"
+                aria-label={`View ${rec.targetType} scan result for ${rec.sanitizedSummary}. Verdict: ${rec.verdict}`}
+                onClick={() => handleHistoryItemClick(rec)}
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '0.5rem',
+                  padding: '0.75rem',
                   backgroundColor: '#0f172a',
+                  border: '1px solid #1e293b',
                   borderRadius: '8px',
-                  fontSize: '0.85rem'
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  width: '100%',
+                  minHeight: '48px',
+                  color: 'inherit',
+                  transition: 'background-color 0.15s ease'
                 }}
               >
                 <div>
@@ -201,7 +271,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
                 >
                   {rec.verdict}
                 </span>
-              </div>
+              </button>
             ))}
           </div>
         )}
