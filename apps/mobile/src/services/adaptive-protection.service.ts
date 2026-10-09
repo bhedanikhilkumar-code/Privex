@@ -103,4 +103,13 @@ export class AdaptiveProtectionService {
       metadata: { isScheduled: true, scanMode: 'FULL_ACCESSIBLE_SCAN' }
     };
   }
+
+  /**
+   * Evaluates whether scheduled background deep scans should be executed
+   * or deferred based on battery percentage and charging state.
+   */
+  public canExecuteScheduledScan(batteryPct: number, isCharging: boolean): boolean {
+    if (isCharging) return true;
+    return batteryPct >= 20;
+  }
 }

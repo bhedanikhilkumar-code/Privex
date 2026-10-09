@@ -355,3 +355,11 @@ All native notifications dispatched on Android MUST strictly route through typed
 5. **Critical Threat Priority Invariant:** Active `CRITICAL_THREAT` events (e.g. active ransomware or confirmed malicious APKs) MUST NEVER be suppressed or dropped by the rate limiter; they must always reach the user immediately.
 6. **Payload Sanitization & Unicode Shielding:** Notification titles and bodies MUST be strictly sanitized before presentation: strip Unicode bidirectional override characters (`U+202E`, etc.), control characters, and newlines; truncate titles to 100 characters and bodies to 250 characters; replace empty strings with safe default text.
 
+## RULE-46: Mobile Performance & Memory Bounding Rule
+Mobile file ingestion, threat screening, and background scan queues MUST operate within strictly bounded resources without causing Application Not Responding (ANR) or Out of Memory (OOM) faults:
+1. **Zero Artificial Delays:** File stabilization checks MUST NOT execute arbitrary blocking thread sleeps on readable, non-zero length files. Initial small-file triage MUST satisfy $p50 < 20\text{ ms}$ and $p95 < 50\text{ ms}$.
+2. **Bounded Heap Delta Under Burst Events:** Event deduplication and LRU caches MUST enforce hard capacity boundaries ($\le 5,000$ entries). A 1,000-file burst ingress event storm MUST result in $\Delta \text{Heap} < 32\text{ MB}$.
+3. **Clean-File Fast-Path Acceleration:** Benign files verified as `ALLOW` MAY be cached in `MobileCleanFileCache` with verified bounds (path, length, mtime). Cache hits MUST execute in $< 2.0\text{ ms}$. Disguised binaries and threat indicators MUST NEVER enter or be served from the clean cache.
+4. **Cooperative Cancellation & Offloading:** All intensive disk I/O, hash computations, and file parsing MUST execute on dedicated background worker pools (`BoundedWorkerExecutor`), never blocking the Android main/UI thread. All background scan jobs MUST support cooperative cancellation exiting within $< 100\text{ ms}$.
+
+

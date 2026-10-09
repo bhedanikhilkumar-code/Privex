@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { MobileSecurityAdapter } from '../../adapters/mobile-security-adapter';
 import { FileScannerService } from '../../services/file-scanner.service';
 import { DeviceAuditService } from '../../services/device-audit.service';
@@ -23,20 +23,14 @@ import { NotificationService } from '../../services/notification.service';
 describe('Phase T15 Mobile Performance Engine Benchmarks', () => {
   let adapter: MobileSecurityAdapter;
   let fileService: FileScannerService;
-  let auditService: DeviceAuditService;
   let webShield: WebShieldService;
   let adaptiveService: AdaptiveProtectionService;
-  let pwdService: PasswordGeneratorService;
-  let notifService: NotificationService;
 
   beforeEach(() => {
     adapter = new MobileSecurityAdapter();
     fileService = new FileScannerService();
-    auditService = new DeviceAuditService();
-    webShield = new WebShieldService();
+    webShield = WebShieldService.getInstance();
     adaptiveService = new AdaptiveProtectionService();
-    pwdService = new PasswordGeneratorService();
-    notifService = new NotificationService();
   });
 
   it('Target 1: Protection services warm-start overhead < 500 ms', () => {
@@ -45,7 +39,7 @@ describe('Phase T15 Mobile Performance Engine Benchmarks', () => {
     const a = new MobileSecurityAdapter();
     const f = new FileScannerService();
     const d = new DeviceAuditService();
-    const w = new WebShieldService();
+    const w = WebShieldService.getInstance();
     const ad = new AdaptiveProtectionService();
     const p = new PasswordGeneratorService();
     const n = new NotificationService();
