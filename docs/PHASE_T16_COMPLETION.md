@@ -3,7 +3,7 @@
 **Author:** Mobile Engineering & Zero-Trust Audit Committee  
 **Date:** October 9, 2026  
 **Status:** **SOFTWARE AUDIT COMPLETE (100% PASS) | PHYSICAL RELEASE GATE: PARTIAL / BLOCKED (0 USB DEVICES)**  
-**Commit Baseline:** `6f6b27d65b03bda217ec553e407ca964621e6e86`  
+**Commit Baseline:** `6db71cea3cddf7aebdf7e173d5eca4b4bfe48af9`  
 **Test Suite Verification:** 233 Android JVM Unit Tests PASS (100%) | 203 Mobile Vitest Tests PASS (100%)  
 **Build Verification:** Android Debug (`assembleDebug`) PASS | Android Release (`assembleRelease` with full R8 minification) PASS  
 

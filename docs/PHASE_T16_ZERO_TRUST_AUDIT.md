@@ -4,7 +4,7 @@
 **Audit Date:** October 9, 2026  
 **Target Repository:** `https://github.com/bhedanikhilkumar-code/Privex`  
 **Target Branch:** `main`  
-**Target Baseline SHA:** `6f6b27d65b03bda217ec553e407ca964621e6e86`  
+**Target Baseline SHA:** `6db71cea3cddf7aebdf7e173d5eca4b4bfe48af9`  
 **Working Tree Status:** Clean (0 untracked, 0 modified)  
 **Overall Release Recommendation:** **PARTIAL / BLOCKED** (Software Verification: 100% PASS / GO; Physical Hardware Acceptance: BLOCKED per Rule 41 due to 0 attached USB devices)
 

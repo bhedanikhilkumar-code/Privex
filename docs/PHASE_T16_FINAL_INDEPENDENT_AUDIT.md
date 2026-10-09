@@ -4,7 +4,7 @@
 **Audit Date:** October 9, 2026  
 **Target Repository:** `https://github.com/bhedanikhilkumar-code/Privex`  
 **Target Branch:** `main`  
-**Baseline SHA:** `6f6b27d65b03bda217ec553e407ca964621e6e86`  
+**Baseline SHA:** `6db71cea3cddf7aebdf7e173d5eca4b4bfe48af9`  
 **Final Release Verdict:** **PARTIAL / BLOCKED**
 
 ---

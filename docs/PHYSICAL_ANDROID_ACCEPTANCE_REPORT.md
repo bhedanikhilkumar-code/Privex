@@ -6,7 +6,7 @@
 **Repository:** `https://github.com/bhedanikhilkumar-code/Privex`  
 **Branch:** `main`  
 **Starting Commit SHA:** `562099ba24a3e1228da31a95dcffd04882d8c077`  
-**Latest Baseline SHA:** `6d4b1a2bd57c8f6ee528d662b33f6554f497278e`  
+**Latest Baseline SHA:** `6db71cea3cddf7aebdf7e173d5eca4b4bfe48af9`  
 **Target Release Artifact:** `apps/mobile/android/app/build/outputs/apk/release/app-release.apk`  
 **APK SHA-256:** `88217749dffecb46877363cd4958affc30473a3dcf9639e789248fff79c7f82a`  
 **Final Release Disposition:** **PARTIAL / BLOCKED** (per **RULE-41**)
