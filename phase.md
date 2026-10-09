@@ -732,6 +732,7 @@ Build a mobile App Safety pipeline:
   - `docs/PHASE_T16_ZERO_TRUST_AUDIT.md`: Comprehensive independent audit review across all 7 gates.
   - `docs/PHASE_T16_COMPLETION.md`: Completion report detailing software verification sign-off and hardware gating.
   - `docs/PHASE_T16_FINAL_INDEPENDENT_AUDIT.md`: Final release verdict and action items for physical device unblocking.
+  - `docs/PHYSICAL_ANDROID_ACCEPTANCE_REPORT.md`: Comprehensive physical device acceptance and 12-scenario release gate evaluation.
 
 ### Phase T Definition of Done
 COMPLETE only when the mobile app demonstrably provides the strongest technically possible equivalent of modern mobile security protection, with honest Android limitations, real-device evidence, zero fake protection, and full documentation sync across all six canonical documents. Software verification is 100% complete; final commercial release approval awaits physical hardware testing.
