@@ -102,7 +102,10 @@ public class UniversalFileShieldService {
 
         try (FileInputStream fis = new FileInputStream(file)) {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] buffer = new byte[8192];
+            int bufSize = context != null
+                    ? com.privateprotection.mobile.core.AdaptiveResourceManager.getInstance(context).getStreamingBufferSize()
+                    : 64 * 1024;
+            byte[] buffer = new byte[bufSize];
             int read;
             boolean firstChunk = true;
 
@@ -181,7 +184,10 @@ public class UniversalFileShieldService {
             }
 
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] buffer = new byte[8192];
+            int bufSize = context != null
+                    ? com.privateprotection.mobile.core.AdaptiveResourceManager.getInstance(context).getStreamingBufferSize()
+                    : 64 * 1024;
+            byte[] buffer = new byte[bufSize];
             int read;
             boolean firstChunk = true;
 

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { MobileThreatIntelService } from '../services/mobile-threat-intel.service';
 import { MobileQuarantineService } from '../services/mobile-quarantine.service';
+import { AdaptiveProtectionService } from '../services/adaptive-protection.service';
 import type {
   ThreatDatabaseInspectionResult,
   QuarantineRecordDTO,
-  QuarantineVaultStatsDTO
+  QuarantineVaultStatsDTO,
+  AdaptiveResourceStatusDTO
 } from '../types/mobile.types';
 
 export const ProtectionStatusScreen: React.FC = () => {
@@ -13,13 +15,25 @@ export const ProtectionStatusScreen: React.FC = () => {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [vaultStats, setVaultStats] = useState<QuarantineVaultStatsDTO | null>(null);
   const [quarantineItems, setQuarantineItems] = useState<QuarantineRecordDTO[]>([]);
+  const [adaptiveStatus, setAdaptiveStatus] = useState<AdaptiveResourceStatusDTO | null>(null);
 
   const quarantineService = new MobileQuarantineService();
+  const adaptiveService = AdaptiveProtectionService.getInstance();
 
   useEffect(() => {
     loadIntelStatus();
     loadQuarantineData();
+    loadAdaptiveStatus();
   }, []);
+
+  const loadAdaptiveStatus = async () => {
+    try {
+      const status = await adaptiveService.getAdaptiveStatus();
+      setAdaptiveStatus(status);
+    } catch (e: any) {
+      console.warn('Failed to load adaptive status', e);
+    }
+  };
 
   const loadIntelStatus = async () => {
     try {
@@ -132,6 +146,72 @@ export const ProtectionStatusScreen: React.FC = () => {
           <span>Feed: {intelStatus?.activeMetadata.sourceFeed || 'FACTORY_SEED'}</span>
           <span>Version: {intelStatus?.activeMetadata.installedVersion || '1.0.0-seed'} (Seq #{intelStatus?.activeMetadata.versionSequence ?? 100})</span>
           <span>Records: {intelStatus?.activeMetadata.recordsCount ?? 11}</span>
+        </div>
+      </div>
+
+      {/* Adaptive Resource & Thermal Protection Card (Phase T12) */}
+      <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '16px', padding: '1.25rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+          <div>
+            <h4 style={{ margin: 0, fontSize: '1rem', color: '#38bdf8' }}>Adaptive Power & Thermal Shield</h4>
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Dynamic concurrency & low-RAM buffer tuning</span>
+          </div>
+          <span
+            style={{
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              padding: '0.2rem 0.6rem',
+              borderRadius: '6px',
+              backgroundColor:
+                adaptiveStatus?.resourceMode === 'NORMAL'
+                  ? 'rgba(52, 211, 153, 0.2)'
+                  : adaptiveStatus?.resourceMode === 'BATTERY_SAVER' || adaptiveStatus?.resourceMode === 'BACKGROUND_THROTTLED'
+                  ? 'rgba(251, 191, 36, 0.2)'
+                  : 'rgba(248, 113, 113, 0.2)',
+              color:
+                adaptiveStatus?.resourceMode === 'NORMAL'
+                  ? '#34d399'
+                  : adaptiveStatus?.resourceMode === 'BATTERY_SAVER' || adaptiveStatus?.resourceMode === 'BACKGROUND_THROTTLED'
+                  ? '#fbbf24'
+                  : '#f87171'
+            }}
+          >
+            {adaptiveStatus?.resourceMode ?? 'NORMAL'}
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem', marginBottom: '0.75rem' }}>
+          <div style={{ backgroundColor: '#0f172a', padding: '0.75rem', borderRadius: '8px' }}>
+            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Battery State</div>
+            <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>
+              {adaptiveStatus?.batteryPercentage ?? 100}% {adaptiveStatus?.isCharging ? '⚡ Charging' : '🔋 Discharging'}
+            </div>
+          </div>
+          <div style={{ backgroundColor: '#0f172a', padding: '0.75rem', borderRadius: '8px' }}>
+            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Thermal Status</div>
+            <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>
+              {adaptiveStatus?.thermalStatus ?? 'UNAVAILABLE'}
+            </div>
+          </div>
+          <div style={{ backgroundColor: '#0f172a', padding: '0.75rem', borderRadius: '8px' }}>
+            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Buffer Sizing</div>
+            <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>
+              {(adaptiveStatus?.streamingBufferSize ?? 65536) / 1024} KB
+            </div>
+          </div>
+          <div style={{ backgroundColor: '#0f172a', padding: '0.75rem', borderRadius: '8px' }}>
+            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Scheduled Deep Scans</div>
+            <div style={{ fontSize: '0.95rem', fontWeight: 700, color: adaptiveStatus?.canExecuteScheduledDeepScan ? '#34d399' : '#fbbf24' }}>
+              {adaptiveStatus?.canExecuteScheduledDeepScan ? 'ELIGIBLE' : 'DEFERRED'}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginBottom: '0.5rem' }}>
+          <strong>Active Rationale:</strong> {adaptiveStatus?.transitionReason ?? 'System within nominal thresholds'}
+        </div>
+        <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+          ℹ️ {adaptiveStatus?.disclaimer ?? 'Adaptive resource monitoring responds dynamically to Android OS signals.'}
         </div>
       </div>
 

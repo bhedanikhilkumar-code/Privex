@@ -756,3 +756,40 @@ export interface PermissionsPrivacyReportDTO {
   timestamp: number;
 }
 
+// ==========================================
+// PHASE T12: BATTERY, THERMAL & LOW-RAM ADAPTIVE PROTECTION
+// ==========================================
+
+export type ResourceModeType =
+  | 'NORMAL'
+  | 'BATTERY_SAVER'
+  | 'THERMAL_THROTTLED'
+  | 'LOW_MEMORY'
+  | 'BACKGROUND_THROTTLED'
+  | 'DEGRADED_CRITICAL';
+
+export type ThermalStatusType =
+  | 'NONE'
+  | 'LIGHT'
+  | 'MODERATE'
+  | 'SEVERE'
+  | 'CRITICAL'
+  | 'EMERGENCY'
+  | 'SHUTDOWN'
+  | 'UNAVAILABLE';
+
+export interface AdaptiveResourceStatusDTO {
+  resourceMode: ResourceModeType;
+  batteryPercentage: number;
+  isCharging: boolean;
+  thermalStatus: ThermalStatusType;
+  isThermalSupported: boolean;
+  isLowMemory: boolean;
+  isForegroundHeavy: boolean;
+  streamingBufferSize: number;
+  canExecuteScheduledDeepScan: boolean;
+  transitionReason: string;
+  disclaimer: string;
+}
+
+

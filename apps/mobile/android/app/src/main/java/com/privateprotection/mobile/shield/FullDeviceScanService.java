@@ -145,8 +145,29 @@ public class FullDeviceScanService {
         // Assemble canonical scan report
         JSONObject report = new JSONObject();
         try {
+            com.privateprotection.mobile.core.AdaptiveResourceManager adaptiveMgr =
+                    com.privateprotection.mobile.core.AdaptiveResourceManager.getInstance(context);
+            com.privateprotection.mobile.core.AdaptiveResourceManager.ResourceMode activeMode = adaptiveMgr.getCurrentMode();
+            boolean isThrottled = (activeMode == com.privateprotection.mobile.core.AdaptiveResourceManager.ResourceMode.THERMAL_THROTTLED ||
+                    activeMode == com.privateprotection.mobile.core.AdaptiveResourceManager.ResourceMode.BACKGROUND_THROTTLED ||
+                    activeMode == com.privateprotection.mobile.core.AdaptiveResourceManager.ResourceMode.LOW_MEMORY ||
+                    activeMode == com.privateprotection.mobile.core.AdaptiveResourceManager.ResourceMode.BATTERY_SAVER);
+
+            String finalStatus;
+            if (wasCancelled) {
+                finalStatus = "CANCELLED";
+            } else if (!threatsFound.isEmpty()) {
+                finalStatus = "ACTION_REQUIRED";
+            } else if (isThrottled) {
+                finalStatus = "THROTTLED";
+            } else {
+                finalStatus = "SECURE";
+            }
+
             report.put("scanMode", mode.name());
-            report.put("status", wasCancelled ? "CANCELLED" : (threatsFound.isEmpty() ? "SECURE" : "ACTION_REQUIRED"));
+            report.put("status", finalStatus);
+            report.put("isThrottled", isThrottled);
+            report.put("resourceMode", activeMode.name());
             report.put("startTimeMs", startTime);
             report.put("endTimeMs", endTime);
             report.put("durationMs", endTime - startTime);

@@ -332,3 +332,11 @@ Privex MUST display ground-truth Android platform state across all 8 security an
 6. **Battery Optimization Honesty:** Report real OS exemption status; clarify that exemption is optional and non-mandatory.
 7. **Zero-Telemetry Integrity:** Truthfully report that telemetry is completely uncollected and unimplemented. Never show fake toggles for non-existent telemetry.
 8. **Threat-DB Freshness & Integrity:** Report actual sequence numbers, record counts, and last updated timestamps. Trust requires successful cryptographic verification.
+
+## RULE-44: Battery, Thermal & Adaptive Protection Rule
+Privex mobile protection MUST adapt dynamically to host hardware constraints without compromising user security or reporting simulated metrics:
+1. **Battery-Aware Deferral:** When battery is $< 20\%$ while discharging, non-urgent scheduled batch operations (such as scheduled deep storage scans) MUST transition to `DEFERRED`. Manual user-triggered scans and active device charging MUST bypass this deferral.
+2. **Thermal-Aware Worker Concurrency:** Thermal status MUST be queried truthfully via `PowerManager.OnThermalStatusChangedListener` (API 29+) or reported as `UNAVAILABLE` on older platforms. On `MODERATE` thermal pressure, worker concurrency MUST throttle down from $N$ to $N-1$; on `SEVERE`, `CRITICAL`, or `EMERGENCY` states, concurrency MUST clamp to $1$ thread with inter-file cooling pauses. Fake temperatures MUST NOT be displayed.
+3. **Low-RAM Buffer Scaling:** System memory pressure events (`ComponentCallbacks2.onTrimMemory` / `onLowMemory`) MUST dynamically scale streaming inspection and crypto buffers down from 64 KB to 16 KB and reduce worker threads to 1, bounding heap allocations.
+4. **Foreground Priority:** When heavy user interaction is detected in the foreground, background scan tasks MUST yield CPU time slices to prevent UI stutter.
+5. **Critical Threat Preservation Invariant:** Active real-time threat evaluations (in-flight downloads, user-initiated file scans, APK installation inspections, live URL filtering) MUST NEVER be deferred, cancelled, or downgraded to `ALLOW` due to resource pressure.

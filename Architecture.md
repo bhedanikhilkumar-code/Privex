@@ -472,8 +472,25 @@ Uses Android CSPRNG / SecureRandom. The generator is isolated from telemetry and
   - Critical System Package Protection: Critical system packages (`android`, `com.android.systemui`, `com.google.android.packageinstaller`, etc.) are designated `SYSTEM_APP_PROTECTED` and cannot be targeted for destructive removal.
 
 
-### M-12 Battery/Thermal Manager
-Inputs Android BatteryManager/PowerManager/thermal state. Outputs worker concurrency and scan scheduling limits. Critical scan events have priority over background optimization.
+### M-12 Battery, Thermal & Low-RAM Adaptive Mode (`AdaptiveResourceManager.java` & `MobileSecurityCoordinator.java`)
+- **Adaptive Resource Management Architecture:**
+  - Singleton manager (`AdaptiveResourceManager.java`) tracking system state via Android OS APIs:
+    - Battery: Level and charging state via `IntentFilter(Intent.ACTION_BATTERY_CHANGED)`.
+    - Thermal: Hardware thermal state via `PowerManager.OnThermalStatusChangedListener` on API 29+ (`NONE`, `LIGHT`, `MODERATE`, `SEVERE`, `CRITICAL`, `EMERGENCY`), with `UNAVAILABLE` fallback on older APIs (zero fabricated metrics).
+    - Low-RAM: `ComponentCallbacks2.onTrimMemory` / `onLowMemory` and `ActivityManager.MemoryInfo`.
+    - Foreground Interaction: Heavy workload tracking to yield CPU slices during active user interaction.
+- **Dynamic Worker Concurrency Throttling:**
+  - `MobileSecurityCoordinator` observes resource state changes and dynamically updates `BoundedWorkerExecutor.setMaxThreads()`.
+  - Under `MODERATE` thermal pressure: scales concurrency from $N$ to $\max(1, N - 1)$.
+  - Under `SEVERE`/`CRITICAL`/`EMERGENCY` thermal pressure or Low-RAM trim events: clamps concurrency to 1 thread with cooling pauses between batch items.
+- **Battery-Aware Deferral Policy:**
+  - When battery is $< 20\%$ while discharging (`isDischarging = true`), non-urgent scheduled batch operations (`JobType.STORAGE_SCAN` with `isScheduled = true`) transition to `JobState.DEFERRED` with reason `BATTERY_LOW_DEFERRED`.
+  - Manual user-triggered scans (`isScheduled = false`) and active charging states bypass deferral.
+- **Dynamic Memory-Scaled Streaming Buffers:**
+  - `UniversalFileShieldService` queries `AdaptiveResourceManager.getStreamingBufferSize()`.
+  - Automatically scales from 64 KB (normal) down to 16 KB (low-RAM), reducing peak heap allocation during file hashing and vault crypto by 75%.
+- **Critical Threat Preservation Invariant:**
+  - Real-time file inspection, in-flight download inspection, live URL filtering, and APK audits are never deferred, dropped, or converted to `ALLOW` due to resource pressure.
 
 ### M-13 Permission & Privacy Center (`PrivacyCenterService.java` & `PermissionsPrivacyService.ts`)
 - **Ground-Truth 8-Point Auditing Architecture:**

@@ -498,8 +498,15 @@ The product shall provide privacy-first URL protection with:
   - Safe native system intent launchers for App Notification Settings, Application Details Settings, and Battery Optimization Settings.
   - Automatic `onResume` lifecycle re-check: returning from Android Settings immediately refreshes the UI without requiring an app restart.
 
-### MOB-013 — Battery & Performance
-Background scanning shall adapt to battery, thermal and memory state. Critical threat detection remains prioritized. No unbounded worker queue or persistent wakelock.
+### MOB-013 — Battery & Performance (Phase T12)
+- **Status:** IMPLEMENTED & VERIFIED
+- **Capabilities:**
+  - Dynamic adaptive resource manager (`AdaptiveResourceManager.java`) tracking battery state, charging state, thermal status via `PowerManager.OnThermalStatusChangedListener` (API 29+), and memory trim signals via `ComponentCallbacks2`.
+  - Battery-aware scanning policy: defer scheduled batch scans (`STORAGE_SCAN` with `isScheduled=true`) when battery $< 20\%$ while discharging; manual user-triggered scans and charging bypass deferral.
+  - Concurrency scaling: dynamic worker pool resizing from $N$ to $N-1$ on `MODERATE` thermal pressure, and clamping to 1 thread on `SEVERE`/`CRITICAL`/`EMERGENCY` or low RAM.
+  - Memory-adaptive streaming buffers: chunk sizes scale dynamically between 64 KB (normal) and 16 KB (low-RAM), reducing peak heap allocation by 75%.
+  - Critical threat preservation invariant: real-time file inspections, in-flight download triage, live URL filtering, and APK audits are never deferred, dropped, or converted to `ALLOW`.
+  - Zero indefinite wakelocks, bounded worker queues, and truth-grounded UI telemetry without fabricated temperature values.
 
 ### MOB-014 — Remediation (Phase T10)
 - **Status:** IMPLEMENTED & VERIFIED

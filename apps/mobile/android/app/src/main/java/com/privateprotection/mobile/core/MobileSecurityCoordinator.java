@@ -45,6 +45,7 @@ public class MobileSecurityCoordinator {
 
     private final AtomicBoolean isShutdown = new AtomicBoolean(false);
     private final AtomicBoolean isThrottled = new AtomicBoolean(false);
+    private final AdaptiveResourceManager adaptiveManager;
 
     public static MobileSecurityCoordinator getInstance(Context context) {
         if (sInstance == null) {
@@ -82,6 +83,13 @@ public class MobileSecurityCoordinator {
         this.appContext = context.getApplicationContext();
         this.workerExecutor = executor;
         this.stateStore = store;
+        this.adaptiveManager = AdaptiveResourceManager.getInstance(this.appContext);
+
+        // Listen for adaptive mode changes
+        this.adaptiveManager.addListener((newMode, reason) -> {
+            applyAdaptiveConcurrency(newMode);
+        });
+        applyAdaptiveConcurrency(this.adaptiveManager.getCurrentMode());
 
         // Perform truthful process recovery on coordinator startup
         List<SecurityJob> recovered = this.stateStore.recoverOrphanedJobs();
@@ -89,6 +97,17 @@ public class MobileSecurityCoordinator {
             Log.w(TAG, "Truthful crash recovery: updated " + recovered.size() + " orphaned jobs to FAILED.");
         }
         Log.i(TAG, "MobileSecurityCoordinator initialized successfully.");
+    }
+
+    private void applyAdaptiveConcurrency(AdaptiveResourceManager.ResourceMode mode) {
+        int recommended = adaptiveManager.getRecommendedWorkerConcurrency(workerExecutor.getDefaultMaxThreads());
+        if (mode == AdaptiveResourceManager.ResourceMode.NORMAL) {
+            workerExecutor.restoreConcurrency();
+            isThrottled.set(false);
+        } else {
+            workerExecutor.throttleConcurrency(recommended);
+            isThrottled.set(true);
+        }
     }
 
     /**
@@ -112,6 +131,17 @@ public class MobileSecurityCoordinator {
         }
 
         SecurityJob job = new SecurityJob(type, metadata);
+
+        // Check if job is a non-critical scheduled scan that must be deferred
+        boolean isScheduled = metadata != null && metadata.optBoolean("isScheduled", false);
+        if (isScheduled && type == JobType.STORAGE_SCAN && !adaptiveManager.canExecuteScheduledDeepScan()) {
+            String deferReason = "Deferred due to adaptive resource constraints: " + adaptiveManager.getTransitionReason();
+            Log.w(TAG, "Deferring scheduled job " + job.getId() + " - " + deferReason);
+            job.transitionTo(JobState.DEFERRED, deferReason);
+            stateStore.persistJob(job);
+            return job;
+        }
+
         activeJobs.put(job.getId(), job);
         stateStore.persistJob(job);
 
@@ -309,6 +339,9 @@ public class MobileSecurityCoordinator {
             obj.put("workerMaxPoolSize", workerExecutor.getMaximumPoolSize());
             obj.put("workerQueueSize", workerExecutor.getQueueSize());
             obj.put("totalPersistedJobs", stateStore.getAllJobs().size());
+            if (adaptiveManager != null) {
+                obj.put("adaptiveStatus", adaptiveManager.getAdaptiveStatusJSON());
+            }
         } catch (JSONException ignored) {
         }
         return obj;

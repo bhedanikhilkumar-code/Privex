@@ -542,3 +542,17 @@ The UI must never say "fully protected" if Android denied required access.
 - **One-Click Crypto-Shredder:**
   - Retains instant cryptographic state shredder for local caches, scan history, and allowlists with feedback banner.
 
+## 14. Adaptive Power & Thermal Shield UX (`ProtectionStatusScreen.tsx`)
+- **Adaptive Protection Card:**
+  - Real-Time Mode Badge: Displays current operational mode with semantic color-coding:
+    - `NORMAL` (Emerald/Green): All systems operating at standard concurrency and buffer sizing.
+    - `BATTERY_SAVER` (Amber/Orange): Battery is below 20% and discharging; non-critical scheduled deep scans deferred.
+    - `THERMAL_THROTTLED` (Orange/Red): Device thermal level elevated; worker thread concurrency throttled and cooling pauses enabled.
+    - `LOW_RAM` (Amber): System memory pressure detected; dynamic streaming buffer scaled to 16 KB and thread pool clamped to 1.
+    - `CRITICAL_RESOURCE_PRESSURE` (Red): Multiple resource constraints active simultaneously.
+  - Thermal Status Badge: Displays exact OS-reported thermal level (`NONE`, `LIGHT`, `MODERATE`, `SEVERE`, `CRITICAL`, `EMERGENCY`, or `UNAVAILABLE`) without fake temperature numbers.
+  - Battery Telemetry: Real-time percentage indicator, charging status (`Plugged in` vs `Discharging`), and charging bypass disclaimer.
+  - Dynamic Buffer Indicator: Explicitly discloses active streaming chunk size (e.g. `64 KB (Standard)` vs `16 KB (Low-RAM Optimization)`).
+  - Scheduled Scan Status: Informs user whether background scans are currently eligible to run or safely deferred to preserve battery and device stability.
+  - Transparent Explanation: Jargon-free explanation reminding the user that active real-time threat detection is never disabled or reduced regardless of power mode.
+

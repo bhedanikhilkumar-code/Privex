@@ -8,6 +8,7 @@ export default defineConfig({
     setupFiles: [],
     include: ['src/**/__tests__/**/*.test.{ts,tsx}'],
     testTimeout: 15000,
+    pool: 'forks',
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

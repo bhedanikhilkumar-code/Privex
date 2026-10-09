@@ -1256,5 +1256,64 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         }
+
+        // ==========================================
+        // PHASE T12: BATTERY, THERMAL & ADAPTIVE MODE
+        // ==========================================
+
+        @JavascriptInterface
+        public String getAdaptiveResourceStatus() {
+            try {
+                com.privateprotection.mobile.core.AdaptiveResourceManager mgr =
+                        com.privateprotection.mobile.core.AdaptiveResourceManager.getInstance(activity);
+                return mgr.getAdaptiveStatusJSON().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "getAdaptiveResourceStatus error", e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public boolean setForegroundHeavyWorkload(boolean isHeavy) {
+            try {
+                com.privateprotection.mobile.core.AdaptiveResourceManager mgr =
+                        com.privateprotection.mobile.core.AdaptiveResourceManager.getInstance(activity);
+                mgr.setForegroundHeavy(isHeavy);
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "setForegroundHeavyWorkload error", e);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public String triggerScheduledDeepScan() {
+            try {
+                com.privateprotection.mobile.core.MobileSecurityCoordinator coordinator =
+                        com.privateprotection.mobile.core.MobileSecurityCoordinator.getInstance(activity);
+                JSONObject meta = new JSONObject();
+                meta.put("isScheduled", true);
+                meta.put("scanMode", "FULL_ACCESSIBLE_SCAN");
+
+                com.privateprotection.mobile.core.SecurityJob job =
+                        coordinator.submitJob(com.privateprotection.mobile.core.JobType.STORAGE_SCAN, meta, (j, ctrl) -> {
+                            com.privateprotection.mobile.shield.FullDeviceScanService scanService =
+                                    new com.privateprotection.mobile.shield.FullDeviceScanService(activity);
+                            return scanService.executeScan(
+                                    com.privateprotection.mobile.shield.FullDeviceScanService.ScanMode.FULL_ACCESSIBLE_SCAN,
+                                    ctrl,
+                                    (item, scanned, discovered, threats) -> {
+                                        if (discovered > 0) {
+                                            j.setProgress(Math.min(99, (int) ((scanned * 100.0) / discovered)));
+                                        }
+                                    }
+                            );
+                        });
+                return job.toJSON().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "triggerScheduledDeepScan error", e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
     }
 }
