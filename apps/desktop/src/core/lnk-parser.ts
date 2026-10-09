@@ -287,18 +287,18 @@ export class LnkParser {
 
     // Evaluate Threat Indicators & Risk Scoring
     let riskScore = 0;
-    const baseName = path.basename(filePath).toLowerCase();
+    const baseName = (filePath.split(/[/\\]/).pop() || '').toLowerCase();
 
     // 1. Check Worm Spoofed Name (e.g. Documents.lnk replacing folder)
     if (this.WORM_SPOOFED_NAMES.has(baseName)) {
       indicators.push('LNK_WORM_SPOOFED_FOLDER_NAME');
-      evidenceFactors.push(`Shortcut uses common folder/drive name deception: ${path.basename(filePath)}`);
+      evidenceFactors.push(`Shortcut uses common folder/drive name deception: ${filePath.split(/[/\\]/).pop()}`);
       riskScore = Math.max(riskScore, 65);
     }
 
     // 2. Check Target & Script Interpreter Invocation
     const resolvedTarget = targetPath || relativePath || '';
-    const baseTargetName = path.basename(resolvedTarget).toLowerCase();
+    const baseTargetName = (resolvedTarget.split(/[/\\]/).pop() || '').toLowerCase();
 
     if (this.SCRIPT_INTERPRETERS.has(baseTargetName)) {
       indicators.push('LNK_INVOKES_SCRIPT_INTERPRETER');

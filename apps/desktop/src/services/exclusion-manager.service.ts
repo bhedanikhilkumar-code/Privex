@@ -228,6 +228,23 @@ export class ExclusionManagerService extends EventEmitter {
     let normalized = trimmed;
     if (/^[a-zA-Z]:$/.test(trimmed)) {
       normalized = `${trimmed.toUpperCase()}\\`;
+    } else if (/^[a-zA-Z]:[\\/]/.test(trimmed)) {
+      // Windows drive path: resolve . and .. components cleanly across all platforms
+      const drive = trimmed.substring(0, 2).toUpperCase();
+      const rest = trimmed.substring(2).replace(/\\/g, '/');
+      const segments = rest.split('/').filter(Boolean);
+      const resolvedSegments: string[] = [];
+      for (const seg of segments) {
+        if (seg === '.') continue;
+        if (seg === '..') {
+          if (resolvedSegments.length > 0) {
+            resolvedSegments.pop();
+          }
+        } else {
+          resolvedSegments.push(seg);
+        }
+      }
+      normalized = `${drive}\\${resolvedSegments.join('\\')}`;
     } else {
       normalized = path.normalize(trimmed);
       try {
@@ -242,11 +259,11 @@ export class ExclusionManagerService extends EventEmitter {
       normalized = normalized.slice(0, -1);
     }
 
-    const lowerNormalized = normalized.toLowerCase();
+    const lowerNormalized = normalized.toLowerCase().replace(/\//g, '\\');
 
     // 4. ANTI-ABUSE GUARDRAILS: Reject forbidden root and critical system locations
     for (const forbidden of ExclusionManagerService.FORBIDDEN_PATH_ROOTS) {
-      const forbiddenClean = forbidden.endsWith('\\') || forbidden.endsWith('/') ? forbidden.slice(0, -1) : forbidden;
+      const forbiddenClean = (forbidden.endsWith('\\') || forbidden.endsWith('/') ? forbidden.slice(0, -1) : forbidden).toLowerCase().replace(/\//g, '\\');
       const isDriveRoot = forbiddenClean.length <= 2 || forbiddenClean === '/';
 
       if (
@@ -263,16 +280,20 @@ export class ExclusionManagerService extends EventEmitter {
     }
 
     // Reject user root directories without specific file/subfolder (Downloads, Temp, AppData)
-    const userProfile = (process.env.USERPROFILE || os.homedir()).toLowerCase();
-    const userDownloads = path.join(userProfile, 'downloads').toLowerCase();
-    const userTemp = os.tmpdir().toLowerCase();
+    const userProfile = (process.env.USERPROFILE || os.homedir()).toLowerCase().replace(/\//g, '\\');
+    const userDownloads = path.join(userProfile, 'downloads').toLowerCase().replace(/\//g, '\\');
+    const userTemp = os.tmpdir().toLowerCase().replace(/\//g, '\\');
 
     if (
       lowerNormalized === userProfile ||
       lowerNormalized === userDownloads ||
       lowerNormalized === userTemp ||
       lowerNormalized === `${userDownloads}\\` ||
-      lowerNormalized === `${userTemp}\\`
+      lowerNormalized === `${userTemp}\\` ||
+      lowerNormalized.endsWith('\\downloads') ||
+      lowerNormalized.endsWith('/downloads') ||
+      lowerNormalized.includes('\\appdata\\local\\temp') ||
+      lowerNormalized.includes('/appdata/local/temp')
     ) {
       throw new Error(`SECURITY_VIOLATION: Exclusion of entire user folder "${trimmed}" is forbidden.`);
     }
