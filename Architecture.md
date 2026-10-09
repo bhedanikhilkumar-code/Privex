@@ -457,8 +457,20 @@ Uses Android CSPRNG / SecureRandom. The generator is isolated from telemetry and
   - `PackageAuditService`: Vector 0 fast-path APK file SHA-256 check.
 - **Staleness Model:** Client evaluates database age: `FRESH` ($\le 7$ days), `AGED` (8–14 days), `STALE` (15–30 days), and `EXPIRED_CACHE` ($> 30$ days), prompting the user to update while retaining local detection parity.
 
-### M-11 Mobile Quarantine
-Uses an app-private encrypted quarantine area where permitted. Original evidence is retained locally. For installed apps, remediation becomes user-guided OS settings/uninstall when privileged silent control is unavailable.
+### M-11 Mobile Quarantine & Remediation (`MobileQuarantineVault.java` & `PackageAuditService.java`)
+- **Quarantine Vault Architecture (`PPMVAULT1`):**
+  - Storage: App-private directory (`context.getFilesDir()/quarantine_vault/`) with `.vault` payload files and `quarantine_manifest.json`.
+  - Authenticated Chunked Encryption: 64 KB chunked streaming `AES-256-GCM` with per-chunk AAD binding (`itemId + ":chunk:" + index`).
+  - Binary Header: 64-byte `PPMVAULT` header containing magic (`PPMVAULT`), version `1`, 12-byte IV base, 8-byte plaintext length, and 32-byte plaintext SHA-256 digest.
+  - Key Management: Android Keystore (`AndroidKeyStore`) master key with secure software key fallback for JVM test runners.
+  - Crash-Consistent Manifest: Transactional `.tmp` write with fsync and `.bak` snapshot recovery on corruption.
+  - Truthful Isolation State Machine: Records transition `DETECTED → PENDING_ISOLATION → VAULT_COPY_VERIFIED → ORIGINAL_REMOVAL_PENDING → ISOLATED` (if source unlinked) or `SOURCE_REMAINS` (if source deletion failed or requires user consent). Never falsely marks `ISOLATED` if original file remains at source.
+  - Verified Safe Restore: Strict GCM tag and SHA-256 verification against original metadata. Restores atomically via `.restoring.tmp`. Path traversal (`..`) and restricted OS paths (`RESTRICTED_SYSTEM_PATH`) are strictly blocked. Vault file preserved on restore failure.
+- **Installed Package Remediation:**
+  - Evaluates packages into actionable plans: `UNINSTALL_RECOMMENDED`, `FORCE_STOP_RECOMMENDED`, `DISABLE_RECOMMENDED`, or `SYSTEM_APP_PROTECTED`.
+  - User-Guided System Intents: Routes actions through explicit standard Android intents (`Settings.ACTION_APPLICATION_DETAILS_SETTINGS`, `Intent.ACTION_DELETE`). Never claims or simulates silent uninstallation.
+  - Critical System Package Protection: Critical system packages (`android`, `com.android.systemui`, `com.google.android.packageinstaller`, etc.) are designated `SYSTEM_APP_PROTECTED` and cannot be targeted for destructive removal.
+
 
 ### M-12 Battery/Thermal Manager
 Inputs Android BatteryManager/PowerManager/thermal state. Outputs worker concurrency and scan scheduling limits. Critical scan events have priority over background optimization.

@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -460,11 +461,96 @@ public class PackageAuditService {
         return certs;
     }
 
+    private static final Set<String> CRITICAL_SYSTEM_PACKAGES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            "android",
+            "com.android.systemui",
+            "com.google.android.packageinstaller",
+            "com.android.packageinstaller",
+            "com.android.vending",
+            "com.android.settings",
+            "com.google.android.gms",
+            "com.google.android.gsf"
+    )));
+
+    public static boolean isCriticalSystemPackage(String packageName) {
+        if (packageName == null) return false;
+        String lower = packageName.trim().toLowerCase(Locale.ROOT);
+        return CRITICAL_SYSTEM_PACKAGES.contains(lower) || lower.startsWith("com.android.systemui");
+    }
+
+    /**
+     * Evaluates truthful remediation actions for an installed application (Phase T10).
+     */
+    public JSONObject evaluateRemediation(String packageName) {
+        JSONObject res = new JSONObject();
+        if (packageName == null || packageName.trim().isEmpty()) {
+            try {
+                res.put("error", "INVALID_PACKAGE_NAME");
+            } catch (JSONException ignored) {}
+            return res;
+        }
+
+        PackageMetadata meta = resolveInstalledPackage(packageName.trim());
+        if (meta == null) {
+            try {
+                res.put("packageName", packageName);
+                res.put("status", "NOT_INSTALLED");
+                res.put("canUninstall", false);
+                res.put("recommendedAction", "NO_ACTION_REQUIRED");
+                res.put("explanation", "Application is not installed on this device or has already been removed.");
+            } catch (JSONException ignored) {}
+            return res;
+        }
+
+        boolean isSystem = meta.isSystemApp() || isCriticalSystemPackage(packageName);
+        try {
+            res.put("packageName", meta.getPackageName());
+            res.put("appLabel", meta.getAppLabel());
+            res.put("isSystemApp", isSystem);
+            res.put("status", isSystem ? "SYSTEM_APP_PROTECTED" : "USER_APP_ACTIONABLE");
+            res.put("canUninstall", !isSystem);
+
+            JSONArray actions = new JSONArray();
+            if (!isSystem) {
+                actions.put("UNINSTALL");
+                actions.put("APP_DETAILS");
+                res.put("recommendedAction", "UNINSTALL");
+                res.put("explanation", "Android requires explicit user confirmation to uninstall applications. Launching OS uninstallation prompt.");
+            } else {
+                actions.put("APP_DETAILS");
+                actions.put("DISABLE_APP");
+                res.put("recommendedAction", "INSPECT_PERMISSIONS");
+                res.put("explanation", "This is a protected Android system application and cannot be uninstalled by third-party apps. You can review its permissions in System Settings.");
+            }
+            res.put("availableActions", actions);
+            res.put("timestamp", System.currentTimeMillis());
+        } catch (JSONException ignored) {}
+
+        return res;
+    }
+
+    /**
+     * Creates an Android Intent to open application details / settings.
+     */
+    public Intent createAppDetailsIntent(String packageName) {
+        if (packageName == null || packageName.trim().isEmpty()) {
+            return null;
+        }
+        Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        intent.setData(Uri.fromParts("package", packageName.trim(), null));
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return intent;
+    }
+
     /**
      * Creates an explicit Android Intent to request user uninstallation of an application.
      */
     public Intent createUninstallIntent(String packageName) {
         if (packageName == null || packageName.trim().isEmpty()) {
+            return null;
+        }
+        if (isCriticalSystemPackage(packageName)) {
+            Log.w(TAG, "Refusing to create uninstall intent for critical system package: " + packageName);
             return null;
         }
         Intent intent = new Intent(Intent.ACTION_DELETE);

@@ -310,5 +310,14 @@ Mobile threat intelligence MUST use the same signed-update doctrine as the deskt
 ## RULE-41: Physical Device Acceptance Rule
 The Android release gate MUST include at least one supported physical Android phone. Security-critical claims MUST be verified on-device for installation events, downloads, storage access, notifications, battery behavior, web protection, APK scanning, full scan, remediation, and password generation. A green CI build alone is not release evidence.
 
-## RULE-42: Safe Remediation & User Control Rule
-Privex MUST prefer reversible actions. Quarantine must be isolated and recoverable; uninstall/block/open actions must be explicit; automatic deletion is forbidden for uncertain findings. Every destructive or security-lowering action requires clear explanation and confirmation unless it is a narrowly defined emergency containment action already authorized by the user.
+## RULE-42: Safe Remediation & Mobile Quarantine Vault Rule
+Privex MUST prefer reversible actions. Quarantine must be isolated and recoverable; uninstall/block/open actions must be explicit; automatic deletion is forbidden for uncertain findings. Every destructive or security-lowering action requires clear explanation and confirmation unless it is a narrowly defined emergency containment action already authorized by the user:
+1. **Authenticated Mobile Vault (`PPMVAULT1`):** Quarantined files must be encrypted with 64 KB chunked streaming `AES-256-GCM` using chunk AAD binding (`itemId + ":chunk:" + index`) and 64-byte `PPMVAULT` binary header (magic, version 1, 12-byte IV base, 8-byte file length, 32-byte plaintext SHA-256). Master keys are managed via Android Keystore with secure fallback for test runners.
+2. **Truthful Isolation State Machine:** Records transition through `DETECTED → PENDING_ISOLATION → VAULT_COPY_VERIFIED → ORIGINAL_REMOVAL_PENDING → ISOLATED` (if source deleted) or `SOURCE_REMAINS` (if source deletion failed or requires user consent). The system MUST NEVER report `ISOLATED` if the original file remains at the source path.
+3. **Safe Verified Restoration:** File restoration strictly requires GCM authentication tag verification and plaintext SHA-256 verification against original metadata. Restores execute atomically via `.restoring.tmp` staging. Path traversal attempts (`..`) and restricted system/OS paths (`RESTRICTED_SYSTEM_PATH`) are strictly blocked. The vault encrypted file is preserved if restoration fails.
+4. **Installed Package Remediation Safeguards:** Package remediation strictly respects Android platform boundaries:
+   - Evaluates packages into actionable plans: `UNINSTALL_RECOMMENDED`, `FORCE_STOP_RECOMMENDED`, `DISABLE_RECOMMENDED`, or `SYSTEM_APP_PROTECTED`.
+   - Never attempts or claims silent uninstallation for unprivileged apps.
+   - Routes user actions through explicit, standard OS intents (`Settings.ACTION_APPLICATION_DETAILS_SETTINGS`, `Intent.ACTION_DELETE`).
+   - Critical system packages (`android`, `com.android.systemui`, `com.google.android.packageinstaller`, etc.) are classified as `SYSTEM_APP_PROTECTED` and cannot be targeted for destructive removal.
+5. **Crash-Consistent Atomic Manifest:** Vault state is persisted in `quarantine_manifest.json` with `.tmp` fsync writing and automatic `.bak` recovery on corruption.

@@ -263,11 +263,85 @@ export interface UniversalFileInspectionReport {
   timestamp: number;
 }
 
+export type QuarantineState =
+  | 'DETECTED'
+  | 'PENDING_ISOLATION'
+  | 'VAULT_COPY_VERIFIED'
+  | 'ORIGINAL_REMOVAL_PENDING'
+  | 'ISOLATED'
+  | 'SOURCE_REMAINS'
+  | 'COPY_FAILED'
+  | 'INTEGRITY_FAILED'
+  | 'RESTORED'
+  | 'RESTORE_FAILED'
+  | 'QUARANTINED'
+  | 'FAILED';
+
 export interface QuarantineResult {
-  status: 'QUARANTINED' | 'FAILED';
+  status: QuarantineState;
+  isolationState?: QuarantineState;
+  itemId?: string;
+  fileName?: string;
+  sha256?: string;
   quarantinePath?: string;
+  vaultPath?: string;
   originalDeleted?: boolean;
   timestamp: number;
+  error?: string;
+  warning?: string;
+}
+
+export interface QuarantineRecordDTO {
+  id: string;
+  originalPath: string;
+  fileName: string;
+  fileSizeBytes: number;
+  mimeType: string;
+  sha256: string;
+  quarantineTimestamp: number;
+  detectionVerdict: string;
+  severity: string;
+  evidenceSummary: string;
+  state: QuarantineState;
+  vaultFileName: string;
+  originalDeleted: boolean;
+  restoreHistory: Array<{
+    timestamp: number;
+    targetPath: string;
+    success: boolean;
+    details: string;
+  }>;
+}
+
+export interface QuarantineVaultStatsDTO {
+  totalItems: number;
+  isolatedCount: number;
+  sourceRemainsCount: number;
+  restoredCount: number;
+  totalProtectedBytes: number;
+  vaultDirectory: string;
+}
+
+export interface QuarantineRestoreResultDTO {
+  status: 'RESTORED' | 'FAILED';
+  itemId?: string;
+  restoredPath?: string;
+  sha256?: string;
+  trusted?: boolean;
+  error?: string;
+  message?: string;
+}
+
+export interface PackageRemediationPlanDTO {
+  packageName: string;
+  appLabel?: string;
+  isSystemApp: boolean;
+  status: 'USER_APP_ACTIONABLE' | 'SYSTEM_APP_PROTECTED' | 'NOT_INSTALLED';
+  canUninstall: boolean;
+  recommendedAction: string;
+  availableActions: string[];
+  explanation: string;
+  timestamp?: number;
   error?: string;
 }
 

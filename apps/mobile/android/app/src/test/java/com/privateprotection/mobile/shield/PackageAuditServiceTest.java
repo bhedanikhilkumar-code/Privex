@@ -158,4 +158,33 @@ public class PackageAuditServiceTest {
         Intent emptyIntent = auditService.createUninstallIntent("   ");
         org.junit.Assert.assertNull(emptyIntent);
     }
+
+    @Test
+    public void testCriticalSystemPackageSafeguards() {
+        assertTrue(PackageAuditService.isCriticalSystemPackage("android"));
+        assertTrue(PackageAuditService.isCriticalSystemPackage("com.android.systemui"));
+        assertTrue(PackageAuditService.isCriticalSystemPackage("com.google.android.packageinstaller"));
+        assertFalse(PackageAuditService.isCriticalSystemPackage("com.thirdparty.game"));
+
+        // Critical system packages MUST NOT produce an uninstall intent
+        Intent intent = auditService.createUninstallIntent("android");
+        org.junit.Assert.assertNull("Uninstall intent must be refused for critical system package", intent);
+    }
+
+    @Test
+    public void testEvaluateRemediationNonInstalledPackage() {
+        JSONObject res = auditService.evaluateRemediation("com.nonexistent.app");
+        assertNotNull(res);
+        assertEquals("NOT_INSTALLED", res.optString("status"));
+        assertFalse(res.optBoolean("canUninstall"));
+        assertEquals("NO_ACTION_REQUIRED", res.optString("recommendedAction"));
+    }
+
+    @Test
+    public void testCreateAppDetailsIntent() {
+        Intent intent = auditService.createAppDetailsIntent("com.sample.app");
+        assertNotNull(intent);
+        org.junit.Assert.assertNull(auditService.createAppDetailsIntent(null));
+        org.junit.Assert.assertNull(auditService.createAppDetailsIntent("   "));
+    }
 }

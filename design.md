@@ -514,3 +514,16 @@ The UI must never say "fully protected" if Android denied required access.
   - One-click **"Check for Signed Threat Database Updates"** triggering staged signature verification and atomic activation.
   - Emergency **"Rollback to Factory Seed"** action with confirmation dialog, reverting sequence and invalidating caches in $<50\text{ ms}$.
 - **Honest Staleness Representation:** If definitions are aged or offline, the UI transparently reports age in days, maintains 100% heuristic baseline protection, and never displays a false "outdated vulnerability" scare banner.
+ 
++## 12. Mobile Quarantine & Remediation UX (`ProtectionStatusScreen.tsx`)
++- **Quarantine Vault Card:**
++  - Live Vault Statistics: Displays total quarantined items count and aggregate encrypted vault storage size in KB/MB.
++  - Quarantined Item List: Lists each isolated threat with original filename, threat category, isolation timestamp, and current isolation state (`ISOLATED` vs `SOURCE_REMAINS`).
++  - Item Actions:
++    - **Verified Restore:** Confirms restore path, verifies cryptographic GCM auth tag and SHA-256 hash, and atomically restores the original file.
++    - **Permanent Purge:** Deletes encrypted `.vault` blob, updates the atomic manifest, and permanently removes the item from the device.
++- **Package Remediation Guidance:**
++  - Clear Plan Badges: Labels candidate packages with their explicit remediation recommendation (`UNINSTALL_RECOMMENDED`, `FORCE_STOP_RECOMMENDED`, `DISABLE_RECOMMENDED`, or `SYSTEM_APP_PROTECTED`).
++  - Safe OS Intent Launchers: Directs users into Android's native Application Details Settings or standard system uninstall confirmation dialog.
++  - Honest Capability Representation: Explicitly clarifies that Android sandbox rules require user confirmation and does not pretend that background silent uninstallation took place.
+

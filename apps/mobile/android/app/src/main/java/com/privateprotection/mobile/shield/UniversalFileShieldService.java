@@ -51,9 +51,21 @@ public class UniversalFileShieldService {
     )));
 
     private final Context context;
+    private MobileQuarantineVault quarantineVault;
 
     public UniversalFileShieldService(Context context) {
-        this.context = context.getApplicationContext();
+        this.context = context != null ? context.getApplicationContext() : null;
+    }
+
+    public void setQuarantineVault(MobileQuarantineVault vault) {
+        this.quarantineVault = vault;
+    }
+
+    public MobileQuarantineVault getQuarantineVault() {
+        if (quarantineVault == null) {
+            quarantineVault = context != null ? new MobileQuarantineVault(context) : null;
+        }
+        return quarantineVault;
     }
 
     /**
@@ -432,8 +444,8 @@ public class UniversalFileShieldService {
     }
 
     /**
-     * Securely moves or copies an untrusted threat file into the app's private quarantine vault.
-     * The file in quarantine is stripped of executable permissions and isolated from other apps.
+     * Securely moves or isolates an untrusted threat file into the app's private quarantine vault (PPMVAULT1).
+     * Truthfully reports whether the original file was successfully removed.
      */
     public JSONObject quarantineFile(File sourceFile) {
         if (sourceFile == null || !sourceFile.exists() || !sourceFile.isFile()) {
@@ -444,52 +456,33 @@ public class UniversalFileShieldService {
             return err;
         }
 
-        File vaultDir = new File(context.getFilesDir(), QUARANTINE_DIR_NAME);
-        if (!vaultDir.exists()) {
-            boolean created = vaultDir.mkdirs();
-            if (!created) {
-                JSONObject err = new JSONObject();
-                try {
-                    err.put("error", "VAULT_CREATION_FAILED");
-                } catch (JSONException ignored) {}
-                return err;
-            }
-        }
-
-        String quarantineName = System.currentTimeMillis() + "_" + sourceFile.getName() + ".quarantined";
-        File destination = new File(vaultDir, quarantineName);
-
-        try (FileInputStream fis = new FileInputStream(sourceFile);
-             FileOutputStream fos = new FileOutputStream(destination)) {
-            byte[] buf = new byte[8192];
-            int read;
-            while ((read = fis.read(buf)) != -1) {
-                fos.write(buf, 0, read);
-            }
-            fos.flush();
-
-            // Set read-only non-executable permissions
-            boolean ro = destination.setReadOnly();
-            boolean rx = destination.setExecutable(false, false);
-
-            // Attempt to remove original dangerous file if permissions allow
-            boolean originalDeleted = sourceFile.delete();
-
-            JSONObject res = new JSONObject();
-            res.put("status", "QUARANTINED");
-            res.put("quarantinePath", destination.getAbsolutePath());
-            res.put("originalDeleted", originalDeleted);
-            res.put("timestamp", System.currentTimeMillis());
-            return res;
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to quarantine file: " + sourceFile.getAbsolutePath(), e);
+        MobileQuarantineVault vault = getQuarantineVault();
+        if (vault == null) {
             JSONObject err = new JSONObject();
             try {
-                err.put("error", "QUARANTINE_WRITE_FAILED");
-                err.put("message", e.getMessage());
+                err.put("error", "VAULT_INITIALIZATION_FAILED");
+                err.put("message", "Quarantine vault unavailable without context.");
             } catch (JSONException ignored) {}
             return err;
         }
+
+        JSONObject vaultRes = vault.quarantineFile(sourceFile, "DANGEROUS", "CRITICAL", "Quarantined by UniversalFileShield");
+        try {
+            boolean originalDeleted = vaultRes.optBoolean("originalDeleted", false);
+            String vaultPath = vaultRes.optString("vaultPath", "");
+            vaultRes.put("quarantinePath", vaultPath);
+            if (originalDeleted) {
+                vaultRes.put("status", "QUARANTINED");
+                vaultRes.put("isolationState", MobileQuarantineVault.STATE_ISOLATED);
+            } else if ("FAILED".equals(vaultRes.optString("status"))) {
+                // leave as FAILED
+            } else {
+                vaultRes.put("status", MobileQuarantineVault.STATE_SOURCE_REMAINS);
+                vaultRes.put("isolationState", MobileQuarantineVault.STATE_SOURCE_REMAINS);
+            }
+        } catch (JSONException ignored) {}
+
+        return vaultRes;
     }
 
     /**

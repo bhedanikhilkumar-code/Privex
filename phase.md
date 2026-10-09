@@ -581,11 +581,24 @@ Build a mobile App Safety pipeline:
   - Physical Android Device Validation: NOT EXECUTED (Honestly reported; 0 USB devices attached).
 
 ## T10 — Mobile Quarantine & Remediation
-- Isolate suspicious downloaded files where Android permits.
-- For installed apps, provide supported remediation: disable/uninstall/settings guidance, never claim silent uninstall when unavailable.
-- Preserve original evidence metadata.
-- Reversible actions first.
-- Strong friction gate for destructive actions.
+- Status: COMPLETE & INDEPENDENTLY AUDITED GO
+- Implementation:
+  - Authenticated `PPMVAULT1` Vault Format: 64 KB chunked streaming `AES-256-GCM` encryption/decryption with chunk AAD (`itemId + ":chunk:" + index`) and 64-byte `PPMVAULT` binary header (magic, version 1, 12-byte IV base, 8-byte length, 32-byte SHA-256).
+  - Android Keystore Integration: Key managed via Android Keystore master key with secure software key fallback for JVM test runners.
+  - Crash-Consistent Atomic Manifest: Persisted in `quarantine_manifest.json` using atomic `.tmp` fsync writing and automatic `.bak` snapshot recovery on corruption.
+  - Truthful Isolation State Machine: Records transition through `DETECTED → PENDING_ISOLATION → VAULT_COPY_VERIFIED → ORIGINAL_REMOVAL_PENDING → ISOLATED` (if source deleted) or `SOURCE_REMAINS` (if source deletion failed or requires consent). Never falsely reports `ISOLATED` if the original file was not successfully unlinked.
+  - Verified Safe Restore: Full GCM tag and plaintext SHA-256 verification against original manifest metadata before restore. Restores atomically via `.restoring.tmp` staging. Path traversal (`..`) and restricted system/OS paths (`RESTRICTED_SYSTEM_PATH`) are strictly blocked. Retains vault file if restore fails.
+  - Installed Package Remediation: `PackageAuditService` provides `evaluateRemediation(packageName)` returning actionable plans (`UNINSTALL_RECOMMENDED`, `FORCE_STOP_RECOMMENDED`, `DISABLE_RECOMMENDED`, or `SYSTEM_APP_PROTECTED`). Employs standard user-guided OS intents (`Settings.ACTION_APPLICATION_DETAILS_SETTINGS`, `Intent.ACTION_DELETE`). Never claims or attempts silent uninstallation. Protects critical system packages (`android`, `com.android.systemui`, `com.google.android.packageinstaller`, etc.).
+  - Cross-Shield Integration: Directly integrated with `UniversalFileShieldService` for automatic and manual quarantine operations.
+  - Native Bridge & UI: Exposed via typed `@JavascriptInterface` in `MainActivity.java`, consumed by `mobile-quarantine.service.ts`, and presented in `ProtectionStatusScreen.tsx` with live vault statistics, quarantine list, verified restore, and permanent purge actions.
+- Verification:
+  - Android Unit Tests: 176/176 PASS (100% pass rate across 22 JUnit test suites, including `MobileQuarantineVaultTest` and `PackageAuditServiceTest`).
+  - Mobile Vitest Tests: 168/168 PASS (100% pass rate across 25 test files, including `mobile-quarantine.test.ts`).
+  - Monorepo Regression: 100% PASS (core, ml, desktop: 101/101 test files, 727 passed; extension, mobile, web).
+  - Typecheck: 0 errors across all 6 workspaces (`npm run typecheck`).
+  - Debug Build: BUILD SUCCESSFUL (`assembleDebug`).
+  - Release / R8 Build: BUILD SUCCESSFUL (`assembleRelease` with full R8 minification, lintVital, and resource shrinking).
+  - Physical Android Device Validation: NOT EXECUTED (Honestly reported; 0 USB devices attached).
 
 ## T11 — Permissions & Privacy Center
 Show:

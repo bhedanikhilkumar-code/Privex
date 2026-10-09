@@ -493,8 +493,16 @@ The product shall request only necessary Android permissions and must gracefully
 ### MOB-013 — Battery & Performance
 Background scanning shall adapt to battery, thermal and memory state. Critical threat detection remains prioritized. No unbounded worker queue or persistent wakelock.
 
-### MOB-014 — Remediation
-Downloaded threats shall be quarantined/removed where Android permits. Installed-app remediation shall use supported user-facing uninstall/settings flows when silent control is unavailable.
+### MOB-014 — Remediation (Phase T10)
+- **Status:** IMPLEMENTED & VERIFIED
+- **Capabilities:**
+  - Authenticated on-device quarantine vault (`PPMVAULT1` binary format with 64 KB chunked `AES-256-GCM` streaming encryption and chunk AAD binding).
+  - Android Keystore master key lifecycle with secure software fallback for test runners.
+  - Crash-consistent atomic manifest persistence with `.tmp` fsync writing and automatic `.bak` snapshot recovery.
+  - Truthful isolation state machine: `DETECTED → PENDING_ISOLATION → VAULT_COPY_VERIFIED → ORIGINAL_REMOVAL_PENDING → ISOLATED` (if source unlinked) or `SOURCE_REMAINS` (if source deletion failed or requires user consent). Never reports `ISOLATED` if original file remains at source.
+  - Safe verified restoration: Strict GCM tag and SHA-256 digest validation, atomic restore staging via `.restoring.tmp`, path traversal block, and OS system directory protection (`RESTRICTED_SYSTEM_PATH`).
+  - Installed package remediation: `PackageAuditService` computes actionable plans (`UNINSTALL_RECOMMENDED`, `FORCE_STOP_RECOMMENDED`, `DISABLE_RECOMMENDED`, or `SYSTEM_APP_PROTECTED`). Uses standard user-guided OS intents (`Settings.ACTION_APPLICATION_DETAILS_SETTINGS`, `Intent.ACTION_DELETE`). Never claims or simulates silent uninstallation. Critical system packages (`android`, `com.android.systemui`, `com.google.android.packageinstaller`, etc.) are protected from destructive removal.
+
 
 ### MOB-015 — Threat Intelligence (Phase T9)
 - **Status:** IMPLEMENTED & VERIFIED

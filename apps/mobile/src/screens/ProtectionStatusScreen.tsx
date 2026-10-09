@@ -1,14 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { MobileThreatIntelService } from '../services/mobile-threat-intel.service';
-import type { ThreatDatabaseInspectionResult } from '../types/mobile.types';
+import { MobileQuarantineService } from '../services/mobile-quarantine.service';
+import type {
+  ThreatDatabaseInspectionResult,
+  QuarantineRecordDTO,
+  QuarantineVaultStatsDTO
+} from '../types/mobile.types';
 
 export const ProtectionStatusScreen: React.FC = () => {
   const [intelStatus, setIntelStatus] = useState<ThreatDatabaseInspectionResult | null>(null);
   const [isRollbackRunning, setIsRollbackRunning] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [vaultStats, setVaultStats] = useState<QuarantineVaultStatsDTO | null>(null);
+  const [quarantineItems, setQuarantineItems] = useState<QuarantineRecordDTO[]>([]);
+
+  const quarantineService = new MobileQuarantineService();
 
   useEffect(() => {
     loadIntelStatus();
+    loadQuarantineData();
   }, []);
 
   const loadIntelStatus = async () => {
@@ -17,6 +27,47 @@ export const ProtectionStatusScreen: React.FC = () => {
       setIntelStatus(status);
     } catch (e: any) {
       console.warn('Failed to load threat intel status', e);
+    }
+  };
+
+  const loadQuarantineData = async () => {
+    try {
+      const [stats, items] = await Promise.all([
+        quarantineService.getQuarantineStats(),
+        quarantineService.getQuarantinedItems()
+      ]);
+      setVaultStats(stats);
+      setQuarantineItems(items);
+    } catch (e: any) {
+      console.warn('Failed to load quarantine data', e);
+    }
+  };
+
+  const handleRestore = async (itemId: string) => {
+    try {
+      const res = await quarantineService.restoreQuarantinedFile(itemId);
+      if (res.status === 'RESTORED') {
+        setStatusMessage(`Item restored successfully to: ${res.restoredPath}`);
+        await loadQuarantineData();
+      } else {
+        setStatusMessage(`Restore failed: ${res.error || res.message}`);
+      }
+    } catch (e: any) {
+      setStatusMessage(`Restore error: ${e.message || String(e)}`);
+    }
+  };
+
+  const handleDeleteItem = async (itemId: string) => {
+    try {
+      const ok = await quarantineService.deleteQuarantinedItem(itemId);
+      if (ok) {
+        setStatusMessage('Quarantined item purged from vault.');
+        await loadQuarantineData();
+      } else {
+        setStatusMessage('Failed to purge quarantined item.');
+      }
+    } catch (e: any) {
+      setStatusMessage(`Purge error: ${e.message || String(e)}`);
     }
   };
 
@@ -175,6 +226,101 @@ export const ProtectionStatusScreen: React.FC = () => {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Quarantine Vault & Remediation Card (Phase T10) */}
+      <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '16px', padding: '1.25rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+          <div>
+            <h4 style={{ margin: 0, fontSize: '1rem', color: '#38bdf8' }}>App-Private Quarantine Vault</h4>
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>AES-256-GCM authenticated streaming container (PPMVAULT1)</span>
+          </div>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#34d399', padding: '0.2rem 0.5rem', borderRadius: '4px', backgroundColor: 'rgba(52, 211, 153, 0.1)' }}>
+            {vaultStats?.isolatedCount ?? 0} ISOLATED
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+          <div style={{ backgroundColor: '#0f172a', padding: '0.75rem', borderRadius: '8px' }}>
+            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Total Quarantined</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{vaultStats?.totalItems ?? 0}</div>
+          </div>
+          <div style={{ backgroundColor: '#0f172a', padding: '0.75rem', borderRadius: '8px' }}>
+            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Source Remains</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: (vaultStats?.sourceRemainsCount ?? 0) > 0 ? '#fbbf24' : '#94a3b8' }}>
+              {vaultStats?.sourceRemainsCount ?? 0}
+            </div>
+          </div>
+          <div style={{ backgroundColor: '#0f172a', padding: '0.75rem', borderRadius: '8px' }}>
+            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Protected Bytes</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>
+              {((vaultStats?.totalProtectedBytes ?? 0) / 1024).toFixed(1)} KB
+            </div>
+          </div>
+        </div>
+
+        {quarantineItems.length === 0 ? (
+          <div style={{ backgroundColor: '#0f172a', padding: '1rem', borderRadius: '8px', textAlign: 'center', color: '#64748b', fontSize: '0.85rem' }}>
+            Quarantine vault is empty. No suspicious or malicious files currently isolated.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {quarantineItems.map((item) => (
+              <div
+                key={item.id}
+                style={{
+                  backgroundColor: '#0f172a',
+                  padding: '0.75rem',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '0.85rem'
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 600, color: '#f8fafc' }}>{item.fileName}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    SHA-256: {item.sha256 ? item.sha256.substring(0, 16) + '...' : 'unknown'} • {(item.fileSizeBytes / 1024).toFixed(1)} KB
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: item.state === 'ISOLATED' ? '#34d399' : item.state === 'SOURCE_REMAINS' ? '#fbbf24' : '#38bdf8', marginTop: '0.2rem' }}>
+                    State: {item.state}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    onClick={() => handleRestore(item.id)}
+                    style={{
+                      backgroundColor: '#3b82f6',
+                      border: 'none',
+                      color: '#ffffff',
+                      padding: '0.3rem 0.6rem',
+                      borderRadius: '4px',
+                      fontSize: '0.75rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Restore
+                  </button>
+                  <button
+                    onClick={() => handleDeleteItem(item.id)}
+                    style={{
+                      backgroundColor: '#ef4444',
+                      border: 'none',
+                      color: '#ffffff',
+                      padding: '0.3rem 0.6rem',
+                      borderRadius: '4px',
+                      fontSize: '0.75rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Purge
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

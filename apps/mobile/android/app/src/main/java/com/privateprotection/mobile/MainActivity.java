@@ -743,6 +743,93 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        @JavascriptInterface
+        public String getQuarantinedItems() {
+            try {
+                com.privateprotection.mobile.shield.MobileQuarantineVault vault =
+                        com.privateprotection.mobile.shield.MobileQuarantineVault.getInstance(activity);
+                return vault.getAllItems().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to get quarantined items", e);
+                return "[]";
+            }
+        }
+
+        @JavascriptInterface
+        public String getQuarantineStats() {
+            try {
+                com.privateprotection.mobile.shield.MobileQuarantineVault vault =
+                        com.privateprotection.mobile.shield.MobileQuarantineVault.getInstance(activity);
+                return vault.getVaultStats().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to get quarantine stats", e);
+                return "{}";
+            }
+        }
+
+        @JavascriptInterface
+        public String restoreQuarantinedFile(String itemId, String destinationPath, boolean overwrite, boolean trustSha256) {
+            try {
+                if (itemId == null || itemId.trim().isEmpty()) {
+                    return "{\"status\":\"FAILED\",\"error\":\"INVALID_ITEM_ID\"}";
+                }
+                com.privateprotection.mobile.shield.MobileQuarantineVault vault =
+                        com.privateprotection.mobile.shield.MobileQuarantineVault.getInstance(activity);
+                JSONObject res = vault.restoreItem(itemId.trim(), destinationPath, overwrite, trustSha256);
+                return res.toString();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to restore quarantined file: " + itemId, e);
+                return "{\"status\":\"FAILED\",\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public boolean deleteQuarantinedItem(String itemId) {
+            try {
+                if (itemId == null || itemId.trim().isEmpty()) return false;
+                com.privateprotection.mobile.shield.MobileQuarantineVault vault =
+                        com.privateprotection.mobile.shield.MobileQuarantineVault.getInstance(activity);
+                return vault.deleteItem(itemId.trim());
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to delete quarantined item: " + itemId, e);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public String getPackageRemediationPlan(String packageName) {
+            try {
+                if (packageName == null || packageName.trim().isEmpty()) {
+                    return "{\"error\":\"INVALID_PACKAGE_NAME\"}";
+                }
+                com.privateprotection.mobile.shield.PackageAuditService auditService =
+                        new com.privateprotection.mobile.shield.PackageAuditService(activity);
+                JSONObject res = auditService.evaluateRemediation(packageName.trim());
+                return res.toString();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to evaluate package remediation: " + packageName, e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public boolean openPackageDetails(String packageName) {
+            try {
+                if (packageName == null || packageName.trim().isEmpty()) return false;
+                com.privateprotection.mobile.shield.PackageAuditService auditService =
+                        new com.privateprotection.mobile.shield.PackageAuditService(activity);
+                Intent intent = auditService.createAppDetailsIntent(packageName.trim());
+                if (intent != null) {
+                    activity.startActivity(intent);
+                    return true;
+                }
+                return false;
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to open package details for: " + packageName, e);
+                return false;
+            }
+        }
+
         // ==========================================
         // FULL ACCESSIBLE DEVICE SCAN (PHASE T4)
         // ==========================================
