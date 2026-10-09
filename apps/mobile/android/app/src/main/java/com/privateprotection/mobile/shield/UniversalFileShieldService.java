@@ -92,8 +92,21 @@ public class UniversalFileShieldService {
         }
 
         long length = file.length();
+        long mtime = file.lastModified();
         String fileName = file.getName();
         String extension = getFileExtension(fileName);
+        String filePath = file.getAbsolutePath();
+
+        // 1.5 Fast-Path: Check bounded MobileCleanFileCache for previously verified clean files
+        if (context != null) {
+            MobileCleanFileCache cache = MobileCleanFileCache.getInstance(context);
+            if (cache.isClean(filePath, length, mtime)) {
+                JSONObject cachedResult = createCachedCleanResult(file, length, mtime);
+                if (cachedResult != null) {
+                    return cachedResult;
+                }
+            }
+        }
 
         // 2. Read Header Magic & Compute Streaming SHA-256
         byte[] headerBytes = new byte[HEADER_READ_LIMIT];
@@ -119,11 +132,7 @@ public class UniversalFileShieldService {
             }
 
             byte[] hashBytes = digest.digest();
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            sha256 = sb.toString();
+            sha256 = bytesToHex(hashBytes);
         } catch (Exception e) {
             Log.e(TAG, "Failed to read file for inspection: " + file.getAbsolutePath(), e);
             JSONObject err = new JSONObject();
@@ -147,14 +156,23 @@ public class UniversalFileShieldService {
                 extension,
                 magic.mimeType,
                 length,
-                file.lastModified(),
+                mtime,
                 sha256,
                 "LOCAL_STORAGE",
                 magic.isExecutable || EXECUTABLE_EXTENSIONS.contains(extension)
         );
 
         // 4. Detailed Static Inspection & Risk Evaluation
-        return evaluateRisk(identity, magic, file);
+        JSONObject riskResult = evaluateRisk(identity, magic, file);
+
+        // 4.5 Cache clean verdict in MobileCleanFileCache
+        if (context != null && "ALLOW".equals(riskResult.optString("verdict"))) {
+            try {
+                MobileCleanFileCache.getInstance(context).putClean(filePath, length, mtime, sha256);
+            } catch (Exception ignored) {}
+        }
+
+        return riskResult;
     }
 
     /**
@@ -202,11 +220,7 @@ public class UniversalFileShieldService {
             }
 
             byte[] hashBytes = digest.digest();
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            sha256 = sb.toString();
+            sha256 = bytesToHex(hashBytes);
         } catch (Exception e) {
             Log.e(TAG, "Failed to read content Uri: " + uri, e);
             JSONObject err = new JSONObject();
@@ -491,15 +505,79 @@ public class UniversalFileShieldService {
         return vaultRes;
     }
 
+    private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
+
+    /**
+     * High-performance, zero-allocation hex string conversion for cryptographic digests.
+     */
+    public static String bytesToHex(byte[] bytes) {
+        if (bytes == null) return "";
+        char[] hex = new char[bytes.length * 2];
+        for (int i = 0; i < bytes.length; i++) {
+            int v = bytes[i] & 0xFF;
+            hex[i * 2] = HEX_CHARS[v >>> 4];
+            hex[i * 2 + 1] = HEX_CHARS[v & 0x0F];
+        }
+        return new String(hex);
+    }
+
+    /**
+     * Generates a cached clean result for a verified file in the clean cache.
+     */
+    private JSONObject createCachedCleanResult(File file, long length, long mtime) {
+        try {
+            String fileName = file.getName();
+            String extension = getFileExtension(fileName);
+            // Invariant: never serve cached clean for disguised or executable files
+            if (hasDeceptiveDoubleExtension(fileName) || EXECUTABLE_EXTENSIONS.contains(extension)) {
+                return null;
+            }
+            CanonicalFileIdentity identity = new CanonicalFileIdentity(
+                    file.toURI().toString(),
+                    fileName,
+                    extension,
+                    "application/octet-stream",
+                    length,
+                    mtime,
+                    "",
+                    "LOCAL_STORAGE",
+                    false
+            );
+            JSONObject result = new JSONObject();
+            result.put("fileIdentity", identity.toJSON());
+            result.put("score", 0);
+            result.put("verdict", "ALLOW");
+            result.put("severity", "NONE");
+            result.put("recommendation", "SAFE_TO_OPEN: File format and content previously verified clean.");
+            result.put("timestamp", System.currentTimeMillis());
+            result.put("fromCache", true);
+            result.put("evidence", new JSONArray());
+            return result;
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
     /**
      * Checks if a file size is stabilized (not actively being written by a downloader).
      */
     public static boolean isStabilized(File file) {
-        if (file == null || !file.exists()) return false;
+        return isStabilized(file, 0);
+    }
+
+    public static boolean isStabilized(File file, int waitMs) {
+        if (file == null || !file.exists() || !file.canRead()) return false;
+        String name = file.getName();
+        if (DownloadStabilizer.isPartialDownloadName(name)) {
+            return false;
+        }
+        if (waitMs <= 0) {
+            return true;
+        }
         long len1 = file.length();
-        if (len1 == 0) return true; // empty file or just touched
+        if (len1 == 0) return true;
         try {
-            Thread.sleep(150);
+            Thread.sleep(waitMs);
         } catch (InterruptedException ignored) {}
         long len2 = file.length();
         return len1 == len2;
