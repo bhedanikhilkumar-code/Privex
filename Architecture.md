@@ -523,6 +523,27 @@ Uses Android CSPRNG / SecureRandom. The generator is isolated from telemetry and
 - **Unicode RTLO & Control Character Sanitization:** Strips bidirectional overrides (`\u202E`, etc.), control characters, and newlines; truncates titles to 100 characters and bodies to 250 characters; safely falls back for empty strings.
 - **Native Bridge & UI:** `@JavascriptInterface` endpoints `dispatchCategorizedNotification` and `getNotificationDispatcherStats` consumed by TypeScript `notification.service.ts` and surfaced in `SettingsScreen.tsx`.
 
+### M-15 Security Test Matrix & Verification Architecture (Phase T14)
+- **15-Category Comprehensive Verification:** Master test matrix covering all security boundaries and failure modes across native JVM (`SecurityTestMatrixT14Test.java`) and TypeScript (`security-matrix-t14.test.ts`):
+  - `CAT-01`: APK & Sideloading Analysis (dangerous permission clusters, hardcoded C2 telemetry IPs, OS package protection).
+  - `CAT-02`: EICAR Test Detection & Isolation (stream-based signature detection, AES-256-GCM chunked vault isolation, source file unlinking).
+  - `CAT-03`: Archive Containers & Bounds (uncompressed size $\le 500$ MB, entries $\le 10,000$, Zip-Slip relative path escaping rejection).
+  - `CAT-04`: Multi-Format Media & Documents (magic byte sniffer distinguishing PDF/DOCX from native executables).
+  - `CAT-05`: Extension Disguise & Spoofing (binary disguised as document, double extensions $\ge 85$ score, RTLO directional override sanitization).
+  - `CAT-06`: Real-Time Download Stabilization (partial download extension state tracking, deferred scanning until stabilized).
+  - `CAT-07`: Full-Device Scan & Scoping Truthfulness (MediaStore scoping, protected path declaration for `/data/data`, cooperative cancellation).
+  - `CAT-08`: SAF Directory Traversal (user-granted Document tree boundary enforcement, safe permission denial handling).
+  - `CAT-09`: Phishing, Homoglyphs & Dangerous Schemes (Cyrillic IDN homoglyphs, brand typosquatting, `javascript:`/`intent:` rejection).
+  - `CAT-10`: Signed Threat Intelligence & Anti-Downgrade (unconfigured key rejection, Ed25519 validation, monotonic sequence enforcement, factory seed rollback).
+  - `CAT-11`: Adaptive Power, Thermal & Low-RAM (battery $<20\%$ scan deferral, thermal concurrency throttling, memory trim buffer downscaling).
+  - `CAT-12`: Notification Channels & Rate Limiting (canonical channels, Rule 45 burst threshold 3 coalescing, critical threat priority preservation).
+  - `CAT-13`: Secure Password & Passphrase Generation (CSPRNG rejection sampling, BIP-0039 dictionary entropy $\ge 55$ bits, buffer zeroization).
+  - `CAT-14`: Encrypted Quarantine Vault & Tamper Detection (AES-256-GCM chunked encryption, bit-flip tamper rejection, AAD binding).
+  - `CAT-15`: ANR / OOM Resilience & Bounded Resources (bounded LRU caches max 5,000 entries, memory trim callbacks, clean service teardown).
+- **Physical Device Acceptance Standard (Rule 41):**
+  - Requires truthful reporting of physical handset verification status based on live ADB query.
+  - Zero connected devices truthfully reported as `NOT EXECUTED / NOT VERIFIED` without synthetic fabrication. Full behavioral contracts verified via deterministic JVM unit tests and TypeScript runtime suites.
+
 ## 3. Install-Time Reality Model
 The architecture MUST explicitly distinguish:
 - System/Device Owner/Installer role: stronger pre-install control may be possible.

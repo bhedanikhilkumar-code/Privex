@@ -31,7 +31,7 @@ import java.util.Map;
  * 1. Manages all 7 canonical notification categories and maps them to stable Android NotificationChannels.
  * 2. Enforces Token-Bucket rate limiting (max 3 individual native OS alerts per 10-second rolling window).
  * 3. Enforces 30-second per-category deduplication/cooldown for repetitive identical alerts.
- * 4. Coalesces rapid burst events (burstCount >= 5) into a single batch summary alert (ID 99999).
+ * 4. Coalesces rapid burst events (burstCount >= 3) into a single batch summary alert (ID 99999).
  * 5. Deterministic priority: Critical security alerts (CRITICAL_THREAT) are NEVER suppressed or discarded
  *    by rate limiting, but rather delivered with top priority.
  * 6. Content sanitization: Strips control characters, RTLO / bidirectional overrides (U+202E), newlines,
@@ -54,7 +54,8 @@ public class MobileNotificationDispatcher {
     public static final int MAX_EVENTS_IN_WINDOW = 3;
     public static final long WINDOW_MS = 10000L; // 10 seconds
     public static final long CATEGORY_COOLDOWN_MS = 30000L; // 30 seconds deduplication
-    public static final int COALESCE_BURST_THRESHOLD = 5;
+    public static final int COALESCE_BURST_THRESHOLD = 3; // Rule 45 mandated burst coalescing threshold
+
 
     // Content Length Bounds
     public static final int MAX_TITLE_LENGTH = 100;
@@ -313,7 +314,7 @@ public class MobileNotificationDispatcher {
             currentBurstCount++;
             Log.w(TAG, "Rate limit active (" + dispatchTimestamps.size() + "/" + MAX_EVENTS_IN_WINDOW + "). Burst count=" + currentBurstCount);
 
-            // If burst reaches threshold (5), emit a single coalesced summary
+            // If burst reaches threshold (3), emit a single coalesced summary
             if (currentBurstCount == COALESCE_BURST_THRESHOLD) {
                 totalCoalesced++;
                 boolean coalescedSent = sendCoalescedSummary(currentBurstCount);

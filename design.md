@@ -573,4 +573,11 @@ The UI must never say "fully protected" if Android denied required access.
   - Native System Settings Deep Link:
     - "Configure in Android Settings" button routing directly into the native OS notification channel manager (`Settings.ACTION_APP_NOTIFICATION_SETTINGS`) so users can customize sounds and vibrations per channel.
 
+## 16. Security Test Matrix & Verification Design Standard (Phase T14)
+- **15-Category Coverage Guarantee:** UI components across all security surfaces reflect strictly validated threat states backed by deterministic test categories (CAT-01 through CAT-15).
+- **Physical Device Transparency Standard:**
+  - When displaying security audit results or device compatibility, the interface must never synthesize or simulate real-device hardware approvals when tests were executed on development host runners.
+  - Hardware-dependent features explicitly disclose host capabilities and sandbox limits without synthetic emulation claims.
+
+
 

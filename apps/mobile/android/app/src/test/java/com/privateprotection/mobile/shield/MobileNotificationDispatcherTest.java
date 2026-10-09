@@ -127,19 +127,29 @@ public class MobileNotificationDispatcherTest {
         dispatcher.dispatch(MobileNotificationDispatcher.Category.DOWNLOAD_BLOCKED, "D2", "D2", "d2");
         dispatcher.dispatch(MobileNotificationDispatcher.Category.DOWNLOAD_BLOCKED, "D3", "D3", "d3");
 
-        // Suppressed 1, 2, 3, 4 (burstCount = 1, 2, 3, 4)
-        for (int i = 4; i <= 7; i++) {
+        // Suppressed 1, 2 (burstCount = 1, 2)
+        for (int i = 4; i <= 5; i++) {
             MobileNotificationDispatcher.DispatchResult r = dispatcher.dispatch(
                     MobileNotificationDispatcher.Category.DOWNLOAD_BLOCKED, "D" + i, "D" + i, "d" + i);
             assertEquals(MobileNotificationDispatcher.DispatchOutcome.SUPPRESSED_RATE_LIMIT, r.outcome);
         }
 
-        // 5th suppressed event in burst (burstCount = 5) triggers COALESCED_BATCH
+        // 3rd suppressed event in burst (burstCount = 3 == COALESCE_BURST_THRESHOLD) triggers COALESCED_BATCH
         MobileNotificationDispatcher.DispatchResult coalesced = dispatcher.dispatch(
-                MobileNotificationDispatcher.Category.DOWNLOAD_BLOCKED, "D8", "D8", "d8");
+                MobileNotificationDispatcher.Category.DOWNLOAD_BLOCKED, "D6", "D6", "d6");
 
         assertEquals(MobileNotificationDispatcher.DispatchOutcome.COALESCED_BATCH, coalesced.outcome);
         assertEquals(99999, coalesced.notificationId);
+
+        // 4th burst event is suppressed again
+        MobileNotificationDispatcher.DispatchResult r7 = dispatcher.dispatch(
+                MobileNotificationDispatcher.Category.DOWNLOAD_BLOCKED, "D7", "D7", "d7");
+        assertEquals(MobileNotificationDispatcher.DispatchOutcome.SUPPRESSED_RATE_LIMIT, r7.outcome);
+    }
+
+    @Test
+    public void testRule45CoalescingThresholdRegression() {
+        assertEquals("Rule 45 requires COALESCE_BURST_THRESHOLD to equal 3", 3, MobileNotificationDispatcher.COALESCE_BURST_THRESHOLD);
     }
 
     @Test
