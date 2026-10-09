@@ -238,6 +238,24 @@ public class UniversalFileShieldService {
         String fileName = identity.getFileName();
         String ext = identity.getFileExtension();
         String declaredMime = magic.mimeType;
+        String sha256 = identity.getSha256();
+
+        // Vector 0: Canonical Threat Intelligence Database Hash Lookup
+        if (sha256 != null && !sha256.isEmpty()) {
+            MobileThreatDatabase threatDb = MobileThreatDatabase.getInstance(context);
+            MobileThreatDatabase.ThreatRecord threatMatch = threatDb.lookupFileHash(sha256);
+            if (threatMatch != null) {
+                int contrib = threatMatch.isCritical ? 100 : 85;
+                evidenceList.add(createEvidence(
+                        "KNOWN_MALICIOUS_HASH",
+                        threatMatch.severity,
+                        contrib,
+                        "File SHA-256 matches confirmed threat indicator in on-device database: " + threatMatch.threatName +
+                                " (" + threatMatch.category + ", feed: " + threatMatch.sourceFeed + ")"
+                ));
+                riskScore = Math.max(riskScore, contrib);
+            }
+        }
 
         // Vector 1: EICAR Standard Antivirus Test Pattern
         if ("MALWARE_TEST".equals(magic.canonicalCategory)) {

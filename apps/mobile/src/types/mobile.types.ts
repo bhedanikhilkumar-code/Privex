@@ -548,6 +548,47 @@ export interface PassphraseGenerationResult {
   separator: string;
 }
 
+// ==========================================
+// PHASE T9: MOBILE THREAT INTELLIGENCE
+// ==========================================
 
+export type ThreatRecordType = 'DOMAIN' | 'URL' | 'FILE_HASH' | 'CERT_FINGERPRINT' | 'HEURISTIC_RULE';
 
+export interface MobileThreatMetadata {
+  databaseVersion: number;
+  versionSequence: number;
+  installedVersion: string;
+  publishedAt: number;
+  lastVerifiedAt: number;
+  sourceFeed: string;
+  recordsCount: number;
+  sha256Digest: string;
+  isFactorySeed: boolean;
+  status: 'ACTIVE' | 'STAGED' | 'LKG' | 'FAILED';
+}
 
+export interface MobileThreatRecord {
+  type: ThreatRecordType;
+  indicator: string; // Normalized domain, full URL, or lowercase SHA-256
+  threatName: string;
+  category: 'PHISHING' | 'MALWARE' | 'SCAM' | 'EXTORTION' | 'SUSPICIOUS';
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  sourceFeed: string;
+  isCritical: boolean;
+  expiresAt?: number;
+}
+
+export interface ThreatDatabaseInspectionResult {
+  activeMetadata: MobileThreatMetadata;
+  lkgMetadata?: MobileThreatMetadata;
+  stalenessDays: number;
+  stalenessState: 'FRESH' | 'AGED' | 'STALE' | 'EXPIRED_CACHE';
+  isVerified: boolean;
+}
+
+export interface ThreatUpdateInspectionResult {
+  success: boolean;
+  targetSequence?: number;
+  appliedRecordsCount?: number;
+  error?: string;
+}

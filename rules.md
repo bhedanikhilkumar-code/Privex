@@ -300,7 +300,12 @@ Background scanning MUST be adaptive. On low battery, thermal throttling, low RA
 All decompression and content parsing MUST be bounded by maximum compressed bytes, expanded bytes, recursion depth, entry count, parser time, and memory. ZIP bombs, nested archive bombs, malformed PDFs, Office parser abuse, oversized images, decompression bombs, and parser fuzz inputs MUST terminate safely without OOM or ANR.
 
 ## RULE-40: Mobile Threat-DB Integrity Rule
-Mobile threat intelligence MUST use the same signed-update doctrine as the desktop product: pinned Ed25519 root, SHA-256 payload verification, monotonic version sequence, staged validation, self-test, atomic activation, and LKG rollback. A failed update MUST never replace a known-good database.
+Mobile threat intelligence MUST use the same signed-update doctrine as the desktop product: pinned Ed25519 root, SHA-256 payload verification, monotonic version sequence, staged validation, self-test, atomic activation, and LKG rollback:
+1. **Cryptographic Signature Verification:** Ed25519 signature over canonical tuple `${targetSequence}:${formatVersion}:${manifestSha256}`.
+2. **Unconfigured Key Fail-Closed:** A placeholder zero-key (`0000...`) or unconfigured trust anchor MUST fail closed (`UNCONFIGURED_TRUST_KEY`). Test keys MUST be strictly rejected in production builds (`TEST_KEY_REJECTED`).
+3. **Monotonic Anti-Downgrade:** Any manifest where `targetSequence <= currentSequence` MUST be rejected (`DOWNGRADE_REJECTED`).
+4. **Staging & Self-Test:** Transactional SQLite staging with schema validation, capacity bounds ($\le 20,000$ records), and `PRAGMA quick_check` integrity test before activation.
+5. **Deterministic Cache Invalidation:** Successful activation or rollback MUST trigger immediate cache invalidation via `DatabaseChangeListener` across `WebShieldService`, `UniversalFileShieldService`, and `PackageAuditService`. A failed update MUST never replace a known-good database or mutate cached verdicts.
 
 ## RULE-41: Physical Device Acceptance Rule
 The Android release gate MUST include at least one supported physical Android phone. Security-critical claims MUST be verified on-device for installation events, downloads, storage access, notifications, battery behavior, web protection, APK scanning, full scan, remediation, and password generation. A green CI build alone is not release evidence.

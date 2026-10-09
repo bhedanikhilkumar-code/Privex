@@ -476,8 +476,13 @@ The product shall provide privacy-first URL protection with:
   - 30-second deduplication cache to prevent notification storm fatigue.
   - Zero raw user data uploaded; 100% on-device synthesis and bounded local decision history.
 
-### MOB-010 — Password Generator
-The product shall provide a local CSPRNG password generator supporting 12–128 characters, configurable character sets, strong presets, passphrases, entropy measurement and clipboard hygiene. Generated passwords shall never be uploaded or logged.
+### MOB-010 — Password Generator (Phase T8)
+- **Status:** IMPLEMENTED & VERIFIED
+- **Capabilities:**
+  - Local CSPRNG password generator using Android `SecureRandom` / WebCrypto.
+  - Configurable 12–128 character length, custom character sets, Diceware passphrase mode, and NIST/zxcvbn entropy calculation.
+  - Zero clipboard persistence leakage: timed auto-clearing clipboard after 45 seconds.
+  - Passwords are Tier-1 secrets: never persisted, logged, or uploaded off-device.
 
 ### MOB-011 — Privacy
 Raw files, document contents, credentials, browsing history and URL query secrets shall remain on-device. Telemetry is disabled by default.
@@ -491,8 +496,17 @@ Background scanning shall adapt to battery, thermal and memory state. Critical t
 ### MOB-014 — Remediation
 Downloaded threats shall be quarantined/removed where Android permits. Installed-app remediation shall use supported user-facing uninstall/settings flows when silent control is unavailable.
 
-### MOB-015 — Threat Intelligence
-Mobile threat intelligence shall use signed, monotonic, rollback-safe local databases compatible with the product's existing update security doctrine.
+### MOB-015 — Threat Intelligence (Phase T9)
+- **Status:** IMPLEMENTED & VERIFIED
+- **Capabilities:**
+  - Versioned `.ppdb` SQLite threat intelligence database schema + volatile in-memory screening cache.
+  - Factory Seed database with standard EICAR AV hash, synthetic trojan/ransomware APK hashes, and phishing domains.
+  - Cryptographic verification via native Ed25519 signatures over canonical tuple `${targetSequence}:${formatVersion}:${manifestSha256}`.
+  - Fail-closed security on placeholder zero-key (`UNCONFIGURED_TRUST_KEY`) and segregation of test keys (`TEST_KEY_REJECTED`).
+  - Monotonic sequence enforcement rejecting downgrade attacks (`DOWNGRADE_REJECTED`).
+  - Transactional staging with `PRAGMA quick_check` verification and bounded capacity ($\le 20,000$ records).
+  - Deterministic cache invalidation via `DatabaseChangeListener` across `WebShieldService`, `UniversalFileShieldService`, and `PackageAuditService`.
+  - Atomic LKG / factory seed rollback and live UI diagnostics on `ProtectionStatusScreen`.
 
 ### MOB-016 — Physical Device Acceptance
 At least one real supported Android phone must pass the complete security acceptance matrix before release.

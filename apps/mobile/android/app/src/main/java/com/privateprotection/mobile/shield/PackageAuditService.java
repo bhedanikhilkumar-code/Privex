@@ -294,6 +294,19 @@ public class PackageAuditService {
             int score = 0;
             JSONArray evidenceList = new JSONArray();
 
+            // 0. Threat Intelligence Hash Lookup (APK File / Package SHA-256)
+            if (apkInspection != null && apkInspection.fileSha256 != null && !apkInspection.fileSha256.isEmpty()) {
+                MobileThreatDatabase threatDb = MobileThreatDatabase.getInstance(context);
+                MobileThreatDatabase.ThreatRecord record = threatDb.lookupFileHash(apkInspection.fileSha256);
+                if (record != null) {
+                    int contrib = record.isCritical ? 100 : 85;
+                    score = Math.max(score, contrib);
+                    addEvidence(evidenceList, "KNOWN_MALICIOUS_PACKAGE_HASH", record.severity, contrib,
+                            "Package SHA-256 matches verified malicious indicator in threat database: " + record.threatName +
+                                    " (" + record.category + ", feed: " + record.sourceFeed + ")");
+                }
+            }
+
             // 1. Sideloaded / Unknown Installer Check
             boolean isSideloaded = !meta.isSystemApp() && (meta.getInstallerPackageName().isEmpty() ||
                     !KNOWN_APP_STORES.contains(meta.getInstallerPackageName()));

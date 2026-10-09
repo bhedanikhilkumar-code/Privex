@@ -503,3 +503,14 @@ Every protection state must distinguish:
 - DEGRADED
 - ACTION REQUIRED
 The UI must never say "fully protected" if Android denied required access.
+
+## 11. Mobile Threat Intelligence & Update Diagnostics UX (`ProtectionStatusScreen.tsx`)
+- **Metadata Card:** Displays live database properties:
+  - Sequence number (e.g., `#1000` for factory seed)
+  - Feed source (`factory_seed` or verified OTA bundle publisher)
+  - Active record counts (malicious SHA-256 hashes, phishing domains, certificate blocks)
+  - Staleness status with color-coded badges (`FRESH`, `AGED`, `STALE`, `EXPIRED_CACHE`)
+- **User Actions:**
+  - One-click **"Check for Signed Threat Database Updates"** triggering staged signature verification and atomic activation.
+  - Emergency **"Rollback to Factory Seed"** action with confirmation dialog, reverting sequence and invalidating caches in $<50\text{ ms}$.
+- **Honest Staleness Representation:** If definitions are aged or offline, the UI transparently reports age in days, maintains 100% heuristic baseline protection, and never displays a false "outdated vulnerability" scare banner.

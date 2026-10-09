@@ -436,9 +436,26 @@ HTTPS content is not decrypted by default. Optional VPNService mode, if implemen
 ### M-09 Password Generator
 Uses Android CSPRNG / SecureRandom. The generator is isolated from telemetry and security logs. Clipboard contents are Tier-1 sensitive data.
 
-### M-10 Mobile Threat Database
-Stores signed local hashes/domains/rules. Update flow:
-Bundle -> Signature -> SHA-256 -> VersionSequence -> Structural Validation -> Self-Test -> Atomic Swap -> Cache Invalidation -> Active.
+### M-10 Mobile Threat Database (`MobileThreatDatabase.java` & `mobile-threat-intel.service.ts`)
+- **Storage Architecture:** SQLite-backed versioned `.ppdb` (`mobile_threat_intel.ppdb`) with tables `threat_metadata` and `threat_records` (indexed on `(target_type, target_value)`), backed by a volatile in-memory screening cache for sub-millisecond lookups.
+- **Factory Seed:** Embedded seed records including standard EICAR AV hash (`275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f`), synthetic trojan/ransomware APK hashes, and known phishing domains.
+- **Cryptographic Trust Pipeline:**
+  1. Native Java `Ed25519` signature verification wrapping 32-byte raw public keys with RFC 8410 SPKI DER prefix (`302a300506032b6570032100`).
+  2. Canonical signed message format: `${targetSequence}:${formatVersion}:${manifestSha256}`.
+  3. SHA-256 digest verification over update payload records.
+  4. Unconfigured zero trust key (`0000...`) fails closed with `UNCONFIGURED_TRUST_KEY`. Test keys are rejected in production builds (`TEST_KEY_REJECTED`).
+- **Anti-Downgrade & Staging:**
+  1. Monotonic sequence check rejects `targetSequence <= currentSequence` (`DOWNGRADE_REJECTED`).
+  2. Transactional SQLite staging verifies record schema, capacity bounds ($\le 20,000$ records), and executes `PRAGMA quick_check`.
+  3. Atomic pointer swap activates the new database version.
+- **Deterministic Cache Invalidation:**
+  - `DatabaseChangeListener` publishes invalidation events upon successful update or rollback.
+  - Active shields (`WebShieldService`, `UniversalFileShieldService`, `PackageAuditService`) purge cached verdicts to immediately reflect updated intelligence.
+- **Shield Integration:**
+  - `WebShieldService`: Vector 0 fast-path domain check in `isDomainBlocked()`.
+  - `UniversalFileShieldService`: Vector 0 fast-path file SHA-256 check.
+  - `PackageAuditService`: Vector 0 fast-path APK file SHA-256 check.
+- **Staleness Model:** Client evaluates database age: `FRESH` ($\le 7$ days), `AGED` (8–14 days), `STALE` (15–30 days), and `EXPIRED_CACHE` ($> 30$ days), prompting the user to update while retaining local detection parity.
 
 ### M-11 Mobile Quarantine
 Uses an app-private encrypted quarantine area where permitted. Original evidence is retained locally. For installed apps, remediation becomes user-guided OS settings/uninstall when privileged silent control is unavailable.

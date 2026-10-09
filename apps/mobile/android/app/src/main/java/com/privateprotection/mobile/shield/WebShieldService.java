@@ -52,11 +52,14 @@ public class WebShieldService {
     private final Set<String> blockedDomainsSet = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
     private final Set<String> customAllowlist = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
+    private final MobileThreatDatabase threatDatabase;
+
     private WebShieldService(Context context) {
         this.appContext = context.getApplicationContext();
         this.urlThreatDetector = new UrlThreatDetector();
+        this.threatDatabase = MobileThreatDatabase.getInstance(this.appContext);
 
-        // Prepopulate known test malicious domains and offline threat seeds
+        // Prepopulate fallback demo domains
         blockedDomainsSet.add("phishing-bank-login.com");
         blockedDomainsSet.add("secure-account-update.xyz");
         blockedDomainsSet.add("eicar.org");
@@ -64,6 +67,20 @@ public class WebShieldService {
         blockedDomainsSet.add("login-micros0ft.online");
         blockedDomainsSet.add("crypto-giveaway-airdrop.top");
         blockedDomainsSet.add("urgent-verify-kyc.net");
+
+        // Register database change listener for deterministic cache invalidation
+        this.threatDatabase.registerChangeListener(new MobileThreatDatabase.DatabaseChangeListener() {
+            @Override
+            public void onDatabaseUpdated(int newSequence, String installedVersion) {
+                Log.i(TAG, "Threat database updated to seq " + newSequence + "; invalidating WebShield caches.");
+                // Purge or refresh internal state if needed
+            }
+
+            @Override
+            public void onDatabaseRolledBack(int restoredSequence) {
+                Log.i(TAG, "Threat database rolled back to seq " + restoredSequence + "; invalidating WebShield caches.");
+            }
+        });
 
         initNotificationChannel();
     }
@@ -143,6 +160,11 @@ public class WebShieldService {
 
         if (customAllowlist.contains(cleanDomain)) {
             return false;
+        }
+
+        // Canonical threat database check
+        if (threatDatabase.isDomainMalicious(cleanDomain)) {
+            return true;
         }
 
         if (blockedDomainsSet.contains(cleanDomain)) {

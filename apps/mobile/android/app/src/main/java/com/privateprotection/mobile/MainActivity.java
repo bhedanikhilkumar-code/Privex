@@ -1061,5 +1061,47 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         }
+
+        // ==========================================
+        // PHASE T9: MOBILE THREAT INTELLIGENCE
+        // ==========================================
+
+        @JavascriptInterface
+        public String getThreatDatabaseMetadata() {
+            try {
+                com.privateprotection.mobile.shield.MobileThreatDatabase db =
+                        com.privateprotection.mobile.shield.MobileThreatDatabase.getInstance(activity);
+                return db.getActiveMetadata().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "getThreatDatabaseMetadata bridge error", e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public String applyThreatDatabaseSignedUpdate(String bundleJsonStr, String trustedPublicKeyHexOverride) {
+            try {
+                com.privateprotection.mobile.shield.MobileThreatDatabase db =
+                        com.privateprotection.mobile.shield.MobileThreatDatabase.getInstance(activity);
+                com.privateprotection.mobile.shield.MobileThreatDatabase.UpdateResult res =
+                        db.applySignedUpdateBundle(bundleJsonStr, trustedPublicKeyHexOverride);
+                return res.toJson().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "applyThreatDatabaseSignedUpdate bridge error", e);
+                return "{\"success\":false,\"code\":\"BRIDGE_ERROR\",\"message\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public boolean rollbackThreatDatabaseToFactorySeed() {
+            try {
+                com.privateprotection.mobile.shield.MobileThreatDatabase db =
+                        com.privateprotection.mobile.shield.MobileThreatDatabase.getInstance(activity);
+                return db.rollbackToFactorySeed();
+            } catch (Exception e) {
+                Log.e(TAG, "rollbackThreatDatabaseToFactorySeed bridge error", e);
+                return false;
+            }
+        }
     }
 }
