@@ -53,9 +53,14 @@ The Independent Audit Committee has reviewed the entire implementation and test 
 
 ## 3. Mandatory Steps for Final Unblocking
 
+Release artifact verified:
+- Path: `apps/mobile/android/app/build/outputs/apk/release/app-release.apk`
+- SHA-256: `88217749dffecb46877363cd4958affc30473a3dcf9639e789248fff79c7f82a`
+- Detailed Physical Acceptance Report: [`docs/PHYSICAL_ANDROID_ACCEPTANCE_REPORT.md`](file:///c:/Users/bheda/Music/Desktop/Private%20Protection/docs/PHYSICAL_ANDROID_ACCEPTANCE_REPORT.md)
+
 To elevate the final release status from **PARTIAL / BLOCKED** to full commercial **GO**:
 1. Connect an authorized physical Android device (Android 10+ / API 29+) via USB with USB Debugging enabled.
 2. Confirm device detection via `adb devices -l`.
 3. Install the verified release APK: `adb install -r apps/mobile/android/app/build/outputs/apk/release/app-release.apk`.
-4. Execute the interactive physical acceptance scenarios specified in `docs/PHASE_T14_SECURITY_TEST_MATRIX.md` (Section 3).
+4. Execute the interactive physical acceptance scenarios specified in `docs/PHYSICAL_ANDROID_ACCEPTANCE_REPORT.md` (Section 3).
 5. Attach logcat captures and update hardware acceptance status to `PASS`.

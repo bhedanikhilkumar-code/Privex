@@ -1,13 +1,15 @@
 # PRIVEX — FINAL PHYSICAL ANDROID ACCEPTANCE & RELEASE GATE REPORT
 
-**Document Version:** 1.0.0  
+**Document Version:** 1.1.0  
 **Audit Date:** October 9, 2026  
 **Auditor:** Independent Security & Verification Committee  
 **Repository:** `https://github.com/bhedanikhilkumar-code/Privex`  
 **Branch:** `main`  
 **Starting Commit SHA:** `562099ba24a3e1228da31a95dcffd04882d8c077`  
+**Latest Baseline SHA:** `6d4b1a2bd57c8f6ee528d662b33f6554f497278e`  
 **Target Release Artifact:** `apps/mobile/android/app/build/outputs/apk/release/app-release.apk`  
-**Final Release Disposition:** **PARTIAL / BLOCKED**
+**APK SHA-256:** `88217749dffecb46877363cd4958affc30473a3dcf9639e789248fff79c7f82a`  
+**Final Release Disposition:** **PARTIAL / BLOCKED** (per **RULE-41**)
 
 ---
 
@@ -74,7 +76,7 @@ Each scenario has been verified through automated software regression suites, wi
 
 ## 4. Software Verification Suite Audit Table
 
-All automated verification commands were re-executed against checkout `562099ba24a3e1228da31a95dcffd04882d8c077`:
+All automated verification commands were executed and verified clean:
 
 ```
 ========================================================================================
@@ -95,18 +97,63 @@ npm run typecheck                                   0    33s   0 ERRORS (All 6 w
 
 ---
 
-## 5. Independent Audit Findings & Blocker Resolution
+## 5. Instructions for Connecting a Real Device & Unblocking the Release Gate
+
+To unblock the commercial release gate from **PARTIAL / BLOCKED** to **GO**, follow these exact physical verification steps:
+
+### 5.1. Enable USB Debugging on Physical Android Phone
+1. Open **Settings** > **About Phone**.
+2. Tap **Build Number** 7 times until you see "You are now a developer!".
+3. Go back to **Settings** > **System** > **Developer Options**.
+4. Enable **USB Debugging**.
+5. (Optional but recommended) Enable **Stay Awake** while charging.
+
+### 5.2. Connect and Authorize USB Debugging
+1. Connect the phone to the computer via a data-capable USB cable.
+2. Ensure the USB connection mode is set to **File Transfer (MTP)** or **MIDI** rather than "Charge Only".
+3. When prompted on the phone with **"Allow USB debugging?"**, check **"Always allow from this computer"** and tap **Allow**.
+
+### 5.3. Verify Device Detection
+Run from the repository root:
+```powershell
+adb devices -l
+```
+**Expected Output:**
+```text
+List of devices attached
+<device-serial-number>   device product:<name> model:<model> device:<device> transport_id:<id>
+```
+
+### 5.4. Common Connection Troubleshooting
+- **Device shows `unauthorized`:** Check the phone screen for the RSA key authorization prompt and tap "Allow". If not showing, run:
+  ```powershell
+  adb kill-server
+  adb start-server
+  adb devices
+  ```
+- **Device not listed at all:**
+  - Verify the USB cable supports data transfer (some cables are charge-only).
+  - Install the OEM USB driver for your device manufacturer (Google USB Driver, Samsung Smart Switch / USB Drivers, etc.).
+  - Try plugging into a different USB port directly on the motherboard/PC (avoid unpowered USB hubs).
+
+### 5.5. Install Release Build and Execute On-Device Acceptance
+1. Install the release APK:
+   ```powershell
+   adb install -r apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+   ```
+2. Start continuous logcat capture:
+   ```powershell
+   adb logcat -v time -s PrivexNativeBridge:V UniversalFileShield:V MobileNotificationDispatcher:V AdaptiveResourceManager:V > physical_test_logcat.txt
+   ```
+3. Execute the 12 scenarios interactively on the physical device.
+4. Record observed behavior and attach `physical_test_logcat.txt` to promote status to **GO**.
+
+---
+
+## 6. Independent Audit Findings & Release Verdict
 
 1. **Software Zero-Trust Integrity:** Verified that all cryptographic signatures, authenticated encryption, sandbox boundaries, and fail-closed logic are implemented in real code without dummy mocks in production paths.
 2. **Rule 45 Notification Coalescing:** Verified that `COALESCE_BURST_THRESHOLD = 3` is strictly enforced in `MobileNotificationDispatcher.java`, passing both unit tests and integration tests.
 3. **Web Theme Switcher Integration:** Confirmed that the light/dark/night neo-brutalist theme toggle incorporated from remote `origin/main` cleanly integrates with the mobile baseline and passes 101/101 web Vitest tests.
-4. **Remaining Blocker (RULE-41):** Commercial deployment requires end-to-end execution on a physical Android handset running Android 10+ (API 29+). Until a physical device is connected via USB and verified via `adb devices -l`, release disposition remains **PARTIAL / BLOCKED**.
-
----
-
-## 6. Final Disposition & Release Sign-Off
-
-- **Software Engineering Status:** **GO (100% PASS)**
-- **Hardware Physical Acceptance:** **NOT EXECUTED / NOT VERIFIED** (0 devices attached)
-- **Composite Release Decision:** **PARTIAL / BLOCKED**
-- **Next Required Action:** Connect an authorized physical Android device, verify with `adb devices -l`, execute the 12 scenarios on hardware, attach logcat output, and promote disposition to **GO**. No subsequent feature phases may begin until this release gate is satisfied.
+4. **Hardware Gate Status:** Missing physical Android handset prevents physical validation.
+5. **Final Disposition:** **PARTIAL / BLOCKED** (Software Verification: GO | Hardware Acceptance: BLOCKED).

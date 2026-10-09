@@ -30,6 +30,8 @@ Per Rule 41 and the Anti-Fabrication Invariant, the release gate is truthfully c
 - **Master Audit Specification:** [`docs/PHASE_T16_ZERO_TRUST_AUDIT.md`](file:///c:/Users/bheda/Music/Desktop/Private%20Protection/docs/PHASE_T16_ZERO_TRUST_AUDIT.md)
 - **Phase Completion Report:** [`docs/PHASE_T16_COMPLETION.md`](file:///c:/Users/bheda/Music/Desktop/Private%20Protection/docs/PHASE_T16_COMPLETION.md) (this document)
 - **Final Independent Audit Sign-Off:** [`docs/PHASE_T16_FINAL_INDEPENDENT_AUDIT.md`](file:///c:/Users/bheda/Music/Desktop/Private%20Protection/docs/PHASE_T16_FINAL_INDEPENDENT_AUDIT.md)
+- **Physical Device Acceptance Report:** [`docs/PHYSICAL_ANDROID_ACCEPTANCE_REPORT.md`](file:///c:/Users/bheda/Music/Desktop/Private%20Protection/docs/PHYSICAL_ANDROID_ACCEPTANCE_REPORT.md)
+- **Release APK SHA-256:** `88217749dffecb46877363cd4958affc30473a3dcf9639e789248fff79c7f82a`
 
 ---
 
