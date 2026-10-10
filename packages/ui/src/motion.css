@@ -1,0 +1,346 @@
+/**
+ * PRIVEX Canonical Motion Stylesheet
+ * Brand tokens: Deep Void #0B0F19, Alert Red #DC2626, Node White #F8FAFC, Cyber Slate #0284C7
+ * Properties animated: transform, opacity, stroke-dashoffset ONLY
+ */
+
+:root {
+  --motion-duration-micro-fast: 120ms;
+  --motion-duration-micro: 160ms;
+  --motion-duration-standard-fast: 200ms;
+  --motion-duration-standard: 240ms;
+  --motion-duration-standard-slow: 260ms;
+  --motion-duration-emphasis-fast: 300ms;
+  --motion-duration-emphasis: 360ms;
+  --motion-duration-emphasis-slow: 420ms;
+
+  --motion-ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --motion-ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --motion-color-void: #0B0F19;
+  --motion-color-alert: #DC2626;
+  --motion-color-white: #F8FAFC;
+  --motion-color-cyber: #0284C7;
+  --motion-color-safe: #16A34A;
+  --motion-color-caution: #D97706;
+}
+
+/* =========================================================================
+   1. Interactive Press & Hover Micro-Interactions
+   ========================================================================= */
+
+.motion-pressable {
+  transition: transform var(--motion-duration-micro-fast) var(--motion-ease-standard),
+              box-shadow var(--motion-duration-micro-fast) var(--motion-ease-standard);
+  will-change: transform;
+}
+
+.motion-pressable:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.motion-pressable:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Subtly lifted cards with Cyber Slate edge glow on hover */
+.motion-card {
+  transition: transform var(--motion-duration-micro) var(--motion-ease-standard),
+              box-shadow var(--motion-duration-micro) var(--motion-ease-standard),
+              border-color var(--motion-duration-micro) var(--motion-ease-standard);
+}
+
+.motion-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px -2px rgba(2, 132, 199, 0.18), 3px 3px 0px var(--border-dark, #111111);
+}
+
+/* =========================================================================
+   2. Fade & Slide Entrances (Lists, Panels, Tabs)
+   ========================================================================= */
+
+@keyframes motion-fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes motion-fade-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes motion-tab-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.motion-fade-up {
+  animation: motion-fade-slide-up var(--motion-duration-standard) var(--motion-ease-enter) both;
+}
+
+.motion-fade-down {
+  animation: motion-fade-slide-down var(--motion-duration-standard) var(--motion-ease-enter) both;
+}
+
+.motion-tab-panel {
+  animation: motion-tab-enter var(--motion-duration-standard-fast) var(--motion-ease-enter) both;
+}
+
+/* Stagger List Delays (up to 8 items max) */
+.motion-stagger-1 { animation-delay: 40ms; }
+.motion-stagger-2 { animation-delay: 80ms; }
+.motion-stagger-3 { animation-delay: 120ms; }
+.motion-stagger-4 { animation-delay: 160ms; }
+.motion-stagger-5 { animation-delay: 200ms; }
+.motion-stagger-6 { animation-delay: 240ms; }
+.motion-stagger-7 { animation-delay: 280ms; }
+.motion-stagger-8 { animation-delay: 320ms; }
+
+/* =========================================================================
+   3. Shimmer Scanning & Skeleton Loaders
+   ========================================================================= */
+
+@keyframes motion-shimmer-sweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.motion-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(2, 132, 199, 0.22) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: motion-shimmer-sweep 1.4s infinite linear;
+}
+
+/* Scanning border shimmer line for target URL/Text inputs */
+@keyframes motion-scanline-pulse {
+  0% {
+    transform: scaleX(0);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(0);
+    opacity: 0.4;
+  }
+}
+
+.motion-scanline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--motion-color-cyber);
+  transform-origin: left;
+  animation: motion-scanline-pulse 1.2s infinite ease-in-out;
+}
+
+/* =========================================================================
+   4. Verdict Reveals (Safe check draw-on, Alert shake & settle)
+   ========================================================================= */
+
+/* Dangerous / High Risk Shake: strictly 3 cycles, then settles */
+@keyframes motion-threat-shake {
+  0% { transform: translateX(0); }
+  15% { transform: translateX(-5px); }
+  30% { transform: translateX(5px); }
+  45% { transform: translateX(-4px); }
+  60% { transform: translateX(4px); }
+  75% { transform: translateX(-2px); }
+  90% { transform: translateX(2px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes motion-danger-glow {
+  0% {
+    box-shadow: 0 0 0 rgba(220, 38, 38, 0);
+  }
+  40% {
+    box-shadow: 0 0 18px 2px rgba(220, 38, 38, 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+
+.motion-threat-alert {
+  animation: motion-threat-shake var(--motion-duration-emphasis) var(--motion-ease-standard) 1,
+             motion-danger-glow 700ms var(--motion-ease-standard) 1;
+}
+
+/* SVG Stroke Draw-On for Green Check & Circular Gauges */
+@keyframes motion-draw-check {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.motion-draw-stroke {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: motion-draw-check var(--motion-duration-emphasis-fast) var(--motion-ease-enter) forwards;
+}
+
+/* =========================================================================
+   5. Modals, Friction Gates & Interstitial Animations
+   ========================================================================= */
+
+@keyframes motion-modal-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes motion-modal-panel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.motion-modal-backdrop {
+  animation: motion-modal-backdrop-in var(--motion-duration-standard-fast) var(--motion-ease-enter) both;
+}
+
+.motion-modal-panel {
+  animation: motion-modal-panel-in var(--motion-duration-emphasis-fast) var(--motion-ease-enter) both;
+}
+
+/* Interstitial Alert Shield Icon: 2 subtle alert pulses then settle */
+@keyframes motion-shield-beacon {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6);
+  }
+  40% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+  }
+  70% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 14px rgba(220, 38, 38, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+
+.motion-shield-beacon {
+  animation: motion-shield-beacon 800ms var(--motion-ease-standard) 1;
+}
+
+/* =========================================================================
+   6. Network & Status Indicator Live Pulse (stops when idle or hidden)
+   ========================================================================= */
+
+@keyframes motion-live-dot {
+  0% { transform: scale(0.92); opacity: 0.8; }
+  50% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(0.92); opacity: 0.8; }
+}
+
+.motion-live-dot {
+  animation: motion-live-dot 2.2s infinite ease-in-out;
+}
+
+/* =========================================================================
+   7. Mobile QR Scanner Reticle & Laser Sweep
+   ========================================================================= */
+
+@keyframes motion-laser-sweep {
+  0% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(220px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+}
+
+.motion-laser-line {
+  animation: motion-laser-sweep 2s infinite ease-in-out;
+}
+
+/* =========================================================================
+   8. STRICT ACCESSIBILITY: prefers-reduced-motion overrides
+   ========================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .motion-pressable:hover,
+  .motion-pressable:active,
+  .motion-card:hover {
+    transform: none !important;
+  }
+
+  .motion-threat-alert {
+    animation: none !important;
+  }
+
+  .motion-live-dot,
+  .motion-laser-line,
+  .motion-shimmer,
+  .motion-scanline {
+    animation: none !important;
+  }
+
+  .motion-draw-stroke {
+    stroke-dashoffset: 0 !important;
+    animation: none !important;
+  }
+
+  .motion-modal-panel {
+    transform: none !important;
+  }
+}
