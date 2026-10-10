@@ -555,7 +555,372 @@
     </div>
   </section>
 
-  <section class="section-install-guide" id="install">    <div class="container">      <div class="section-title-block">        <span class="section-pre-tag">DEPLOYMENT GUIDE</span>        <h2 class="section-main-heading">3-Step Sideload Protocol</h2>        <p class="section-lead-text">          Standard installation procedure on all Android 8.0+ devices.        </p>      </div>      <div class="install-steps-layout">        <div class="install-step-card">          <div class="install-step-index">01</div>          <h4 class="install-step-title">Acquire APK</h4>          <p class="install-step-body">            Download <code>privex-mobile-release.apk</code> (1.86 MB). The release package contains all embedded models and Bloom filters.          </p>        </div>        <div class="install-step-card">          <div class="install-step-index">02</div>          <h4 class="install-step-title">Authorize Origin</h4>          <p class="install-step-body">            Tap the downloaded file. When prompted by Android Package Installer, toggle on "Allow from this source" in system settings.          </p>        </div>        <div class="install-step-card">          <div class="install-step-index">03</div>          <h4 class="install-step-title">Execute Installation</h4>          <p class="install-step-body">            Tap "Install". Launch PRIVEX to initiate real-time on-device phishing and scam defenses immediately.          </p>        </div>      </div>      <!-- Checksum Verification Card -->      <div class="checksum-audit-container">        <div>          <h4 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.25rem; font-weight: 800; margin-bottom: 8px;">Package Integrity Verification</h4>          <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">            Cryptographic SHA-256 hash. You can verify this binary via PowerShell or Linux bash before installing.          </p>          <div class="hash-display-pill">            <span class="hash-string" id="hashText">849db939732a1b91534807d8761682933324c31a64ee2eff4d7368e20005773b</span>            <button class="btn-copy-cli" id="copyHashBtn">Copy</button>          </div>        </div>        <div style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.8; font-family: 'Space Grotesk', monospace;">          <div>• <strong>PACKAGE ID:</strong> com.privex.security</div>          <div>• <strong>RELEASE:</strong> 0.1.2</div>          <div>• <strong>MIN SDK:</strong> Android 8.0 (API 26)</div>          <div>• <strong>TARGET SDK:</strong> Android 15 (API 35)</div>          <div>• <strong>ARCHITECTURES:</strong> arm64-v8a, armeabi-v7a, x86_64</div>        </div>      </div>    </div>  </section>  <!-- Fullscreen Lightbox Modal -->  <div class="lightbox-overlay" id="lightboxModal">    <div class="lightbox-viewport">      <button class="lightbox-dismiss-btn" id="lightboxCloseBtn">&times;</button>      <img src="" alt="Screen Detail" class="lightbox-target-img" id="lightboxImg">      <div class="lightbox-info-bar" id="lightboxTitle">SUBSYSTEM INSPECTION</div>    </div>  </div>  <!-- Industrial Engineering Footer -->  <footer class="site-footer">    <div class="container">      <div class="footer-columns-grid">        <div>          <div class="footer-col-header">PRIVEX CYBERSECURITY PLATFORM</div>          <p style="line-height: 1.7; max-width: 440px;">            A privacy-first cybersecurity system architected on data-minimization and zero-cloud dependence. All threat telemetry evaluates locally on the endpoint.          </p>        </div>        <div>          <div class="footer-col-header">REPOSITORIES & BUILDS</div>          <ul class="footer-nav-list">            <li class="footer-nav-item"><a href="downloads/privex-mobile-release.apk" download="privex-mobile-release.apk">Android APK (v0.1.2)</a></li>            <li class="footer-nav-item"><a href="index.html">Web Security Scanner</a></li>            <li class="footer-nav-item"><a href="https://github.com/bhedanikhilkumar-code/Privex" target="_blank" rel="noopener">GitHub Source Code</a></li>            <li class="footer-nav-item"><a href="release/RELEASE_NOTES_V0.1.2.md">Release Notes v0.1.2</a></li>          </ul>        </div>        <div>          <div class="footer-col-header">SECURITY PROTOCOLS</div>          <ul class="footer-nav-list">            <li class="footer-nav-item"><a href="SECURITY.md">Security Vulnerability Policy</a></li>            <li class="footer-nav-item"><a href="downloads/SHA256SUMS.txt">SHA-256 Checksums</a></li>            <li class="footer-nav-item"><a href="README.md">System Architecture</a></li>            <li class="footer-nav-item"><a href="AGENTS.md">Constitutional Rules</a></li>          </ul>        </div>      </div>      <div class="footer-bottom-bar">        <div>&copy; 2026 PRIVEX CYBERSECURITY. LOCAL-FIRST • ZERO-CLOUD • ZERO-KNOWLEDGE.</div>        <div>SHA256: B19A8C67...5AA3691</div>      </div>    </div>  </footer>  <!-- Application Logic -->  <script>    const SCREENS_DATA = [      {        id: 'home-dashboard',        name: 'Home Dashboard',        subsystem: 'CORE.DASHBOARD.TELEMETRY',        sla: '< 0.50 MS',        file: 'assets/screenshots/home-dashboard.png',        heading: 'Central Security Dashboard',        desc: 'Real-time overview of endpoint security posture, background monitors status, quick scan triggers, and volatile event counters.',        caps: [          'Unified Device Security Health Score',          'One-Tap Link & Message Quick Scan',          'Active Background Shield Toggles',          'Ephemeral Threat Activity Counters'        ],        guarantee: 'State is maintained locally in volatile memory. No browsing history persists to disk or cloud.'      },      {        id: 'protection-status',        name: 'Protection Status',        subsystem: 'CORE.MONITORS.TELEMETRY',        sla: '< 0.35 MS',        file: 'assets/screenshots/protection-status.png',        heading: 'Active Protection Status',        desc: 'Deep telemetry inspection for SMS extortion filtering, pre-navigation link interceptors, and local Bloom filter freshness.',        caps: [          'Inbound SMS Extortion Interceptor',          'Pre-Navigation URL Heuristic Guard',          'Air-Gapped Bloom Filter Cache Health',          'Local Explanation Synthesizer Status'        ],        guarantee: 'Monitors evaluate broadcast events ephemerally without persisting message content.'      },      {        id: 'scan-hub',        name: 'Scan Hub',        subsystem: 'CORE.INGESTION.PIPELINE',        sla: '< 0.65 MS',        file: 'assets/screenshots/scan-hub.png',        heading: 'Multi-Modal Threat Scan Hub',        desc: 'Universal ingestion point for untrusted strings, deceptive SMS notifications, QR bitmaps, and binary file headers.',        caps: [          'Multi-Input (URL, SMS, QR, File)',          'Instant Clipboard Sanitization & Scan',          'Automated Unicode NFKD Normalization',          '2,048-Byte Buffer Overflow Shielding'        ],        guarantee: 'All raw inputs are sanitized before parser execution and scrubbed upon verdict.'      },      {        id: 'url-scanner',        name: 'URL Scanner',        subsystem: 'CORE.SCANNER.LEXICAL_ENGINE',        sla: '< 0.85 MS',        file: 'assets/screenshots/url-scanner.png',        heading: 'Lexical Link & Homograph Scanner',        desc: 'Mathematical parsing of deceptive domains: Shannon entropy calculations, Levenshtein typosquatting distance, and IDN homograph de-cloaking.',        caps: [          'Shannon Entropy Randomness Scoring',          'Target Brand Typosquatting Distance',          'Punycode & IDN Homograph Translation',          'Offline Bloom Filter Reputation Check'        ],        guarantee: 'Zero DNS lookup or remote ping is made during evaluation. 100% offline.'      },      {        id: 'universal-scan-result',        name: 'Universal Scan Result',        subsystem: 'CORE.DECISION.BAYESIAN_ENGINE',        sla: '< 1.10 MS',        file: 'assets/screenshots/universal-scan-result.png',        heading: 'Instant Threat Verdict & Evidence',        desc: 'Non-linear Bayesian risk scoring producing an actionable 0-100 risk score, transparent evidence factors, and color-coded alert.',        caps: [          'Tri-State Color Alert (Safe / Caution / Block)',          'Multi-Factor Bounded Risk Score (0-100)',          'Transparent Evidence Telemetry Factors',          'Instant Friction Gate for Malicious Links'        ],        guarantee: 'The mathematical risk score is finalized deterministically before any explanation is generated.'      },      {        id: 'security-assistant',        name: 'Security Assistant',        subsystem: 'CORE.ASSISTANT.READ_ONLY_SLM',        sla: '< 12.0 MS',        file: 'assets/screenshots/security-assistant.png',        heading: 'Read-Only Security Assistant',        desc: 'Translates technical threat evidence into plain, non-jargon explanations formatted below cognitive Grade 8 reading level.',        caps: [          'Plain English Non-Technical Breakdown',          'Specific Threat Tactics Explained (Urgency, Spoof)',          'Step-by-Step Remediation Action Guide',          'Airtight Prompt Injection Containment'        ],        guarantee: 'The assistant is read-only and has zero authority to alter or downgrade the deterministic risk score.'      },      {        id: 'privacy-center',        name: 'Privacy Center',        subsystem: 'CORE.BOUNDARIES.DATA_MINIMIZATION',        sla: '< 0.20 MS',        file: 'assets/screenshots/privacy-center.png',        heading: 'Privacy Center & Data Shredder',        desc: 'Audit volatile RAM boundaries, verify zero-knowledge telemetry, and execute one-tap cryptographic data shredding.',        caps: [          'Zero-Knowledge Telemetry Audit',          'Volatile RAM Heap Auto-Zeroing Status',          'Encrypted SQLite / SQLCipher Store Controls',          'One-Tap Cryptographic Shredder'        ],        guarantee: 'Data shredding purges all internal event counters and derived local caches instantaneously.'      },      {        id: 'quarantine-vault',        name: 'Quarantine Vault',        subsystem: 'CORE.CONTAINMENT.SANDBOX',        sla: '< 0.40 MS',        file: 'assets/screenshots/quarantine-vault.png',        heading: 'Isolated Endpoint Quarantine Vault',        desc: 'Neutralized repository for intercepted malicious URLs, phishing payloads, and deceptive messages without execution risk.',        caps: [          'Neutralized Payload Containment',          'Safe De-Obfuscated Structure View',          'Export Anonymized Signatures',          'Permanent Shredding with Secure Overwrite'        ],        guarantee: 'Quarantined payloads are encrypted with keys derived from OS-native Keystore.'      },      {        id: 'password-generator',        name: 'Password Generator',        subsystem: 'CORE.TOOLS.CRYPTO_CSPRNG',        sla: '< 0.15 MS',        file: 'assets/screenshots/password-generator.png',        heading: 'Cryptographic Password Studio',        desc: 'Generate hardware-seeded, high-entropy passwords and authorization tokens directly using the OS CSPRNG.',        caps: [          'Hardware-Seeded Cryptographic Randomness',          'Customizable Length, Character Sets & Symbols',          'Real-time Shannon Entropy Strength Meter',          'Zero Clipboard Leak Auto-Clear'        ],        guarantee: 'Generated credentials are never logged, cached, or persisted to device storage.'      },      {        id: 'settings',        name: 'Settings & Rules',        subsystem: 'CORE.CONFIG.LOCAL_POLICY',        sla: '< 0.30 MS',        file: 'assets/screenshots/settings.png',        heading: 'Policy Controls & Sensitivity Tuning',        desc: 'Manage custom domain allowlists, calibrate heuristic sensitivity thresholds, and configure cryptographically signed updates.',        caps: [          'Custom User Allowlists & Exclusions',          'Detection Sensitivity Tuning (Strict / Balanced)',          'Ed25519-Signed Offline Rule Updates',          'High-Contrast Cyberpunk & OLED Theme'        ],        guarantee: 'Allows total control over endpoint security policies with zero remote server reporting.'      }    ];    let currentIndex = 0;    let tourTimer = null;    // Elements    const heroImg = document.getElementById('heroPhoneScreenImg');    const studioImg = document.getElementById('studioPhoneImg');    const pillsBox = document.getElementById('screenPillsContainer');    const galleryBox = document.getElementById('galleryCardsGrid');    const indexBadge = document.getElementById('screenIndexBadge');    const specSubsystemTag = document.getElementById('specSubsystemTag');    const specSlaTag = document.getElementById('specSlaTag');    const specHeading = document.getElementById('specScreenHeading');    const specDesc = document.getElementById('specScreenDesc');    const specCapsMatrix = document.getElementById('specCapsMatrix');    const specGuaranteeText = document.getElementById('specGuaranteeText');    const prevBtn = document.getElementById('prevScreenBtn');    const nextBtn = document.getElementById('nextScreenBtn');    const tourBtn = document.getElementById('tourAutoBtn');    // Lightbox Elements    const lightboxModal = document.getElementById('lightboxModal');    const lightboxImg = document.getElementById('lightboxImg');    const lightboxTitle = document.getElementById('lightboxTitle');    const lightboxClose = document.getElementById('lightboxCloseBtn');    // Theme Elements    const themeBtn = document.getElementById('themeToggleBtn');    const themeLabel = document.getElementById('themeLabel');    const themes = ['night', 'dark', 'light'];    let currentThemeIdx = 0;    themeBtn.addEventListener('click', () => {      currentThemeIdx = (currentThemeIdx + 1) % themes.length;      const t = themes[currentThemeIdx];      document.documentElement.setAttribute('data-theme', t);      themeLabel.textContent = t.toUpperCase();    });    // Populate Selector Pills and Gallery    SCREENS_DATA.forEach((s, idx) => {      // Pill      const pill = document.createElement('button');      pill.className = `screen-pill-btn ${idx === 0 ? 'active' : ''}`;      pill.innerHTML = `        <span class="pill-num">[0${idx + 1}]</span>        <span class="pill-title">${s.name}</span>      `;      pill.addEventListener('click', () => {        stopTour();        displayScreen(idx);      });      pillsBox.appendChild(pill);      // Gallery Card      const card = document.createElement('div');      card.className = 'gallery-screen-item';      card.innerHTML = `        <div class="gallery-preview-frame">          <img src="${s.file}" alt="${s.name}" class="gallery-preview-img" loading="lazy">        </div>        <div class="gallery-item-footer">          <div class="gallery-item-index">[0${idx + 1}] • ${s.subsystem.split('.')[1]}</div>          <div class="gallery-item-name">${s.name}</div>        </div>      `;      card.addEventListener('click', () => {        openLightbox(s.file, `[0${idx + 1}] ${s.name} — ${s.subsystem}`);      });      galleryBox.appendChild(card);    });    function displayScreen(index) {      currentIndex = (index + SCREENS_DATA.length) % SCREENS_DATA.length;      const s = SCREENS_DATA[currentIndex];      // Smooth switch      studioImg.style.opacity = '0.35';      setTimeout(() => {        studioImg.src = s.file;        studioImg.alt = s.name;        studioImg.style.opacity = '1';      }, 120);      // Metadata Update      indexBadge.textContent = `${String(currentIndex + 1).padStart(2, '0')} / ${SCREENS_DATA.length}`;      specSubsystemTag.textContent = `SUBSYSTEM: ${s.subsystem}`;      specSlaTag.textContent = `SLA: ${s.sla}`;      specHeading.textContent = s.heading;      specDesc.textContent = s.desc;      specGuaranteeText.textContent = s.guarantee;      // Capabilities Matrix      specCapsMatrix.innerHTML = '';      s.caps.forEach(cap => {        const item = document.createElement('div');        item.className = 'cap-matrix-item';        item.innerHTML = `          <svg class="cap-svg-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>          <span>${cap}</span>        `;        specCapsMatrix.appendChild(item);      });      // Update Active Pill      const pills = pillsBox.querySelectorAll('.screen-pill-btn');      pills.forEach((p, i) => {        p.classList.toggle('active', i === currentIndex);      });    }    prevBtn.addEventListener('click', () => {      stopTour();      displayScreen(currentIndex - 1);    });    nextBtn.addEventListener('click', () => {      stopTour();      displayScreen(currentIndex + 1);    });    function stopTour() {      if (tourTimer) {        clearInterval(tourTimer);        tourTimer = null;        tourBtn.textContent = 'TOUR';        tourBtn.style.backgroundColor = '';        tourBtn.style.color = '';      }    }    tourBtn.addEventListener('click', () => {      if (tourTimer) {        stopTour();      } else {        tourBtn.textContent = 'PAUSE';        tourBtn.style.backgroundColor = 'var(--color-accent)';        tourBtn.style.color = 'var(--color-accent-text)';        tourTimer = setInterval(() => {          displayScreen(currentIndex + 1);        }, 3000);      }    });    // Keyboard Arrow Navigation    window.addEventListener('keydown', (e) => {      if (e.key === 'ArrowRight') {        stopTour();        displayScreen(currentIndex + 1);      } else if (e.key === 'ArrowLeft') {        stopTour();        displayScreen(currentIndex - 1);      } else if (e.key === 'Escape') {        closeLightbox();      }    });    // Lightbox    studioImg.addEventListener('click', () => {      const s = SCREENS_DATA[currentIndex];      openLightbox(s.file, `[0${currentIndex + 1}] ${s.name} — ${s.heading}`);    });    function openLightbox(src, title) {      lightboxImg.src = src;      lightboxTitle.textContent = title;      lightboxModal.classList.add('active');    }    function closeLightbox() {      lightboxModal.classList.remove('active');    }    lightboxClose.addEventListener('click', closeLightbox);    lightboxModal.addEventListener('click', (e) => {      if (e.target === lightboxModal) closeLightbox();    });    // Copy ADB Code    const copyAdbBtn = document.getElementById('copyAdbBtn');    const adbText = document.getElementById('adbCodeText').innerText;    copyAdbBtn.addEventListener('click', () => {      navigator.clipboard.writeText(adbText).then(() => {        copyAdbBtn.textContent = 'COPIED';        setTimeout(() => copyAdbBtn.textContent = 'COPY ADB', 2000);      });    });    // Copy Hash    const copyHashBtn = document.getElementById('copyHashBtn');    const hashText = document.getElementById('hashText').innerText;    copyHashBtn.addEventListener('click', () => {      navigator.clipboard.writeText(hashText).then(() => {        copyHashBtn.textContent = 'COPIED';        setTimeout(() => copyHashBtn.textContent = 'COPY', 2000);      });    });    // Initial render    displayScreen(0);  
+  <section class="section-install-guide" id="install">    <div class="container">      <div class="section-title-block">        <span class="section-pre-tag">DEPLOYMENT GUIDE</span>        <h2 class="section-main-heading">3-Step Sideload Protocol</h2>        <p class="section-lead-text">          Standard installation procedure on all Android 8.0+ devices.        </p>      </div>      <div class="install-steps-layout">        <div class="install-step-card">          <div class="install-step-index">01</div>          <h4 class="install-step-title">Acquire APK</h4>          <p class="install-step-body">            Download <code>privex-mobile-release.apk</code> (1.86 MB). The release package contains all embedded models and Bloom filters.          </p>        </div>        <div class="install-step-card">          <div class="install-step-index">02</div>          <h4 class="install-step-title">Authorize Origin</h4>          <p class="install-step-body">            Tap the downloaded file. When prompted by Android Package Installer, toggle on "Allow from this source" in system settings.          </p>        </div>        <div class="install-step-card">          <div class="install-step-index">03</div>          <h4 class="install-step-title">Execute Installation</h4>          <p class="install-step-body">            Tap "Install". Launch PRIVEX to initiate real-time on-device phishing and scam defenses immediately.          </p>        </div>      </div>      <!-- Checksum Verification Card -->      <div class="checksum-audit-container">        <div>          <h4 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.25rem; font-weight: 800; margin-bottom: 8px;">Package Integrity Verification</h4>          <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">            Cryptographic SHA-256 hash. You can verify this binary via PowerShell or Linux bash before installing.          </p>          <div class="hash-display-pill">            <span class="hash-string" id="hashText">849db939732a1b91534807d8761682933324c31a64ee2eff4d7368e20005773b</span>            <button class="btn-copy-cli" id="copyHashBtn">Copy</button>          </div>        </div>        <div style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.8; font-family: 'Space Grotesk', monospace;">          <div>• <strong>PACKAGE ID:</strong> com.privex.security</div>          <div>• <strong>RELEASE:</strong> 0.1.2</div>          <div>• <strong>MIN SDK:</strong> Android 8.0 (API 26)</div>          <div>• <strong>TARGET SDK:</strong> Android 15 (API 35)</div>          <div>• <strong>ARCHITECTURES:</strong> arm64-v8a, armeabi-v7a, x86_64</div>        </div>      </div>    </div>  </section>  <!-- Fullscreen Lightbox Modal -->  <div class="lightbox-overlay" id="lightboxModal">    <div class="lightbox-viewport">      <button class="lightbox-dismiss-btn" id="lightboxCloseBtn">&times;</button>      <img src="" alt="Screen Detail" class="lightbox-target-img" id="lightboxImg">      <div class="lightbox-info-bar" id="lightboxTitle">SUBSYSTEM INSPECTION</div>    </div>  </div>  <!-- Industrial Engineering Footer -->  <footer class="site-footer">    <div class="container">      <div class="footer-columns-grid">        <div>          <div class="footer-col-header">PRIVEX CYBERSECURITY PLATFORM</div>          <p style="line-height: 1.7; max-width: 440px;">            A privacy-first cybersecurity system architected on data-minimization and zero-cloud dependence. All threat telemetry evaluates locally on the endpoint.          </p>        </div>        <div>          <div class="footer-col-header">REPOSITORIES & BUILDS</div>          <ul class="footer-nav-list">            <li class="footer-nav-item"><a href="downloads/privex-mobile-release.apk" download="privex-mobile-release.apk">Android APK (v0.1.2)</a></li>            <li class="footer-nav-item"><a href="index.html">Web Security Scanner</a></li>            <li class="footer-nav-item"><a href="https://github.com/bhedanikhilkumar-code/Privex" target="_blank" rel="noopener">GitHub Source Code</a></li>            <li class="footer-nav-item"><a href="release/RELEASE_NOTES_V0.1.2.md">Release Notes v0.1.2</a></li>          </ul>        </div>        <div>          <div class="footer-col-header">SECURITY PROTOCOLS</div>          <ul class="footer-nav-list">            <li class="footer-nav-item"><a href="SECURITY.md">Security Vulnerability Policy</a></li>            <li class="footer-nav-item"><a href="downloads/SHA256SUMS.txt">SHA-256 Checksums</a></li>            <li class="footer-nav-item"><a href="README.md">System Architecture</a></li>            <li class="footer-nav-item"><a href="AGENTS.md">Constitutional Rules</a></li>          </ul>        </div>      </div>      <div class="footer-bottom-bar">        <div>&copy; 2026 PRIVEX CYBERSECURITY. LOCAL-FIRST • ZERO-CLOUD • ZERO-KNOWLEDGE.</div>        <div>SHA256: B19A8C67...5AA3691</div>      </div>    </div>  </footer>  <!-- Application Logic -->  <script>
+
+    const SCREENS_DATA = [
+      {
+        id: 'home-dashboard',
+        name: 'Home Dashboard',
+        subsystem: 'CORE.DASHBOARD.TELEMETRY',
+        sla: '< 0.50 MS',
+        file: 'assets/screenshots/home-dashboard.png',
+        heading: 'Central Security Dashboard',
+        desc: 'Real-time overview of endpoint security posture, background monitors status, quick scan triggers, and volatile event counters.',
+        caps: [
+          'Unified Device Security Health Score',
+          'One-Tap Link & Message Quick Scan',
+          'Active Background Shield Toggles',
+          'Ephemeral Threat Activity Counters'
+        ],
+        guarantee: 'State is maintained locally in volatile memory. No browsing history persists to disk or cloud.'
+      },
+      {
+        id: 'protection-status',
+        name: 'Protection Status',
+        subsystem: 'CORE.MONITORS.TELEMETRY',
+        sla: '< 0.35 MS',
+        file: 'assets/screenshots/protection-status.png',
+        heading: 'Active Protection Status',
+        desc: 'Deep telemetry inspection for SMS extortion filtering, pre-navigation link interceptors, and local Bloom filter freshness.',
+        caps: [
+          'Inbound SMS Extortion Interceptor',
+          'Pre-Navigation URL Heuristic Guard',
+          'Air-Gapped Bloom Filter Cache Health',
+          'Local Explanation Synthesizer Status'
+        ],
+        guarantee: 'Monitors evaluate broadcast events ephemerally without persisting message content.'
+      },
+      {
+        id: 'scan-hub',
+        name: 'Scan Hub',
+        subsystem: 'CORE.INGESTION.PIPELINE',
+        sla: '< 0.65 MS',
+        file: 'assets/screenshots/scan-hub.png',
+        heading: 'Multi-Modal Threat Scan Hub',
+        desc: 'Universal ingestion point for untrusted strings, deceptive SMS notifications, QR bitmaps, and binary file headers.',
+        caps: [
+          'Multi-Input (URL, SMS, QR, File)',
+          'Instant Clipboard Sanitization & Scan',
+          'Automated Unicode NFKD Normalization',
+          '2,048-Byte Buffer Overflow Shielding'
+        ],
+        guarantee: 'All raw inputs are sanitized before parser execution and scrubbed upon verdict.'
+      },
+      {
+        id: 'url-scanner',
+        name: 'URL Scanner',
+        subsystem: 'CORE.SCANNER.LEXICAL_ENGINE',
+        sla: '< 0.85 MS',
+        file: 'assets/screenshots/url-scanner.png',
+        heading: 'Lexical Link & Homograph Scanner',
+        desc: 'Mathematical parsing of deceptive domains: Shannon entropy calculations, Levenshtein typosquatting distance, and IDN homograph de-cloaking.',
+        caps: [
+          'Shannon Entropy Randomness Scoring',
+          'Target Brand Typosquatting Distance',
+          'Punycode & IDN Homograph Translation',
+          'Offline Bloom Filter Reputation Check'
+        ],
+        guarantee: 'Zero DNS lookup or remote ping is made during evaluation. 100% offline.'
+      },
+      {
+        id: 'universal-scan-result',
+        name: 'Universal Scan Result',
+        subsystem: 'CORE.DECISION.BAYESIAN_ENGINE',
+        sla: '< 1.10 MS',
+        file: 'assets/screenshots/universal-scan-result.png',
+        heading: 'Instant Threat Verdict & Evidence',
+        desc: 'Non-linear Bayesian risk scoring producing an actionable 0-100 risk score, transparent evidence factors, and color-coded alert.',
+        caps: [
+          'Tri-State Color Alert (Safe / Caution / Block)',
+          'Multi-Factor Bounded Risk Score (0-100)',
+          'Transparent Evidence Telemetry Factors',
+          'Instant Friction Gate for Malicious Links'
+        ],
+        guarantee: 'The mathematical risk score is finalized deterministically before any explanation is generated.'
+      },
+      {
+        id: 'security-assistant',
+        name: 'Security Assistant',
+        subsystem: 'CORE.ASSISTANT.READ_ONLY_SLM',
+        sla: '< 12.0 MS',
+        file: 'assets/screenshots/security-assistant.png',
+        heading: 'Read-Only Security Assistant',
+        desc: 'Translates technical threat evidence into plain, non-jargon explanations formatted below cognitive Grade 8 reading level.',
+        caps: [
+          'Plain English Non-Technical Breakdown',
+          'Specific Threat Tactics Explained (Urgency, Spoof)',
+          'Step-by-Step Remediation Action Guide',
+          'Airtight Prompt Injection Containment'
+        ],
+        guarantee: 'The assistant is read-only and has zero authority to alter or downgrade the deterministic risk score.'
+      },
+      {
+        id: 'privacy-center',
+        name: 'Privacy Center',
+        subsystem: 'CORE.BOUNDARIES.DATA_MINIMIZATION',
+        sla: '< 0.20 MS',
+        file: 'assets/screenshots/privacy-center.png',
+        heading: 'Privacy Center & Data Shredder',
+        desc: 'Audit volatile RAM boundaries, verify zero-knowledge telemetry, and execute one-tap cryptographic data shredding.',
+        caps: [
+          'Zero-Knowledge Telemetry Audit',
+          'Volatile RAM Heap Auto-Zeroing Status',
+          'Encrypted SQLite / SQLCipher Store Controls',
+          'One-Tap Cryptographic Shredder'
+        ],
+        guarantee: 'Data shredding purges all internal event counters and derived local caches instantaneously.'
+      },
+      {
+        id: 'quarantine-vault',
+        name: 'Quarantine Vault',
+        subsystem: 'CORE.CONTAINMENT.SANDBOX',
+        sla: '< 0.40 MS',
+        file: 'assets/screenshots/quarantine-vault.png',
+        heading: 'Isolated Endpoint Quarantine Vault',
+        desc: 'Neutralized repository for intercepted malicious URLs, phishing payloads, and deceptive messages without execution risk.',
+        caps: [
+          'Neutralized Payload Containment',
+          'Safe De-Obfuscated Structure View',
+          'Export Anonymized Signatures',
+          'Permanent Shredding with Secure Overwrite'
+        ],
+        guarantee: 'Quarantined payloads are encrypted with keys derived from OS-native Keystore.'
+      },
+      {
+        id: 'password-generator',
+        name: 'Password Generator',
+        subsystem: 'CORE.TOOLS.CRYPTO_CSPRNG',
+        sla: '< 0.15 MS',
+        file: 'assets/screenshots/password-generator.png',
+        heading: 'Cryptographic Password Studio',
+        desc: 'Generate hardware-seeded, high-entropy passwords and authorization tokens directly using the OS CSPRNG.',
+        caps: [
+          'Hardware-Seeded Cryptographic Randomness',
+          'Customizable Length, Character Sets & Symbols',
+          'Real-time Shannon Entropy Strength Meter',
+          'Zero Clipboard Leak Auto-Clear'
+        ],
+        guarantee: 'Generated credentials are never logged, cached, or persisted to device storage.'
+      },
+      {
+        id: 'settings',
+        name: 'Settings & Rules',
+        subsystem: 'CORE.CONFIG.LOCAL_POLICY',
+        sla: '< 0.30 MS',
+        file: 'assets/screenshots/settings.png',
+        heading: 'Policy Controls & Sensitivity Tuning',
+        desc: 'Manage custom domain allowlists, calibrate heuristic sensitivity thresholds, and configure cryptographically signed updates.',
+        caps: [
+          'Custom User Allowlists & Exclusions',
+          'Detection Sensitivity Tuning (Strict / Balanced)',
+          'Ed25519-Signed Offline Rule Updates',
+          'High-Contrast Cyberpunk & OLED Theme'
+        ],
+        guarantee: 'Allows total control over endpoint security policies with zero remote server reporting.'
+      }
+    ];
+
+    let currentIndex = 0;
+    let tourTimer = null;
+
+    // Elements
+    const heroImg = document.getElementById('heroPhoneScreenImg');
+    const studioImg = document.getElementById('studioPhoneImg');
+    const pillsBox = document.getElementById('screenPillsContainer');
+    const galleryBox = document.getElementById('galleryCardsGrid');
+    const indexBadge = document.getElementById('screenIndexBadge');
+    const specSubsystemTag = document.getElementById('specSubsystemTag');
+    const specSlaTag = document.getElementById('specSlaTag');
+    const specHeading = document.getElementById('specScreenHeading');
+    const specDesc = document.getElementById('specScreenDesc');
+    const specCapsMatrix = document.getElementById('specCapsMatrix');
+    const specGuaranteeText = document.getElementById('specGuaranteeText');
+    const prevBtn = document.getElementById('prevScreenBtn');
+    const nextBtn = document.getElementById('nextScreenBtn');
+    const tourBtn = document.getElementById('tourAutoBtn');
+
+    // Lightbox Elements
+    const lightboxModal = document.getElementById('lightboxModal');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxTitle = document.getElementById('lightboxTitle');
+    const lightboxClose = document.getElementById('lightboxCloseBtn');
+
+    // Theme Elements
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const themeLabel = document.getElementById('themeLabel');
+    const themes = ['night', 'dark', 'light'];
+    let currentThemeIdx = 0;
+
+    themeBtn.addEventListener('click', () => {
+      currentThemeIdx = (currentThemeIdx + 1) % themes.length;
+      const t = themes[currentThemeIdx];
+      document.documentElement.setAttribute('data-theme', t);
+      themeLabel.textContent = t.toUpperCase();
+    });
+
+    // Populate Selector Pills and Gallery
+    SCREENS_DATA.forEach((s, idx) => {
+      // Pill
+      const pill = document.createElement('button');
+      pill.className = `screen-pill-btn ${idx === 0 ? 'active' : ''}`;
+      pill.innerHTML = `
+        <span class="pill-num">[0${idx + 1}]</span>
+        <span class="pill-title">${s.name}</span>
+      `;
+      pill.addEventListener('click', () => {
+        stopTour();
+        displayScreen(idx);
+      });
+      pillsBox.appendChild(pill);
+
+      // Gallery Card
+      const card = document.createElement('div');
+      card.className = 'gallery-screen-item';
+      card.innerHTML = `
+        <div class="gallery-preview-frame">
+          <img src="${s.file}" alt="${s.name}" class="gallery-preview-img" loading="lazy">
+        </div>
+        <div class="gallery-item-footer">
+          <div class="gallery-item-index">[0${idx + 1}] • ${s.subsystem.split('.')[1]}</div>
+          <div class="gallery-item-name">${s.name}</div>
+        </div>
+      `;
+      card.addEventListener('click', () => {
+        openLightbox(s.file, `[0${idx + 1}] ${s.name} — ${s.subsystem}`);
+      });
+      galleryBox.appendChild(card);
+    });
+
+    function displayScreen(index) {
+      currentIndex = (index + SCREENS_DATA.length) % SCREENS_DATA.length;
+      const s = SCREENS_DATA[currentIndex];
+
+      // Smooth switch
+      studioImg.style.opacity = '0.35';
+      setTimeout(() => {
+        studioImg.src = s.file;
+        studioImg.alt = s.name;
+        studioImg.style.opacity = '1';
+      }, 120);
+
+      // Metadata Update
+      indexBadge.textContent = `${String(currentIndex + 1).padStart(2, '0')} / ${SCREENS_DATA.length}`;
+      specSubsystemTag.textContent = `SUBSYSTEM: ${s.subsystem}`;
+      specSlaTag.textContent = `SLA: ${s.sla}`;
+      specHeading.textContent = s.heading;
+      specDesc.textContent = s.desc;
+      specGuaranteeText.textContent = s.guarantee;
+
+      // Capabilities Matrix
+      specCapsMatrix.innerHTML = '';
+      s.caps.forEach(cap => {
+        const item = document.createElement('div');
+        item.className = 'cap-matrix-item';
+        item.innerHTML = `
+          <svg class="cap-svg-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>${cap}</span>
+        `;
+        specCapsMatrix.appendChild(item);
+      });
+
+      // Update Active Pill
+      const pills = pillsBox.querySelectorAll('.screen-pill-btn');
+      pills.forEach((p, i) => {
+        p.classList.toggle('active', i === currentIndex);
+      });
+    }
+
+    prevBtn.addEventListener('click', () => {
+      stopTour();
+      displayScreen(currentIndex - 1);
+    });
+
+    nextBtn.addEventListener('click', () => {
+      stopTour();
+      displayScreen(currentIndex + 1);
+    });
+
+    function stopTour() {
+      if (tourTimer) {
+        clearInterval(tourTimer);
+        tourTimer = null;
+        tourBtn.textContent = 'TOUR';
+        tourBtn.style.backgroundColor = '';
+        tourBtn.style.color = '';
+      }
+    }
+
+    tourBtn.addEventListener('click', () => {
+      if (tourTimer) {
+        stopTour();
+      } else {
+        tourBtn.textContent = 'PAUSE';
+        tourBtn.style.backgroundColor = 'var(--color-accent)';
+        tourBtn.style.color = 'var(--color-accent-text)';
+        tourTimer = setInterval(() => {
+          displayScreen(currentIndex + 1);
+        }, 3000);
+      }
+    });
+
+    // Keyboard Arrow Navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        stopTour();
+        displayScreen(currentIndex + 1);
+      } else if (e.key === 'ArrowLeft') {
+        stopTour();
+        displayScreen(currentIndex - 1);
+      } else if (e.key === 'Escape') {
+        closeLightbox();
+      }
+    });
+
+    // Lightbox
+    studioImg.addEventListener('click', () => {
+      const s = SCREENS_DATA[currentIndex];
+      openLightbox(s.file, `[0${currentIndex + 1}] ${s.name} — ${s.heading}`);
+    });
+
+    function openLightbox(src, title) {
+      lightboxImg.src = src;
+      lightboxTitle.textContent = title;
+      lightboxModal.classList.add('active');
+    }
+
+    function closeLightbox() {
+      lightboxModal.classList.remove('active');
+    }
+
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightboxModal.addEventListener('click', (e) => {
+      if (e.target === lightboxModal) closeLightbox();
+    });
+
+    // Copy ADB Code
+    const copyAdbBtn = document.getElementById('copyAdbBtn');
+    const adbText = document.getElementById('adbCodeText').innerText;
+    copyAdbBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(adbText).then(() => {
+        copyAdbBtn.textContent = 'COPIED';
+        setTimeout(() => copyAdbBtn.textContent = 'COPY ADB', 2000);
+      });
+    });
+
+    // Copy Hash
+    const copyHashBtn = document.getElementById('copyHashBtn');
+    const hashText = document.getElementById('hashText').innerText;
+    copyHashBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(hashText).then(() => {
+        copyHashBtn.textContent = 'COPIED';
+        setTimeout(() => copyHashBtn.textContent = 'COPY', 2000);
+      });
+    });
+
+    // Initial render
+    displayScreen(0);
+  
+
     // Automated GitHub Releases Live Dynamic Asset Detection
     async function syncLatestGitHubRelease() {
       const REPO = 'bhedanikhilkumar-code/Privex';
@@ -683,4 +1048,5 @@
     // Call dynamic release sync on page load
     syncLatestGitHubRelease();
 
+  
   </script></body></html>
