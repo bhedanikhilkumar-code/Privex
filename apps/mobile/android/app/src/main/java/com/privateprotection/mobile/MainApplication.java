@@ -39,7 +39,6 @@ public class MainApplication extends Application {
         if (securityCoordinator != null) {
             securityCoordinator.onTrimMemory(level);
         }
-        com.privateprotection.mobile.core.AdaptiveResourceManager.getInstance(this).onTrimMemory(level);
     }
 
     @Override
@@ -48,6 +47,5 @@ public class MainApplication extends Application {
         if (securityCoordinator != null) {
             securityCoordinator.onLowMemory();
         }
-        com.privateprotection.mobile.core.AdaptiveResourceManager.getInstance(this).onLowMemory();
     }
 }

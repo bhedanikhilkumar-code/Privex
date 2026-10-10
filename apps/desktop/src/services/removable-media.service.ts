@@ -100,7 +100,7 @@ export class RemovableMediaService extends EventEmitter {
       return this.customDriveProvider();
     }
 
-    if (process.platform === 'win32' || !(this.runner instanceof DefaultRemovableMediaCommandRunner)) {
+    if (process.platform === 'win32') {
       return this.queryWindowsRemovableDrives();
     }
 

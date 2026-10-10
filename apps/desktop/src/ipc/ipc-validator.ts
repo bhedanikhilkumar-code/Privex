@@ -102,21 +102,11 @@ export class IpcValidator {
       return false;
     }
 
-    const trimmed = filePath.trim();
-    const rawSlash = trimmed.replace(/\\/g, '/').toLowerCase();
-    const rawBackslash = trimmed.replace(/\//g, '\\').toLowerCase();
-
-    if (rawSlash === '/tmp' || rawSlash.startsWith('/tmp/')) {
-      return false;
-    }
-    if (
-      rawBackslash === 'c:\\windows\\temp' ||
-      rawBackslash.startsWith('c:\\windows\\temp\\') ||
-      rawSlash === 'c:/windows/temp' ||
-      rawSlash.startsWith('c:/windows/temp/')
-    ) {
-      return false;
-    }
+    const candidates = [
+      filePath.trim(),
+      path.resolve(filePath.trim()),
+      this.resolveNativeRealPathBestEffort(filePath.trim())
+    ];
 
     const dynamicPrefixes = [...this.PROTECTED_SYSTEM_PREFIXES];
     for (const envVar of ['SystemRoot', 'ProgramFiles', 'ProgramFiles(x86)']) {
@@ -126,43 +116,34 @@ export class IpcValidator {
       }
     }
 
-    for (const prefix of dynamicPrefixes) {
-      const prefixSlash = prefix.replace(/\\/g, '/');
-      const prefixBackslash = prefix.replace(/\//g, '\\');
-      if (
-        rawBackslash === prefixBackslash ||
-        rawBackslash.startsWith(prefixBackslash + '\\') ||
-        rawSlash === prefixSlash ||
-        rawSlash.startsWith(prefixSlash + '/')
-      ) {
-        return true;
+    for (const candidate of candidates) {
+      const rawSlash = candidate.replace(/\\/g, '/').toLowerCase();
+      if (rawSlash === '/tmp' || rawSlash.startsWith('/tmp/')) {
+        return false;
       }
-    }
+      const normalized = path.resolve(candidate).toLowerCase();
+      if (
+        normalized === 'c:\\windows\\temp' ||
+        normalized.startsWith('c:\\windows\\temp\\') ||
+        rawSlash === 'c:/windows/temp' ||
+        rawSlash.startsWith('c:/windows/temp/')
+      ) {
+        return false;
+      }
 
-    // Only attempt OS-level path resolution if filePath matches the current OS native path model
-    if (process.platform === 'win32' || !/^[a-zA-Z]:[\\/]/.test(trimmed)) {
-      const candidates = [
-        path.resolve(trimmed),
-        this.resolveNativeRealPathBestEffort(trimmed)
-      ];
-      for (const candidate of candidates) {
-        const cSlash = candidate.replace(/\\/g, '/').toLowerCase();
-        const cBackslash = candidate.replace(/\//g, '\\').toLowerCase();
-        if (cSlash === '/tmp' || cSlash.startsWith('/tmp/')) {
-          continue;
-        }
-        for (const prefix of dynamicPrefixes) {
-          const prefixSlash = prefix.replace(/\\/g, '/');
-          const prefixBackslash = prefix.replace(/\//g, '\\');
-          if (
-            cBackslash === prefixBackslash ||
-            cBackslash.startsWith(prefixBackslash + '\\') ||
-            cSlash === prefixSlash ||
-            cSlash.startsWith(prefixSlash + '/')
-          ) {
-            return true;
-          }
-        }
+      const isProtected = dynamicPrefixes.some((prefix) => {
+        const prefixSlash = prefix.replace(/\\/g, '/');
+        return (
+          normalized === prefix ||
+          normalized.startsWith(prefix + '\\') ||
+          normalized.startsWith(prefix + '/') ||
+          rawSlash === prefixSlash ||
+          rawSlash.startsWith(prefixSlash + '/')
+        );
+      });
+
+      if (isProtected) {
+        return true;
       }
     }
 

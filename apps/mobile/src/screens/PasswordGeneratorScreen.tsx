@@ -36,9 +36,9 @@ export const PasswordGeneratorScreen: React.FC<PasswordGeneratorScreenProps> = (
   // Generated Result
   const [generatedResult, setGeneratedResult] = useState<PasswordGenerationResult | PassphraseGenerationResult | null>(null);
   const [copiedFeedback, setCopiedFeedback] = useState<boolean>(false);
-  const [showSecret, setShowSecret] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Sync preset changes
   const applyPreset = (selectedPreset: PasswordGeneratorPreset) => {
     setPreset(selectedPreset);
     const opts = service.getPresetOptions(selectedPreset);
@@ -84,7 +84,7 @@ export const PasswordGeneratorScreen: React.FC<PasswordGeneratorScreenProps> = (
 
   useEffect(() => {
     handleGenerate();
-  }, [mode, length, wordCount, useUppercase, useLowercase, useNumbers, useSpecial, avoidAmbiguous, avoidSimilar, separator, capitalize, includeNumber]);
+  }, [mode]);
 
   const handleCopy = async () => {
     if (!generatedResult?.secret) return;
@@ -98,70 +98,56 @@ export const PasswordGeneratorScreen: React.FC<PasswordGeneratorScreenProps> = (
   const getStrengthBadge = (strength: string) => {
     switch (strength) {
       case 'VERY_STRONG':
-        return { label: 'Very Strong', bg: 'rgba(16, 185, 129, 0.2)', text: '#34d399', border: '#10b981' };
+        return { label: 'Very Strong', bg: '#064e3b', text: '#34d399', border: '#059669' };
       case 'STRONG':
-        return { label: 'Strong', bg: 'rgba(16, 185, 129, 0.2)', text: '#6ee7b7', border: '#059669' };
+        return { label: 'Strong', bg: '#065f46', text: '#6ee7b7', border: '#10b981' };
       case 'MEDIUM':
-        return { label: 'Medium', bg: 'rgba(245, 158, 11, 0.2)', text: '#fde047', border: '#f59e0b' };
+        return { label: 'Medium', bg: '#78350f', text: '#fde047', border: '#f59e0b' };
       case 'WEAK':
       default:
-        return { label: 'Weak', bg: 'rgba(239, 68, 68, 0.2)', text: '#fca5a5', border: '#ef4444' };
+        return { label: 'Weak', bg: '#7f1d1d', text: '#fca5a5', border: '#ef4444' };
     }
   };
 
   const badge = generatedResult ? getStrengthBadge(generatedResult.strengthLevel) : null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '1rem', color: '#f8fafc' }}>
-      {/* Top Header matching Password Generator.png */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+    <div style={{ padding: '1rem', color: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {onBack && (
             <button
               type="button"
               onClick={onBack}
               style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                backgroundColor: '#111b2e',
-                border: '1px solid #27364b',
+                background: 'transparent',
+                border: 'none',
                 color: '#38bdf8',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                fontSize: '1.25rem',
                 cursor: 'pointer',
-                fontSize: '1rem'
+                padding: '0.25rem 0.5rem'
               }}
             >
               ←
             </button>
           )}
-          <div>
-            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              KEY VAULT
-            </span>
-            <h1 style={{ margin: '0.1rem 0 0 0', fontSize: '1.5rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
-              🔐 Secure Password Generator
-            </h1>
-          </div>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>🔐 Secure Password Generator</h2>
         </div>
         <span
           style={{
             fontSize: '0.7rem',
-            padding: '0.25rem 0.65rem',
+            padding: '0.2rem 0.5rem',
             borderRadius: '9999px',
-            backgroundColor: 'rgba(56, 189, 248, 0.15)',
-            color: '#38bdf8',
-            border: '1px solid #0284c7',
-            fontWeight: 700
+            backgroundColor: '#0369a1',
+            color: '#e0f2fe'
           }}
         >
           100% On-Device CSPRNG
         </span>
       </div>
 
-      {/* Mode Switcher matching Password Generator.png tabs & test selectors */}
+      {/* Mode Switcher */}
       <div
         style={{
           display: 'grid',
@@ -169,391 +155,355 @@ export const PasswordGeneratorScreen: React.FC<PasswordGeneratorScreenProps> = (
           gap: '0.5rem',
           backgroundColor: '#0f172a',
           padding: '0.25rem',
-          borderRadius: '12px'
+          borderRadius: '10px'
         }}
       >
         <button
           type="button"
-          onClick={() => setMode('PASSWORD')}
+          onClick={() => {
+            setMode('PASSWORD');
+          }}
           style={{
             padding: '0.6rem',
             border: 'none',
-            borderRadius: '10px',
+            borderRadius: '8px',
             cursor: 'pointer',
             fontWeight: mode === 'PASSWORD' ? 700 : 500,
             backgroundColor: mode === 'PASSWORD' ? '#2563eb' : 'transparent',
-            color: mode === 'PASSWORD' ? '#ffffff' : '#94a3b8',
-            fontSize: '0.85rem'
+            color: mode === 'PASSWORD' ? '#ffffff' : '#94a3b8'
           }}
         >
           Password (Chars)
         </button>
         <button
           type="button"
-          onClick={() => setMode('PASSPHRASE')}
+          onClick={() => {
+            setMode('PASSPHRASE');
+          }}
           style={{
             padding: '0.6rem',
             border: 'none',
-            borderRadius: '10px',
+            borderRadius: '8px',
             cursor: 'pointer',
             fontWeight: mode === 'PASSPHRASE' ? 700 : 500,
             backgroundColor: mode === 'PASSPHRASE' ? '#2563eb' : 'transparent',
-            color: mode === 'PASSPHRASE' ? '#ffffff' : '#94a3b8',
-            fontSize: '0.85rem'
+            color: mode === 'PASSPHRASE' ? '#ffffff' : '#94a3b8'
           }}
         >
           Passphrase (Words)
         </button>
       </div>
 
-      {/* Preset Buttons for Quick Selection */}
-      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-        <button
-          type="button"
-          onClick={() => applyPreset('STANDARD')}
-          style={{
-            padding: '0.35rem 0.65rem',
-            backgroundColor: preset === 'STANDARD' ? '#2563eb' : '#111b2e',
-            color: preset === 'STANDARD' ? '#ffffff' : '#94a3b8',
-            border: '1px solid #27364b',
-            borderRadius: '8px',
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            cursor: 'pointer'
-          }}
-        >
-          Standard (20)
-        </button>
-        <button
-          type="button"
-          onClick={() => applyPreset('STRONG')}
-          style={{
-            padding: '0.35rem 0.65rem',
-            backgroundColor: preset === 'STRONG' ? '#2563eb' : '#111b2e',
-            color: preset === 'STRONG' ? '#ffffff' : '#94a3b8',
-            border: '1px solid #27364b',
-            borderRadius: '8px',
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            cursor: 'pointer'
-          }}
-        >
-          Strong (32)
-        </button>
-        <button
-          type="button"
-          onClick={() => applyPreset('VERY_STRONG')}
-          style={{
-            padding: '0.35rem 0.65rem',
-            backgroundColor: preset === 'VERY_STRONG' ? '#2563eb' : '#111b2e',
-            color: preset === 'VERY_STRONG' ? '#ffffff' : '#94a3b8',
-            border: '1px solid #27364b',
-            borderRadius: '8px',
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            cursor: 'pointer'
-          }}
-        >
-          Very Strong (64)
-        </button>
-      </div>
-
-      {errorMessage && (
-        <div style={{ padding: '0.5rem', backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#f87171', borderRadius: '8px', fontSize: '0.8rem' }}>
-          {errorMessage}
-        </div>
-      )}
-
-      {/* Generated Secret Display Card matching Password Generator.png */}
+      {/* Display Result Card */}
       <div
         style={{
-          backgroundColor: '#111b2e',
-          borderRadius: '20px',
+          backgroundColor: '#1e293b',
+          borderRadius: '16px',
           padding: '1.25rem',
-          border: '1px solid #27364b',
+          border: '1px solid #334155',
           display: 'flex',
           flexDirection: 'column',
-          gap: '1rem'
+          gap: '0.75rem'
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
             {mode === 'PASSWORD' ? `Length: ${length} chars` : `Word Count: ${wordCount} words`}
           </span>
           {badge && (
             <span
               style={{
-                fontSize: '0.72rem',
+                fontSize: '0.75rem',
                 fontWeight: 700,
                 padding: '0.2rem 0.6rem',
-                borderRadius: '9999px',
+                borderRadius: '6px',
                 backgroundColor: badge.bg,
                 color: badge.text,
                 border: `1px solid ${badge.border}`
               }}
             >
-              {badge.label} • {generatedResult?.entropyBits} BITS
+              {badge.label} · {generatedResult?.entropyBits} bits
             </span>
           )}
         </div>
 
-        {/* Secret Output Container */}
+        {/* Secret container */}
         <div
           role="region"
           aria-label="Generated Secret"
           style={{
             backgroundColor: '#0f172a',
-            borderRadius: '12px',
+            borderRadius: '10px',
             padding: '1rem',
-            border: '1px solid #1e293b',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '0.75rem'
+            border: '1px solid #38bdf8',
+            fontFamily: 'monospace',
+            fontSize: '1.1rem',
+            wordBreak: 'break-all',
+            color: '#38bdf8',
+            userSelect: 'all'
           }}
         >
-          <div
+          {generatedResult?.secret || 'Click Generate to produce secret'}
+        </div>
+
+        {/* Action Buttons: Refresh & Copy */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          <button
+            type="button"
+            onClick={handleGenerate}
             style={{
-              fontFamily: 'monospace, "JetBrains Mono", Consolas',
-              fontSize: '1.05rem',
+              padding: '0.75rem',
+              backgroundColor: '#334155',
+              border: '1px solid #475569',
+              borderRadius: '10px',
+              color: '#f8fafc',
+              cursor: 'pointer',
               fontWeight: 600,
-              wordBreak: 'break-all',
-              color: '#38bdf8',
-              flex: 1,
-              letterSpacing: '0.02em'
+              fontSize: '0.9rem'
             }}
           >
-            {showSecret
-              ? (generatedResult?.secret || 'Generating...')
-              : '••••••••••••••••••••••••'}
-          </div>
-          <div style={{ display: 'flex', gap: '0.4rem' }}>
-            <button
-              type="button"
-              onClick={() => setShowSecret(!showSecret)}
-              aria-label={showSecret ? 'Hide secret' : 'Show secret'}
-              style={{
-                backgroundColor: '#1e293b',
-                border: '1px solid #334155',
-                color: '#94a3b8',
-                borderRadius: '8px',
-                padding: '0.4rem 0.6rem',
-                cursor: 'pointer',
-                fontSize: '0.85rem'
-              }}
-            >
-              {showSecret ? '👁️' : '🔒'}
-            </button>
-            <button
-              type="button"
-              onClick={handleGenerate}
-              aria-label="🔄 Regenerate"
-              style={{
-                backgroundColor: '#1e293b',
-                border: '1px solid #334155',
-                color: '#38bdf8',
-                borderRadius: '8px',
-                padding: '0.4rem 0.6rem',
-                cursor: 'pointer',
-                fontSize: '0.85rem'
-              }}
-            >
-              🔄 Regenerate
-            </button>
-          </div>
+            🔄 Regenerate
+          </button>
+          <button
+            type="button"
+            onClick={handleCopy}
+            disabled={!generatedResult?.secret}
+            style={{
+              padding: '0.75rem',
+              backgroundColor: copiedFeedback ? '#059669' : '#0284c7',
+              border: 'none',
+              borderRadius: '10px',
+              color: '#ffffff',
+              cursor: 'pointer',
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              transition: 'background-color 0.2s'
+            }}
+          >
+            {copiedFeedback ? '✓ Copied (Auto-clear in 60s)' : '📋 Copy Secret'}
+          </button>
         </div>
 
-        {/* Copy Button */}
-        <button
-          type="button"
-          onClick={handleCopy}
-          style={{
-            padding: '0.85rem',
-            backgroundColor: copiedFeedback ? '#10b981' : '#2563eb',
-            color: '#ffffff',
-            fontWeight: 700,
-            borderRadius: '12px',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: '0.9rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.5rem',
-            boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
-            transition: 'background-color 0.2s ease'
-          }}
-        >
-          <span>{copiedFeedback ? '✓ Copied (Auto-clear in 60s)' : '📋 Copy Secret'}</span>
-        </button>
+        {/* Entropy Explanation */}
+        {generatedResult && (
+          <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.4 }}>
+            ℹ️ {generatedResult.entropyExplanation}
+          </p>
+        )}
       </div>
 
-      {/* Configuration Controls */}
-      <div
-        style={{
-          backgroundColor: '#111b2e',
-          borderRadius: '20px',
-          padding: '1.25rem',
-          border: '1px solid #27364b',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1.25rem'
-        }}
-      >
-        {/* Length / Word Count Slider */}
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f8fafc' }}>
-              {mode === 'PASSWORD' ? 'Password Length' : 'Word Count'}
-            </span>
-            <span
-              style={{
-                fontSize: '0.85rem',
-                fontWeight: 800,
-                color: '#38bdf8',
-                backgroundColor: '#0f172a',
-                padding: '0.2rem 0.6rem',
-                borderRadius: '6px',
-                border: '1px solid #1e293b'
-              }}
-            >
-              {mode === 'PASSWORD' ? length : wordCount}
-            </span>
+      {errorMessage && (
+        <div
+          style={{
+            backgroundColor: '#7f1d1d',
+            color: '#fecaca',
+            padding: '0.75rem',
+            borderRadius: '8px',
+            fontSize: '0.85rem'
+          }}
+        >
+          ⚠️ {errorMessage}
+        </div>
+      )}
+
+      {/* Controls & Configuration */}
+      {mode === 'PASSWORD' ? (
+        <div
+          style={{
+            backgroundColor: '#1e293b',
+            borderRadius: '16px',
+            padding: '1.25rem',
+            border: '1px solid #334155',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem'
+          }}
+        >
+          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Password Presets</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
+            {(['STANDARD', 'STRONG', 'VERY_STRONG', 'CUSTOM'] as PasswordGeneratorPreset[]).map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => applyPreset(p)}
+                style={{
+                  padding: '0.5rem 0.25rem',
+                  fontSize: '0.75rem',
+                  borderRadius: '8px',
+                  border: preset === p ? '1px solid #38bdf8' : '1px solid #475569',
+                  backgroundColor: preset === p ? '#0369a1' : '#0f172a',
+                  color: preset === p ? '#ffffff' : '#94a3b8',
+                  cursor: 'pointer',
+                  fontWeight: preset === p ? 700 : 500
+                }}
+              >
+                {p === 'STANDARD' ? 'Standard (20)' : p === 'STRONG' ? 'Strong (32)' : p === 'VERY_STRONG' ? 'Max (48)' : 'Custom'}
+              </button>
+            ))}
           </div>
 
-          <input
-            type="range"
-            min={mode === 'PASSWORD' ? 8 : 3}
-            max={mode === 'PASSWORD' ? 64 : 12}
-            value={mode === 'PASSWORD' ? length : wordCount}
-            onChange={(e) => {
-              if (mode === 'PASSWORD') {
-                setLength(parseInt(e.target.value, 10));
-              } else {
-                setWordCount(parseInt(e.target.value, 10));
-              }
-            }}
-            style={{
-              width: '100%',
-              accentColor: '#38bdf8',
-              cursor: 'pointer'
-            }}
-          />
-        </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+              <label htmlFor="length-slider" style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>Length: {length} characters</label>
+              <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>12–128</span>
+            </div>
+            <input
+              id="length-slider"
+              type="range"
+              min={12}
+              max={128}
+              value={length}
+              onChange={(e) => {
+                setLength(Number(e.target.value));
+                setPreset('CUSTOM');
+              }}
+              style={{ width: '100%' }}
+            />
+          </div>
 
-        {/* Complexity Rules Switches */}
-        {mode === 'PASSWORD' ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              COMPLEXITY RULES
-            </span>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#f8fafc' }}>Uppercase Letters</span>
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block' }}>A, B, C, ...</span>
-              </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={useUppercase}
-                onChange={(e) => setUseUppercase(e.target.checked)}
-                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#38bdf8' }}
+                onChange={(e) => { setUseUppercase(e.target.checked); setPreset('CUSTOM'); }}
               />
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #1e293b', paddingTop: '0.75rem' }}>
-              <div>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#f8fafc' }}>Lowercase Letters</span>
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block' }}>a, b, c, ...</span>
-              </div>
+              Uppercase Letters (A-Z)
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={useLowercase}
-                onChange={(e) => setUseLowercase(e.target.checked)}
-                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#38bdf8' }}
+                onChange={(e) => { setUseLowercase(e.target.checked); setPreset('CUSTOM'); }}
               />
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #1e293b', paddingTop: '0.75rem' }}>
-              <div>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#f8fafc' }}>Numeric Digits</span>
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block' }}>0 through 9</span>
-              </div>
+              Lowercase Letters (a-z)
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={useNumbers}
-                onChange={(e) => setUseNumbers(e.target.checked)}
-                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#38bdf8' }}
+                onChange={(e) => { setUseNumbers(e.target.checked); setPreset('CUSTOM'); }}
               />
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #1e293b', paddingTop: '0.75rem' }}>
-              <div>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#f8fafc' }}>Special Symbols</span>
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block' }}>!@#$%^&amp;*</span>
-              </div>
+              Numbers (0-9)
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={useSpecial}
-                onChange={(e) => setUseSpecial(e.target.checked)}
-                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#38bdf8' }}
+                onChange={(e) => { setUseSpecial(e.target.checked); setPreset('CUSTOM'); }}
               />
-            </div>
+              Symbols & Special (!@#$%...)
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={avoidSimilar}
+                onChange={(e) => { setAvoidSimilar(e.target.checked); setPreset('CUSTOM'); }}
+              />
+              Avoid Similar Characters (l, 1, I, o, 0, O)
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={avoidAmbiguous}
+                onChange={(e) => { setAvoidAmbiguous(e.target.checked); setPreset('CUSTOM'); }}
+              />
+              Avoid Ambiguous Symbols ({'{'} {'}'} [ ] ( ) / \ ' " ` ~)
+            </label>
           </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Passphrase Configuration
-            </span>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <label htmlFor="separator-input" style={{ fontSize: '0.85rem', fontWeight: 600, color: '#f8fafc' }}>
-                Word Separator:
-              </label>
-              <input
-                id="separator-input"
-                type="text"
-                value={separator}
-                onChange={(e) => setSeparator(e.target.value)}
-                style={{
-                  width: '40px',
-                  textAlign: 'center',
-                  padding: '0.2rem',
-                  backgroundColor: '#0f172a',
-                  border: '1px solid #27364b',
-                  borderRadius: '6px',
-                  color: '#f8fafc'
-                }}
-              />
+        </div>
+      ) : (
+        <div
+          style={{
+            backgroundColor: '#1e293b',
+            borderRadius: '16px',
+            padding: '1.25rem',
+            border: '1px solid #334155',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem'
+          }}
+        >
+          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Passphrase Configuration</h3>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+              <label htmlFor="word-count-slider" style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>Word Count: {wordCount} words</label>
+              <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>3–10</span>
             </div>
+            <input
+              id="word-count-slider"
+              type="range"
+              min={3}
+              max={10}
+              value={wordCount}
+              onChange={(e) => setWordCount(Number(e.target.value))}
+              style={{ width: '100%' }}
+            />
+          </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #1e293b', paddingTop: '0.75rem' }}>
-              <label htmlFor="capitalize-checkbox" style={{ fontSize: '0.85rem', fontWeight: 600, color: '#f8fafc' }}>
-                Capitalize Each Word
-              </label>
+          <div>
+            <label htmlFor="separator-select" style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.25rem', color: '#cbd5e1' }}>
+              Word Separator:
+            </label>
+            <select
+              id="separator-select"
+              value={separator}
+              onChange={(e) => setSeparator(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.5rem',
+                backgroundColor: '#0f172a',
+                color: '#f8fafc',
+                border: '1px solid #475569',
+                borderRadius: '8px'
+              }}
+            >
+              <option value="-">Hyphen (-)</option>
+              <option value="_">Underscore (_)</option>
+              <option value=" ">Space ( )</option>
+              <option value=".">Period (.)</option>
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
               <input
-                id="capitalize-checkbox"
                 type="checkbox"
                 checked={capitalize}
                 onChange={(e) => setCapitalize(e.target.checked)}
-                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#38bdf8' }}
               />
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #1e293b', paddingTop: '0.75rem' }}>
-              <label htmlFor="include-number-checkbox" style={{ fontSize: '0.85rem', fontWeight: 600, color: '#f8fafc' }}>
-                Include Random Number
-              </label>
+              Capitalize Each Word
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
               <input
-                id="include-number-checkbox"
                 type="checkbox"
                 checked={includeNumber}
                 onChange={(e) => setIncludeNumber(e.target.checked)}
-                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#38bdf8' }}
               />
-            </div>
+              Include Random Number
+            </label>
           </div>
-        )}
+
+          <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>
+            Dictionary: Bundled 2,048-word standard wordlist (11 bits/word). 100% offline. Zero network transmission.
+          </p>
+        </div>
+      )}
+
+      {/* Security Guidance Note */}
+      <div
+        style={{
+          padding: '0.85rem',
+          backgroundColor: '#0f172a',
+          borderRadius: '12px',
+          border: '1px solid #1e293b',
+          fontSize: '0.75rem',
+          color: '#94a3b8',
+          lineHeight: 1.4
+        }}
+      >
+        <strong style={{ color: '#f8fafc', display: 'block', marginBottom: '0.2rem' }}>🔒 Zero-Knowledge Privacy Guarantee:</strong>
+        Passwords generated here are computed purely in volatile RAM using on-device CSPRNG. Secrets are never saved to disk, logged, or sent over any network. Autofill service integration is deferred to a future platform release.
       </div>
     </div>
   );

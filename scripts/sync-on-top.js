@@ -54,14 +54,10 @@ async function main() {
 
   console.log(`[GIT] Staged ${stagedCount} files.`);
 
-  const commitMsg = `feat(web): add light/dark/night mode theme switcher and remove engine metrics box
+  const commitMsg = `chore(ui): remove local on-device processing indicator
 
-- Remove telemetry status box (ENGINE: v0.1.1 | RAM: 42MB | LATENCY: <1ms) from Header.tsx
-- Implement 3-way segmented ThemeToggle component (Light, Dark, AMOLED Night)
-- Add theme persistence via localStorage ('privex_theme') and document root 'data-theme' synchronization
-- Define neo-brutalist CSS custom properties for Light, Dark, and Night modes in index.html
-- Adapt Navigation, App, SettingsView, ResultCard, UrlScannerView, and TextScannerView to dynamic theme tokens
-- Add comprehensive unit and integration tests covering theme toggling, persistence, and accessibility (100% pass)`;
+- Removed the static '100% Local On-Device Processing' div from Header.tsx as requested.
+- No changes to underlying functions or logic.`;
 
   console.log('[GIT] Creating commit on top of parent:', parentSha);
   const sha = await git.commit({

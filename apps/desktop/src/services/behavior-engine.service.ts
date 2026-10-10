@@ -1,3 +1,4 @@
+import * as path from 'path';
 import {
   Evidence,
   DetectorType,
@@ -504,7 +505,7 @@ export class BehaviorEngineService {
    * Checks whether a binary name or path corresponds to a known Living-off-the-Land binary.
    */
   public isLolbin(binaryOrPath: string): boolean {
-    const base = (binaryOrPath.split(/[/\\]/).pop() || '').toLowerCase();
+    const base = path.basename(binaryOrPath).toLowerCase();
     return BehaviorEngineService.KNOWN_LOLBINS.has(base);
   }
 
@@ -521,13 +522,13 @@ export class BehaviorEngineService {
 
   public isLegitimateSystemPath(filePath: string): boolean {
     if (!filePath) return false;
-    const normalized = filePath.replace(/\//g, '\\').toLowerCase();
+    const normalized = path.resolve(filePath).toLowerCase();
     return BehaviorEngineService.SYSTEM_DIR_PATTERNS.some((rx) => rx.test(normalized));
   }
 
   public isUserWritablePath(filePath: string): boolean {
     if (!filePath) return false;
-    const normalized = filePath.replace(/\//g, '\\').toLowerCase();
+    const normalized = path.resolve(filePath).toLowerCase();
     return BehaviorEngineService.USER_WRITABLE_DIR_PATTERNS.some((rx) => rx.test(normalized));
   }
 

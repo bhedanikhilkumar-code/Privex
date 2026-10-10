@@ -498,15 +498,8 @@ The product shall provide privacy-first URL protection with:
   - Safe native system intent launchers for App Notification Settings, Application Details Settings, and Battery Optimization Settings.
   - Automatic `onResume` lifecycle re-check: returning from Android Settings immediately refreshes the UI without requiring an app restart.
 
-### MOB-013 — Battery & Performance (Phase T12)
-- **Status:** IMPLEMENTED & VERIFIED
-- **Capabilities:**
-  - Dynamic adaptive resource manager (`AdaptiveResourceManager.java`) tracking battery state, charging state, thermal status via `PowerManager.OnThermalStatusChangedListener` (API 29+), and memory trim signals via `ComponentCallbacks2`.
-  - Battery-aware scanning policy: defer scheduled batch scans (`STORAGE_SCAN` with `isScheduled=true`) when battery $< 20\%$ while discharging; manual user-triggered scans and charging bypass deferral.
-  - Concurrency scaling: dynamic worker pool resizing from $N$ to $N-1$ on `MODERATE` thermal pressure, and clamping to 1 thread on `SEVERE`/`CRITICAL`/`EMERGENCY` or low RAM.
-  - Memory-adaptive streaming buffers: chunk sizes scale dynamically between 64 KB (normal) and 16 KB (low-RAM), reducing peak heap allocation by 75%.
-  - Critical threat preservation invariant: real-time file inspections, in-flight download triage, live URL filtering, and APK audits are never deferred, dropped, or converted to `ALLOW`.
-  - Zero indefinite wakelocks, bounded worker queues, and truth-grounded UI telemetry without fabricated temperature values.
+### MOB-013 — Battery & Performance
+Background scanning shall adapt to battery, thermal and memory state. Critical threat detection remains prioritized. No unbounded worker queue or persistent wakelock.
 
 ### MOB-014 — Remediation (Phase T10)
 - **Status:** IMPLEMENTED & VERIFIED
@@ -531,38 +524,8 @@ The product shall provide privacy-first URL protection with:
   - Deterministic cache invalidation via `DatabaseChangeListener` across `WebShieldService`, `UniversalFileShieldService`, and `PackageAuditService`.
   - Atomic LKG / factory seed rollback and live UI diagnostics on `ProtectionStatusScreen`.
 
-### MOB-017 — Mobile Notifications & Storm Rate Limiting (Phase T13)
-- **Status:** IMPLEMENTED & VERIFIED
-- **Capabilities:**
-  - 7 Canonical notification categories: `CRITICAL_THREAT`, `APP_INSTALL_WARNING`, `DOWNLOAD_BLOCKED`, `PHISHING_WARNING`, `SCAN_COMPLETE`, `PROTECTION_DEGRADED`, `UPDATE_AVAILABLE`.
-  - 5 Typed Android Notification Channels: `threat_alerts_channel` (`IMPORTANCE_HIGH`), `downloads_protection_channel` (`IMPORTANCE_HIGH`), `web_shield_alerts` (`IMPORTANCE_HIGH`), `scans_and_health_channel` (`IMPORTANCE_DEFAULT`), `threat_updates_channel` (`IMPORTANCE_LOW`).
-  - Token-Bucket Storm Rate Limiting: max 3 individual native OS alerts per 10-second rolling window.
-  - Burst Coalescing: when $\ge 3$ events occur in a burst, combines subsequent alerts into a single consolidated summary notification (ID `99999`) reporting total count and recent target name.
-  - 30-Second Per-Target Cooldown: suppresses duplicate alerts for the identical target (package name, URL, or file path) within 30s.
-  - Critical Threat Priority Invariant: `CRITICAL_THREAT` events are never dropped or suppressed by rate limiting.
-  - Unicode & Payload Sanitization: strips bidirectional override characters (`\u202E`, etc.), control characters, and newlines; truncates titles to 100 chars and bodies to 250 chars.
-  - Native Bridge & UI: `@JavascriptInterface` endpoints `dispatchCategorizedNotification` and `getNotificationDispatcherStats` exposed to TypeScript `notification.service.ts` and visualized in `SettingsScreen.tsx`.
-
-### MOB-016 — Security Test Matrix & Physical Device Acceptance (Phase T14)
-- **Status:** TEST MATRIX IMPLEMENTED & VERIFIED (PHYSICAL HARDWARE: NOT EXECUTED / NOT VERIFIED)
-- **Capabilities & Verification:**
-  - 15-Category master security test matrix implemented and passing across Android JVM (`SecurityTestMatrixT14Test.java`) and TypeScript (`security-matrix-t14.test.ts`).
-  - Covers APK/sideloading, EICAR stream isolation, archive containers & zip-slip, multi-format media magic bytes, extension spoofing & RTLO, real-time download stabilization, full-device scan truthfulness, SAF directory boundaries, phishing homoglyphs & dangerous schemes, signed threat intel anti-downgrade, adaptive resource throttling, notification channels & burst threshold 3 coalescing, CSPRNG password/passphrase generation, encrypted quarantine vault tamper detection, and LRU cache ANR/OOM bounds.
-  - Physical Real-Device Status: Truthfully declared `NOT EXECUTED / NOT VERIFIED` due to 0 attached hardware endpoints at test execution time per Rule 41 / Anti-Fabrication Invariant. All functional contracts validated via deterministic JVM and TypeScript test suites.
-
-### MOB-018 — Mobile Performance Engine & Resource Bounds (Phase T15)
-- **Status:** IMPLEMENTED & EMPIRICALLY VERIFIED
-- **Capabilities & Verification:**
-  - Non-blocking file stabilization checks in `UniversalFileShieldService.java` replacing artificial 150 ms sleep floor.
-  - Zero-allocation `bytesToHex` table lookup during SHA-256 calculation reducing GC allocations.
-  - Fast-path integration with `MobileCleanFileCache` delivering verified benign cache hits in $1.02\text{ ms}$ ($1021\ \mu\text{s}$). Disguised and threat files bypass cache.
-  - Adaptive low-power deferral: scheduled scans deferred at $<20\%$ battery when discharging (`DEFERRED_LOW_BATTERY`), permitted when charging.
-  - Verified Empirical SLAs:
-    - Protection warm start: $1.00\text{ ms}$ (JVM) / $1.43\text{ ms}$ (TS) (SLA $< 500\text{ ms}$).
-    - Small local-file triage: $p50 = 6.00\text{ ms}$, $p95 = 49.00\text{ ms}$ (JVM) / $p50 = 0.04\text{ ms}$, $p95 = 0.10\text{ ms}$ (TS) (SLA $p50 < 20\text{ ms}$, $p95 < 50\text{ ms}$).
-    - 1,000-burst memory delta: $\Delta \text{Heap} = 0.00\text{ MB}$ (JVM) / $0.12\text{ MB}$ (TS) (SLA $< 32\text{ MB}$).
-    - Full-scan cooperative cancellation: non-blocking UI thread execution, zero ANRs.
-  - Verified with 233 Android unit tests passing, 203 mobile Vitest tests passing, 100% monorepo pass, and clean debug & R8 release builds.
+### MOB-016 — Physical Device Acceptance
+At least one real supported Android phone must pass the complete security acceptance matrix before release.
 
 ## Non-Goals / Explicit Limitations
 - No claim of being Google Play Protect.
@@ -573,4 +536,4 @@ The product shall provide privacy-first URL protection with:
 - No cloud-only security dependency.
 
 ## Success Criteria
-Phase T can reach release-ready status only when all MOB-001..017 requirements have implementation evidence, physical-device tests pass, offline/privacy parity passes, security adversarial corpus passes, battery/thermal/low-RAM tests pass, typecheck/build pass, and a fresh independent mobile zero-trust audit returns GO.
+Phase T can reach release-ready status only when all MOB-001..016 requirements have implementation evidence, physical-device tests pass, offline/privacy parity passes, security adversarial corpus passes, battery/thermal/low-RAM tests pass, typecheck/build pass, and a fresh independent mobile zero-trust audit returns GO.

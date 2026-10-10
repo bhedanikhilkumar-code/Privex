@@ -204,16 +204,12 @@ describe('ProcessAuditorService (Phase F — Process Auditing & Containment)', (
         expect(res.action).toBe('TERMINATED');
         expect(res.pid).toBe(pid);
 
-        // Verify the child process is terminated (poll briefly for kernel signal processing)
+        // Verify the child process is terminated
         let isAlive = true;
-        for (let i = 0; i < 10; i++) {
-          try {
-            process.kill(pid, 0); // signal 0 tests for existence
-            await new Promise((r) => setTimeout(r, 20));
-          } catch {
-            isAlive = false;
-            break;
-          }
+        try {
+          process.kill(pid, 0); // signal 0 tests for existence
+        } catch {
+          isAlive = false;
         }
         expect(isAlive).toBe(false);
       } finally {

@@ -128,34 +128,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange }) => {
           </button>
         )}
 
-        <div
-          role="status"
-          aria-label="Local on-device processing status"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.4rem 0.9rem',
-            backgroundColor: 'var(--color-accent)',
-            border: '2px solid var(--border-dark)',
-            boxShadow: '2px 2px 0px #111111',
-            fontSize: '0.75rem',
-            color: '#111111',
-            fontWeight: 800,
-            fontFamily: 'var(--font-mono)',
-            letterSpacing: '0.02em'
-          }}
-        >
-          <span
-            style={{
-              width: '0.55rem',
-              height: '0.55rem',
-              backgroundColor: '#111111',
-              borderRadius: '50%'
-            }}
-          />
-          100% Local On-Device Processing
-        </div>
+
       </div>
     </header>
   );
