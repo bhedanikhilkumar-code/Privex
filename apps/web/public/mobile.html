@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRIVEX Mobile — Download Official Android APK (v0.1.2) & Live App Preview</title>
+  <meta name="description" content="Download PRIVEX Android APK. Next-gen on-device AI threat, phishing, and scam protection. 100% offline, zero cloud telemetry, instant sub-millisecond warnings.">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="shortcut icon" href="./favicon.ico">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #070B14;
+      --bg-card: #0F172A;
+      --bg-card-hover: #162038;
+      --bg-card-inner: #0B1120;
+      --border-color: #1E293B;
+      --border-accent: #334155;
+      --neon-lime: #D7FF3F;
+      --neon-lime-glow: rgba(215, 255, 63, 0.25);
+      --cyber-blue: #2457FF;
+      --cyber-blue-glow: rgba(36, 87, 255, 0.35);
+      --safe-green: #1DB954;
+      --danger-red: #FF5A36;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient Cyber Background Grid */
+    .cyber-bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(215, 255, 63, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(215, 255, 63, 0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .ambient-glow-1 {
+      position: fixed;
+      top: -10%;
+      left: 20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(36, 87, 255, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(80px);
+    }
+
+    .ambient-glow-2 {
+      position: fixed;
+      bottom: 10%;
+      right: 10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(215, 255, 63, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(80px);
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(7, 11, 20, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 0;
+    }
+
+    .nav-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+
+    .brand-icon-box {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--neon-lime);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px var(--neon-lime-glow);
+    }
+
+    .brand-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-tag {
+      font-size: 0.65rem;
+      padding: 2px 7px;
+      background: rgba(215, 255, 63, 0.15);
+      color: var(--neon-lime);
+      border: 1px solid var(--neon-lime);
+      border-radius: 4px;
+      font-family: 'Space Grotesk', monospace;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--neon-lime);
+    }
+
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-header-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--neon-lime);
+      color: #070B14;
+      font-weight: 800;
+      font-size: 0.9rem;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 20px rgba(215, 255, 63, 0.3);
+    }
+
+    .btn-header-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 28px rgba(215, 255, 63, 0.5);
+    }
+
+    /* Hero Section */
+    .hero-section {
+      padding: 80px 0 60px;
+      position: relative;
+    }
+
+    .hero-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(215, 255, 63, 0.4);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--neon-lime);
+      margin-bottom: 24px;
+      box-shadow: 0 0 20px rgba(215, 255, 63, 0.1);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--safe-green);
+      box-shadow: 0 0 10px var(--safe-green);
+      animation: pulseDot 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 50px;
+      align-items: center;
+    }
+
+    .hero-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 3.4rem;
+      font-weight: 800;
+      line-height: 1.12;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+    }
+
+    .hero-title .highlight {
+      color: var(--neon-lime);
+      text-shadow: 0 0 30px rgba(215, 255, 63, 0.3);
+    }
+
+    .hero-description {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 36px;
+      max-width: 580px;
+    }
+
+    /* Hero CTA Block */
+    .hero-cta-box {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+
+    .cta-buttons-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn-download-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 32px;
+      background: var(--neon-lime);
+      color: #070B14;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+      box-shadow: 0 8px 30px rgba(215, 255, 63, 0.35);
+      border: 2px solid var(--neon-lime);
+    }
+
+    .btn-download-primary:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 12px 40px rgba(215, 255, 63, 0.6);
+      background: #e2ff62;
+    }
+
+    .btn-download-primary svg {
+      width: 26px;
+      height: 26px;
+      fill: #070B14;
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 26px;
+      background: rgba(30, 41, 59, 0.6);
+      color: var(--text-main);
+      border: 1px solid var(--border-accent);
+      font-weight: 700;
+      font-size: 1.0rem;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(51, 65, 85, 0.8);
+      border-color: var(--neon-lime);
+      color: var(--neon-lime);
+      transform: translateY(-2px);
+    }
+
+    /* Meta Badges */
+    .apk-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.84rem;
+      color: var(--text-dim);
+    }
+
+    .apk-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border-color);
+      padding: 5px 12px;
+      border-radius: 6px;
+    }
+
+    .apk-meta-item strong {
+      color: var(--text-main);
+    }
+
+    /* Hero Quick Highlights */
+    .hero-quick-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+      max-width: 580px;
+    }
+
+    .stat-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      backdrop-filter: blur(8px);
+    }
+
+    .stat-number {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--neon-lime);
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Hero Phone Teaser Mockup */
+    .hero-phone-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .hero-phone-glow {
+      position: absolute;
+      width: 380px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(36, 87, 255, 0.3) 0%, rgba(215, 255, 63, 0.15) 50%, transparent 75%);
+      filter: blur(60px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Modern Smartphone Chassis */
+    .phone-mockup-frame {
+      width: 320px;
+      height: 650px;
+      background: #0B0F19;
+      border: 10px solid #1A2234;
+      border-radius: 46px;
+      box-shadow: 
+        0 0 0 2px rgba(255, 255, 255, 0.08),
+        0 25px 60px -15px rgba(0, 0, 0, 0.8),
+        0 0 40px rgba(36, 87, 255, 0.2);
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Speaker Pill & Camera Notch */
+    .phone-notch-bar {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 22px;
+      background: #000000;
+      border-radius: 14px;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .phone-camera-lens {
+      width: 9px;
+      height: 9px;
+      background: #0F172A;
+      border: 1px solid #334155;
+      border-radius: 50%;
+    }
+
+    .phone-speaker-slit {
+      width: 35px;
+      height: 3px;
+      background: #1E293B;
+      border-radius: 2px;
+    }
+
+    .phone-screen-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    /* Interactive Showcase Section */
+    .section-showcase {
+      padding: 90px 0;
+      border-top: 1px solid var(--border-color);
+      background: linear-gradient(180deg, rgba(7, 11, 20, 0.5) 0%, rgba(15, 23, 42, 0.3) 100%);
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 760px;
+      margin: 0 auto 50px;
+    }
+
+    .section-tag {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--neon-lime);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+
+    .section-heading {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.6rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .section-subtext {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Interactive Showcase Studio */
+    .showcase-studio {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 50px;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: 48px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Phone Column in Showcase */
+    .showcase-phone-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .showcase-phone-frame {
+      width: 320px;
+      height: 650px;
+      background: #000;
+      border: 10px solid #1E293B;
+      border-radius: 46px;
+      box-shadow: 
+        0 0 0 2px rgba(255, 255, 255, 0.08),
+        0 20px 50px rgba(0, 0, 0, 0.9),
+        0 0 45px rgba(215, 255, 63, 0.2);
+      position: relative;
+      overflow: hidden;
+      cursor: zoom-in;
+    }
+
+    .showcase-screen-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      transition: opacity 0.25s ease;
+    }
+
+    .showcase-phone-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .ctrl-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-accent);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .ctrl-btn:hover {
+      background: rgba(215, 255, 63, 0.15);
+      border-color: var(--neon-lime);
+      color: var(--neon-lime);
+    }
+
+    .ctrl-counter {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      padding: 0 8px;
+    }
+
+    /* Details Column in Showcase */
+    .showcase-details-col {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Tabs Bar */
+    .screen-tabs-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .screen-tab {
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .screen-tab:hover {
+      border-color: var(--border-accent);
+      color: var(--text-main);
+    }
+
+    .screen-tab.active {
+      background: rgba(215, 255, 63, 0.12);
+      border-color: var(--neon-lime);
+      color: var(--neon-lime);
+      box-shadow: 0 0 16px rgba(215, 255, 63, 0.15);
+    }
+
+    .screen-tab-number {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 0.72rem;
+      padding: 1px 5px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+    }
+
+    .screen-tab.active .screen-tab-number {
+      background: var(--neon-lime);
+      color: #070B14;
+    }
+
+    /* Active Screen Info Card */
+    .active-screen-card {
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .active-screen-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--neon-lime);
+    }
+
+    .screen-meta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(36, 87, 255, 0.18);
+      border: 1px solid rgba(36, 87, 255, 0.4);
+      color: #7AA2FF;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-family: 'Space Grotesk', monospace;
+      margin-bottom: 14px;
+    }
+
+    .active-screen-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+
+    .active-screen-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .screen-capabilities-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .cap-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+
+    .cap-icon {
+      color: var(--neon-lime);
+      font-weight: 800;
+      margin-top: 1px;
+    }
+
+    .screen-security-tip {
+      background: rgba(29, 185, 84, 0.08);
+      border: 1px solid rgba(29, 185, 84, 0.3);
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.88rem;
+      color: #8CEAB1;
+    }
+
+    /* All Screens Gallery Grid */
+    .screens-gallery-section {
+      padding: 80px 0;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 20px;
+      margin-top: 40px;
+    }
+
+    .gallery-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .gallery-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--neon-lime);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(215, 255, 63, 0.2);
+    }
+
+    .gallery-img-box {
+      width: 100%;
+      height: 280px;
+      background: #000;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .gallery-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      transition: transform 0.3s ease;
+    }
+
+    .gallery-card:hover .gallery-img {
+      transform: scale(1.05);
+    }
+
+    .gallery-card-footer {
+      padding: 14px;
+      background: var(--bg-card-inner);
+      border-top: 1px solid var(--border-color);
+    }
+
+    .gallery-card-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .gallery-card-tag {
+      font-size: 0.75rem;
+      color: var(--neon-lime);
+      font-weight: 600;
+    }
+
+    /* Core Features Grid */
+    .features-section {
+      padding: 90px 0;
+      border-top: 1px solid var(--border-color);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.2) 0%, rgba(7, 11, 20, 0.6) 100%);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 40px;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .feature-card:hover {
+      border-color: var(--neon-lime);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(215, 255, 63, 0.12);
+    }
+
+    .feature-icon-wrapper {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid var(--border-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: 22px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .feature-card:hover .feature-icon-wrapper {
+      border-color: var(--neon-lime);
+      background: rgba(215, 255, 63, 0.1);
+    }
+
+    .feature-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 12px;
+    }
+
+    .feature-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 20px;
+      flex-grow: 1;
+    }
+
+    .feature-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: 'Space Grotesk', monospace;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-dim);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      align-self: flex-start;
+    }
+
+    .feature-card:hover .feature-pill-badge {
+      color: var(--neon-lime);
+      border-color: rgba(215, 255, 63, 0.3);
+      background: rgba(215, 255, 63, 0.08);
+    }
+
+    /* Comparison Table Section */
+    .comparison-section {
+      padding: 90px 0;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .comparison-table-wrapper {
+      margin-top: 40px;
+      overflow-x: auto;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.95rem;
+    }
+
+    .comparison-table th {
+      background: var(--bg-card-inner);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      color: var(--text-main);
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+    }
+
+    .comparison-table th.highlight-col {
+      background: rgba(215, 255, 63, 0.08);
+      color: var(--neon-lime);
+      border-bottom: 2px solid var(--neon-lime);
+    }
+
+    .comparison-table td.highlight-col {
+      background: rgba(215, 255, 63, 0.03);
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .badge-check {
+      color: var(--safe-green);
+      font-weight: 800;
+    }
+
+    .badge-cross {
+      color: var(--danger-red);
+      font-weight: 800;
+    }
+
+    /* Installation Steps Section */
+    .install-section {
+      padding: 90px 0;
+      border-top: 1px solid var(--border-color);
+      background: linear-gradient(180deg, rgba(7, 11, 20, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+    }
+
+    .install-steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 40px;
+    }
+
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 32px 26px;
+      position: relative;
+    }
+
+    .step-number-bubble {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--neon-lime);
+      color: #070B14;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      box-shadow: 0 0 20px rgba(215, 255, 63, 0.4);
+    }
+
+    .step-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 10px;
+    }
+
+    .step-desc {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Technical Integrity Section */
+    .tech-specs-card {
+      margin-top: 60px;
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .hash-box {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border-accent);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .hash-code {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 0.8rem;
+      color: var(--neon-lime);
+      word-break: break-all;
+    }
+
+    .btn-copy-hash {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .btn-copy-hash:hover {
+      background: var(--neon-lime);
+      color: #070B14;
+    }
+
+    /* FAQ Section */
+    .faq-section {
+      padding: 90px 0;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .faq-accordion {
+      max-width: 820px;
+      margin: 40px auto 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .faq-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: border-color 0.2s ease;
+    }
+
+    .faq-item:hover {
+      border-color: var(--border-accent);
+    }
+
+    .faq-question {
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .faq-icon {
+      font-size: 1.2rem;
+      color: var(--neon-lime);
+      transition: transform 0.2s ease;
+    }
+
+    .faq-item.open .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      padding: 0 24px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    .faq-item.open .faq-answer {
+      max-height: 250px;
+      padding: 0 24px 22px;
+    }
+
+    /* Final CTA Banner */
+    .final-cta-section {
+      padding: 90px 0 110px;
+      position: relative;
+    }
+
+    .final-cta-card {
+      background: linear-gradient(135deg, #111A30 0%, #0F172A 100%);
+      border: 1px solid rgba(215, 255, 63, 0.3);
+      border-radius: var(--radius-xl);
+      padding: 64px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7);
+    }
+
+    .final-cta-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(215, 255, 63, 0.15) 0%, transparent 70%);
+      filter: blur(50px);
+      pointer-events: none;
+    }
+
+    .final-cta-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin-bottom: 18px;
+      letter-spacing: -0.02em;
+    }
+
+    .final-cta-sub {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 36px;
+    }
+
+    /* Lightbox Modal */
+    .lightbox-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(16px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .lightbox-modal.active {
+      display: flex;
+    }
+
+    .lightbox-content {
+      position: relative;
+      max-width: 90vw;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .lightbox-img {
+      max-height: 80vh;
+      max-width: 100%;
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--border-accent);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+      object-fit: contain;
+    }
+
+    .lightbox-caption {
+      margin-top: 16px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--neon-lime);
+      text-align: center;
+    }
+
+    .lightbox-close-btn {
+      position: absolute;
+      top: -45px;
+      right: 0;
+      background: none;
+      border: none;
+      color: var(--text-main);
+      font-size: 2.2rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid var(--border-color);
+      background: #04070D;
+      padding: 60px 0 40px;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 40px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .footer-brand {
+      max-width: 380px;
+    }
+
+    .footer-desc {
+      margin-top: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .footer-col-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .footer-links-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer-link:hover {
+      color: var(--neon-lime);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.82rem;
+    }
+
+    /* Responsive Queries */
+    @media (max-width: 1024px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .hero-description, .hero-quick-stats {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .cta-buttons-row, .apk-meta-row {
+        justify-content: center;
+      }
+      .showcase-studio {
+        grid-template-columns: 1fr;
+        padding: 32px 24px;
+      }
+      .gallery-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .install-steps-grid {
+        grid-template-columns: 1fr;
+      }
+      .tech-specs-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+      .hero-title {
+        font-size: 2.5rem;
+      }
+      .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+      .screen-capabilities-list {
+        grid-template-columns: 1fr;
+      }
+      .phone-mockup-frame, .showcase-phone-frame {
+        width: 290px;
+        height: 590px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Grids & Lighting -->
+  <div class="cyber-bg-grid"></div>
+  <div class="ambient-glow-1"></div>
+  <div class="ambient-glow-2"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="brand-logo">
+        <div class="brand-icon-box">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D7FF3F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <div class="brand-title">
+          PRIVEX <span class="brand-tag">MOBILE</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#screens" class="nav-link">App Screens</a></li>
+        <li><a href="#features" class="nav-link">Features</a></li>
+        <li><a href="#comparison" class="nav-link">Why Privex?</a></li>
+        <li><a href="#install" class="nav-link">How to Install</a></li>
+        <li><a href="#faq" class="nav-link">FAQ</a></li>
+      </ul>
+
+      <div class="nav-cta">
+        <a href="downloads/privex-mobile-release.apk" class="btn-header-download" download="privex-mobile-release.apk">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-1.0002 0-.5517.4482-1.0003.9993-1.0003.5517 0 1.0002.4486 1.0002 1.0003 0 .5516-.4485 1.0002-1.0002 1.0002m-11.046 0c-.5516 0-1.0002-.4486-1.0002-1.0002 0-.5517.4486-1.0003 1.0002-1.0003.5517 0 .9998.4486.9998 1.0003 0 .5516-.4481 1.0002-.9998 1.0002m11.4045-6.02l1.996-3.4572c.1126-.1951.0456-.4445-.1496-.557-.195-.1127-.444-.0457-.557.1495l-2.0232 3.5042c-1.4984-.6844-3.1764-1.0664-4.9477-1.0664-1.7713 0-3.4493.382-4.9477 1.0664l-2.0232-3.5042c-.113-.1952-.362-.2622-.557-.1495-.1952.1125-.2622.3619-.1496.557l1.996 3.4572c-3.1818 1.7276-5.352 5.0118-5.4678 8.8786h21.8458c-.1158-3.8668-2.286-7.151-5.4678-8.8786"/>
+          </svg>
+          Download APK (v0.1.2)
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container hero-grid">
+      <!-- Left Content -->
+      <div class="hero-text-col">
+        <div class="hero-badge-pill">
+          <span class="status-dot"></span>
+          <span>OFFICIAL ANDROID RELEASE • v0.1.2</span>
+        </div>
+
+        <h1 class="hero-title">
+          Next-Gen On-Device <br>
+          <span class="highlight">Threat & Scam Defense</span>
+        </h1>
+
+        <p class="hero-description">
+          Detect phishing links, urgent SMS extortion scams, and malicious digital threats in real-time. 
+          Powered by an on-device AI assistant that runs <strong>100% locally</strong> without uploading your personal messages or URLs to any cloud server.
+        </p>
+
+        <!-- CTA Action Area -->
+        <div class="hero-cta-box">
+          <div class="cta-buttons-row">
+            <a href="downloads/privex-mobile-release.apk" class="btn-download-primary" download="privex-mobile-release.apk" id="heroDownloadBtn">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm9 4H3v-2h18v2z"/>
+              </svg>
+              <span>Download APK (1.86 MB)</span>
+            </a>
+
+            <a href="#screens" class="btn-secondary">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                <line x1="12" y1="18" x2="12.01" y2="18"/>
+              </svg>
+              Explore App Screens
+            </a>
+          </div>
+
+          <!-- APK Metadata Pill List -->
+          <div class="apk-meta-row">
+            <div class="apk-meta-item">
+              <span>Android:</span> <strong>8.0+ (Oreo to 15)</strong>
+            </div>
+            <div class="apk-meta-item">
+              <span>Size:</span> <strong>1.86 MB</strong>
+            </div>
+            <div class="apk-meta-item">
+              <span>Privacy:</span> <strong>0 Data Collected</strong>
+            </div>
+            <div class="apk-meta-item">
+              <span>Network:</span> <strong>100% Offline</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Numerical Highlights -->
+        <div class="hero-quick-stats">
+          <div class="stat-card">
+            <div class="stat-number">&lt; 1.0 ms</div>
+            <div class="stat-label">Fast-Path Threat Analysis</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">0 KB</div>
+            <div class="stat-label">Cloud Data Transmission</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Offline Air-Gapped Engine</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Smartphone Hero Preview -->
+      <div class="hero-phone-container">
+        <div class="hero-phone-glow"></div>
+        <div class="phone-mockup-frame">
+          <div class="phone-notch-bar">
+            <div class="phone-camera-lens"></div>
+            <div class="phone-speaker-slit"></div>
+          </div>
+          <img src="assets/screenshots/home-dashboard.png" alt="PRIVEX Mobile Home Dashboard Screen" class="phone-screen-img" id="heroPhoneImg">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive App Screen Showcase -->
+  <section class="section-showcase" id="screens">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Interactive App Preview</span>
+        <h2 class="section-heading">How PRIVEX Looks On Your Phone</h2>
+        <p class="section-subtext">
+          Explore actual high-definition screens from the Android application. Click any screen below to preview the intuitive, cyberpunk security interface designed for instant clarity.
+        </p>
+      </div>
+
+      <!-- Interactive Phone Studio -->
+      <div class="showcase-studio">
+        <!-- Phone Viewport -->
+        <div class="showcase-phone-col">
+          <div class="showcase-phone-frame" id="showcasePhoneFrame" title="Click to view full-resolution screenshot">
+            <div class="phone-notch-bar">
+              <div class="phone-camera-lens"></div>
+              <div class="phone-speaker-slit"></div>
+            </div>
+            <img src="assets/screenshots/home-dashboard.png" alt="Screen Preview" class="showcase-screen-img" id="activeScreenImg">
+          </div>
+
+          <div class="showcase-phone-controls">
+            <button class="ctrl-btn" id="prevScreenBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></button>
+            </button>
+            <span class="ctrl-counter" id="screenCounter">1 / 10</span>
+            <button class="ctrl-btn" id="nextScreenBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></button>
+            </button>
+            <button class="ctrl-btn" id="autoPlayBtn">▶ Auto Tour</button>
+          </div>
+        </div>
+
+        <!-- Synchronized Details Panel -->
+        <div class="showcase-details-col">
+          <!-- Screen Tabs Switcher -->
+          <div class="screen-tabs-bar" id="screenTabsBar">
+            <!-- Rendered dynamically by JavaScript -->
+          </div>
+
+          <!-- Active Card Details -->
+          <div class="active-screen-card" id="activeScreenCard">
+            <div class="screen-meta-badge" id="screenCategoryBadge">CORE DEFENSE</div>
+            <h3 class="active-screen-title" id="screenTitle">Home Security Dashboard</h3>
+            <p class="active-screen-desc" id="screenDesc">
+              Your central command center. Provides an instant overview of your device's security posture, real-time background protection monitors, quick threat scan shortcuts, and system health status.
+            </p>
+
+            <ul class="screen-capabilities-list" id="screenCapsList">
+              <li class="cap-item"><span class="cap-icon">✓</span> <span>Comprehensive Device Security Score</span></li>
+              <li class="cap-item"><span class="cap-icon">✓</span> <span>One-tap Emergency Quick Scan</span></li>
+              <li class="cap-item"><span class="cap-icon">✓</span> <span>Real-time Background Shield Toggles</span></li>
+              <li class="cap-item"><span class="cap-icon">✓</span> <span>Local Threat Activity Timeline</span></li>
+            </ul>
+
+            <div class="screen-security-tip" id="screenTip">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span id="screenTipText">Monitors run completely in volatile memory without keeping scan logs on disk.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Complete Screens Gallery Grid -->
+  <section class="screens-gallery-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Complete Gallery</span>
+        <h2 class="section-heading">All 10 Application Screens</h2>
+        <p class="section-subtext">Click on any screen below to inspect the full-resolution layout.</p>
+      </div>
+
+      <div class="gallery-grid" id="galleryGrid">
+        <!-- Generated by JavaScript for all 10 screens -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Features Section -->
+  <section class="features-section" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Powerful Capabilities</span>
+        <h2 class="section-heading">Key Features of PRIVEX Mobile</h2>
+        <p class="section-subtext">
+          Engineered from the ground up for maximum privacy, zero battery waste, and airtight offline security.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">🤖</div>
+          <h3 class="feature-title">On-Device AI Assistant</h3>
+          <p class="feature-desc">
+            Technical cyber threats are translated into simple, plain English (under Grade 8 reading level). You get clear instructions on <em>why</em> a link is dangerous and <em>what</em> exact steps to take.
+          </p>
+          <div class="feature-pill-badge">Zero Prompt Injection • Read-Only</div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">🎣</div>
+          <h3 class="feature-title">Phishing & Punycode Shield</h3>
+          <p class="feature-desc">
+            Lexical feature analysis, Shannon entropy scoring, Levenshtein typosquatting distance, and IDN homograph decoding detect deceptive links in less than 1 millisecond.
+          </p>
+          <div class="feature-pill-badge">&lt; 1.0 ms Fast-Path Engine</div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">💬</div>
+          <h3 class="feature-title">Scam SMS & Extortion Filter</h3>
+          <p class="feature-desc">
+            Inbound text messages are parsed on-device to flag urgency pressure tactics, lottery fraud, fake package delivery notices, and cryptocurrency extortion demands without reading your chats.
+          </p>
+          <div class="feature-pill-badge">Local Natural Language Rules</div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">🔒</div>
+          <h3 class="feature-title">Volatile RAM Data-Zeroing</h3>
+          <p class="feature-desc">
+            Raw URLs, messages, and QR payloads are inspected strictly in volatile RAM and zeroed immediately upon evaluation. Your browsing history is mathematically prevented from leaving your phone.
+          </p>
+          <div class="feature-pill-badge">Zero-Knowledge Architecture</div>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">📴</div>
+          <h3 class="feature-title">100% Offline Air-Gapped</h3>
+          <p class="feature-desc">
+            Enjoy full threat detection parity while completely disconnected from Wi-Fi or cellular networks. Embedded Bloom filters and deterministic pattern databases operate completely air-gapped.
+          </p>
+          <div class="feature-pill-badge">Airplane-Mode Certified</div>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">🗄️</div>
+          <h3 class="feature-title">Quarantine Vault & Tools</h3>
+          <p class="feature-desc">
+            Safely sandbox intercepted malicious URLs, test suspicious snippets in an isolated environment, and generate high-entropy passwords with the cryptographic password studio.
+          </p>
+          <div class="feature-pill-badge">Isolated Endpoint Sandbox</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparison Section -->
+  <section class="comparison-section" id="comparison">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Architecture Comparison</span>
+        <h2 class="section-heading">PRIVEX vs Traditional Cloud Antivirus</h2>
+        <p class="section-subtext">
+          See why privacy-first on-device detection is fundamentally safer than sending your private data to corporate cloud servers.
+        </p>
+      </div>
+
+      <div class="comparison-table-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Evaluation Criteria</th>
+              <th class="highlight-col">PRIVEX Android (v0.1.2)</th>
+              <th>Traditional Cloud Antivirus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Data Processing Location</strong></td>
+              <td class="highlight-col"><span class="badge-check">✓</span> 100% On-Device (Volatile RAM)</td>
+              <td><span class="badge-cross">✕</span> Remote Cloud Servers</td>
+            </tr>
+            <tr>
+              <td><strong>Browsing & SMS Privacy</strong></td>
+              <td class="highlight-col"><span class="badge-check">✓</span> Mathematical Zero-Telemetry</td>
+              <td><span class="badge-cross">✕</span> URLs & Message Payloads Uploaded</td>
+            </tr>
+            <tr>
+              <td><strong>Offline Functionality</strong></td>
+              <td class="highlight-col"><span class="badge-check">✓</span> 100% Functional in Airplane Mode</td>
+              <td><span class="badge-cross">✕</span> Fails or Degrades Severely Offline</td>
+            </tr>
+            <tr>
+              <td><strong>Detection Latency</strong></td>
+              <td class="highlight-col"><span class="badge-check">✓</span> &lt; 1 ms Deterministic (&lt;50ms UI)</td>
+              <td><span class="badge-cross">✕</span> 250 ms – 1,200 ms Cloud Round-Trip</td>
+            </tr>
+            <tr>
+              <td><strong>Battery & Mobile Data Usage</strong></td>
+              <td class="highlight-col"><span class="badge-check">✓</span> Ultra-Low (No continuous cloud polling)</td>
+              <td><span class="badge-cross">✕</span> High (Constant background telemetry)</td>
+            </tr>
+            <tr>
+              <td><strong>Explanation Grade</strong></td>
+              <td class="highlight-col"><span class="badge-check">✓</span> Clear, Actionable Plain English</td>
+              <td><span class="badge-cross">✕</span> Cryptic Antivirus Error Codes</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Installation Guide Section -->
+  <section class="install-section" id="install">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Quick Sideload Guide</span>
+        <h2 class="section-heading">How to Install PRIVEX in 3 Steps</h2>
+        <p class="section-subtext">
+          Sideloading is simple and takes less than 30 seconds on any Android 8.0+ smartphone.
+        </p>
+      </div>
+
+      <div class="install-steps-grid">
+        <div class="step-card">
+          <div class="step-number-bubble">1</div>
+          <h3 class="step-title">Download APK</h3>
+          <p class="step-desc">
+            Tap the <strong>Download APK</strong> button above to download the official <code>privex-mobile-release.apk</code> (1.86 MB) package to your device.
+          </p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number-bubble">2</div>
+          <h3 class="step-title">Allow Unknown Apps</h3>
+          <p class="step-desc">
+            Tap the downloaded file in your browser notifications. If Android prompts you, tap <strong>Settings</strong> and toggle on <strong>"Allow from this source"</strong>.
+          </p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number-bubble">3</div>
+          <h3 class="step-title">Install & Shield</h3>
+          <p class="step-desc">
+            Tap <strong>Install</strong>. Once completed, open PRIVEX to immediately activate on-device phishing and scam protection!
+          </p>
+        </div>
+      </div>
+
+      <!-- Technical Integrity Card -->
+      <div class="tech-specs-card">
+        <div>
+          <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; margin-bottom: 8px;">Cryptographic Package Integrity</h3>
+          <p style="color: var(--text-muted); font-size: 0.92rem;">
+            Verify that your downloaded APK matches the official build hash bit-for-bit before installing.
+          </p>
+          <div class="hash-box">
+            <span class="hash-code" id="sha256Text">e90a8d9f56ca096c5ef3f81be5f24dd4e565999a78eb4a04808e71a27ac6888d</span>
+            <button class="btn-copy-hash" id="copyHashBtn">Copy Hash</button>
+          </div>
+        </div>
+
+        <div style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.8;">
+          <div>• <strong>Package Name:</strong> <code>com.privex.security</code></div>
+          <div>• <strong>Build Version:</strong> <code>0.1.2 (Release)</code></div>
+          <div>• <strong>Target Architectures:</strong> ARM64-v8a, armeabi-v7a, x86_64</div>
+          <div>• <strong>Minimum SDK:</strong> Android 8.0 (API Level 26)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section" id="faq">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Frequently Asked Questions</span>
+        <h2 class="section-heading">Got Questions? We Have Answers.</h2>
+      </div>
+
+      <div class="faq-accordion">
+        <div class="faq-item open">
+          <div class="faq-question">
+            <span>Is installing this APK safe on my Android device?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Yes, completely. PRIVEX is 100% open-source, uses zero invasive permissions, contains zero ads or trackers, and operates with zero cloud telemetry. The APK is cryptographically signed and hash-verified.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Does PRIVEX upload my links, messages, or files to any server?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Never. Our foundational constitution mandates zero cloud telemetry for raw user data. All link parsing, entropy calculation, and AI explanations execute locally on your phone in volatile RAM.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Will PRIVEX work without an internet connection?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Yes, 100%. All core heuristic engines, Brand typosquatting models, and Bloom filter threat intelligence are bundled right into the APK. You can test it in airplane mode anytime.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Why is PRIVEX distributed as an APK instead of Google Play Store?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Direct APK release provides unrestricted freedom, rapid security updates without app-store review delays, and complete transparency without vendor lock-in. Google Play distribution is also coming soon.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final Call to Action -->
+  <section class="final-cta-section">
+    <div class="container">
+      <div class="final-cta-card">
+        <h2 class="final-cta-title">Upgrade Your Digital Security Today</h2>
+        <p class="final-cta-sub">
+          Take control of your privacy with on-device AI protection. Download the official Android APK now and browse with total peace of mind.
+        </p>
+        <a href="downloads/privex-mobile-release.apk" class="btn-download-primary" download="privex-mobile-release.apk">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm9 4H3v-2h18v2z"/>
+          </svg>
+          <span>Download PRIVEX APK (v0.1.2)</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox Modal for Full Screen Inspection -->
+  <div class="lightbox-modal" id="lightboxModal">
+    <div class="lightbox-content">
+      <button class="lightbox-close-btn" id="lightboxCloseBtn">&times;</button>
+      <img src="" alt="Enlarged App Screen" class="lightbox-img" id="lightboxImg">
+      <div class="lightbox-caption" id="lightboxCaption">App Screen</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="index.html" class="brand-logo">
+            <div class="brand-icon-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D7FF3F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <div class="brand-title">PRIVEX</div>
+          </a>
+          <p class="footer-desc">
+            Privacy-First Cybersecurity Platform. Protecting users against phishing, deceptive links, and cyber scams with 100% on-device AI.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Platforms</h4>
+          <ul class="footer-links-list">
+            <li><a href="downloads/privex-mobile-release.apk" class="footer-link">Android APK</a></li>
+            <li><a href="index.html" class="footer-link">Web Scanner</a></li>
+            <li><a href="release/PrivateProtection-Setup-0.1.2.exe" class="footer-link">Desktop App (Windows)</a></li>
+            <li><a href="release/private-protection-extension-0.1.2.zip" class="footer-link">Browser Extension</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Documentation</h4>
+          <ul class="footer-links-list">
+            <li><a href="README.md" class="footer-link">Architecture Docs</a></li>
+            <li><a href="release/RELEASE_NOTES_V0.1.2.md" class="footer-link">Release Notes v0.1.2</a></li>
+            <li><a href="SECURITY.md" class="footer-link">Security Policy</a></li>
+            <li><a href="downloads/SHA256SUMS.txt" class="footer-link">SHA-256 Checksums</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 PRIVEX Cybersecurity. Local-First • Zero-Cloud • Zero-Knowledge.</div>
+        <div>Engineered for Total Digital Privacy.</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic & Interactive Tour Script -->
+  <script>
+    // Screen definitions matching actual screenshots in assets/screenshots/
+    const APP_SCREENS = [
+      {
+        id: 'home-dashboard',
+        name: 'Home Dashboard',
+        tag: 'Command Center',
+        category: 'CORE OVERVIEW',
+        file: 'assets/screenshots/home-dashboard.png',
+        title: 'Central Security Dashboard',
+        desc: 'Your main defense dashboard displaying live security health status, active shield toggles, threat scan history, and fast-action threat analysis triggers.',
+        caps: [
+          'Comprehensive Device Security Health Score',
+          'One-Tap Quick Scan for Links & Messages',
+          'Live Background Shield Protection Toggles',
+          'Volatile Threat Counter & System Status'
+        ],
+        tip: 'All statistics and scan counters are computed locally and stored encrypted at rest.'
+      },
+      {
+        id: 'protection-status',
+        name: 'Protection Status',
+        tag: 'Live Monitors',
+        category: 'SYSTEM TELEMETRY',
+        file: 'assets/screenshots/protection-status.png',
+        title: 'Active Protection Status',
+        desc: 'Detailed real-time monitoring of each defense layer: Web URL filtering, SMS extortion shielding, Offline Bloom Filter database, and local AI explanation engine.',
+        caps: [
+          'SMS & Notification Real-Time Interceptor',
+          'Pre-Navigation URL Heuristic Guard',
+          'Air-Gapped Bloom Filter Database Health',
+          'Local SLM Assistant Model Readiness'
+        ],
+        tip: 'Shows exact heartbeat timestamp for offline intelligence caches without network queries.'
+      },
+      {
+        id: 'scan-hub',
+        name: 'Scan Hub',
+        tag: 'Multi-Modal Scanner',
+        category: 'THREAT INGESTION',
+        file: 'assets/screenshots/scan-hub.png',
+        title: 'Universal Threat Scan Hub',
+        desc: 'Scan any untrusted payload: paste suspicious URLs, check urgent text messages, inspect QR code bitmaps, or analyze file headers with zero cloud roundtrips.',
+        caps: [
+          'Multi-Input (URL, SMS, QR Code, File)',
+          'Instant Clipboard Paste & Scan',
+          'Sanitized Pre-Execution Pipeline',
+          'Automatic Input Normalization & Punycode De-obfuscation'
+        ],
+        tip: 'Inputs exceeding 2,048 bytes are bounded safely to prevent buffer exploit attempts.'
+      },
+      {
+        id: 'url-scanner',
+        name: 'URL Scanner',
+        tag: 'Deep Link Inspection',
+        category: 'LEXICAL ENGINE',
+        file: 'assets/screenshots/url-scanner.png',
+        title: 'Deep Lexical URL Scanner',
+        desc: 'Inspects deceptive domains before you click. Analyzes Shannon entropy, brand typosquatting distance, IP-based hosts, deceptive subdomains, and sneaky URL redirects.',
+        caps: [
+          'Shannon Entropy Randomness Calculation',
+          'Brand Typosquatting Distance Check',
+          'IDN Homograph & Punycode De-cloaking',
+          'Offline Bloom Filter Reputation Verification'
+        ],
+        tip: 'Calculates verdict in under 1 millisecond using zero-allocation algorithms.'
+      },
+      {
+        id: 'universal-scan-result',
+        name: 'Universal Scan Result',
+        tag: 'Verdict & Evidence',
+        category: 'RISK VERDICT',
+        file: 'assets/screenshots/universal-scan-result.png',
+        title: 'Instant Threat Verdict & Evidence',
+        desc: 'Visually unambiguous color-coded alert providing a clear 0-100 risk score, transparent evidence breakdown, confidence level, and actionable recommendations.',
+        caps: [
+          'Color-Coded Verdict (Safe, Caution, Block)',
+          'Multi-Factor Bayesian Risk Score (0-100)',
+          'Transparent Evidence Factor Breakdown',
+          'Instant Action Gate (Block, Quarantine, Proceed)'
+        ],
+        tip: 'The risk score is mathematically finalized before the AI assistant formats the explanation.'
+      },
+      {
+        id: 'security-assistant',
+        name: 'Security Assistant',
+        tag: 'On-Device AI',
+        category: 'PLAIN-LANGUAGE AI',
+        file: 'assets/screenshots/security-assistant.png',
+        title: 'AI Security Assistant (Offline SLM)',
+        desc: 'A read-only local AI security assistant that translates complex technical telemetry into jargon-free, Grade-8 explanations directly on your phone.',
+        caps: [
+          'Plain English Non-Technical Explanations',
+          'Specific Threat Tactics Explained (e.g. Urgency)',
+          'Clear Recommended Action Guide',
+          '100% On-Device Prompt Injection Containment'
+        ],
+        tip: 'The assistant operates strictly read-only and has zero authority to alter the security verdict.'
+      },
+      {
+        id: 'privacy-center',
+        name: 'Privacy Center',
+        tag: 'Zero-Knowledge',
+        category: 'DATA BOUNDARIES',
+        file: 'assets/screenshots/privacy-center.png',
+        title: 'Privacy Center & Data Shading',
+        desc: 'Verify that zero personal data leaves your device. Manage encrypted local vaults, audit ephemeral RAM usage, and trigger one-tap cryptographic data shredding.',
+        caps: [
+          'Zero-Knowledge Telemetry Verification',
+          'Volatile Memory Auto-Zeroing Status',
+          'Encrypted SQLite / SQLCipher Store Controls',
+          'One-Tap Cryptographic Shredder'
+        ],
+        tip: 'Data shredding purges all internal event counters and derived local caches instantly.'
+      },
+      {
+        id: 'quarantine-vault',
+        name: 'Quarantine Vault',
+        tag: 'Isolated Sandbox',
+        category: 'CONTAINMENT',
+        file: 'assets/screenshots/quarantine-vault.png',
+        title: 'Endpoint Quarantine Vault',
+        desc: 'Securely store and isolate intercepted malicious links, fake credentials, and deceptive SMS scams without risking accidental taps or browser execution.',
+        caps: [
+          'Neutralized Payload Storage',
+          'Safe De-Obfuscated Metadata View',
+          'Export Anonymized Signatures',
+          'Permanent Deletion with Secure Overwrite'
+        ],
+        tip: 'All quarantined items are encrypted at rest with keys derived from the OS hardware keystore.'
+      },
+      {
+        id: 'password-generator',
+        name: 'Password Generator',
+        tag: 'Cryptographic Tool',
+        category: 'ENDPOINT TOOLS',
+        file: 'assets/screenshots/password-generator.png',
+        title: 'Cryptographic Password Studio',
+        desc: 'Generate ultra-high-entropy, cryptographically secure passwords and authentication tokens locally using the Android operating system CSPRNG.',
+        caps: [
+          'Hardware-Seeded Cryptographic Randomness',
+          'Customizable Length, Character Sets & Symbols',
+          'Real-time Shannon Entropy Strength Meter',
+          'Zero Clipboard Leak Timer'
+        ],
+        tip: 'Generated passwords are never logged, synced, or persisted to device storage.'
+      },
+      {
+        id: 'settings',
+        name: 'Settings & Rules',
+        tag: 'Custom Controls',
+        category: 'CUSTOM CONFIGURATION',
+        file: 'assets/screenshots/settings.png',
+        title: 'Settings & Policy Controls',
+        desc: 'Customize engine sensitivity thresholds, manage user allowlists, configure offline rule updates, and toggle UI appearance between Cyber Dark and Brutalist modes.',
+        caps: [
+          'Custom Domain & Keyword Allowlists',
+          'Detection Sensitivity Tuning (Strict / Balanced)',
+          'Cryptographically Signed Offline Updates',
+          'High-Contrast Cyberpunk & OLED Theme'
+        ],
+        tip: 'Allows complete control over your security rules with zero remote telemetry.'
+      }
+    ];
+
+    let currentScreenIndex = 0;
+    let autoPlayInterval = null;
+
+    // Elements
+    const showcaseImg = document.getElementById('activeScreenImg');
+    const heroImg = document.getElementById('heroPhoneImg');
+    const screenTitle = document.getElementById('screenTitle');
+    const screenDesc = document.getElementById('screenDesc');
+    const screenCategoryBadge = document.getElementById('screenCategoryBadge');
+    const screenCapsList = document.getElementById('screenCapsList');
+    const screenTipText = document.getElementById('screenTipText');
+    const screenCounter = document.getElementById('screenCounter');
+    const screenTabsBar = document.getElementById('screenTabsBar');
+    const galleryGrid = document.getElementById('galleryGrid');
+    const prevBtn = document.getElementById('prevScreenBtn');
+    const nextBtn = document.getElementById('nextScreenBtn');
+    const autoPlayBtn = document.getElementById('autoPlayBtn');
+    const phoneFrame = document.getElementById('showcasePhoneFrame');
+
+    // Lightbox Elements
+    const lightboxModal = document.getElementById('lightboxModal');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxCaption = document.getElementById('lightboxCaption');
+    const lightboxCloseBtn = document.getElementById('lightboxCloseBtn');
+
+    // Build Tabs
+    APP_SCREENS.forEach((screen, index) => {
+      const tab = document.createElement('button');
+      tab.className = `screen-tab ${index === 0 ? 'active' : ''}`;
+      tab.innerHTML = `<span class="screen-tab-number">${index + 1}</span> <span>${screen.name}</span>`;
+      tab.addEventListener('click', () => {
+        stopAutoPlay();
+        setScreen(index);
+      });
+      screenTabsBar.appendChild(tab);
+
+      // Build Gallery Card
+      const card = document.createElement('div');
+      card.className = 'gallery-card';
+      card.innerHTML = `
+        <div class="gallery-img-box">
+          <img src="${screen.file}" alt="${screen.name}" class="gallery-img" loading="lazy">
+        </div>
+        <div class="gallery-card-footer">
+          <div class="gallery-card-name">${screen.name}</div>
+          <div class="gallery-card-tag">${screen.tag}</div>
+        </div>
+      `;
+      card.addEventListener('click', () => {
+        openLightbox(screen.file, `${screen.name} — ${screen.tag}`);
+      });
+      galleryGrid.appendChild(card);
+    });
+
+    function setScreen(index) {
+      currentScreenIndex = (index + APP_SCREENS.length) % APP_SCREENS.length;
+      const screen = APP_SCREENS[currentScreenIndex];
+
+      // Fade transition for phone image
+      showcaseImg.style.opacity = '0.3';
+      setTimeout(() => {
+        showcaseImg.src = screen.file;
+        showcaseImg.alt = screen.name;
+        showcaseImg.style.opacity = '1';
+      }, 150);
+
+      // Update text
+      screenCategoryBadge.textContent = screen.category;
+      screenTitle.textContent = screen.title;
+      screenDesc.textContent = screen.desc;
+      screenCounter.textContent = `${currentScreenIndex + 1} / ${APP_SCREENS.length}`;
+      screenTipText.textContent = screen.tip;
+
+      // Update capabilities
+      screenCapsList.innerHTML = '';
+      screen.caps.forEach(cap => {
+        const li = document.createElement('li');
+        li.className = 'cap-item';
+        li.innerHTML = `<span class="cap-icon">✓</span> <span>${cap}</span>`;
+        screenCapsList.appendChild(li);
+      });
+
+      // Update active tab
+      const tabs = screenTabsBar.querySelectorAll('.screen-tab');
+      tabs.forEach((tab, i) => {
+        tab.classList.toggle('active', i === currentScreenIndex);
+      });
+    }
+
+    prevBtn.addEventListener('click', () => {
+      stopAutoPlay();
+      setScreen(currentScreenIndex - 1);
+    });
+
+    nextBtn.addEventListener('click', () => {
+      stopAutoPlay();
+      setScreen(currentScreenIndex + 1);
+    });
+
+    function stopAutoPlay() {
+      if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+        autoPlayInterval = null;
+        autoPlayBtn.innerHTML = '▶ Auto Tour';
+        autoPlayBtn.style.color = '';
+        autoPlayBtn.style.borderColor = '';
+      }
+    }
+
+    autoPlayBtn.addEventListener('click', () => {
+      if (autoPlayInterval) {
+        stopAutoPlay();
+      } else {
+        autoPlayBtn.innerHTML = '⏸ Pause Tour';
+        autoPlayBtn.style.color = 'var(--neon-lime)';
+        autoPlayBtn.style.borderColor = 'var(--neon-lime)';
+        autoPlayInterval = setInterval(() => {
+          setScreen(currentScreenIndex + 1);
+        }, 3200);
+      }
+    });
+
+    // Lightbox Handlers
+    phoneFrame.addEventListener('click', () => {
+      const s = APP_SCREENS[currentScreenIndex];
+      openLightbox(s.file, `${s.name} — ${s.title}`);
+    });
+
+    function openLightbox(src, caption) {
+      lightboxImg.src = src;
+      lightboxCaption.textContent = caption;
+      lightboxModal.classList.add('active');
+    }
+
+    lightboxCloseBtn.addEventListener('click', () => {
+      lightboxModal.classList.remove('active');
+    });
+
+    lightboxModal.addEventListener('click', (e) => {
+      if (e.target === lightboxModal) {
+        lightboxModal.classList.remove('active');
+      }
+    });
+
+    // FAQ Accordion
+    document.querySelectorAll('.faq-question').forEach(q => {
+      q.addEventListener('click', () => {
+        const item = q.parentElement;
+        item.classList.toggle('open');
+      });
+    });
+
+    // Copy Hash Button
+    const copyBtn = document.getElementById('copyHashBtn');
+    const hashText = document.getElementById('sha256Text').innerText;
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(hashText).then(() => {
+        copyBtn.textContent = 'Copied!';
+        copyBtn.style.background = 'var(--safe-green)';
+        copyBtn.style.color = '#fff';
+        setTimeout(() => {
+          copyBtn.textContent = 'Copy Hash';
+          copyBtn.style.background = '';
+          copyBtn.style.color = '';
+        }, 2200);
+      });
+    });
+
+    // Initialize first screen
+    setScreen(0);
+  </script>
+</body>
+</html>

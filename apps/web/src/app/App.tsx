@@ -1019,20 +1019,35 @@ export const App: React.FC = () => {
                   <p className="font-body-sm" style={{ color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
                     Direct APK sideload for Android 8.0+. Live QR scanning and SMS notification filter.
                   </p>
-                  <a
-                    href="/downloads/private-protection-mobile-0.1.1.apk"
-                    download="private-protection-mobile-0.1.1.apk"
-                    style={{
-                      display: 'inline-block',
-                      fontSize: '0.75rem',
-                      fontFamily: 'var(--font-mono)',
-                      fontWeight: 800,
-                      color: 'var(--color-brand)',
-                      textDecoration: 'underline'
-                    }}
-                  >
-                    Direct APK (1.0 MB) →
-                  </a>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    <a
+                      href="mobile.html"
+                      style={{
+                        display: 'inline-block',
+                        fontSize: '0.8rem',
+                        fontFamily: 'var(--font-mono)',
+                        fontWeight: 800,
+                        color: 'var(--color-brand)',
+                        textDecoration: 'underline'
+                      }}
+                    >
+                      📱 View App Screens &amp; Features →
+                    </a>
+                    <a
+                      href="/downloads/privex-mobile-release.apk"
+                      download="privex-mobile-release.apk"
+                      style={{
+                        display: 'inline-block',
+                        fontSize: '0.75rem',
+                        fontFamily: 'var(--font-mono)',
+                        fontWeight: 700,
+                        color: 'var(--text-muted)',
+                        textDecoration: 'underline'
+                      }}
+                    >
+                      Direct APK v0.1.2 (1.86 MB) ⤓
+                    </a>
+                  </div>
                 </div>
 
                 <div className="cyber-panel" style={{ padding: '1.25rem' }}>

@@ -33,7 +33,11 @@ release/*.exe
 *.apk
 *.aab
 apps/desktop/release/
-apps/web/public/downloads/
+apps/web/public/downloads/*
+!apps/web/public/downloads/privex-mobile-release.apk
+!apps/web/public/downloads/SHA256SUMS.txt
+!downloads/privex-mobile-release.apk
+!downloads/SHA256SUMS.txt
 
 # Mobile / Android Build Files
 .gradle/
