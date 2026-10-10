@@ -306,6 +306,35 @@ export class BehaviorEngineService {
       severity: SeverityLevel.HIGH,
       threatName: 'MSBUILD_INLINE_TASK',
       description: () => 'MSBuild invoked on untrusted project file to execute inline C# compilation.'
+    },
+    {
+      ruleId: 'behav-defender-tamper-disable',
+      name: 'Windows Defender Service / Tamper Disable Attempt',
+      regex: /(?:set-mppreference\s+.*(?:-disablerealtimemonitoring\s+\$true|-disablescriptscanning\s+\$true|-exclusionpath)|sc(?:\.exe)?\s+(?:stop|config)\s+windefend|net(?:\.exe)?\s+stop\s+windefend)/i,
+      score: 95,
+      severity: SeverityLevel.CRITICAL,
+      threatName: 'DEFENDER_TAMPER_DISABLE_ATTEMPT',
+      isCriticalOverride: true,
+      description: () => 'Attempted tampering or disabling of Windows Defender real-time protection or adding unauthorized exclusions.'
+    },
+    {
+      ruleId: 'behav-amsi-bypass-tamper',
+      name: 'AMSI Security Architecture Tamper / Memory Patch Bypass',
+      regex: /(?:\[Ref\]\.Assembly\.GetType\(['"]System\.Management\.Automation\.AmsiUtils['"]\)|amsiInitFailed|amsiContext|AmsiScanBuffer)/i,
+      score: 95,
+      severity: SeverityLevel.CRITICAL,
+      threatName: 'AMSI_TAMPER_BYPASS_ATTEMPT',
+      isCriticalOverride: true,
+      description: () => 'In-memory tampering or unhooking of Windows Antimalware Scan Interface (AMSI) detected.'
+    },
+    {
+      ruleId: 'behav-mpcmdrun-download-abuse',
+      name: 'Defender Utility (MpCmdRun.exe) Download Abuse',
+      regex: /mpcmdrun(?:\.exe)?\s+.*-downloadfile\s+-url/i,
+      score: 85,
+      severity: SeverityLevel.HIGH,
+      threatName: 'MPCMDRUN_INGRESS_TRANSFER',
+      description: () => 'Windows Defender command-line tool (MpCmdRun.exe) abused as an ingress download utility.'
     }
   ];
 

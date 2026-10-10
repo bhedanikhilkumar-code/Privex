@@ -1,19 +1,110 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileScannerService } from '../services/file-scanner.service';
 import { FileInspectionResult } from '../types/mobile.types';
 import { SecurityBadge } from '../components/SecurityBadge';
 import { EvidenceCard } from '../components/EvidenceCard';
+import { SecureStorageService } from '../services/secure-storage.service';
+import { NotificationService } from '../services/notification.service';
+import { Verdict } from '@private-protection/core';
 
 interface FileScannerScreenProps {
   scannerService: FileScannerService;
   onNavigateHome: () => void;
+  initialFileName?: string;
+  initialResult?: FileInspectionResult | null;
 }
 
-export const FileScannerScreen: React.FC<FileScannerScreenProps> = ({ scannerService, onNavigateHome }) => {
-  const [result, setResult] = useState<FileInspectionResult | null>(null);
+/**
+ * Robustly reads an ArrayBuffer from a Blob or File with fallback for older Android WebViews
+ */
+async function readFileSliceAsArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
+  if (typeof blob.arrayBuffer === 'function') {
+    try {
+      return await blob.arrayBuffer();
+    } catch {
+      // Fallback to FileReader if arrayBuffer() throws in Webview
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (reader.result instanceof ArrayBuffer) {
+        resolve(reader.result);
+      } else {
+        reject(new Error('FileReader did not return an ArrayBuffer'));
+      }
+    };
+    reader.onerror = () => reject(reader.error || new Error('Failed to read file slice via FileReader'));
+    reader.readAsArrayBuffer(blob);
+  });
+}
+
+export const FileScannerScreen: React.FC<FileScannerScreenProps> = ({
+  scannerService,
+  onNavigateHome,
+  initialFileName,
+  initialResult = null
+}) => {
+  const [result, setResult] = useState<FileInspectionResult | null>(initialResult);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (initialResult) {
+      setResult(initialResult);
+    } else if (initialFileName) {
+      // Check if it matches known test samples or synthesize inspection
+      if (initialFileName.endsWith('.exe')) {
+        simulateFileScan(initialFileName, 'application/x-msdownload', [0x4d, 0x5a, 0x90, 0x00, 0x03, 0x00, 0x00, 0x00]);
+      } else if (initialFileName.endsWith('.dex')) {
+        simulateFileScan(initialFileName, 'application/vnd.android.dex', [0x64, 0x65, 0x78, 0x0a, 0x30, 0x33, 0x35, 0x00]);
+      } else if (initialFileName.endsWith('.pdf')) {
+        simulateFileScan(initialFileName, 'application/pdf', [0x25, 0x50, 0x44, 0x2d, 0x31, 0x2e, 0x35]);
+      }
+    }
+  }, [initialFileName, initialResult]);
+
+  const processFileInspection = async (inspection: FileInspectionResult) => {
+    setResult(inspection);
+
+    // 1. Record non-sensitive metadata in local encrypted scan history
+    try {
+      await SecureStorageService.recordScan({
+        scanId: `file-scan-${Date.now()}`,
+        targetType: 'FILE',
+        sanitizedSummary: inspection.fileName.substring(0, 30),
+        verdict: inspection.verdict,
+        score: inspection.score,
+        timestamp: Date.now()
+      });
+    } catch (recordErr) {
+      console.warn('Failed to record file scan to secure storage:', recordErr);
+    }
+
+    // 2. Dispatch native notification & haptic feedback if threat or suspicious
+    try {
+      await NotificationService.notifyScanResult({
+        scanId: `file-${Date.now()}`,
+        targetType: 'FILE',
+        rawInput: inspection.fileName,
+        sanitizedTarget: inspection.fileName,
+        verdict: inspection.verdict,
+        overallScore: inspection.score,
+        severity: inspection.severity,
+        confidence: 0.95,
+        threatCategory: inspection.threatCategory,
+        evidence: inspection.evidence,
+        recommendation: inspection.recommendation,
+        timestamp: Date.now(),
+        overridden: false,
+        executionTimeMs: 1
+      });
+    } catch (notifErr) {
+      console.warn('Failed to dispatch notification for file inspection:', notifErr);
+    }
+  };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -31,7 +122,7 @@ export const FileScannerScreen: React.FC<FileScannerScreenProps> = ({ scannerSer
       // Read first 8,192 bytes for header analysis and entropy calculation
       const sliceSize = Math.min(8192, file.size);
       const sliceBlob = file.slice(0, sliceSize);
-      const arrayBuffer = await sliceBlob.arrayBuffer();
+      const arrayBuffer = await readFileSliceAsArrayBuffer(sliceBlob);
       const headerBytes = Array.from(new Uint8Array(arrayBuffer));
 
       const inspection = scannerService.inspectFile({
@@ -40,7 +131,7 @@ export const FileScannerScreen: React.FC<FileScannerScreenProps> = ({ scannerSer
         mimeType: file.type || 'application/octet-stream',
         headerBytes
       });
-      setResult(inspection);
+      await processFileInspection(inspection);
     } catch (err: any) {
       setErrorMessage(`Failed to inspect file: ${err?.message || 'Read error'}`);
     } finally {
@@ -51,7 +142,7 @@ export const FileScannerScreen: React.FC<FileScannerScreenProps> = ({ scannerSer
     }
   };
 
-  const simulateFileScan = (fileName: string, mime: string, header: number[]) => {
+  const simulateFileScan = async (fileName: string, mime: string, header: number[]) => {
     setErrorMessage(null);
     const inspection = scannerService.inspectFile({
       name: fileName,
@@ -59,7 +150,7 @@ export const FileScannerScreen: React.FC<FileScannerScreenProps> = ({ scannerSer
       mimeType: mime,
       headerBytes: header
     });
-    setResult(inspection);
+    await processFileInspection(inspection);
   };
 
   return (

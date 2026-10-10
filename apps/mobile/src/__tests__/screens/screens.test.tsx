@@ -81,6 +81,49 @@ describe('Mobile Screen Components & Presentation Layer', () => {
     });
   });
 
+  it('inspects user-selected file via SAF file input and records scan history', async () => {
+    const { SecureStorageService } = await import('../../services/secure-storage.service');
+    const recordSpy = vi.spyOn(SecureStorageService, 'recordScan');
+
+    render(<FileScannerScreen scannerService={fileService} onNavigateHome={() => {}} />);
+
+    const fileInput = screen.getByTestId('saf-file-input') as HTMLInputElement;
+
+    // Create a mock executable file with MZ header
+    const mockFile = new File([new Uint8Array([0x4d, 0x5a, 0x90, 0x00, 0x03])], 'downloaded_malware.exe', {
+      type: 'application/x-msdownload'
+    });
+
+    fireEvent.change(fileInput, { target: { files: [mockFile] } });
+
+    await waitFor(() => {
+      expect(screen.getByText('downloaded_malware.exe')).toBeDefined();
+      expect(screen.getByText(/DANGEROUS \/ MALICIOUS/i)).toBeDefined();
+    });
+
+    expect(recordSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        targetType: 'FILE',
+        sanitizedSummary: 'downloaded_malware.exe'
+      })
+    );
+  });
+
+  it('auto-displays inspection when navigated with initialFileName', async () => {
+    render(
+      <FileScannerScreen
+        scannerService={fileService}
+        initialFileName="report.pdf"
+        onNavigateHome={() => {}}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('report.pdf')).toBeDefined();
+      expect(screen.getByText(/SAFE \/ ALLOWED/i)).toBeDefined();
+    });
+  });
+
   it('enforces countdown gate inside FrictionGateModal', async () => {
     const bypassSpy = vi.fn();
     const cancelSpy = vi.fn();

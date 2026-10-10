@@ -36,6 +36,7 @@ export const App: React.FC = () => {
   // Inbound Intent state (cold-start or warm-start)
   const [inboundUrl, setInboundUrl] = useState<string | undefined>(undefined);
   const [inboundText, setInboundText] = useState<string | undefined>(undefined);
+  const [inboundFileName, setInboundFileName] = useState<string | undefined>(undefined);
   const [autoScanTrigger, setAutoScanTrigger] = useState<boolean>(false);
   const [activePreThreatWarning, setActivePreThreatWarning] = useState<PreThreatWarningPayload | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
@@ -176,6 +177,7 @@ export const App: React.FC = () => {
                 setInboundText(record.sanitizedSummary);
                 setCurrentTab('TEXT_SCAN');
               } else if (record.targetType === 'FILE') {
+                setInboundFileName(record.sanitizedSummary);
                 setCurrentTab('FILE_SCAN');
               }
             }}
@@ -218,7 +220,11 @@ export const App: React.FC = () => {
         {currentTab === 'FILE_SCAN' && (
           <FileScannerScreen
             scannerService={fileService}
-            onNavigateHome={() => setCurrentTab('HOME')}
+            initialFileName={inboundFileName}
+            onNavigateHome={() => {
+              setInboundFileName(undefined);
+              setCurrentTab('HOME');
+            }}
           />
         )}
         {currentTab === 'PASSWORD' && (
