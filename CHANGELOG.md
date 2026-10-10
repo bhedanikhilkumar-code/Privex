@@ -3,6 +3,18 @@
 
 All notable changes to this project are documented in this file in adherence to the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) standard and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] — 2026-10-10
+
+### Added
+- **Motion Design System & Purposeful Animations (`@private-protection/ui`):**
+  - Centralized motion tokens (`motion.ts`) defining micro ($120\text{–}160\text{ ms}$), standard ($200\text{–}260\text{ ms}$), and emphasis ($300\text{–}420\text{ ms}$) durations, custom cubic-bezier easings, and numeric count-up / character scramble helpers.
+  - Hardware-accelerated CSS animation library (`motion.css`) animating strictly `transform`, `opacity`, and `stroke-dashoffset`.
+  - Comprehensive `prefers-reduced-motion: reduce` compliance across Web, Desktop, Extension, and Mobile.
+  - Interactive laser reticle scanning beam on Android QR Scanner.
+  - Threat detection pulse and warning interstitial beacon in Chromium Extension.
+  - Smooth password strength fill, live score count-up, and network monitor slide-in entrances in Web client.
+  - Elevation transitions and modal presence animations in Desktop client.
+
 ---
 
 ## [0.1.0] — 2026-10-02

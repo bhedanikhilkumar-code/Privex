@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@private-protection/ui': path.resolve(__dirname, '../../packages/ui'),
       'crypto': path.resolve(__dirname, './src/shims/crypto-shim.ts'),
       'buffer': path.resolve(__dirname, './src/shims/buffer-shim.ts'),
     },

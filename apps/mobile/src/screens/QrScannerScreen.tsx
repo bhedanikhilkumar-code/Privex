@@ -196,19 +196,23 @@ export const QrScannerScreen: React.FC<QrScannerScreenProps> = ({ cameraService,
           </div>
         )}
 
-        {/* Viewfinder Target Reticle */}
+        {/* Viewfinder Target Reticle with Animated Laser Line */}
         {isCameraActive && (
           <div
             style={{
               position: 'absolute',
               width: '60%',
               aspectRatio: '1/1',
-              border: '2px dashed #38bdf8',
+              border: '2px solid rgba(56, 189, 248, 0.6)',
               borderRadius: '16px',
               boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.45)',
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              overflow: 'hidden'
             }}
-          />
+          >
+            {/* Animated Laser Sweep Line */}
+            <div className="motion-laser-line" />
+          </div>
         )}
       </div>
 

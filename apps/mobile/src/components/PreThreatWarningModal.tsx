@@ -107,6 +107,7 @@ export const PreThreatWarningModal: React.FC<PreThreatWarningModalProps> = ({
       aria-modal="true"
       aria-labelledby="pre-threat-title"
       aria-describedby="pre-threat-desc"
+      className="motion-modal-backdrop"
       style={{
         position: 'fixed',
         inset: 0,
@@ -120,6 +121,7 @@ export const PreThreatWarningModal: React.FC<PreThreatWarningModalProps> = ({
       }}
     >
       <div
+        className={`motion-modal-panel ${isDangerous ? 'motion-threat-alert' : ''}`}
         style={{
           backgroundColor: '#0f172a',
           borderRadius: '20px',
