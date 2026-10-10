@@ -206,10 +206,11 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Build Core & ML Dependencies
+      - name: Build Core, ML & Desktop Dependencies
         run: |
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/desktop
 
       - name: Run Desktop Tests in Headless Display
         run: xvfb-run -a npm run test --workspace=@private-protection/desktop
@@ -281,10 +282,12 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Build Core & ML
+      - name: Build Core, ML, Desktop & Web
         run: |
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/desktop
+          npm run build --workspace=@private-protection/web
 
       - name: Verify Full Test Coverage
         run: xvfb-run -a npm run test:coverage

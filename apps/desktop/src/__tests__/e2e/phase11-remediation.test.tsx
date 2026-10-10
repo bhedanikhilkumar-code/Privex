@@ -396,6 +396,12 @@ function createValidMinimalPeBuffer(extraRandomBytes: number = 0): Buffer {
     () => {
       const electronBinary = require('electron') as string;
       const mainBundle = path.resolve(__dirname, '../../../dist/main/electron-main.cjs');
+      if (!fs.existsSync(mainBundle)) {
+        spawnSync(process.execPath, [path.resolve(__dirname, '../../../scripts/build-desktop.js')], {
+          cwd: path.resolve(__dirname, '../../..'),
+          encoding: 'utf-8'
+        });
+      }
       expect(fs.existsSync(mainBundle)).toBe(true);
 
       const proc = spawnSync(
