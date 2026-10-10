@@ -190,6 +190,10 @@ export const App: React.FC = () => {
               setAutoScanTrigger(false);
               setCurrentTab('HOME');
             }}
+            onNavigateVulnerabilityAudit={(targetUrl) => {
+              if (targetUrl) setInboundUrl(targetUrl);
+              setCurrentTab('VULNERABILITY_AUDIT');
+            }}
           />
         )}
         {currentTab === 'TEXT_SCAN' && (

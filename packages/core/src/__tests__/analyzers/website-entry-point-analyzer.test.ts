@@ -121,4 +121,19 @@ describe('WebsiteEntryPointAnalyzer', () => {
     expect(point?.severity).toBe('HIGH');
     expect(point?.hackerAttackVector).toContain('web shells');
   });
+
+  it('audits ports for a target and correctly classifies status', () => {
+    const httpsPorts = analyzer.auditPortsForTarget('https://safe-bank.com');
+    const port443 = httpsPorts.find(p => p.port === 443);
+    expect(port443?.status).toBe('SECURE');
+
+    const explicitPorts = analyzer.auditPortsForTarget('http://db-server.local:3306');
+    const port3306 = explicitPorts.find(p => p.port === 3306);
+    expect(port3306?.status).toBe('OPEN');
+    expect(port3306?.isExplicitTarget).toBe(true);
+
+    const profile22 = WebsiteEntryPointAnalyzer.getPortProfile(22);
+    expect(profile22).toBeDefined();
+    expect(profile22?.service).toContain('SSH');
+  });
 });

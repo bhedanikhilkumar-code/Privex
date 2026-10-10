@@ -50,6 +50,9 @@ describe('Mobile Screen Components & Presentation Layer', () => {
     await waitFor(() => {
       expect(screen.getByText(/Analysis Verdict/i)).toBeDefined();
       expect(screen.getByText(/SAFE \/ ALLOWED/i)).toBeDefined();
+      expect(screen.getByText(/ON-DEVICE PORT SCANNER/i)).toBeDefined();
+      expect(screen.getByText(/Perimeter Port Audit: google.com/i)).toBeDefined();
+      expect(screen.getByText(/Re-Probe Target Ports/i)).toBeDefined();
     }, { timeout: 4000 });
   });
 

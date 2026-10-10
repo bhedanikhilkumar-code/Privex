@@ -7,6 +7,19 @@
   <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=10B981&center=true&vCenter=true&width=700&lines=PRIVEX%3A+Cross-Platform+Threat+Protection;100%25+On-Device+%E2%80%A2+Zero-Cloud+Dependency;Instant+Phishing+%26+Scam+Detection+%E2%80%A2+Air-Gapped+Offline" alt="PRIVEX Platform Matrix Animation" />
 </p>
 
+## 🌐 Live Web & Landing Page Links
+
+Access PRIVEX directly in your browser without installing anything:
+
+| Page | URL | Description |
+|---|---|---|
+| **📱 Mobile Landing Page** | [**Open Mobile Landing Page**](https://bhedanikhilkumar-code.github.io/Privex/mobile.html) | Interactive mobile app showcase, live feature preview & download |
+| **🌐 Main Web Scanner** | [**Open Web Scanner**](https://bhedanikhilkumar-code.github.io/Privex/) | Zero-install local on-device URL and threat scanner |
+| **📥 App Download Page** | [**Open Download Page**](https://bhedanikhilkumar-code.github.io/Privex/download.html) | Direct APK, Windows exe, and browser extension downloads |
+| **✨ Intro Feature Preview** | [**Open Feature Preview**](https://bhedanikhilkumar-code.github.io/Privex/intro-preview.html) | Interactive feature walk-through & capability demonstration |
+
+---
+
 ### 🛡️ Cross-Platform Capability & Feature Matrix
 
 <table align="center" width="100%">
@@ -81,6 +94,7 @@
 
 ## TABLE OF CONTENTS
 
+- [🌐 LIVE WEB & LANDING PAGE LINKS](#-live-web--landing-page-links)
 - [🛡️ PLATFORM CAPABILITY MATRIX](#-cross-platform-capability--feature-matrix)
 1. [WHAT IS PRIVEX?](#1-what-is-privex)
 2. [HOW DOES IT WORK?](#2-how-does-it-work)

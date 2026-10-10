@@ -15,13 +15,15 @@ interface UrlScannerScreenProps {
   onNavigateHome: () => void;
   initialUrl?: string;
   autoScan?: boolean;
+  onNavigateVulnerabilityAudit?: (url?: string) => void;
 }
 
 export const UrlScannerScreen: React.FC<UrlScannerScreenProps> = ({
   scannerService,
   onNavigateHome,
   initialUrl,
-  autoScan
+  autoScan,
+  onNavigateVulnerabilityAudit
 }) => {
   const [urlInput, setUrlInput] = useState<string>(initialUrl || '');
   const [activeTab, setActiveTab] = useState<'PHISHING' | 'ATTACK_SURFACE'>('PHISHING');
@@ -117,6 +119,7 @@ export const UrlScannerScreen: React.FC<UrlScannerScreenProps> = ({
           setUrlInput('');
         }}
         onDone={onNavigateHome}
+        onNavigateVulnerabilityAudit={onNavigateVulnerabilityAudit}
       />
     );
   }

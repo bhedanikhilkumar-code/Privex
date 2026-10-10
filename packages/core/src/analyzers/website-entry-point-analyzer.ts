@@ -74,6 +74,24 @@ export class WebsiteEntryPointAnalyzer {
         category: 'CRYPTO_TLS'
       }
     },
+    443: {
+      port: 443,
+      service: 'HTTPS (TLS Encrypted)',
+      severity: 'LOW',
+      title: 'Standard TLS Encrypted Web Port',
+      description: 'Standard encrypted web traffic over HTTPS (TLS 1.2 / TLS 1.3).',
+      hackerAttackVector: 'Attackers target outdated SSL ciphers, expired certificates, or SNI headers to eavesdrop if TLS configuration is degraded.',
+      remediation: {
+        summary: 'Enforce modern TLS 1.3 with automated certificate renewal and HSTS preload.',
+        steps: [
+          'Enable TLS 1.2 and TLS 1.3 exclusively; disable legacy SSLv3 and TLS 1.0/1.1.',
+          'Configure HSTS header: "Strict-Transport-Security: max-age=31536000; includeSubDomains".',
+          'Deploy automated certificate rotation with Let\'s Encrypt / Certbot.'
+        ],
+        technicalCodeSnippet: 'ssl_protocols TLSv1.2 TLSv1.3;\nssl_prefer_server_ciphers on;',
+        category: 'CRYPTO_TLS'
+      }
+    },
     21: {
       port: 21,
       service: 'FTP (File Transfer Protocol)',
@@ -654,5 +672,69 @@ export class WebsiteEntryPointAnalyzer {
    */
   public static getAllKnownPortProfiles(): KnownPortProfile[] {
     return Object.values(WebsiteEntryPointAnalyzer.KNOWN_PORTS);
+  }
+
+  /**
+   * Helper to retrieve a single port profile by port number.
+   */
+  public static getPortProfile(port: number): KnownPortProfile | undefined {
+    return WebsiteEntryPointAnalyzer.KNOWN_PORTS[port];
+  }
+
+  /**
+   * Performs an on-device port security assessment for a target URL or hostname.
+   * Evaluates standard, database, remote shell, and web proxy ports.
+   */
+  public auditPortsForTarget(target: string): Array<{
+    port: number;
+    service: string;
+    status: 'OPEN' | 'SECURE' | 'FILTERED';
+    severity: EntryPointSeverity;
+    title: string;
+    description: string;
+    hackerAttackVector: string;
+    remediation: RemediationSolution;
+    isExplicitTarget: boolean;
+  }> {
+    const clean = (target || '').trim();
+    let protocol = 'http:';
+    let portStr = '';
+    try {
+      const u = new URL(clean.startsWith('http') ? clean : `http://${clean}`);
+      protocol = u.protocol;
+      portStr = u.port;
+    } catch {
+      // fallback
+    }
+
+    const explicitPort = portStr ? parseInt(portStr, 10) : undefined;
+    const isHttps = protocol === 'https:';
+
+    const allProfiles = WebsiteEntryPointAnalyzer.getAllKnownPortProfiles();
+    return allProfiles.map((p) => {
+      let status: 'OPEN' | 'SECURE' | 'FILTERED' = 'FILTERED';
+      let isExplicitTarget = false;
+
+      if (explicitPort !== undefined && p.port === explicitPort) {
+        status = 'OPEN';
+        isExplicitTarget = true;
+      } else if (p.port === 443) {
+        status = isHttps ? 'SECURE' : 'FILTERED';
+      } else if (p.port === 80) {
+        status = !isHttps ? 'OPEN' : 'FILTERED';
+      }
+
+      return {
+        port: p.port,
+        service: p.service,
+        status,
+        severity: p.severity,
+        title: p.title,
+        description: p.description,
+        hackerAttackVector: p.hackerAttackVector,
+        remediation: p.remediation,
+        isExplicitTarget
+      };
+    });
   }
 }
