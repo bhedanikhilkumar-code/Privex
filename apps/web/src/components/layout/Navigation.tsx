@@ -107,7 +107,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 'max-content' }}>
         <a
-          href="/stitch_privex_security_web_ui/privex_overview_dashboard_terra/code.html"
+          href="./stitch_privex_security_web_ui/privex_overview_dashboard_terra/code.html"
           title="Switch to Terra Organic Theme Prototype"
           style={{
             fontFamily: 'var(--font-mono)',

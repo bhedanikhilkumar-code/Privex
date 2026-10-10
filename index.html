@@ -38,55 +38,78 @@
         --color-accent: #D7FF3F;
         --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
         --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        --font-mono: 'Space Grotesk', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        --font-mono: 'Space Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        --surface: #F4F5F8;
+        --surface-container: #FFFFFF;
+        --surface-container-high: #F0F2F7;
+        --surface-container-low: #E9EBF0;
+        --surface-container-lowest: #E2E4EB;
       }
 
       [data-theme="dark"] {
-        --bg-primary: #0b1120;
-        --bg-secondary: #1e293b;
-        --bg-card: #151f32;
-        --text-primary: #f8fafc;
-        --text-muted: #94a3b8;
-        --border-color: #334155;
-        --border-dark: #334155;
-        --border-width: 2px;
-        --shadow-brutal-sm: 2px 2px 0px #020617;
-        --shadow-brutal: 4px 4px 0px #020617;
-        --shadow-brutal-lg: 6px 6px 0px #020617;
-        --shadow-brutal-xl: 8px 8px 0px #020617;
-        --color-safe: #22c55e;
-        --color-safe-bg: #052e16;
-        --color-caution: #f59e0b;
-        --color-caution-bg: #451a03;
-        --color-danger: #ef4444;
-        --color-danger-bg: #450a0a;
-        --color-brand: #3b82f6;
-        --color-brand-hover: #2563eb;
-        --color-accent: #a3e635;
-      }
-
-      [data-theme="night"] {
-        --bg-primary: #000000;
-        --bg-secondary: #0c0c0e;
-        --bg-card: #141416;
-        --text-primary: #ffffff;
-        --text-muted: #a1a1aa;
-        --border-color: #27272a;
-        --border-dark: #27272a;
+        --bg-primary: #111317;
+        --bg-secondary: #1a1c20;
+        --bg-card: #1e2024;
+        --bg-card-high: #282a2e;
+        --bg-card-highest: #333539;
+        --bg-card-lowest: #0c0e12;
+        --surface: #111317;
+        --surface-container: #1e2024;
+        --surface-container-high: #282a2e;
+        --surface-container-low: #1a1c20;
+        --surface-container-lowest: #0c0e12;
+        --text-primary: #e2e2e8;
+        --text-muted: #c4c5d9;
+        --border-color: #434656;
+        --border-dark: #434656;
         --border-width: 2px;
         --shadow-brutal-sm: 2px 2px 0px #000000;
         --shadow-brutal: 4px 4px 0px #000000;
         --shadow-brutal-lg: 6px 6px 0px #000000;
         --shadow-brutal-xl: 8px 8px 0px #000000;
-        --color-safe: #10b981;
-        --color-safe-bg: #022c22;
+        --color-safe: #53e076;
+        --color-safe-bg: #003914;
+        --color-caution: #ffb800;
+        --color-caution-bg: #3e2e00;
+        --color-danger: #ff5a36;
+        --color-danger-bg: #450a0a;
+        --color-brand: #2457ff;
+        --color-brand-hover: #1844dd;
+        --color-accent: #cbf231;
+        --color-primary-fixed: #b8c3ff;
+      }
+
+      [data-theme="night"] {
+        --bg-primary: #000000;
+        --bg-secondary: #08090C;
+        --bg-card: #0c0e12;
+        --bg-card-high: #14171d;
+        --bg-card-highest: #1a1c20;
+        --bg-card-lowest: #040507;
+        --surface: #000000;
+        --surface-container: #0c0e12;
+        --surface-container-high: #14171d;
+        --surface-container-low: #08090C;
+        --surface-container-lowest: #040507;
+        --text-primary: #ffffff;
+        --text-muted: #8d90a2;
+        --border-color: #282a2e;
+        --border-dark: #282a2e;
+        --border-width: 2px;
+        --shadow-brutal-sm: 2px 2px 0px #000000;
+        --shadow-brutal: 4px 4px 0px #000000;
+        --shadow-brutal-lg: 6px 6px 0px #000000;
+        --shadow-brutal-xl: 8px 8px 0px #000000;
+        --color-safe: #53e076;
+        --color-safe-bg: #002108;
         --color-caution: #eab308;
-        --color-caution-bg: #422006;
-        --color-danger: #f43f5e;
-        --color-danger-bg: #4c0519;
-        --color-brand: #60a5fa;
-        --color-brand-hover: #3b82f6;
-        --color-accent: #ccff00;
+        --color-caution-bg: #2d1800;
+        --color-danger: #ff5a36;
+        --color-danger-bg: #3a0003;
+        --color-brand: #3b82f6;
+        --color-brand-hover: #2563eb;
+        --color-accent: #cbf231;
+        --color-primary-fixed: #b8c3ff;
       }
 
       * {
@@ -254,14 +277,91 @@
         50% { transform: scale(1.04); opacity: 1; }
         100% { transform: scale(0.96); opacity: 0.85; }
       }
-      .pulse-anim {
-        animation: pulse-ring 2s infinite ease-in-out;
+      .font-headline-xl {
+        font-family: var(--font-serif);
+        font-size: 2.75rem;
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+      }
+      .font-headline-lg {
+        font-family: var(--font-serif);
+        font-size: 2.15rem;
+        font-weight: 700;
+        line-height: 1.2;
+        letter-spacing: -0.01em;
+      }
+      .font-headline-sm {
+        font-family: var(--font-serif);
+        font-size: 1.35rem;
+        font-weight: 600;
+        line-height: 1.3;
+      }
+      .font-body-lg {
+        font-family: var(--font-sans);
+        font-size: 1.125rem;
+        font-weight: 500;
+        line-height: 1.6;
+      }
+      .font-body-md {
+        font-family: var(--font-sans);
+        font-size: 0.95rem;
+        font-weight: 400;
+        line-height: 1.5;
+      }
+      .font-body-sm {
+        font-family: var(--font-sans);
+        font-size: 0.8125rem;
+        font-weight: 400;
+        line-height: 1.4;
+      }
+      .font-label-lg {
+        font-family: var(--font-mono);
+        font-size: 0.875rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+      }
+      .font-label-md {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+      }
+      .font-label-sm {
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+      }
+
+      .cyber-panel {
+        background-color: var(--bg-card);
+        border: 2px solid var(--border-dark);
+        box-shadow: var(--shadow-brutal);
+      }
+      .cyber-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.2rem 0.55rem;
+        border: 1px solid var(--border-dark);
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .cyber-metric-card {
+        background-color: var(--bg-card);
+        border: 2px solid var(--border-dark);
+        box-shadow: var(--shadow-brutal-sm);
+        padding: 0.85rem 1rem;
       }
     </style>
-    <script type="module" crossorigin src="./assets/index-CXB2I8jf.js"></script>
+    <script type="module" crossorigin src="./assets/index-BBbGq_FM.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-C3qAsqX_.css">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"></div>
   </body>
 </html>

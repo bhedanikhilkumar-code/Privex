@@ -77,11 +77,13 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange }) => {
           }}
         >
           <img
-            src="/privex-icon.png"
+            src="./privex-icon.png"
             alt="PRIVEX logo"
             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
             onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = '/privex-logo.svg';
+              const target = e.currentTarget as HTMLImageElement;
+              if (target.src.endsWith('privex-logo.svg')) return;
+              target.src = './privex-logo.svg';
             }}
           />
         </div>
@@ -135,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange }) => {
         <ThemeToggle theme={theme} onThemeChange={onThemeChange} />
 
         <a
-          href="/stitch_privex_security_web_ui/privex_enclave_authentication/code.html"
+          href="./stitch_privex_security_web_ui/privex_enclave_authentication/code.html"
           title="Open Enclave Authentication Session"
           className="cut-corner-btn"
           style={{
@@ -183,6 +185,38 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange }) => {
             <span>📥</span> Install Web App
           </button>
         )}
+
+        {/* Right Corner PRIVEX Logo Emblem */}
+        <a
+          href="./index.html"
+          title="PRIVEX Shield Web App"
+          aria-label="PRIVEX App Home"
+          className="cut-corner-btn"
+          style={{
+            width: '2.5rem',
+            height: '2.5rem',
+            backgroundColor: '#090d16',
+            border: '2px solid var(--border-dark)',
+            boxShadow: 'var(--shadow-brutal-sm)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '2px',
+            textDecoration: 'none',
+            overflow: 'hidden'
+          }}
+        >
+          <img
+            src="./privex-icon.png"
+            alt="PRIVEX corner logo"
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            onError={(e) => {
+              const target = e.currentTarget as HTMLImageElement;
+              if (target.src.endsWith('privex-logo.svg')) return;
+              target.src = './privex-logo.svg';
+            }}
+          />
+        </a>
       </div>
     </header>
   );
