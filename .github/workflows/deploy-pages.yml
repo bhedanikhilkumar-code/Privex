@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -49,6 +49,9 @@ jobs:
           test -f apps/web/dist/index.html
           echo "Web application build successful."
 
+      - name: Preserve Custom Domain
+        run: printf 'privex.io\n' > apps/web/dist/CNAME
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
@@ -61,10 +64,3 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Deploy to gh-pages Branch (Fallback Mirror)
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./apps/web/dist
-          keep_files: false
-          force_orphan: true
