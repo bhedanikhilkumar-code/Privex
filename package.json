@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "build": "npm run build:web",
-    "build:web": "npm run build --workspace=@private-protection/core && npm run build --workspace=@private-protection/ml && npm run build --workspace=@private-protection/web",
+    "build:web": "npm run build --workspace=@private-protection/core && npm run build --workspace=@private-protection/ml && npm run build --workspace=@private-protection/ui && npm run build --workspace=@private-protection/web",
     "test": "npm run test --workspaces --if-present",
     "test:coverage": "npm run test:coverage --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
