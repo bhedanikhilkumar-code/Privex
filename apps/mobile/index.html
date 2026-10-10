@@ -10,16 +10,41 @@
     <link rel="icon" type="image/svg+xml" href="./privex-logo.svg" />
     <title>PRIVEX</title>
     <style>
-      :root {
+      :root, [data-theme="dark"] {
         --bg-primary: #0b1120;
         --bg-card: #1e293b;
+        --bg-secondary: #0f172a;
         --text-primary: #f8fafc;
         --text-muted: #94a3b8;
         --border-color: #334155;
+        --border-dark: #334155;
         --color-safe: #10b981;
+        --color-safe-bg: rgba(16, 185, 129, 0.15);
         --color-caution: #f59e0b;
+        --color-caution-bg: rgba(245, 158, 11, 0.15);
         --color-danger: #ef4444;
+        --color-danger-bg: rgba(239, 68, 68, 0.15);
         --color-brand: #38bdf8;
+        --color-brand-hover: #0ea5e9;
+        --tab-bar-bg: #090e1a;
+      }
+      [data-theme="light"] {
+        --bg-primary: #f1f5f9;
+        --bg-card: #ffffff;
+        --bg-secondary: #e2e8f0;
+        --text-primary: #0f172a;
+        --text-muted: #64748b;
+        --border-color: #cbd5e1;
+        --border-dark: #94a3b8;
+        --color-safe: #059669;
+        --color-safe-bg: #d1fae5;
+        --color-caution: #d97706;
+        --color-caution-bg: #fef3c7;
+        --color-danger: #dc2626;
+        --color-danger-bg: #fee2e2;
+        --color-brand: #0284c7;
+        --color-brand-hover: #0369a1;
+        --tab-bar-bg: #ffffff;
       }
       * {
         box-sizing: border-box;
@@ -35,6 +60,7 @@
         line-height: 1.5;
         user-select: none;
         -webkit-user-select: none;
+        transition: background-color 0.2s ease, color 0.2s ease;
       }
       #root {
         min-height: 100vh;

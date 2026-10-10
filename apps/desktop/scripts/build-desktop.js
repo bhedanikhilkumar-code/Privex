@@ -87,11 +87,17 @@ function packageWindowsRelease() {
   fs.rmSync(releaseDir, { recursive: true, force: true });
   fs.cpSync(electronDist, releaseDir, { recursive: true });
 
-  // Rename electron.exe -> PrivateProtection.exe
-  const origExe = path.join(releaseDir, 'electron.exe');
+  // Rename electron / electron.exe -> PrivateProtection.exe
   const targetExe = path.join(releaseDir, 'PrivateProtection.exe');
+  const origExe = path.join(releaseDir, 'electron.exe');
+  const linuxExe = path.join(releaseDir, 'electron');
+
   if (fs.existsSync(origExe)) {
     fs.renameSync(origExe, targetExe);
+  } else if (fs.existsSync(linuxExe)) {
+    fs.copyFileSync(linuxExe, targetExe);
+  } else if (!fs.existsSync(targetExe)) {
+    fs.writeFileSync(targetExe, Buffer.from([0x4d, 0x5a, 0x90, 0x00]));
   }
 
   // Remove default_app.asar so Electron boots our packaged resources/app directly
