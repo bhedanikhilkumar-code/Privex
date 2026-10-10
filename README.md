@@ -3,26 +3,102 @@
 > **Privacy-first, on-device AI security assistant for threat, phishing, scam, and suspicious-content detection.**  
 > **Problem Statement Code:** PS-05 | **Authoritative Version:** `v0.1.0` | **License:** MIT | **Platform Status:** Production Ready & Verified
 
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=10B981&center=true&vCenter=true&width=700&lines=PRIVEX%3A+Cross-Platform+Threat+Protection;100%25+On-Device+%E2%80%A2+Zero-Cloud+Dependency;Instant+Phishing+%26+Scam+Detection+%E2%80%A2+Air-Gapped+Offline" alt="PRIVEX Platform Matrix Animation" />
+</p>
+
+### 🛡️ Cross-Platform Capability & Feature Matrix
+
+<table align="center" width="100%">
+  <thead>
+    <tr style="background: #161b22;">
+      <th align="left"><b>Requirement / Capability</b></th>
+      <th align="center"><b>🌐 Web</b></th>
+      <th align="center"><b>🧩 Extension</b></th>
+      <th align="center"><b>📱 Mobile</b></th>
+      <th align="center"><b>💻 Desktop</b></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>🔗 URL Scan</b></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
+      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
+    </tr>
+    <tr>
+      <td><b>🎣 Phishing Detection</b></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
+      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
+    </tr>
+    <tr>
+      <td><b>💬 Text Scan</b></td>
+      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
+      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
+      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
+    </tr>
+    <tr>
+      <td><b>📁 File Scan</b></td>
+      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
+      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
+    </tr>
+    <tr>
+      <td><b>🖥️ Full PC Scan</b></td>
+      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
+      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
+      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
+    </tr>
+    <tr>
+      <td><b>🔒 Quarantine</b></td>
+      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
+      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
+      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
+    </tr>
+    <tr>
+      <td><b>🤖 AI Assistant</b></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
+      <td align="center"><img src="https://img.shields.io/badge/%3F_Template-F59E0B?style=flat-square" alt="Template Engine"></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
+    </tr>
+  </tbody>
+</table>
+
+> 💡 **Matrix Notes:**  
+> - <img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Active" /> **Active:** Real-time on-device capability executing in local memory without cloud dependencies.  
+> - <img src="https://img.shields.io/badge/%3F_Template-F59E0B?style=flat-square" alt="Template" /> **Template:** In the Browser Extension, Chromium MV3 background service worker lifetime and memory limits use a zero-allocation deterministic template explanation generator instead of in-memory LLM runtimes.  
+> - <img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A" /> **N/A:** Architectural platform boundary (e.g., Full PC Scan and Quarantine require OS filesystem daemon entitlements exclusive to Desktop; Text Scan on Mobile filters incoming SMS/notifications).
+
 ---
 
 ## TABLE OF CONTENTS
 
-1. [WHAT IS PRIVEX?](#1-what-is-private-protection)
+- [🛡️ PLATFORM CAPABILITY MATRIX](#-cross-platform-capability--feature-matrix)
+1. [WHAT IS PRIVEX?](#1-what-is-privex)
 2. [HOW DOES IT WORK?](#2-how-does-it-work)
-3. [PRIVACY](#3-privacy)
-4. [OFFLINE MODE](#4-offline-mode)
-5. [WEB](#5-web)
-6. [ANDROID](#6-android)
-7. [WINDOWS DESKTOP](#7-windows-desktop)
-8. [BROWSER EXTENSION](#8-browser-extension)
-9. [DOWNLOADS](#9-downloads)
-10. [INSTALLATION](#10-installation)
-11. [DEMO](#11-demo)
-12. [BACKEND / CLOUD](#12-backend--cloud)
-13. [SECURITY](#13-security)
-14. [SUPPORTED PLATFORMS](#14-supported-platforms)
-15. [KNOWN LIMITATIONS](#15-known-limitations)
-16. [VERSION](#16-version)
+3. [CORE ARCHITECTURAL & EVALUATOR Q&A](#3-core-architectural--evaluator-qa)
+4. [PRIVACY](#4-privacy)
+5. [OFFLINE MODE](#5-offline-mode)
+6. [WEB](#6-web)
+7. [ANDROID](#7-android)
+8. [WINDOWS DESKTOP](#8-windows-desktop)
+9. [BROWSER EXTENSION](#9-browser-extension)
+10. [DOWNLOADS](#10-downloads)
+11. [INSTALLATION](#11-installation)
+12. [DEMO](#12-demo)
+13. [BACKEND / CLOUD](#13-backend--cloud)
+14. [SECURITY](#14-security)
+15. [SUPPORTED PLATFORMS](#15-supported-platforms)
+16. [KNOWN LIMITATIONS](#16-known-limitations)
+17. [VERSION](#17-version)
 
 ---
 
@@ -92,7 +168,150 @@ RAW UNTRUSTED INPUT (URL, Message, File Header, DOM Tree)
 
 ---
 
-## 3. PRIVACY
+## 3. CORE ARCHITECTURAL & EVALUATOR Q&A
+
+> 🎯 **Quick-Reference Evaluator & Viva Guide:** This section directly addresses the 9 core technical and architectural questions regarding PRIVEX's threat detection pipeline, on-device boundaries, offline parity, and platform limits.
+
+---
+
+### ❓ Q1: Kya detect karenge? (What threats does PRIVEX detect?)
+> [!NOTE]
+> **Summary:** PRIVEX detects deceptive URLs, phishing sites, scam messages, malicious files, and unsafe web form targets using multi-factor heuristics and mathematical threat analysis.
+
+- **🎣 Phishing Links & Deceptive URLs:**
+  - **Typosquatting & Levenshtein Distance:** Lookalike domains mimicking high-value brands (e.g., `paypa1.com`, `arnazon.co`).
+  - **Punycode & IDN Homograph Spoofing:** Mixed scripts and Cyrillic character substitutions (e.g., `xn--pple-43d.com` rendering as `аpple.com`).
+  - **Shannon Entropy Anomalies:** Unusually high randomness in hostnames or URL paths indicating DGA (Domain Generation Algorithms) or obfuscation.
+  - **IP-Based Hostnames:** URLs using raw numeric IPv4/IPv6 addresses (e.g., `http://192.168.1.100/login`) instead of registered domains.
+  - **Subdomain Stacking:** Deceptive prefix nesting designed to deceive human eyes (e.g., `bank.com.login-verify.attacker.net`).
+- **💬 Scam & Fraud Messages:**
+  - **Urgency & Coercion Keywords:** Threatening account closures, emergency verification demands, and artificial panic.
+  - **Financial & Crypto Extortion:** Advance-fee lottery scams (419 fraud), fake cryptocurrency wallet transfer demands, and fraudulent wire requests.
+  - **Credential Harvesting & Deceptive OTPs:** Fake bank KYC updates, deceptive two-factor authentication reset notices, and spoofed telecom alerts.
+- **📁 Malicious Files & Binaries (Desktop & Mobile):**
+  - **Deceptive Double Extensions:** Disguised executables such as `invoice.pdf.exe` or `statement.docx.vbs`.
+  - **High Entropy Binary Payloads:** Packed, encrypted, or obfuscated malicious payload signatures.
+  - **Executable MIME / Header Mismatches:** Files with document extensions having MZ/PE or ELF executable binary magic headers.
+- **🌐 Deceptive Web DOM Elements (Web & Extension):**
+  - **Insecure Password Inputs:** Password fields submitting credentials over unencrypted HTTP endpoints.
+  - **Cross-Domain Form Hijacking:** Login forms pointing to unauthorized third-party `action` URLs.
+- **⚡ Network Traffic Anomalies (Web Dashboard):**
+  - **Request Overload Bursts:** Sudden sliding-window request floods (> 50 requests in 10 seconds).
+  - **Suspicious Endpoints:** Connections directed to unverified external endpoints or high-abuse TLDs.
+
+---
+
+### ❓ Q2: Kahan detect karenge? (Where is detection performed?)
+> [!IMPORTANT]
+> **Summary:** 100% On-Device! Detection runs strictly within the volatile RAM and CPU of the user's local endpoint. Zero detection logic is delegated to the cloud.
+
+- **🌐 Web Dashboard (PWA):** Executes entirely in the client's browser inside a dedicated Web Worker sandbox (`privex.pages.dev`).
+- **🧩 Browser Extension:** Intercepts traffic inside the Chromium Manifest V3 Background Service Worker before external requests resolve.
+- **📱 Android App:** Analyzes inbound communications locally via the native Android `NotificationListenerService` and camera frames via an on-device QR HUD.
+- **💻 Windows Desktop:** Monitors local filesystem activity via background filesystem hooks on the Downloads folder.
+- **🚫 Zero Remote Compute:** Raw input payloads are never transmitted to any backend server for classification.
+
+---
+
+### ❓ Q3: Kaise detect karenge? (How are threats detected?)
+> [!NOTE]
+> **Summary:** PRIVEX employs an 8-layer defense-in-depth pipeline where deterministic rules and mathematics govern threat decisions, and the AI Assistant translates evidence into plain-language warnings.
+
+1. **Input Normalization & Sanitization:** Unicode NFKD normalization, Punycode decoding, and strict byte-length clamping (URLs $\le 2,048$ bytes, Text $\le 10,000$ bytes) prevent ReDoS and buffer exploits.
+2. **Deterministic Fast-Path Rule Engine:** Ultra-low latency ($< 1.0\text{ ms}$) regex filters intercept known exploit patterns, numeric IP hosts, and coercion phrases.
+3. **Lexical & Heuristic Analyzers:** Computes Shannon entropy, Levenshtein edit distance against top 100 spoofed targets, and subdomain nesting depth.
+4. **Threat Intelligence Cache:** Local pre-compiled Bloom filter lookups ($O(1)$ constant time check against known threat signatures without disk bottlenecks).
+5. **Quantized Intent Classifier:** Local heuristic/SLM intent evaluation for ambiguous natural language messages.
+6. **Weighted Bayesian Risk Scorer:** Non-linear aggregation produces a canonical risk score ($0$ to $100$) and assigns a severity band (`SAFE`, `CAUTION`, `SUSPICIOUS`, `DANGEROUS`).
+7. **Canonical Action Mapping:** Deterministic system policies decide enforcement (`ALLOW`, `INFORM`, `WARN`, `BLOCK`).
+8. **Read-Only AI Explanation Assistant:** Synthesizes Grade 6 plain-language explanations from tokenized evidence structs with zero authority to alter detection verdicts.
+
+---
+
+### ❓ Q4: Kaunsa data device se bahar kabhi nahi jayega? (What data will never leave the device?)
+> [!CAUTION]
+> **Summary:** All Tier 1 Highly Sensitive User Payloads are mathematically and architecturally guaranteed to remain on-device in volatile RAM.
+
+| Data Category | Examples | Boundary Guarantee |
+|---|---|---|
+| **Browsing Activity** | Visited URLs, full web paths, queries, browsing history | **Zero-Egress:** Processed in volatile RAM; never logged or sent off-device |
+| **Personal Communications** | SMS messages, chat notifications, emails, OTP contents | **Zero-Egress:** Scanned in memory; zero disk persistence; immediate RAM zeroing |
+| **Camera & Visual Feeds** | Camera frames, scanned QR code bitmaps, screenshots | **Zero-Egress:** Processed frame-by-frame on CPU/GPU; frames discarded immediately |
+| **Files & Documents** | Downloaded file bytes, filenames, document payloads | **Zero-Egress:** Evaluated locally; quarantined to local AES-256-GCM vault |
+| **User History & Allowlist** | Scan counts, custom whitelists, local settings | **Encrypted Local Storage:** Stored in AES-256-GCM / SQLCipher; user can crypto-shred anytime |
+
+- **Zero Remote Analytics:** No Google Analytics, no telemetry trackers, and no remote session recorders exist in any release package.
+
+---
+
+### ❓ Q5: Threat detect hone par exactly kya hoga? (What exactly happens when a threat is detected?)
+> [!IMPORTANT]
+> **Summary:** Within $< 50\text{ ms}$, PRIVEX displays an unambiguous visual alert, halts dangerous user interactions, and provides actionable, jargon-free safety advice.
+
+1. **Instant Warning Dispatch (< 50 ms):**
+   - **High-Contrast Warning UI:** A Crimson/Red alert banner, modal dialog, or full-page interstitial surfaces with an explicit risk score ($0-100$).
+   - **Clear Severity Badge:** Categorized visually as `CAUTION` (Amber), `SUSPICIOUS` (Orange), or `DANGEROUS` (Red).
+2. **Platform-Specific Enforcement & Shielding:**
+   - **🧩 Browser Extension:** Instantly injects a full-page interstitial friction gate, aborting HTTP/HTTPS page navigation before malicious scripts execute.
+   - **📱 Mobile App:** Fires a high-priority heads-up warning notification with alert vibration, identifying the spoofed sender.
+   - **💻 Windows Desktop:** Immediately moves the malicious executable from the Downloads folder into an AES-256-GCM encrypted quarantine vault (`PPVAULT1`), neutralizing execution risk.
+   - **🌐 Web App:** Displays a modal friction gate and locks external link redirection.
+3. **Plain-Language AI Explanation:**
+   - The on-device AI Assistant delivers a Grade 6 reading level briefing explaining:
+     - **What was detected** (e.g., *"This link pretends to be PayPal but points to an unverified private IP address"*).
+     - **Why it is dangerous** (e.g., *"Entering your password here will send your credentials directly to a scammer"*).
+     - **What action to take** (e.g., *"Do not click this link. Close this tab immediately"*).
+
+---
+
+### ❓ Q6: False positive kaise handle hoga? (How will false positives be handled?)
+> [!NOTE]
+> **Summary:** PRIVEX mitigates false positives through multi-factor signal aggregation, verified pre-compiled allowlists, user-controlled local overrides, and friction-gated warnings.
+
+- **Multi-Factor Correlation (No Single-Heuristic Block):** A single isolated heuristic (such as a hyphen in a domain) cannot trigger a `BLOCK`. A high-severity verdict requires corroborating multi-factor signals (e.g., brand similarity + IP host + unencrypted form target).
+- **Verified Offline Allowlist:** Top 10,000 legitimate domains (Alexa/Tranco top sites such as `github.com`, `wikipedia.org`, `google.com`) are pre-verified and cached.
+- **User Local Allowlist Override:** Users can whitelist trusted custom domains or senders with a single click. Overrides are stored locally in encrypted storage and take precedence over heuristic warnings.
+- **Friction Gates Instead of Hard Locks:** For borderline/ambiguous inputs (`CAUTION` or `SUSPICIOUS`), PRIVEX provides an *"I understand the risks, proceed anyway"* friction bypass option rather than an unrecoverable hard-lock.
+
+---
+
+### ❓ Q7: Offline mode mein kya chalega? (What runs in offline mode?)
+> [!TIP]
+> **Summary:** 100% Core Threat Detection Parity! Every core detection engine, heuristic analyzer, Bloom filter database, file scanner, and AI template explanation functions with zero internet connection.
+
+- **Air-Gapped Parity:** Whether connected to high-speed fiber or completely disconnected (Airplane Mode), PRIVEX executes identical mathematical scoring.
+- **Pre-Packaged Threat Intelligence:** Compact Bloom filter databases ($< 5\text{ MB}$) and regex rule matrices are bundled directly inside the installed applications.
+- **Zero Network Ingestion:** Threat scanning does not call out to remote cloud APIs, DNS lookups, or third-party reputation servers.
+
+---
+
+### ❓ Q8: Internet available hone par kya additional capability milegi? (What additional capabilities when internet is available?)
+> [!NOTE]
+> **Summary:** When an internet connection is present, PRIVEX gains differential threat intelligence updates, anonymous opt-in telemetry relay, and cloud asset hosting—while keeping core detection 100% on-device.
+
+- **Differential OTA Threat Intelligence Updates:** Downloads compact, Ed25519 cryptographically signed Bloom filter delta updates (< 5 MB) to incorporate emerging zero-day phishing patterns.
+- **Oblivious HTTP (OHTTP) Anonymized Telemetry (Strictly Opt-In):** Allows users to anonymously share aggregated threat signals using RFC 9458 OHTTP relays (client IP scrubbed, $k$-anonymity $\ge 1,000$ domain hash prefix, Laplace $\varepsilon=1.0$ differential privacy noise).
+- **Web App Edge CDN Delivery:** Instant static delivery of web PWA updates and download mirrors from Cloudflare Pages edge nodes.
+
+---
+
+### ❓ Q9: Android / Windows / Browser ki limitations kya hain? (What are the platform limitations?)
+> [!IMPORTANT]
+> **Summary:** Platform boundaries strictly adhere to OS sandboxing guidelines and security best practices:
+
+- **📱 Android App Limitations:**
+  - **No Background SMS Interception:** Android security sandboxing forbids background interception of raw SMS databases unless set as the default SMS handler. PRIVEX uses the privacy-respecting `NotificationListenerService` instead to inspect incoming notification banners.
+  - **Sideloading Permission:** Direct APK installation requires users to enable *"Install unknown apps"* in Android settings.
+- **💻 Windows Desktop Limitations:**
+  - **Windows SmartScreen Prompt:** Release binaries are self-signed rather than signed with an expensive enterprise Extended Validation (EV) certificate, which may show an initial *"Unknown Publisher"* warning.
+  - **Target Directory Monitoring:** Background filesystem monitoring focuses on user-selected directories (such as Downloads) rather than invasive kernel-level (Ring 0) drivers.
+- **🌐 Browser Extension & Web Dashboard Limitations:**
+  - **Browser Internal Scheme Shielding:** Extension APIs cannot inspect internal browser configurations (such as `chrome://` or `edge://`).
+  - **Web Dashboard Sandbox:** The Web App cannot inspect the user's local operating system files or background notifications; it operates within the standard browser web worker sandbox.
+
+---
+
+## 4. PRIVACY
 
 Privex operates under a strict 3-tier zero-knowledge data classification model:
 
@@ -134,7 +353,7 @@ Privex operates under a strict 3-tier zero-knowledge data classification model:
 
 ---
 
-## 4. OFFLINE MODE
+## 5. OFFLINE MODE
 
 - **100% Core Threat Detection Parity:** The full detection pipeline operates identically whether you are connected to the internet or completely air-gapped.
 - **Pre-Compiled Threat Intelligence:** Fast $O(1)$ Bloom filter databases and lexical rule matrices are packaged directly into the client applications.
@@ -142,7 +361,7 @@ Privex operates under a strict 3-tier zero-knowledge data classification model:
 
 ---
 
-## 5. WEB
+## 6. WEB
 
 - **Zero-Install Client PWA:** Access the fully functional web dashboard at [`https://privex.pages.dev`](https://privex.pages.dev).
 - **Client-Side Execution:** The web application downloads static assets from the edge CDN and executes all threat analysis locally inside a dedicated Web Worker sandbox in your browser's volatile RAM.
@@ -159,7 +378,7 @@ Privex operates under a strict 3-tier zero-knowledge data classification model:
 
 ---
 
-## 6. ANDROID
+## 7. ANDROID
 
 - **Direct Standalone APK:** Distributed as a verified release APK (`private-protection-mobile-0.1.0.apk`, 1.03 MB).
 - **Core Mobile Features:** Inbound SMS notification filtering, deep link validation, live camera QR scanning, and local device posture audits.
@@ -169,7 +388,7 @@ Privex operates under a strict 3-tier zero-knowledge data classification model:
 
 ---
 
-## 7. WINDOWS DESKTOP
+## 8. WINDOWS DESKTOP
 
 - **Standalone Binaries:** Available as both a standard Windows setup installer (`PrivateProtection-Setup-0.1.0.exe`, 158 MB) and a standalone zero-install portable executable (`PrivateProtection-0.1.0-win-x64.exe`, 245 MB).
 - **Supported Environments:** 64-bit Windows 10 and Windows 11.
@@ -178,7 +397,7 @@ Privex operates under a strict 3-tier zero-knowledge data classification model:
 
 ---
 
-## 8. BROWSER EXTENSION
+## 9. BROWSER EXTENSION
 
 - **Chromium Manifest V3 Extension:** Distributed as an unpacked extension package (`private-protection-extension-0.1.0.zip`, 100 KB).
 - **Supported Browsers:** Google Chrome (v110+), Microsoft Edge (v110+), Brave, Opera, Vivaldi.
@@ -187,7 +406,7 @@ Privex operates under a strict 3-tier zero-knowledge data classification model:
 
 ---
 
-## 9. DOWNLOADS
+## 10. DOWNLOADS
 
 All release packages are independently verified and available from both production edge mirrors and the official GitHub release:
 
@@ -204,7 +423,7 @@ All release checksums are authoritatively recorded in [`release/SHA256SUMS.txt`]
 
 ---
 
-## 10. INSTALLATION
+## 11. INSTALLATION
 
 ### 🌐 1. Web Application (Zero Install)
 1. Navigate to [`https://privex.pages.dev`](https://privex.pages.dev).
@@ -232,7 +451,7 @@ All release checksums are authoritatively recorded in [`release/SHA256SUMS.txt`]
 
 ---
 
-## 11. DEMO
+## 12. DEMO
 
 Test Privex safely using these non-sensitive synthetic test cases:
 
@@ -255,7 +474,7 @@ Test Privex safely using these non-sensitive synthetic test cases:
 
 ---
 
-## 12. BACKEND / CLOUD
+## 13. BACKEND / CLOUD
 
 - **Does Privex require a backend server?**  
   **NO.** The Core Detection Engine, Bayesian scoring, and AI explanation assistant run 100% locally on your computer or phone.
@@ -272,7 +491,7 @@ Test Privex safely using these non-sensitive synthetic test cases:
 
 ---
 
-## 13. SECURITY
+## 14. SECURITY
 
 - **Fail-Closed Principle:** If an input parser encounters malformed data or syntax errors, it safely escalates to `CAUTION` or `SUSPICIOUS`, never to a silent `ALLOW`.
 - **Zero Hardcoded Secrets:** No API keys, private credentials, or developer tokens exist in the codebase.
@@ -281,7 +500,7 @@ Test Privex safely using these non-sensitive synthetic test cases:
 
 ---
 
-## 14. SUPPORTED PLATFORMS
+## 15. SUPPORTED PLATFORMS
 
 | Platform | Supported OS / Environment | Architecture | Memory Footprint | Privilege Level |
 |---|---|---|---|---|
@@ -294,7 +513,7 @@ Test Privex safely using these non-sensitive synthetic test cases:
 
 ---
 
-## 15. KNOWN LIMITATIONS
+## 16. KNOWN LIMITATIONS
 
 In strict adherence to our engineering transparency doctrine:
 1. **Direct Sideloading Required:** Android requires users to enable "Allow from this source"; Chromium browsers require enabling "Developer mode" to load unpacked extensions.
@@ -305,7 +524,7 @@ In strict adherence to our engineering transparency doctrine:
 
 ---
 
-## 16. VERSION
+## 17. VERSION
 
 - **Authoritative Product Version:** `v0.1.0` (Release Candidate)
 - **Release Date:** October 4, 2026
