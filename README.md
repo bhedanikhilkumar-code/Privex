@@ -187,7 +187,7 @@ RAW UNTRUSTED INPUT (URL, Message, File Header, DOM Tree)
 
 ---
 
-### ❓ Q1: Kya detect karenge? (What threats does PRIVEX detect?)
+### ❓ Q1: What threats does PRIVEX detect?
 > [!NOTE]
 > **Summary:** PRIVEX detects deceptive URLs, phishing sites, scam messages, malicious files, and unsafe web form targets using multi-factor heuristics and mathematical threat analysis.
 
@@ -214,7 +214,7 @@ RAW UNTRUSTED INPUT (URL, Message, File Header, DOM Tree)
 
 ---
 
-### ❓ Q2: Kahan detect karenge? (Where is detection performed?)
+### ❓ Q2: Where is detection performed?
 > [!IMPORTANT]
 > **Summary:** 100% On-Device! Detection runs strictly within the volatile RAM and CPU of the user's local endpoint. Zero detection logic is delegated to the cloud.
 
@@ -226,7 +226,7 @@ RAW UNTRUSTED INPUT (URL, Message, File Header, DOM Tree)
 
 ---
 
-### ❓ Q3: Kaise detect karenge? (How are threats detected?)
+### ❓ Q3: How are threats detected?
 > [!NOTE]
 > **Summary:** PRIVEX employs an 8-layer defense-in-depth pipeline where deterministic rules and mathematics govern threat decisions, and the AI Assistant translates evidence into plain-language warnings.
 
@@ -241,7 +241,7 @@ RAW UNTRUSTED INPUT (URL, Message, File Header, DOM Tree)
 
 ---
 
-### ❓ Q4: Kaunsa data device se bahar kabhi nahi jayega? (What data will never leave the device?)
+### ❓ Q4: What data will never leave the device?
 > [!CAUTION]
 > **Summary:** All Tier 1 Highly Sensitive User Payloads are mathematically and architecturally guaranteed to remain on-device in volatile RAM.
 
@@ -257,7 +257,7 @@ RAW UNTRUSTED INPUT (URL, Message, File Header, DOM Tree)
 
 ---
 
-### ❓ Q5: Threat detect hone par exactly kya hoga? (What exactly happens when a threat is detected?)
+### ❓ Q5: What exactly happens when a threat is detected?
 > [!IMPORTANT]
 > **Summary:** Within $< 50\text{ ms}$, PRIVEX displays an unambiguous visual alert, halts dangerous user interactions, and provides actionable, jargon-free safety advice.
 
@@ -277,7 +277,7 @@ RAW UNTRUSTED INPUT (URL, Message, File Header, DOM Tree)
 
 ---
 
-### ❓ Q6: False positive kaise handle hoga? (How will false positives be handled?)
+### ❓ Q6: How are false positives handled?
 > [!NOTE]
 > **Summary:** PRIVEX mitigates false positives through multi-factor signal aggregation, verified pre-compiled allowlists, user-controlled local overrides, and friction-gated warnings.
 
@@ -288,7 +288,7 @@ RAW UNTRUSTED INPUT (URL, Message, File Header, DOM Tree)
 
 ---
 
-### ❓ Q7: Offline mode mein kya chalega? (What runs in offline mode?)
+### ❓ Q7: What runs in offline mode?
 > [!TIP]
 > **Summary:** 100% Core Threat Detection Parity! Every core detection engine, heuristic analyzer, Bloom filter database, file scanner, and AI template explanation functions with zero internet connection.
 
@@ -298,7 +298,7 @@ RAW UNTRUSTED INPUT (URL, Message, File Header, DOM Tree)
 
 ---
 
-### ❓ Q8: Internet available hone par kya additional capability milegi? (What additional capabilities when internet is available?)
+### ❓ Q8: What additional capabilities exist when internet is available?
 > [!NOTE]
 > **Summary:** When an internet connection is present, PRIVEX gains differential threat intelligence updates, anonymous opt-in telemetry relay, and cloud asset hosting—while keeping core detection 100% on-device.
 
@@ -308,7 +308,7 @@ RAW UNTRUSTED INPUT (URL, Message, File Header, DOM Tree)
 
 ---
 
-### ❓ Q9: Android / Windows / Browser ki limitations kya hain? (What are the platform limitations?)
+### ❓ Q9: What are the platform limitations?
 > [!IMPORTANT]
 > **Summary:** Platform boundaries strictly adhere to OS sandboxing guidelines and security best practices:
 
@@ -324,7 +324,7 @@ RAW UNTRUSTED INPUT (URL, Message, File Header, DOM Tree)
 
 ---
 
-### ❓ Q10: Desktop App aur Windows Defender dono sath me kaise kaam karte hain? (How do PRIVEX Desktop & Windows Defender coexist and collaborate?)
+### ❓ Q10: How do PRIVEX Desktop and Windows Defender coexist and collaborate?
 > [!NOTE]
 > **Summary:** PRIVEX and Windows Defender operate in a complementary **Defense-in-Depth (Layered Security)** partnership without file locks, resource contention, or driver crashes. Windows Defender serves as the core OS kernel and signature engine, while PRIVEX acts as the on-device AI behavioral and phishing intelligence shield.
 
