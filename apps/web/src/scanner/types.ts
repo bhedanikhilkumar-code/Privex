@@ -30,12 +30,8 @@ export interface ScanResultViewData {
   readonly privacyGuarantee: string;
 }
 
-export type AppTheme = 'light' | 'dark' | 'night';
-
 export interface UserPreferences {
   cognitiveReadingGrade: 6 | 8;
   enableWorkerOffloading: boolean;
   allowlistDomains: string[];
-  theme?: AppTheme;
 }
-

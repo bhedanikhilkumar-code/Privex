@@ -254,12 +254,5 @@ A mobile release is not considered complete from CI alone. Required evidence inc
   - Cross-Shield Integration: Directly integrated with `UniversalFileShieldService.java` for quarantine operations.
   - Native Bridge & UI: Typed `@JavascriptInterface` endpoints in `MainActivity.java`, consumed by `mobile-quarantine.service.ts`, and presented in `ProtectionStatusScreen.tsx` with live vault statistics, quarantine list, verified restore, and permanent purge actions.
   - Verified with 176/176 Android unit tests passing (+12 new tests), 168/168 mobile Vitest tests passing across 25 test files (+11 new tests), monorepo regression passing across all workspaces, 0 typecheck errors, and clean R8 release build (`assembleRelease` passed). Physical device validation honestly reported as NOT EXECUTED due to no attached USB handset.
-- **Phase T11 (Permissions & Privacy Center):** COMPLETE & CERTIFIED (`docs/PHASE_T11_FINAL_INDEPENDENT_AUDIT.md`).
-  - Implemented `PrivacyCenterService.java`: Comprehensive native audit service inspecting all 8 platform permissions and privacy dimensions (Storage & SAF, Notification Permission, VPN Web Shield live state, App Install Source visibility, Background Scanning ContentObserver status, Battery Optimization exemption, Zero-Telemetry proof, and Threat Database freshness).
-  - Safe Intent Launchers: Validated, explicit intent generation for notification settings, application details, and battery optimization settings with zero arbitrary intent invocation.
-  - Native Bridge & Resume Synchronization: Added typed `@JavascriptInterface` endpoints in `MainActivity.java` (`getPermissionsPrivacyReport`, `openAppNotificationSettings`, `openAppDetailsSettings`, `openBatteryOptimizationSettings`) and implemented `onResume` event dispatching (`privateprotection:app_resume`) to instantly re-check permissions when users return from OS Settings.
-  - Presentation Layer: Modernized `PrivacyScreen.tsx` with color-coded status badges, real counts, and direct action triggers, powered by `permissions-privacy.service.ts`.
-  - Verified with 186/186 Android unit tests passing (+10 new tests), 174/174 mobile Vitest tests passing across 26 test files (+6 new tests), monorepo regression passing across all workspaces, 0 typecheck errors, and clean R8 release build (`assembleRelease` passed). Physical device validation honestly reported as NOT EXECUTED due to no attached USB handset.
-
 
 

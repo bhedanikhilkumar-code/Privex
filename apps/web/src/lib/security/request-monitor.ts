@@ -88,14 +88,24 @@ export function classifyRequestDestination(
   domain: string,
   currentOriginHostname?: string
 ): { destinationType: RequestDestinationType; riskLevel: RequestRiskLevel; reason: string } {
-  const currentHost = (currentOriginHostname || (typeof window !== 'undefined' ? window.location.hostname : 'localhost')).toLowerCase();
-  const lowerDomain = domain.toLowerCase();
+  let cleanDomain = (domain || '').toLowerCase().trim();
+
+  // Strip optional port (e.g. "localhost:3000" -> "localhost", "192.168.1.1:8080" -> "192.168.1.1")
+  if (cleanDomain.startsWith('[') && cleanDomain.includes(']:')) {
+    cleanDomain = cleanDomain.slice(0, cleanDomain.indexOf(']:') + 1);
+  } else if (!cleanDomain.startsWith('[') && cleanDomain.includes(':') && !cleanDomain.includes('::')) {
+    cleanDomain = cleanDomain.split(':')[0];
+  }
+
+  const currentHost = (currentOriginHostname || (typeof window !== 'undefined' ? window.location.hostname : 'localhost')).toLowerCase().split(':')[0];
+  const lowerDomain = cleanDomain;
 
   // First Party detection
   if (
     lowerDomain === currentHost ||
     lowerDomain === 'localhost' ||
     lowerDomain === '127.0.0.1' ||
+    lowerDomain === '[::1]' ||
     lowerDomain.endsWith(`.${currentHost}`)
   ) {
     return {
@@ -107,7 +117,7 @@ export function classifyRequestDestination(
 
   // Raw IPv4/IPv6 destination address check
   const isRawIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(lowerDomain) || lowerDomain.includes(':');
-  if (isRawIp && lowerDomain !== '127.0.0.1') {
+  if (isRawIp && lowerDomain !== '127.0.0.1' && lowerDomain !== '[::1]') {
     return {
       destinationType: 'UNKNOWN_SUSPICIOUS',
       riskLevel: 'SUSPICIOUS',

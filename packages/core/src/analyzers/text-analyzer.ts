@@ -216,7 +216,7 @@ export class TextAnalyzer {
     }
 
     // 8. Cryptocurrency & Financial Fraud
-    const isCrypto = /bitcoin|btc|eth|ethereum|crypto|usdt|wallet\s+[0-9a-zA-Z]{10,}/i.test(cleanText);
+    const isCrypto = /\b(?:bitcoin|btc|eth|ethereum|crypto|usdt)\b|wallet\s+[0-9a-zA-Z]{10,}/i.test(cleanText);
     if (isCrypto) {
       indicators.push('cryptocurrency');
       // Match typical BTC or ETH addresses
@@ -224,7 +224,7 @@ export class TextAnalyzer {
       if (btcMatches) cryptoAddresses.push(...btcMatches);
     }
 
-    const isFinancial = /send\s+\$?\d+|wire\s+transfer|gift\s+card|send\s+money|new\s+account|cash\s+app|zelle|venmo/i.test(lower);
+    const isFinancial = /\bsend\s+\$?\d+|\bwire\s+transfer|\bgift\s+card|\bsend\s+money|\bnew\s+account|\bcash\s+app|\bzelle|\bvenmo/i.test(lower);
     if (isCrypto || isFinancial) {
       indicators.push('financial-scam');
       paymentExtortionDetected = true;
@@ -286,8 +286,8 @@ export class TextAnalyzer {
     }
 
     // 12. Brand / Government Impersonation
-    const govTargets = ['irs', 'tax bill', 'arrest warrant', 'fbi', 'law enforcement', 'social security administration'];
-    if (govTargets.some(t => lower.includes(t))) {
+    const govRegex = /\b(?:irs|tax bill|arrest warrant|fbi|law enforcement|social security administration)\b/i;
+    if (govRegex.test(cleanText)) {
       indicators.push('government-impersonation');
       authorityMarkers.push('GOVERNMENT_AGENCY');
       evidenceList.push({
@@ -301,8 +301,8 @@ export class TextAnalyzer {
       });
     }
 
-    const brandTargets = ['paypal', 'apple', 'microsoft', 'amazon', 'bank of america', 'chase', 'netflix', 'geek squad', 'norton'];
-    if (brandTargets.some(t => lower.includes(t))) {
+    const brandRegex = /\b(?:paypal|apple|microsoft|amazon|bank of america|chase|netflix|geek squad|norton)\b/i;
+    if (brandRegex.test(cleanText)) {
       indicators.push('brand-impersonation');
       authorityMarkers.push('COMMERCIAL_BRAND');
       evidenceList.push({

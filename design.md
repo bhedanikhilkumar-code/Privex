@@ -515,30 +515,15 @@ The UI must never say "fully protected" if Android denied required access.
   - Emergency **"Rollback to Factory Seed"** action with confirmation dialog, reverting sequence and invalidating caches in $<50\text{ ms}$.
 - **Honest Staleness Representation:** If definitions are aged or offline, the UI transparently reports age in days, maintains 100% heuristic baseline protection, and never displays a false "outdated vulnerability" scare banner.
  
-## 12. Mobile Quarantine & Remediation UX (`ProtectionStatusScreen.tsx`)
-- **Quarantine Vault Card:**
-  - Live Vault Statistics: Displays total quarantined items count and aggregate encrypted vault storage size in KB/MB.
-  - Quarantined Item List: Lists each isolated threat with original filename, threat category, isolation timestamp, and current isolation state (`ISOLATED` vs `SOURCE_REMAINS`).
-  - Item Actions:
-    - **Verified Restore:** Confirms restore path, verifies cryptographic GCM auth tag and SHA-256 hash, and atomically restores the original file.
-    - **Permanent Purge:** Deletes encrypted `.vault` blob, updates the atomic manifest, and permanently removes the item from the device.
-- **Package Remediation Guidance:**
-  - Clear Plan Badges: Labels candidate packages with their explicit remediation recommendation (`UNINSTALL_RECOMMENDED`, `FORCE_STOP_RECOMMENDED`, `DISABLE_RECOMMENDED`, or `SYSTEM_APP_PROTECTED`).
-  - Safe OS Intent Launchers: Directs users into Android's native Application Details Settings or standard system uninstall confirmation dialog.
-  - Honest Capability Representation: Explicitly clarifies that Android sandbox rules require user confirmation and does not pretend that background silent uninstallation took place.
-
-## 13. Permissions & Privacy Center UX (`PrivacyScreen.tsx`)
-- **Architecture Overview:** Displays live audit across 8 key security cards with color-coded status badges:
-  1. **Storage & File Access:** Shows status (`SAF GRANTED`, `LEGACY GRANTED`, `MEDIASTORE (LIMITED)`, `DENIED`), persisted tree count, accessible scope, and provides deep link button to Android App Settings.
-  2. **Security Notifications:** Displays enabled/disabled status, runtime permission, list of dependent security features, and DND delivery disclaimer, with deep link to Notification Settings.
-  3. **Web Shield (DNS Filter VPN):** Live service state (`ACTIVE`, `CONSENT PENDING`, `EXTERNAL VPN ACTIVE`, `STOPPED`), queries filtered, blocked queries, single-active-VPN notice, and local DNS guarantee.
-  4. **App Install Source Visibility:** Detected installer, third-party sandbox reality notice, and explicit disclosure that Google Play Protect privileges are not claimed.
-  5. **Background Scanning:** ContentObserver registration state, processed event counter, and OEM battery saver limitation disclosure.
-  6. **Battery Optimization:** Real OS exemption state (`EXEMPTED` vs `ENFORCED (STANDARD)`), non-mandatory explanation, and link to Battery Optimization Settings.
-  7. **Telemetry & Data Collection:** Zero-collection audit; confirms 0 bytes uploaded, no telemetry SDKs exist, and presents zero fake toggles.
-  8. **Threat Database Freshness:** Sequence number, record count, staleness badge (`FRESH`, `AGED`, `STALE`, `EXPIRED`), and Ed25519 verification indicator.
-- **Live Lifecycle Synchronization:**
-  - Automatically re-audits and re-renders when the app resumes from the background via `privateprotection:app_resume` event.
-- **One-Click Crypto-Shredder:**
-  - Retains instant cryptographic state shredder for local caches, scan history, and allowlists with feedback banner.
++## 12. Mobile Quarantine & Remediation UX (`ProtectionStatusScreen.tsx`)
++- **Quarantine Vault Card:**
++  - Live Vault Statistics: Displays total quarantined items count and aggregate encrypted vault storage size in KB/MB.
++  - Quarantined Item List: Lists each isolated threat with original filename, threat category, isolation timestamp, and current isolation state (`ISOLATED` vs `SOURCE_REMAINS`).
++  - Item Actions:
++    - **Verified Restore:** Confirms restore path, verifies cryptographic GCM auth tag and SHA-256 hash, and atomically restores the original file.
++    - **Permanent Purge:** Deletes encrypted `.vault` blob, updates the atomic manifest, and permanently removes the item from the device.
++- **Package Remediation Guidance:**
++  - Clear Plan Badges: Labels candidate packages with their explicit remediation recommendation (`UNINSTALL_RECOMMENDED`, `FORCE_STOP_RECOMMENDED`, `DISABLE_RECOMMENDED`, or `SYSTEM_APP_PROTECTED`).
++  - Safe OS Intent Launchers: Directs users into Android's native Application Details Settings or standard system uninstall confirmation dialog.
++  - Honest Capability Representation: Explicitly clarifies that Android sandbox rules require user confirmation and does not pretend that background silent uninstallation took place.
 

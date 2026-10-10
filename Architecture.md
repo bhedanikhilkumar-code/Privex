@@ -475,19 +475,8 @@ Uses Android CSPRNG / SecureRandom. The generator is isolated from telemetry and
 ### M-12 Battery/Thermal Manager
 Inputs Android BatteryManager/PowerManager/thermal state. Outputs worker concurrency and scan scheduling limits. Critical scan events have priority over background optimization.
 
-### M-13 Permission & Privacy Center (`PrivacyCenterService.java` & `PermissionsPrivacyService.ts`)
-- **Ground-Truth 8-Point Auditing Architecture:**
-  - Storage & SAF: Inspects MediaStore and `SafManager` persisted tree permissions; clearly reports accessible scope (Downloads, user-picked folders) vs inaccessible scope (`/data/data/*`, protected OS paths).
-  - Notifications: Checks Android 13+ `POST_NOTIFICATIONS` and `NotificationManagerCompat.areNotificationsEnabled()`; discloses that alert receipt depends on device DND/channel settings.
-  - VPN & Web Shield: Inspects live `WebShieldService` and `WebShieldVpnService` instances; distinguishes `ACTIVE`, `CONSENT_PENDING`, `COEXISTENCE_CONFLICT`, and `STOPPED`; explains single-VPN Android platform constraint.
-  - Install Source: Detects installer package; discloses third-party app sandbox reality (pre-install APK audits and post-install commit audits; zero privileged Play Protect claims).
-  - Background Scanning: Reports `RealtimeDownloadProtectionService` ContentObserver status, event counters, OEM battery saver limitations notice, and resume catch-up reconciliation.
-  - Battery Optimization: Queries `PowerManager.isIgnoringBatteryOptimizations()`; explains effects on background jobs while clarifying exemption is non-mandatory.
-  - Telemetry: Zero-collection audit; confirms 0 bytes uploaded, no analytics SDKs, and no remote endpoints.
-  - Threat Database Freshness: Evaluates sequence, record count, and staleness badges (`FRESH`, `AGED`, `STALE`, `EXPIRED_CACHE`) backed by Ed25519 verification.
-- **Safe Intent Dispatch & Lifecycle Synchronization:**
-  - Provides typed native intent generators for App Notification Settings, Application Details Settings, and Battery Optimization Settings.
-  - `MainActivity.onResume` dispatches `privateprotection:app_resume` event into the WebView container, triggering automatic state re-check when the user returns from system Settings.
+### M-13 Permission & Privacy Manager
+Tracks runtime permission state and displays truthful protection coverage. No sensitive permission is requested without a mapped requirement.
 
 ### M-14 Mobile Notification Manager
 Uses notification channels and batching. CRITICAL threats are prioritized; repetitive informational findings are coalesced.

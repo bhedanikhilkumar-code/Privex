@@ -123,7 +123,7 @@ export const TextScannerView: React.FC<TextScannerViewProps> = ({ scannerBridge,
 
           <div
             style={{
-              backgroundColor: 'var(--bg-card)',
+              backgroundColor: '#FFFFFF',
               border: '2px solid var(--border-dark)',
               boxShadow: 'var(--shadow-brutal-sm)',
               padding: '1rem',
@@ -143,7 +143,7 @@ export const TextScannerView: React.FC<TextScannerViewProps> = ({ scannerBridge,
         <div>
           <div
             style={{
-              backgroundColor: 'var(--bg-card)',
+              backgroundColor: '#FFFFFF',
               border: '2px solid var(--border-dark)',
               boxShadow: 'var(--shadow-brutal-lg)',
               padding: '1.75rem',
@@ -257,7 +257,7 @@ export const TextScannerView: React.FC<TextScannerViewProps> = ({ scannerBridge,
           {isScanning && (
             <div
               style={{
-                backgroundColor: 'var(--bg-card)',
+                backgroundColor: '#FFFFFF',
                 border: '2px solid var(--border-dark)',
                 boxShadow: 'var(--shadow-brutal)',
                 padding: '1.75rem',
@@ -322,32 +322,32 @@ export const TextScannerView: React.FC<TextScannerViewProps> = ({ scannerBridge,
               marginBottom: '1.5rem'
             }}
           >
-            <div style={{ backgroundColor: 'var(--bg-card)', border: '2px solid var(--border-dark)', padding: '0.75rem', fontFamily: 'var(--font-mono)' }}>
+            <div style={{ backgroundColor: '#FFFFFF', border: '2px solid var(--border-dark)', padding: '0.75rem', fontFamily: 'var(--font-mono)' }}>
               <span style={{ fontSize: '0.675rem', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>
                 LATENCY
               </span>
-              <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>&lt; 2.0 ms</strong>
+              <strong style={{ fontSize: '0.95rem', color: '#111111' }}>&lt; 2.0 ms</strong>
             </div>
 
-            <div style={{ backgroundColor: 'var(--bg-card)', border: '2px solid var(--border-dark)', padding: '0.75rem', fontFamily: 'var(--font-mono)' }}>
+            <div style={{ backgroundColor: '#FFFFFF', border: '2px solid var(--border-dark)', padding: '0.75rem', fontFamily: 'var(--font-mono)' }}>
               <span style={{ fontSize: '0.675rem', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>
                 CORE VERDICT
               </span>
               <strong style={{ fontSize: '0.95rem', color: 'var(--color-brand)' }}>AUTHORITATIVE</strong>
             </div>
 
-            <div style={{ backgroundColor: 'var(--bg-card)', border: '2px solid var(--border-dark)', padding: '0.75rem', fontFamily: 'var(--font-mono)' }}>
+            <div style={{ backgroundColor: '#FFFFFF', border: '2px solid var(--border-dark)', padding: '0.75rem', fontFamily: 'var(--font-mono)' }}>
               <span style={{ fontSize: '0.675rem', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>
                 PRIVACY
               </span>
               <strong style={{ fontSize: '0.95rem', color: 'var(--color-safe)' }}>LOCAL ONLY</strong>
             </div>
 
-            <div style={{ backgroundColor: 'var(--bg-card)', border: '2px solid var(--border-dark)', padding: '0.75rem', fontFamily: 'var(--font-mono)' }}>
+            <div style={{ backgroundColor: '#FFFFFF', border: '2px solid var(--border-dark)', padding: '0.75rem', fontFamily: 'var(--font-mono)' }}>
               <span style={{ fontSize: '0.675rem', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>
                 STATUS
               </span>
-              <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>READY</strong>
+              <strong style={{ fontSize: '0.95rem', color: '#111111' }}>READY</strong>
             </div>
           </div>
 
