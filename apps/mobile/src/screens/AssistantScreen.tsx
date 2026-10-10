@@ -6,6 +6,7 @@ import { SecureStorageService } from '../services/secure-storage.service';
 export const AssistantScreen: React.FC = () => {
   const [readingGrade, setReadingGrade] = useState<6 | 8>(6);
   const [_simulatedTopic, setSimulatedTopic] = useState<string>('PHISHING');
+  const [customQuery, setCustomQuery] = useState<string>('');
   const [explanation, setExplanation] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const assistant = useMemo(() => new AISecurityAssistant(), []);
@@ -19,6 +20,40 @@ export const AssistantScreen: React.FC = () => {
       })
       .catch(() => {});
   }, []);
+
+  const handleCustomAnalyze = async () => {
+    if (!customQuery.trim()) return;
+    setLoading(true);
+    try {
+      const isUrgent = /(urgent|immediate|account|password|verify|suspend|bitcoin|transfer)/i.test(customQuery);
+      const isUrl = /(https?:\/\/|www\.)/i.test(customQuery);
+
+      const assistantInput: AssistantInput = {
+        requestId: `assistant-custom-${Date.now()}`,
+        verdict: isUrgent || isUrl ? Verdict.SUSPICIOUS : Verdict.ALLOW,
+        riskAssessment: {
+          overallScore: isUrgent ? 75 : (isUrl ? 55 : 10),
+          confidence: 0.92,
+          severity: isUrgent ? SeverityLevel.HIGH : (isUrl ? SeverityLevel.MEDIUM : SeverityLevel.NONE),
+          primaryThreatFactor: isUrgent ? 'SOCIAL_ENGINEERING' : (isUrl ? 'EXTERNAL_LINK' : 'BENIGN_TEXT'),
+          detectorContributions: {}
+        },
+        evidenceTokens: isUrgent ? [
+          { ruleId: 'urgency-cue', category: 'HEURISTIC', description: 'Urgency markers and call-to-action detected in snippet', scoreContribution: 75 }
+        ] : [],
+        cognitiveReadingGrade: readingGrade,
+        targetType: isUrl ? 'URL' : 'MESSAGE',
+        untrustedSnippet: customQuery
+      };
+
+      const output = await assistant.explain(assistantInput);
+      setExplanation(output);
+    } catch {
+      // Safe fallback
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSimulateExplanation = async (topic: string, grade: 6 | 8) => {
     setLoading(true);
@@ -150,6 +185,56 @@ export const AssistantScreen: React.FC = () => {
           >
             Grade 8 (Standard)
           </button>
+        </div>
+
+        {/* Custom Security Inquiry Input */}
+        <div style={{ marginBottom: '1.25rem' }}>
+          <label htmlFor="assistant-input" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.4rem' }}>
+            Ask Assistant or Paste Threat Snippet:
+          </label>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <input
+              id="assistant-input"
+              type="text"
+              value={customQuery}
+              onChange={(e) => setCustomQuery(e.target.value)}
+              placeholder="e.g. Is 'urgent account verify' dangerous?"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleCustomAnalyze();
+                }
+              }}
+              style={{
+                flex: 1,
+                padding: '0.75rem 0.9rem',
+                backgroundColor: '#0f172a',
+                border: '1px solid #334155',
+                borderRadius: '8px',
+                color: '#f8fafc',
+                fontSize: '0.85rem',
+                outline: 'none'
+              }}
+            />
+            <button
+              type="button"
+              onClick={handleCustomAnalyze}
+              disabled={loading || !customQuery.trim()}
+              style={{
+                padding: '0.75rem 1rem',
+                backgroundColor: '#38bdf8',
+                color: '#0f172a',
+                fontWeight: 700,
+                borderRadius: '8px',
+                border: 'none',
+                cursor: loading || !customQuery.trim() ? 'not-allowed' : 'pointer',
+                fontSize: '0.85rem',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Analyze
+            </button>
+          </div>
         </div>
 
         <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.5rem' }}>

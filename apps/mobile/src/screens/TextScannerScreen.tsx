@@ -92,9 +92,37 @@ export const TextScannerScreen: React.FC<TextScannerScreenProps> = ({
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <label htmlFor="text-input" style={{ fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1' }}>
-          Message Text to Analyze:
-        </label>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <label htmlFor="text-input" style={{ fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1' }}>
+            Message Text to Analyze:
+          </label>
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                if (navigator.clipboard?.readText) {
+                  const clip = await navigator.clipboard.readText();
+                  if (clip) setTextInput(clip.trim());
+                }
+              } catch {
+                // Clipboard fallback
+              }
+            }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#818cf8',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
+            }}
+          >
+            📋 Paste Text
+          </button>
+        </div>
         <textarea
           id="text-input"
           rows={5}
