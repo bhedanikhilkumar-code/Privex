@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { BackgroundAutoScanService } from '../../services/background-auto-scan.service';
 import { SecureStorageService } from '../../services/secure-storage.service';
 
