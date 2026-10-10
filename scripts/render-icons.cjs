@@ -6,38 +6,59 @@ app.commandLine.appendSwitch('no-sandbox');
 app.commandLine.appendSwitch('disable-gpu');
 
 app.whenReady().then(async () => {
+  // Capture at 512x512 resolution offscreen with transparent canvas
   const win = new BrowserWindow({
     width: 512,
     height: 512,
     show: false,
     frame: false,
     transparent: true,
+    backgroundColor: '#00000000',
     webPreferences: {
       offscreen: true
     }
   });
 
-  const svgPath = path.resolve(__dirname, '../privex-logo.svg');
+  const svgPath = path.resolve(__dirname, '../privex-icon.svg');
   const svgContent = fs.readFileSync(svgPath, 'utf8');
-  
-  // HTML wrapper that renders SVG centered on transparent background
+
+  // HTML wrapper with strictly transparent background, no margin, no padding, 100% vector fit
   const html = `<!DOCTYPE html>
-  <html>
-    <head>
-      <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background: transparent; overflow: hidden; }
-        svg { width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; }
-      </style>
-    </head>
-    <body>
-      ${svgContent}
-    </body>
-  </html>`;
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 100vw;
+        height: 100vh;
+        background: transparent !important;
+        background-color: transparent !important;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      svg {
+        width: 100%;
+        height: 100%;
+        background: transparent !important;
+      }
+    </style>
+  </head>
+  <body>
+    ${svgContent}
+  </body>
+</html>`;
 
   await win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
-  
-  // Render targets
+  // Allow layout and font rendering
+  await new Promise(r => setTimeout(r, 400));
+
+  const masterCapture = await win.webContents.capturePage();
+  console.log('Captured master image size:', masterCapture.getSize());
+
+  // Render targets across mobile, desktop, extension, and web
   const targets = [
     { size: 16, dest: 'apps/extension/public/icons/icon-16.png' },
     { size: 32, dest: 'apps/extension/public/icons/icon-32.png' },
@@ -54,11 +75,12 @@ app.whenReady().then(async () => {
   ];
 
   for (const t of targets) {
-    win.setSize(t.size, t.size);
-    // Wait a brief moment for repaint
-    await new Promise(r => setTimeout(r, 150));
-    const image = await win.webContents.capturePage();
-    const pngBuf = image.toPNG();
+    const resized = masterCapture.resize({
+      width: t.size,
+      height: t.size,
+      quality: 'best'
+    });
+    const pngBuf = resized.toPNG();
     const destFull = path.resolve(__dirname, '..', t.dest);
     fs.mkdirSync(path.dirname(destFull), { recursive: true });
     fs.writeFileSync(destFull, pngBuf);
