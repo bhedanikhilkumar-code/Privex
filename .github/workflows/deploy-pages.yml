@@ -1,13 +1,11 @@
-name: Deploy Web Application to Cloudflare Pages
+name: Manual Deploy to Cloudflare Pages (privex.io)
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build-and-deploy:
-    name: Build & Deploy to Cloudflare Pages
+    name: Build & Deploy to Cloudflare Pages (privex.io)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -37,13 +35,15 @@ jobs:
       - name: Build Web Application
         run: npm run build --workspace=@private-protection/web
 
-      - name: Verify Web Dist Output
+      - name: Verify Web Dist Output & CNAME
         run: |
           ls -la apps/web/dist
           test -f apps/web/dist/index.html
           test -f apps/web/dist/_headers
+          test -f apps/web/dist/CNAME
+          cat apps/web/dist/CNAME
 
-      - name: Deploy to Cloudflare Pages (Direct Wrangler)
+      - name: Deploy to Cloudflare Pages (privex.io)
         uses: cloudflare/wrangler-action@v3
         if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
         with:
@@ -59,6 +59,7 @@ jobs:
         run: |
           echo "=========================================================================="
           echo "Notice: CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID secrets not found."
+          echo "Target Domain: https://privex.io/ (Fallback: https://privex.pages.dev/)"
           echo "If Cloudflare Pages is connected directly via Git repository integration,"
           echo "Cloudflare automatically builds and deploys from branch main."
           echo "To enable direct GitHub Actions deployment via wrangler, add these secrets"

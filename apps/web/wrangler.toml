@@ -3,6 +3,11 @@ name = "privex"
 compatibility_date = "2024-09-23"
 pages_build_output_dir = "dist"
 
-# Production environment configuration
+# Production environment configuration with custom domain routing
+routes = [
+  { pattern = "privex.io", custom_domain = true },
+  { pattern = "www.privex.io", custom_domain = true }
+]
+
 [env.production]
-vars = { ENVIRONMENT = "production" }
+vars = { ENVIRONMENT = "production", PRIMARY_DOMAIN = "privex.io" }
