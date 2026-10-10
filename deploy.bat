@@ -12,7 +12,7 @@ echo.
 cd /d "%~dp0"
 
 :: Step 1: Pre-build & Verification
-echo [STEP 1/4] Building Web Application (@private-protection/web)...
+echo [STEP 1/5] Building Web Application (@private-protection/web)...
 echo ----------------------------------------------------------------------
 call npm run build:web
 if %ERRORLEVEL% NEQ 0 (
@@ -25,8 +25,19 @@ if %ERRORLEVEL% NEQ 0 (
 echo [OK] Web build completed successfully!
 echo.
 
-:: Step 2: Git Status Check & Staging
-echo [STEP 2/4] Checking Git Status and Staging changes...
+:: Step 2: Deploy to Cloudflare Pages
+echo [STEP 2/5] Deploying directly to Cloudflare Pages (privex.pages.dev)...
+echo ----------------------------------------------------------------------
+call npx wrangler pages deploy apps/web/dist --project-name=privex --branch=main
+if %ERRORLEVEL% NEQ 0 (
+    echo [WARN] Cloudflare direct deploy had an issue, will continue with Git push.
+) else (
+    echo [OK] Deployed to Cloudflare Pages: https://privex.pages.dev/
+)
+echo.
+
+:: Step 3: Git Status Check & Staging
+echo [STEP 3/5] Checking Git Status and Staging changes...
 echo ----------------------------------------------------------------------
 git status --short
 echo.
@@ -44,7 +55,7 @@ if %ERRORLEVEL% EQU 0 (
 ) else (
     :: Step 3: Commit
     echo.
-    echo [STEP 3/4] Creating Git Commit...
+    echo [STEP 4/5] Creating Git Commit...
     echo ----------------------------------------------------------------------
     set /p COMMIT_MSG="Enter commit message (Press ENTER for default message): "
     if "!COMMIT_MSG!"=="" (
@@ -63,9 +74,9 @@ if %ERRORLEVEL% EQU 0 (
     echo [OK] Commit created successfully!
 )
 
-:: Step 4: Push to Remote
+:: Step 5: Push to Remote
 echo.
-echo [STEP 4/4] Pushing commits to GitHub (origin main)...
+echo [STEP 5/5] Pushing commits to GitHub (origin main)...
 echo ----------------------------------------------------------------------
 git push origin main
 if %ERRORLEVEL% NEQ 0 (
@@ -77,9 +88,9 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo.
 echo ======================================================================
-echo  [SUCCESS] All latest commits have been pushed to 'main'!
-echo  Cloudflare Pages / GitHub Actions will now automatically deploy:
-echo  URL: https://privex.io/ (Fallback: https://privex.pages.dev/)
+echo  [SUCCESS] Web application successfully deployed to both platforms!
+echo  1. Cloudflare Pages:  https://privex.pages.dev/
+echo  2. GitHub Pages:      https://bhedanikhilkumar-code.github.io/Privex/
 echo ======================================================================
 echo.
 

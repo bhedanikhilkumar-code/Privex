@@ -1,7 +1,8 @@
 # Privex v0.1.2 (Release 1.2)
 
 ### 🌐 Live Web Application (On-Device Zero-Install PWA)
-- **Live GitHub Pages URL:** [https://bhedanikhilkumar-code.github.io/Privex/](https://bhedanikhilkumar-code.github.io/Privex/)
+- **Primary Cloudflare Pages URL:** [https://privex.pages.dev/](https://privex.pages.dev/)
+- **GitHub Pages Mirror:** [https://bhedanikhilkumar-code.github.io/Privex/](https://bhedanikhilkumar-code.github.io/Privex/)
 - **100% Client-Side On-Device Security Engine:** Instant phishing detection, URL lexical analysis, scam SMS evaluation, password strength auditor, and website exposed entry point / port auditor running directly inside your browser without cloud data transmission.
 
 ## What's New in v0.1.2
