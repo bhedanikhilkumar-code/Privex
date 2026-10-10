@@ -209,8 +209,8 @@ describe('PHASE 8 INDEPENDENT PRODUCT VALIDATION & GAP DISCOVERY SUITE', () => {
         sha256: sha256(originalBytes),
         threatName: 'PE/MZ_EXECUTABLE',
         riskScore: 95,
-        verdict: Verdict.DANGEROUS,
-        severity: 'CRITICAL' as const,
+        verdict: 'BLOCK' as const,
+        severity: 'critical' as const,
         evidenceFactors: ['PE/MZ header', 'Double extension']
       };
 

@@ -974,10 +974,8 @@ export class QuarantineService {
     }
 
     // 3. Canonical Quarantine Policy Enforcement:
-    const isQuarantinableVerdict =
-      threat.verdict === 'BLOCK' ||
-      threat.verdict === 'WARN' ||
-      threat.verdict === 'DANGEROUS';
+    const v = String(threat.verdict || '').toUpperCase();
+    const isQuarantinableVerdict = v === 'BLOCK' || v === 'WARN' || v === 'DANGEROUS';
     const sev = String(threat.severity || '').toLowerCase();
     const isQuarantinableSeverity =
       sev === 'critical' ||
