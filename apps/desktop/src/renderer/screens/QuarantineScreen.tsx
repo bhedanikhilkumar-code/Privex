@@ -88,14 +88,16 @@ export const QuarantineScreen: React.FC<QuarantineScreenProps> = ({
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {items.map((item) => (
+          {items.map((item, index) => (
             <div
               key={item.quarantineId}
+              className="motion-card motion-fade-up"
               style={{
                 backgroundColor: '#ffffff',
                 border: '1px solid #e2e8f0',
                 borderRadius: '8px',
-                padding: '16px'
+                padding: '16px',
+                animationDelay: `${Math.min(index * 50, 300)}ms`
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
@@ -116,6 +118,7 @@ export const QuarantineScreen: React.FC<QuarantineScreenProps> = ({
                 <button
                   type="button"
                   onClick={() => setSelectedRestoreItem(item)}
+                  className="motion-pressable"
                   style={{
                     backgroundColor: '#f1f5f9',
                     border: '1px solid #cbd5e1',
@@ -130,6 +133,7 @@ export const QuarantineScreen: React.FC<QuarantineScreenProps> = ({
                 <button
                   type="button"
                   onClick={() => onDelete(item)}
+                  className="motion-pressable"
                   style={{
                     backgroundColor: '#fee2e2',
                     color: '#991b1b',

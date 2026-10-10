@@ -551,7 +551,9 @@ export const App: React.FC = () => {
         />
 
         <main style={{ flex: 1, overflowY: 'auto' }}>
-          {renderActiveScreen()}
+          <div key={activeTab} className="motion-tab-panel">
+            {renderActiveScreen()}
+          </div>
         </main>
       </div>
 

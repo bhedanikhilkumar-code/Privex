@@ -116,6 +116,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       <section
         role="region"
         aria-labelledby="dashboard-posture-title"
+        className="motion-fade-down"
         style={{
           backgroundColor: postureTheme.bg,
           border: `2px solid ${postureTheme.border}`,
@@ -161,6 +162,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <button
           type="button"
           onClick={postureTheme.action}
+          className="motion-pressable"
           style={{
             backgroundColor: postureTheme.buttonBg,
             color: postureTheme.buttonText,
@@ -433,13 +435,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
           <div
             onClick={() => onNavigate('quick-scan')}
+            className="motion-card"
             style={{
               backgroundColor: '#ffffff',
               padding: '18px',
               borderRadius: '8px',
               border: '1px solid #e2e8f0',
-              cursor: 'pointer',
-              transition: 'border-color 0.15s ease'
+              cursor: 'pointer'
             }}
           >
             <div style={{ fontSize: '22px', marginBottom: '6px' }}>⚡</div>
@@ -451,6 +453,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           <div
             onClick={() => onNavigate('full-scan')}
+            className="motion-card"
             style={{
               backgroundColor: '#ffffff',
               padding: '18px',
@@ -468,6 +471,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           <div
             onClick={() => onNavigate('custom-scan')}
+            className="motion-card"
             style={{
               backgroundColor: '#ffffff',
               padding: '18px',

@@ -43,6 +43,7 @@ export const FrictionGateModal: React.FC<FrictionGateModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="friction-gate-title"
+      className="motion-modal-backdrop"
       style={{
         position: 'fixed',
         top: 0,
@@ -57,6 +58,7 @@ export const FrictionGateModal: React.FC<FrictionGateModalProps> = ({
       }}
     >
       <div
+        className="motion-modal-panel"
         style={{
           backgroundColor: '#ffffff',
           borderRadius: '8px',

@@ -59,6 +59,7 @@ export const ThreatDetectionModal: React.FC<ThreatDetectionModalProps> = ({
       aria-modal="true"
       aria-labelledby="threat-dialog-title"
       aria-describedby="threat-dialog-desc"
+      className="motion-modal-backdrop"
       style={{
         position: 'fixed',
         top: 0,
@@ -76,6 +77,7 @@ export const ThreatDetectionModal: React.FC<ThreatDetectionModalProps> = ({
     >
       <div
         data-testid="realtime-threat-alert-content"
+        className="motion-modal-panel motion-threat-alert"
         style={{
           backgroundColor: '#ffffff',
           borderRadius: '12px',

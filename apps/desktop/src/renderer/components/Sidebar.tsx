@@ -154,6 +154,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     type="button"
                     onClick={() => onSelectTab(item.id)}
                     aria-current={isActive ? 'page' : undefined}
+                    className="motion-pressable"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -161,14 +162,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       padding: '8px 12px',
                       borderRadius: '6px',
                       border: 'none',
+                      borderLeft: isActive ? '3px solid #38bdf8' : '3px solid transparent',
                       backgroundColor: isActive ? '#1e293b' : 'transparent',
                       color: isActive ? '#38bdf8' : '#cbd5e1',
                       fontSize: '12px',
                       fontWeight: isActive ? 600 : 400,
                       cursor: 'pointer',
                       textAlign: 'left',
-                      transition: 'background-color 0.12s ease',
-                      outline: 'none'
+                      transition: 'all 0.16s cubic-bezier(0.22, 1, 0.36, 1)',
+                      outline: 'none',
+                      boxShadow: isActive ? 'inset 0 0 12px rgba(56, 189, 248, 0.08)' : 'none'
                     }}
                   >
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
