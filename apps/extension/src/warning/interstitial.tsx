@@ -76,6 +76,7 @@ export const InterstitialApp: React.FC = () => {
   return (
     <main
       role="main"
+      className="interstitial-panel"
       style={{
         maxWidth: '750px',
         margin: '3rem auto',
@@ -89,6 +90,7 @@ export const InterstitialApp: React.FC = () => {
       {/* Warning Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
         <div
+          className="interstitial-shield-icon"
           style={{
             width: '3.5rem',
             height: '3.5rem',

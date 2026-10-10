@@ -29,6 +29,16 @@ export class ShadowBanner {
           z-index: 2147483647;
           font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
+        @keyframes bannerSlideDown {
+          0% {
+            transform: translateY(-100%);
+            opacity: 0;
+          }
+          100% {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
         .banner {
           background-color: #7f1d1d;
           color: #fef2f2;
@@ -39,6 +49,15 @@ export class ShadowBanner {
           border-bottom: 2px solid #ef4444;
           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
           font-size: 14px;
+          animation: bannerSlideDown 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+          transition: transform 180ms ease-in, opacity 180ms ease-in;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .banner {
+            animation: none !important;
+            transition: none !important;
+            transform: none !important;
+          }
         }
         .content {
           display: flex;
