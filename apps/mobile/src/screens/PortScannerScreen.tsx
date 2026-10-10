@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   WebsiteEntryPointAnalyzer,
-  KnownPortProfile,
-  EntryPointSeverity
+  KnownPortProfile
 } from '@private-protection/core';
 
 interface PortScannerScreenProps {
@@ -57,15 +56,12 @@ export const PortScannerScreen: React.FC<PortScannerScreenProps> = ({
     // Extract hostname and protocol
     let parsedHost = candidate;
     let proto = 'https:';
-    let fullTarget = candidate;
     try {
       const u = new URL(candidate.startsWith('http') ? candidate : `http://${candidate}`);
       parsedHost = u.port ? `${u.hostname}:${u.port}` : (u.hostname || candidate);
       proto = u.protocol;
-      fullTarget = u.toString();
     } catch {
       parsedHost = candidate.replace(/[^\w.:-]/g, '');
-      fullTarget = candidate;
     }
 
     // Scan immediately on-device

@@ -1,8 +1,8 @@
-import { MobileSettings, DEFAULT_MOBILE_SETTINGS } from '../types/mobile.types';
+import { MobileSettings, DEFAULT_MOBILE_SETTINGS, ScanTargetType } from '../types/mobile.types';
 
 export interface ScanHistoryRecord {
   scanId: string;
-  targetType: 'URL' | 'TEXT' | 'FILE';
+  targetType: ScanTargetType;
   sanitizedSummary: string; // Truncated domain prefix or generic label
   verdict: string;
   score: number;

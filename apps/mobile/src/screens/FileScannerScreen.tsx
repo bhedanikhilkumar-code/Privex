@@ -5,7 +5,6 @@ import { SecurityBadge } from '../components/SecurityBadge';
 import { EvidenceCard } from '../components/EvidenceCard';
 import { SecureStorageService } from '../services/secure-storage.service';
 import { NotificationService } from '../services/notification.service';
-import { Verdict } from '@private-protection/core';
 
 interface FileScannerScreenProps {
   scannerService: FileScannerService;
