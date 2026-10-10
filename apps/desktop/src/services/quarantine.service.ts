@@ -974,12 +974,15 @@ export class QuarantineService {
     }
 
     // 3. Canonical Quarantine Policy Enforcement:
-    // Benign ALLOW/INFORM or safe/low severity files must NEVER be quarantined or unlinked.
-    const isQuarantinableVerdict = threat.verdict === 'BLOCK' || threat.verdict === 'WARN';
+    const isQuarantinableVerdict =
+      threat.verdict === 'BLOCK' ||
+      threat.verdict === 'WARN' ||
+      threat.verdict === 'DANGEROUS';
+    const sev = String(threat.severity || '').toLowerCase();
     const isQuarantinableSeverity =
-      threat.severity === 'critical' ||
-      threat.severity === 'dangerous' ||
-      threat.severity === 'suspicious';
+      sev === 'critical' ||
+      sev === 'dangerous' ||
+      sev === 'suspicious';
 
     if (!isQuarantinableVerdict || !isQuarantinableSeverity) {
       throw new Error(
