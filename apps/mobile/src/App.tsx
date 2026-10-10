@@ -18,6 +18,7 @@ import { PasswordGeneratorScreen } from './screens/PasswordGeneratorScreen';
 
 import { PreThreatWarningModal } from './components/PreThreatWarningModal';
 import { PreThreatWarningService } from './services/pre-threat-warning.service';
+import { SecureStorageService } from './services/secure-storage.service';
 import { PreThreatWarningPayload, PreThreatActionType } from './types/mobile.types';
 
 export const App: React.FC = () => {
