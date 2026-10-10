@@ -1,19 +1,29 @@
 import React, { useState } from 'react';
 import { MobileScanResult } from '../types/mobile.types';
-import { Verdict } from '@private-protection/core';
+import { Verdict, WebsiteAuditReport, ExposedEntryPoint } from '@private-protection/core';
 import { SecurityBadge } from '../components/SecurityBadge';
 import { EvidenceCard } from '../components/EvidenceCard';
 import { FrictionGateModal } from '../components/FrictionGateModal';
 
 interface ScanResultScreenProps {
   result: MobileScanResult;
+  auditReport?: WebsiteAuditReport | null;
   onReset: () => void;
   onDone: () => void;
 }
 
-export const ScanResultScreen: React.FC<ScanResultScreenProps> = ({ result, onReset, onDone }) => {
+export const ScanResultScreen: React.FC<ScanResultScreenProps> = ({ result, auditReport, onReset, onDone }) => {
   const [showFrictionModal, setShowFrictionModal] = useState<boolean>(false);
   const [hasOverridden, setHasOverridden] = useState<boolean>(result.overridden);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, id: string) => {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2500);
+    }
+  };
 
   const isCritical = result.verdict === Verdict.DANGEROUS;
 
@@ -164,6 +174,125 @@ export const ScanResultScreen: React.FC<ScanResultScreenProps> = ({ result, onRe
           </div>
         </div>
       </div>
+
+      {/* Open Points & Port Remediation Blueprint (If Audit Data Exists) */}
+      {auditReport && auditReport.openEntryPoints && auditReport.openEntryPoints.length > 0 && (
+        <div style={{ backgroundColor: '#111b2e', border: '1px solid #27364b', borderRadius: '16px', padding: '1.15rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                PERIMETER ATTACK SURFACE AUDIT
+              </span>
+              <h4 style={{ margin: '0.1rem 0 0 0', fontSize: '0.95rem', fontWeight: 800, color: '#f8fafc' }}>
+                Open Entry Points & Hacker Vectors ({auditReport.openPointsDetected})
+              </h4>
+            </div>
+            <span
+              style={{
+                padding: '4px 8px',
+                borderRadius: '6px',
+                fontSize: '0.7rem',
+                fontWeight: 800,
+                backgroundColor:
+                  auditReport.overallExposureRisk === 'CRITICAL'
+                    ? 'rgba(239, 68, 68, 0.2)'
+                    : auditReport.overallExposureRisk === 'HIGH'
+                    ? 'rgba(249, 115, 22, 0.2)'
+                    : 'rgba(234, 179, 8, 0.2)',
+                color:
+                  auditReport.overallExposureRisk === 'CRITICAL'
+                    ? '#f87171'
+                    : auditReport.overallExposureRisk === 'HIGH'
+                    ? '#fb923c'
+                    : '#fde047'
+              }}
+            >
+              {auditReport.overallExposureRisk} EXPOSURE
+            </span>
+          </div>
+
+          <p style={{ margin: 0, fontSize: '0.8rem', color: '#cbd5e1', lineHeight: 1.4 }}>
+            {auditReport.summaryExplanation}
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.25rem' }}>
+            {auditReport.openEntryPoints.map((point: ExposedEntryPoint) => (
+              <div
+                key={point.id}
+                style={{
+                  backgroundColor: '#0b1220',
+                  border: '1px solid #1e293b',
+                  borderRadius: '12px',
+                  padding: '0.85rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <strong style={{ fontSize: '0.85rem', color: '#f8fafc' }}>{point.name}</strong>
+                  <span style={{ fontSize: '0.72rem', fontFamily: 'monospace', color: '#38bdf8', fontWeight: 700 }}>
+                    {point.target}
+                  </span>
+                </div>
+
+                <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                  {point.description}
+                </div>
+
+                {/* Hacker Vector */}
+                <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '8px', padding: '0.6rem', fontSize: '0.75rem', color: '#fca5a5' }}>
+                  <strong style={{ display: 'block', marginBottom: '2px' }}>
+                    🥷 How Hackers Exploit This Point:
+                  </strong>
+                  {point.hackerAttackVector}
+                </div>
+
+                {/* Remediation & Code Directive */}
+                <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '8px', padding: '0.6rem', fontSize: '0.75rem', color: '#6ee7b7' }}>
+                  <strong style={{ display: 'block', marginBottom: '2px' }}>
+                    🛠️ Remediation / How to Fix:
+                  </strong>
+                  <div style={{ marginBottom: '4px', fontWeight: 600 }}>
+                    {point.remediationSolution.summary}
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: '14px' }}>
+                    {point.remediationSolution.steps.map((st: string, i: number) => (
+                      <li key={i} style={{ marginBottom: '2px' }}>{st}</li>
+                    ))}
+                  </ul>
+
+                  {point.remediationSolution.technicalCodeSnippet && (
+                    <div style={{ marginTop: '6px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 700 }}>Directive / Config Snippet:</span>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(point.remediationSolution.technicalCodeSnippet!, point.id)}
+                          style={{
+                            padding: '2px 6px',
+                            backgroundColor: '#1e293b',
+                            border: '1px solid #334155',
+                            color: '#38bdf8',
+                            fontSize: '0.65rem',
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {copiedId === point.id ? '✓ Copied' : '📋 Copy'}
+                        </button>
+                      </div>
+                      <pre style={{ margin: 0, padding: '6px', backgroundColor: '#090e1a', color: '#a3e635', borderRadius: '4px', fontSize: '0.7rem', overflowX: 'auto', fontFamily: 'monospace' }}>
+                        {point.remediationSolution.technicalCodeSnippet}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Technical Evidence Telemetry */}
       <div>

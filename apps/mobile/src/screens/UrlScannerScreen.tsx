@@ -110,6 +110,7 @@ export const UrlScannerScreen: React.FC<UrlScannerScreenProps> = ({
     return (
       <ScanResultScreen
         result={scanResult}
+        auditReport={auditReport}
         onReset={() => {
           setScanResult(null);
           setAuditReport(null);
