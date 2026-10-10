@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none';" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="description" content="Privex — Zero-Install On-Device Security Scanner and Phishing Protection." />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png" />
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
+    <link rel="manifest" href="./manifest.json" />
+    <title>PRIVEX — Security Dashboard</title>
+    <style>
+      :root, [data-theme="light"] {
+        --bg-primary: #F7F3EB;
+        --bg-secondary: #EBE7DE;
+        --bg-card: #FFFFFF;
+        --text-primary: #111111;
+        --text-muted: #555555;
+        --border-color: #111111;
+        --border-dark: #111111;
+        --border-width: 2px;
+        --shadow-brutal-sm: 2px 2px 0px #111111;
+        --shadow-brutal: 4px 4px 0px #111111;
+        --shadow-brutal-lg: 6px 6px 0px #111111;
+        --shadow-brutal-xl: 8px 8px 0px #111111;
+        --color-safe: #1DB954;
+        --color-safe-bg: #E7F9EE;
+        --color-caution: #FFB800;
+        --color-caution-bg: #FFF9E6;
+        --color-danger: #FF5A36;
+        --color-danger-bg: #FFECE8;
+        --color-brand: #2457FF;
+        --color-brand-hover: #1844DD;
+        --color-accent: #D7FF3F;
+        --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+        --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        --font-mono: 'Space Grotesk', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+      }
+
+      [data-theme="dark"] {
+        --bg-primary: #0b1120;
+        --bg-secondary: #1e293b;
+        --bg-card: #151f32;
+        --text-primary: #f8fafc;
+        --text-muted: #94a3b8;
+        --border-color: #334155;
+        --border-dark: #334155;
+        --border-width: 2px;
+        --shadow-brutal-sm: 2px 2px 0px #020617;
+        --shadow-brutal: 4px 4px 0px #020617;
+        --shadow-brutal-lg: 6px 6px 0px #020617;
+        --shadow-brutal-xl: 8px 8px 0px #020617;
+        --color-safe: #22c55e;
+        --color-safe-bg: #052e16;
+        --color-caution: #f59e0b;
+        --color-caution-bg: #451a03;
+        --color-danger: #ef4444;
+        --color-danger-bg: #450a0a;
+        --color-brand: #3b82f6;
+        --color-brand-hover: #2563eb;
+        --color-accent: #a3e635;
+      }
+
+      [data-theme="night"] {
+        --bg-primary: #000000;
+        --bg-secondary: #0c0c0e;
+        --bg-card: #141416;
+        --text-primary: #ffffff;
+        --text-muted: #a1a1aa;
+        --border-color: #27272a;
+        --border-dark: #27272a;
+        --border-width: 2px;
+        --shadow-brutal-sm: 2px 2px 0px #000000;
+        --shadow-brutal: 4px 4px 0px #000000;
+        --shadow-brutal-lg: 6px 6px 0px #000000;
+        --shadow-brutal-xl: 8px 8px 0px #000000;
+        --color-safe: #10b981;
+        --color-safe-bg: #022c22;
+        --color-caution: #eab308;
+        --color-caution-bg: #422006;
+        --color-danger: #f43f5e;
+        --color-danger-bg: #4c0519;
+        --color-brand: #60a5fa;
+        --color-brand-hover: #3b82f6;
+        --color-accent: #ccff00;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: var(--font-sans);
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        transition: background-color 0.15s ease, color 0.15s ease;
+      }
+      #root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      /* Dark & Night mode surface overrides */
+      [data-theme="dark"] .brutal-card,
+      [data-theme="dark"] .brutal-card-lg,
+      [data-theme="night"] .brutal-card,
+      [data-theme="night"] .brutal-card-lg {
+        background-color: var(--bg-card) !important;
+        border-color: var(--border-dark) !important;
+        color: var(--text-primary) !important;
+      }
+      [data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+      [data-theme="dark"] textarea,
+      [data-theme="night"] input:not([type="checkbox"]):not([type="radio"]),
+      [data-theme="night"] textarea {
+        background-color: var(--bg-secondary) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-dark) !important;
+      }
+      /* Brutalist UI utility classes & Polished Corner-Cut Button Styles */
+      .brutal-card {
+        background-color: var(--bg-card);
+        border: 2px solid var(--border-dark);
+        box-shadow: var(--shadow-brutal);
+      }
+      .brutal-card-lg {
+        background-color: var(--bg-card);
+        border: 2px solid var(--border-dark);
+        box-shadow: var(--shadow-brutal-lg);
+      }
+      
+      /* Global Polished Corner-Cut Button System with Glass Effect */
+      .cut-corner-btn,
+      button:not([role="tab"]):not([role="radio"]):not(.raw-btn),
+      [role="tab"] {
+        position: relative;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        background-color: var(--glass-btn-bg, rgba(255, 255, 255, 0.85));
+        border: 2px solid var(--border-dark);
+        clip-path: polygon(
+          0 0,
+          calc(100% - 8px) 0,
+          100% 8px,
+          100% 100%,
+          8px 100%,
+          0 calc(100% - 8px)
+        );
+        transition: transform 0.14s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.14s ease, filter 0.14s ease, background-color 0.14s ease, border-color 0.14s ease;
+      }
+
+      [data-theme="dark"] .cut-corner-btn,
+      [data-theme="dark"] button:not([role="tab"]):not([role="radio"]):not(.raw-btn) {
+        --glass-btn-bg: rgba(30, 41, 59, 0.75);
+      }
+      [data-theme="night"] .cut-corner-btn,
+      [data-theme="night"] button:not([role="tab"]):not([role="radio"]):not(.raw-btn) {
+        --glass-btn-bg: rgba(20, 20, 24, 0.75);
+      }
+
+      .cut-corner-btn:hover:not(:disabled),
+      button:not([role="tab"]):not([role="radio"]):not(.raw-btn):hover:not(:disabled),
+      [role="tab"]:hover:not(:disabled) {
+        transform: translate(-2px, -2px) !important;
+        box-shadow: 4px 4px 0px var(--border-dark) !important;
+        filter: brightness(1.08) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+
+      .cut-corner-btn:active:not(:disabled),
+      button:not([role="tab"]):not([role="radio"]):not(.raw-btn):active:not(:disabled),
+      [role="tab"]:active:not(:disabled) {
+        transform: translate(1px, 1px) !important;
+        box-shadow: 1px 1px 0px var(--border-dark) !important;
+      }
+
+      .brutal-btn-primary {
+        background-color: var(--color-brand);
+        color: #FFFFFF;
+        border: 2px solid var(--border-dark);
+        box-shadow: var(--shadow-brutal-sm);
+        font-weight: 700;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        clip-path: polygon(
+          0 0,
+          calc(100% - 8px) 0,
+          100% 8px,
+          100% 100%,
+          8px 100%,
+          0 calc(100% - 8px)
+        );
+        transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+      }
+      .brutal-btn-primary:hover:not(:disabled) {
+        transform: translate(-2px, -2px);
+        box-shadow: var(--shadow-brutal);
+        filter: brightness(1.08);
+      }
+      .brutal-btn-primary:active:not(:disabled) {
+        transform: translate(1px, 1px);
+        box-shadow: 1px 1px 0px var(--border-dark);
+      }
+
+      /* Global Glassmorphism Status Bar Component */
+      .glass-status-bar {
+        background: rgba(17, 19, 23, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 2px solid var(--border-dark);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        position: relative;
+        z-index: 20;
+      }
+      [data-theme="light"] .glass-status-bar {
+        background: rgba(247, 243, 235, 0.88);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      }
+      [data-theme="dark"] .glass-status-bar {
+        background: rgba(15, 23, 42, 0.85);
+      }
+      [data-theme="night"] .glass-status-bar {
+        background: rgba(10, 10, 12, 0.90);
+      }
+
+      .brutal-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.65rem;
+        border: 2px solid var(--border-dark);
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+      }
+      @keyframes pulse-ring {
+        0% { transform: scale(0.96); opacity: 0.85; }
+        50% { transform: scale(1.04); opacity: 1; }
+        100% { transform: scale(0.96); opacity: 0.85; }
+      }
+      .pulse-anim {
+        animation: pulse-ring 2s infinite ease-in-out;
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/index-CXB2I8jf.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-C3qAsqX_.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

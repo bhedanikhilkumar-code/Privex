@@ -1,0 +1,37 @@
+name: One-time gh-pages branch cleanup
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/cleanup-gh-pages.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  remove-gh-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete gh-pages branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/gh-pages" >/dev/null 2>&1; then
+            gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/gh-pages"
+            echo "Deleted gh-pages branch."
+          else
+            echo "gh-pages branch already absent."
+          fi
+      - name: Remove this temporary workflow from main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          file_sha="$(gh api "repos/${GITHUB_REPOSITORY}/contents/.github/workflows/cleanup-gh-pages.yml?ref=main" --jq .sha)"
+          gh api --method DELETE "repos/${GITHUB_REPOSITORY}/contents/.github/workflows/cleanup-gh-pages.yml" \
+            -f message="chore: remove one-time gh-pages cleanup workflow" \
+            -f sha="$file_sha" \
+            -f branch=main
