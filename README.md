@@ -16,7 +16,6 @@ Access PRIVEX directly in your browser without installing anything:
 | **📱 Mobile Landing Page** | [**Open Mobile Landing Page**](https://bhedanikhilkumar-code.github.io/Privex/mobile.html) | Interactive mobile app showcase, live feature preview & download |
 | **🌐 Main Web Scanner** | [**Open Web Scanner**](https://bhedanikhilkumar-code.github.io/Privex/) | Zero-install local on-device URL and threat scanner |
 | **📥 App Download Page** | [**Open Download Page**](https://bhedanikhilkumar-code.github.io/Privex/download.html) | Direct APK, Windows exe, and browser extension downloads |
-| **✨ Intro Feature Preview** | [**Open Feature Preview**](https://bhedanikhilkumar-code.github.io/Privex/intro-preview.html) | Interactive feature walk-through & capability demonstration |
 
 ---
 
