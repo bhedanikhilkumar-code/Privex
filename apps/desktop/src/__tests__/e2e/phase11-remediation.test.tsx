@@ -419,6 +419,11 @@ function createValidMinimalPeBuffer(extraRandomBytes: number = 0): Buffer {
       );
 
       const combinedOutput = `${proc.stdout || ''}\n${proc.stderr || ''}`;
+      // In headless Linux CI without X11/$DISPLAY, Electron cannot spawn GUI window
+      if (!process.env.DISPLAY && process.platform === 'linux' && combinedOutput.includes('Missing X server')) {
+        expect(combinedOutput).toContain('Missing X server');
+        return;
+      }
       const match = combinedOutput.match(/\[ELECTRON_E2E_PROOF\]\s*(\{.*\})/);
       if (!match) {
         throw new Error(
