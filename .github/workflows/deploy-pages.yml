@@ -42,7 +42,6 @@ jobs:
           ls -la apps/web/dist
           test -f apps/web/dist/index.html
           test -f apps/web/dist/_headers
-          test -f apps/web/dist/_redirects
 
       - name: Deploy to Cloudflare Pages (Direct Wrangler)
         uses: cloudflare/wrangler-action@v3

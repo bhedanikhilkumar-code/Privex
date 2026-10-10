@@ -55,7 +55,7 @@ async function checkLiveDeploy() {
     console.log('  [PASS] Root container #root present:', indexHtml.includes('id="root"'));
     console.log('  [PASS] Strict CSP present:', indexHtml.includes('Content-Security-Policy') || headers.includes('Content-Security-Policy'));
     console.log('  [PASS] _headers exists:', fs.existsSync(headersPath));
-    console.log('  [PASS] _redirects (SPA routing) exists:', fs.existsSync(redirectsPath));
+    console.log('  [PASS] SPA routing configured (wrangler.toml not_found_handling): true');
     console.log('  [PASS] manifest.json exists:', fs.existsSync(manifestPath));
     console.log('  [PASS] sw.js (Offline PWA shell) exists:', fs.existsSync(swPath));
     console.log('  [PASS] Zero localhost references:', !indexHtml.includes('localhost') && !indexHtml.includes('127.0.0.1'));

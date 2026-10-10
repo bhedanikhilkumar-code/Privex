@@ -1,2 +1,0 @@
-# Cloudflare Redirects Configuration for Privex SPA
-# Client-side SPA routing fallback is handled natively via wrangler.toml [assets] not_found_handling
