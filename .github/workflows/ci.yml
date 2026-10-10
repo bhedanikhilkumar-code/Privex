@@ -744,7 +744,7 @@ jobs:
           npm run build --workspace=@private-protection/ml
           npm run build --workspace=@private-protection/ui
       - name: Test Mobile Threat Protection Services
-        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/web-shield.test.ts src/__tests__/services/app-installation-shield.test.ts src/__tests__/services/realtime-download-protection.test.ts src/__tests__/services/camera-scanner.test.ts src/__tests__/services/mobile-threat-intel.test.ts
+        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/web-shield.test.ts src/__tests__/services/app-installation-shield.test.ts src/__tests__/services/realtime-download-protection.test.ts src/__tests__/services/camera-scanner.test.ts src/__tests__/services/mobile-threat-intel.test.ts src/__tests__/screens/website-vulnerability-screen.test.tsx
 
   mobile-device-files:
     name: "38. Mobile Full Device Audit & Universal File Shield"

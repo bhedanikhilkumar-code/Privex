@@ -15,6 +15,7 @@ import { ProtectionStatusScreen } from './screens/ProtectionStatusScreen';
 import { PrivacyScreen } from './screens/PrivacyScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { PasswordGeneratorScreen } from './screens/PasswordGeneratorScreen';
+import { WebsiteVulnerabilityScreen } from './screens/WebsiteVulnerabilityScreen';
 
 import { PreThreatWarningModal } from './components/PreThreatWarningModal';
 import { PreThreatWarningService } from './services/pre-threat-warning.service';
@@ -226,6 +227,16 @@ export const App: React.FC = () => {
             theme={theme}
             onThemeChange={(t) => handleThemeToggle(t)}
             onBack={() => setCurrentTab('HOME')}
+          />
+        )}
+        {currentTab === 'VULNERABILITY_AUDIT' && (
+          <WebsiteVulnerabilityScreen
+            initialUrl={inboundUrl}
+            onNavigateHome={() => {
+              setInboundUrl(undefined);
+              setAutoScanTrigger(false);
+              setCurrentTab('HOME');
+            }}
           />
         )}
       </main>

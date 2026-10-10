@@ -10,7 +10,8 @@ export type MobileTab =
   | 'ASSISTANT'
   | 'STATUS'
   | 'PRIVACY'
-  | 'SETTINGS';
+  | 'SETTINGS'
+  | 'VULNERABILITY_AUDIT';
 
 interface TabBarProps {
   currentTab: MobileTab;
@@ -20,8 +21,8 @@ interface TabBarProps {
 export const TabBar: React.FC<TabBarProps> = ({ currentTab, onSelectTab }) => {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
-  const isScannerTab = ['URL_SCAN', 'TEXT_SCAN', 'FILE_SCAN', 'QR_SCAN'].includes(currentTab);
-  const isMoreActive = ['SETTINGS', 'PRIVACY', 'PASSWORD'].includes(currentTab);
+  const isScannerTab = ['URL_SCAN', 'TEXT_SCAN', 'FILE_SCAN', 'QR_SCAN', 'VULNERABILITY_AUDIT'].includes(currentTab);
+  const isMoreActive = ['SETTINGS', 'PRIVACY', 'PASSWORD', 'VULNERABILITY_AUDIT'].includes(currentTab);
 
   const primaryTabs: {
     id: MobileTab | 'MORE';
@@ -87,6 +88,7 @@ export const TabBar: React.FC<TabBarProps> = ({ currentTab, onSelectTab }) => {
   ];
 
   const drawerItems: { id: MobileTab; label: string; icon: string; description: string }[] = [
+    { id: 'VULNERABILITY_AUDIT', label: 'Website Vulnerability Auditor', icon: '🌐', description: 'Detect website weaknesses, open ports & hacker vectors' },
     { id: 'SETTINGS', label: 'Protection Settings', icon: '⚡', description: 'Configure active shields & thresholds' },
     { id: 'PRIVACY', label: 'Privacy Center', icon: '🔒', description: 'Zero-knowledge guarantees & crypto-shredder' },
     { id: 'PASSWORD', label: 'Password Generator', icon: '🔐', description: 'CSPRNG cryptographic entropy passwords' },

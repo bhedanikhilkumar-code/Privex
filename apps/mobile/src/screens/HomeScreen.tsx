@@ -329,6 +329,89 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onSelectResu
         </button>
       </div>
 
+      {/* Featured Website Vulnerability Auditor Card */}
+      <div
+        style={{
+          backgroundColor: '#111b2e',
+          border: '1px solid #38bdf8',
+          borderRadius: '16px',
+          padding: '1.1rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+          boxShadow: '0 4px 20px rgba(56, 189, 248, 0.12)'
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <div
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '10px',
+                backgroundColor: 'rgba(56, 189, 248, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.4rem'
+              }}
+            >
+              🌐
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                  NEW CAPABILITY
+                </span>
+                <span
+                  style={{
+                    padding: '0.1rem 0.45rem',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                    border: '1px solid #10b981',
+                    color: '#34d399',
+                    fontSize: '0.65rem',
+                    fontWeight: 800
+                  }}
+                >
+                  AIR-GAPPED
+                </span>
+              </div>
+              <h4 style={{ margin: '0.1rem 0 0 0', fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc' }}>
+                Website Vulnerability Auditor
+              </h4>
+            </div>
+          </div>
+        </div>
+
+        <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8', lineHeight: 1.45 }}>
+          Audit any website for open database ports (MySQL :3306), unencrypted HTTP cleartext, exposed admin panels, and hacker attack vectors with one-click remediation fixes.
+        </p>
+
+        <button
+          type="button"
+          onClick={() => onNavigate('VULNERABILITY_AUDIT')}
+          style={{
+            padding: '0.65rem',
+            backgroundColor: '#38bdf8',
+            border: 'none',
+            borderRadius: '10px',
+            color: '#090e1a',
+            fontSize: '0.82rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.4rem'
+          }}
+        >
+          <span>🌐 Audit Website Vulnerabilities Now</span>
+          <span>→</span>
+        </button>
+      </div>
+
       {/* Protection Modules Section Heading */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem' }}>
         <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc' }}>
@@ -520,59 +603,21 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onSelectResu
 
         <button
           type="button"
-          onClick={() => onNavigate('PASSWORD')}
-          style={{
-            padding: '1rem',
-            backgroundColor: '#1e293b',
-            border: '1px solid #38bdf8',
-            borderRadius: '12px',
-            color: '#f8fafc',
-            cursor: 'pointer',
-            textAlign: 'left',
-            minHeight: '48px'
-          }}
-        >
-          <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.25rem' }}>🔐</span>
-          <strong style={{ display: 'block', fontSize: '0.95rem' }}>Password Generator</strong>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Secure on-device CSPRNG</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onNavigate('STATUS')}
-          style={{
-            padding: '1rem',
-            backgroundColor: '#1e293b',
-            border: '1px solid #cbd5e1',
-            borderRadius: '12px',
-            color: '#f8fafc',
-            cursor: 'pointer',
-            textAlign: 'left',
-            minHeight: '48px'
-          }}
-        >
-          <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.25rem' }}>⚙️</span>
-          <strong style={{ display: 'block', fontSize: '0.95rem' }}>Engine Diagnostics</strong>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Offline Bloom filter health</span>
-        </button>
-
-        <button
-          type="button"
           onClick={() => onNavigate('PRIVACY')}
           style={{
             padding: '1rem',
-            backgroundColor: '#1e293b',
+            backgroundColor: '#111b2e',
             border: '1px solid #a855f7',
-            borderRadius: '12px',
+            borderRadius: '14px',
             color: '#f8fafc',
             cursor: 'pointer',
             textAlign: 'left',
             minHeight: '48px'
           }}
         >
-          <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.25rem' }}>🔒</span>
-          <strong style={{ display: 'block', fontSize: '0.95rem' }}>Privacy Center</strong>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Zero-knowledge & shredder</span>
+          <span style={{ fontSize: '1.4rem', display: 'block', marginBottom: '0.25rem' }}>🔒</span>
+          <strong style={{ display: 'block', fontSize: '0.92rem' }}>Privacy Center</strong>
+          <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Zero-knowledge & shredder</span>
         </button>
 
         <button
@@ -580,18 +625,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onSelectResu
           onClick={() => onNavigate('SETTINGS')}
           style={{
             padding: '1rem',
-            backgroundColor: '#1e293b',
+            backgroundColor: '#111b2e',
             border: '1px solid #eab308',
-            borderRadius: '12px',
+            borderRadius: '14px',
             color: '#f8fafc',
             cursor: 'pointer',
             textAlign: 'left',
             minHeight: '48px'
           }}
         >
-          <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.25rem' }}>⚡</span>
-          <strong style={{ display: 'block', fontSize: '0.95rem' }}>Protection Settings</strong>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Shields & custom allowlists</span>
+          <span style={{ fontSize: '1.4rem', display: 'block', marginBottom: '0.25rem' }}>⚡</span>
+          <strong style={{ display: 'block', fontSize: '0.92rem' }}>Protection Settings</strong>
+          <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Shields & custom allowlists</span>
         </button>
       </div>
 
