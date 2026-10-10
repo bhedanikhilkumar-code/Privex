@@ -1,0 +1,514 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,300;0,6..12,400;0,6..12,500;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,400&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}
+/* Polished Cyber Cut-Corner Buttons & Glass Interactive States */
+.cut-corner-btn,
+button:not([role="tab"]):not([role="radio"]):not(.raw-btn),
+.btn-cyber {
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), filter 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease !important;
+}
+.cut-corner-btn:hover,
+button:not([role="tab"]):not([role="radio"]):not(.raw-btn):hover,
+.btn-cyber:hover {
+  transform: translate(-2px, -2px) !important;
+  filter: brightness(1.12) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15)) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+.cut-corner-btn:active,
+button:not([role="tab"]):not([role="radio"]):not(.raw-btn):active,
+.btn-cyber:active {
+  transform: translate(1px, 1px) !important;
+  filter: brightness(0.95) !important;
+}
+
+/* Glassmorphism Status Bar Component */
+.glass-status-bar,
+.status-bar-glass {
+  background: rgba(239, 236, 230, 0.85) !important;
+  backdrop-filter: blur(16px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+  border-bottom: 1px solid rgba(126, 133, 124, 0.4) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+/* Theme Modes */
+html.dark {
+  filter: invert(0.92) hue-rotate(180deg);
+}
+html.dark img, html.dark video, html.dark canvas {
+  filter: invert(1) hue-rotate(180deg);
+}
+html.night {
+  filter: invert(0.92) hue-rotate(180deg) contrast(1.15) brightness(0.85);
+}
+html.night img, html.night video, html.night canvas {
+  filter: invert(1) hue-rotate(180deg);
+}
+</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-background": "#1A2E22",
+          "primary-container": "#78a886",
+          "inverse-primary": "#8ecf9e",
+          "on-primary-fixed-variant": "#2a6038",
+          "surface-container-high": "#eae6de",
+          "secondary-fixed-dim": "#d4ccbf",
+          "inverse-surface": "#2e3230",
+          "on-tertiary-fixed-variant": "#554020",
+          "on-secondary": "#ffffff",
+          "surface-tint": "#4a7c59",
+          "on-primary-fixed": "#002110",
+          "on-secondary-fixed": "#1e1a13",
+          "secondary-fixed": "#f0e8db",
+          "primary-fixed-dim": "#8ecf9e",
+          "primary": "#4a7c59",
+          "primary-hover": "#3b6346",
+          "on-tertiary-container": "#554020",
+          "on-tertiary-fixed": "#221a05",
+          "surface-container": "#f0ece4",
+          "on-tertiary": "#ffffff",
+          "secondary-container": "#f0e8db",
+          "inverse-on-surface": "#f5f0e8",
+          "on-secondary-container": "#5e5548",
+          "surface-container-low": "#f5f1ea",
+          "primary-fixed": "#c8e8d0",
+          "on-secondary-fixed-variant": "#4a4538",
+          "surface-variant": "#e4e0d8",
+          "surface-bright": "#faf6f0",
+          "on-error": "#ffffff",
+          "surface": "#FAF7F2",
+          "error": "#b83230",
+          "surface-container-highest": "#e4e0d8",
+          "surface-dim": "#dbd7cf",
+          "on-surface-variant": "#4A5B50",
+          "secondary": "#6b6358",
+          "background": "#F7F5F0",
+          "tertiary-container": "#c4a66a",
+          "tertiary-fixed-dim": "#dcc48e",
+          "on-error-container": "#690005",
+          "surface-container-lowest": "#ffffff",
+          "error-container": "#ffdad8",
+          "on-primary-container": "#d8f0de",
+          "on-surface": "#1A2E22",
+          "tertiary-fixed": "#f8e0a8",
+          "outline": "#74796e",
+          "on-primary": "#ffffff",
+          "outline-variant": "#d8d3c8",
+          "tertiary": "#705c30"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.5rem",
+          "lg": "0.75rem",
+          "xl": "0.75rem",
+          "2xl": "1rem",
+          "full": "9999px"
+        },
+        "fontFamily": {
+          "sans": ["Nunito Sans", "sans-serif"],
+          "body": ["Nunito Sans", "sans-serif"],
+          "display": ["Nunito Sans", "sans-serif"]
+        }
+      },
+    },
+  }
+</script></head><body class="bg-background font-sans text-on-background selection:bg-primary-container selection:text-on-background min-h-screen antialiased relative">
+<!-- STITCH_SHADER_START:ANIMATION_12 class="fixed inset-0 w-full h-full pointer-events-none z-0" -->
+<div class="fixed inset-0 w-full h-full pointer-events-none z-0" style="display:block;">
+<canvas id="shader-canvas-ANIMATION_12" style="display:block;width:100%;height:100%"></canvas>
+<script>
+(function() {
+  const canvas = document.getElementById('shader-canvas-ANIMATION_12');
+
+  // Sync the WebGL drawing-buffer size with the CSS-driven layout size.
+  // This fires on initial layout and whenever the element is resized.
+  function syncSize() {
+    const w = canvas.clientWidth  || 1280;
+    const h = canvas.clientHeight || 720;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width  = w;
+      canvas.height = h;
+    }
+  }
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(syncSize).observe(canvas);
+  }
+  syncSize();
+
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+  v_texCoord = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+  const fs = `precision highp float;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+
+// Pseudo-random generator
+float hash(vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+}
+
+void main() {
+    vec2 st = gl_FragCoord.xy / u_resolution.xy;
+    
+    // Background: Terra calm warm organic surface (#F7F5F0)
+    vec3 baseBg = vec3(0.969, 0.961, 0.941);
+    
+    // Columns grid for subtle digital byte rain
+    float cols = 55.0;
+    vec2 grid = vec2(floor(st.x * cols), floor(st.y * 36.0));
+    
+    // Column speed and random offset
+    float colRand = hash(vec2(grid.x, 31.7));
+    float speed = 0.35 + colRand * 0.55;
+    
+    // Falling byte packets (up to down: top st.y = 1.0 to bottom 0.0)
+    float fall = fract(st.y + u_time * speed * 0.22 + colRand * 10.0);
+    
+    // Matrix character pulse / cell randomness
+    float cellRand = hash(vec2(grid.x, floor((st.y + u_time * speed * 0.22) * 36.0)));
+    
+    // Matrix tail trail: sharp head, slow soft fade downwards
+    float head = smoothstep(0.90, 0.98, fall);
+    float trail = pow(fall, 3.0);
+    
+    // Byte glyph simulation within cell
+    vec2 cellUV = fract(vec2(st.x * cols, st.y * 36.0));
+    float charBox = step(0.18, cellUV.x) * step(cellUV.x, 0.82) * step(0.18, cellUV.y) * step(cellUV.y, 0.82);
+    float bitMask = step(0.40, cellRand) * charBox;
+    
+    // Terra Organic Palette:
+    // Forest Green #4a7c59 (0.290, 0.486, 0.349)
+    // Sage / Muted Leaf #7a9a7a (0.478, 0.604, 0.478)
+    // Warm Stone Accent #c2b8a3 (0.761, 0.722, 0.639)
+    vec3 forestGreen = vec3(0.290, 0.486, 0.349);
+    vec3 sageGreen = vec3(0.478, 0.604, 0.478);
+    vec3 highlightGreen = vec3(0.210, 0.380, 0.260);
+    
+    vec3 byteColor = mix(sageGreen, forestGreen, cellRand);
+    vec3 glowColor = mix(byteColor, highlightGreen, head);
+    
+    // Subtle top & bottom edge soft blend
+    float edgeFade = smoothstep(0.0, 0.15, st.y) * (1.0 - smoothstep(0.88, 1.0, st.y) * 0.2);
+    float stream = (trail * 0.65 + head * 1.3) * bitMask * edgeFade;
+    
+    // Delicate organic grid dot texture
+    float gridLine = (step(0.97, fract(st.x * cols)) + step(0.97, fract(st.y * 36.0))) * 0.015;
+    
+    // Blend byte particles softly over warm paper background
+    // Since background is light (#F7F5F0), we softly tint towards forest green
+    vec3 finalColor = mix(baseBg, glowColor, stream * 0.28);
+    finalColor = mix(finalColor, forestGreen, gridLine * 0.3);
+    
+    // Subtle warm organic vignette
+    float vig = 16.0 * st.x * st.y * (1.0 - st.x) * (1.0 - st.y);
+    vig = clamp(pow(vig, 0.15), 0.0, 1.0);
+    
+    gl_FragColor = vec4(finalColor * (0.95 + 0.05 * vig), 1.0);
+}`;
+  function cs(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const pos = gl.getAttribLocation(prog, 'a_position');
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+  const uRes = gl.getUniformLocation(prog, 'u_resolution');
+  const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+  // u_mouse is in pixel coordinates matching u_resolution (ShaderToy convention).
+  // Shaders that need normalized coords should use: u_mouse / u_resolution.
+  let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+  window.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width && rect.height) {
+      const nx = (event.clientX - rect.left) / rect.width;
+      const ny = 1.0 - (event.clientY - rect.top) / rect.height;
+      mouse.x = nx * canvas.width;
+      mouse.y = ny * canvas.height;
+    }
+  });
+
+  function render(t) {
+    if (typeof ResizeObserver === 'undefined') syncSize();
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    if (uTime) gl.uniform1f(uTime, t * 0.001);
+    if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+    if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  render(0);
+})();
+</script>
+</div>
+<!-- STITCH_SHADER_END:ANIMATION_12 -->
+<header class="fixed top-0 w-full z-50 bg-[#FAF7F2]/90 backdrop-blur-md border-b border-surface-variant/70 shadow-sm"><div class="h-20 max-w-[1200px] mx-auto px-4 lg:px-8 flex items-center justify-between gap-4"><div class="flex items-center gap-3"><a href="../../index.html" class="flex items-center gap-3 hover:opacity-90 transition-opacity" title="Launch Main Privex Web App"><div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shadow-sm"><span class="material-symbols-outlined text-[24px]">shield</span></div><div class="flex flex-col"><div class="flex items-center gap-2"><span class="font-bold text-base tracking-wide text-on-surface">PRIVEX</span><span class="px-2 py-0.5 bg-primary/10 text-primary font-semibold text-xs rounded-full border border-primary/20">LOCAL ONLY (RAM)</span></div><span class="text-xs text-on-surface-variant font-medium tracking-wide">ON-DEVICE THREAT DEFENSE</span></div></a></div><div class="flex items-center gap-4"><div class="hidden md:flex items-center border border-outline-variant/60 bg-surface-container-low p-1 rounded-xl shadow-inner" id="theme-switch-group"><button class="px-3 py-1 text-xs font-semibold bg-surface-container-lowest text-primary rounded-lg shadow-sm transition-colors" data-theme-btn="light" title="Light Mode" type="button">LGT</button><button class="px-3 py-1 text-xs font-medium text-on-surface-variant hover:text-on-surface rounded-lg transition-colors" data-theme-btn="dark" title="Dark Mode" type="button">DRK</button><button class="px-3 py-1 text-xs font-medium text-on-surface-variant hover:text-on-surface rounded-lg transition-colors" data-theme-btn="night" title="Night Mode" type="button">NIT</button></div><a href="../../index.html" class="hidden sm:flex items-center gap-1.5 px-3.5 py-2 bg-primary text-on-primary font-semibold text-xs cut-corner-btn hover:bg-primary-hover shadow-sm transition-all" title="Open Main Application"><span class="material-symbols-outlined text-[16px]">apps</span><span>OPEN APP</span></a><a href="../privex_overview_dashboard_terra/code.html" class="w-9 h-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center border border-primary/25 shadow-sm hover:opacity-85 transition-opacity" title="Back to Terra Overview"><span class="material-symbols-outlined text-[18px]">dashboard</span></a></div></div><div class="w-full bg-surface-container-low/70 border-t border-b border-surface-variant/60"><div class="max-w-[1200px] mx-auto px-4 lg:px-8"><nav aria-label="Primary Navigation" class="flex items-center overflow-x-auto gap-2 py-1.5" role="tablist"><a class="px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant hover:text-primary hover:bg-surface-container-lowest rounded-lg transition-all whitespace-nowrap" data-path="overview" href="../privex_overview_dashboard_terra/code.html" role="tab">HOME</a><a class="px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant hover:text-primary hover:bg-surface-container-lowest rounded-lg transition-all whitespace-nowrap" data-path="url-scanner" href="../../index.html#url-scanner" role="tab">URL_SCAN</a><a class="px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant hover:text-primary hover:bg-surface-container-lowest rounded-lg transition-all whitespace-nowrap" data-path="message-scanner" href="../../index.html#message-scanner" role="tab">TEXT_SCAN</a><a class="px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant hover:text-primary hover:bg-surface-container-lowest rounded-lg transition-all whitespace-nowrap" data-path="ai-assistant" href="../../index.html#ai-assistant" role="tab">ASSISTANT</a><a class="px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant hover:text-primary hover:bg-surface-container-lowest rounded-lg transition-all whitespace-nowrap" data-path="password-and-network" href="../../index.html#password-and-network" role="tab">MONITOR</a><a class="px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant hover:text-primary hover:bg-surface-container-lowest rounded-lg transition-all whitespace-nowrap" data-path="privacy-and-architecture" href="../../index.html#privacy-and-architecture" role="tab">PRIVACY</a><a class="px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant hover:text-primary hover:bg-surface-container-lowest rounded-lg transition-all whitespace-nowrap" data-path="settings" href="../../index.html#settings" role="tab">SETTINGS</a><a aria-current="page" class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap bg-primary text-white shadow-xs" href="#" role="tab">ENCLAVE_AUTH</a><a class="px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant hover:text-primary hover:bg-surface-container-lowest rounded-lg transition-all whitespace-nowrap" href="../privex_enclave_authentication/code.html" role="tab">CYBER_THEME</a></nav></div></div><div class="w-full glass-status-bar"><div class="max-w-[1200px] mx-auto px-4 lg:px-8 py-1.5 flex items-center justify-between text-primary font-medium text-xs"><div class="flex items-center gap-2"><span class="inline-block w-2 h-2 rounded-full bg-primary animate-pulse"></span><span>[AIR-GAP INTEGRITY: VERIFIED] 100% OFFLINE BUS // 0 PACKETS EMITTED // ZERO-TRUST MEMORY ENCLAVE ARMED</span></div><span class="hidden md:inline text-on-surface-variant/80">LATENCY: 0.12ms LOCAL</span></div></div></header><main class="w-full pt-36 relative z-10 bg-transparent"><div class="flex flex-col w-full relative min-h-[calc(100vh-9rem)] justify-center items-center px-4 py-12 overflow-hidden">
+<div class="relative z-10 w-full max-w-[520px] flex flex-col gap-6 items-center">
+<div class="w-full flex items-center justify-between text-xs px-3 py-1.5 rounded-xl glass-status-bar text-on-surface-variant font-medium">
+<div class="flex items-center gap-2">
+<span class="inline-block w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-primary font-semibold tracking-wide">NODE: LOCAL_AIRGAP_01</span>
+</div>
+<div class="flex items-center gap-1.5 text-on-surface-variant tracking-wide">
+<span class="material-symbols-outlined text-[15px] text-primary">verified_user</span>
+<span>SECURITY LEVEL: ALPHA-MAX</span>
+</div>
+</div>
+<div class="w-full bg-white/95 backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-[0_12px_40px_rgb(0,0,0,0.08)] border border-[#4a7c59]/20 relative z-10 flex flex-col gap-6">
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="px-2.5 py-1 bg-primary/10 text-primary text-xs font-bold rounded-lg border border-primary/20 tracking-wider">
+            ENCLAVE // ZERO-KNOWLEDGE AUTH
+          </span>
+<span class="text-xs text-on-surface-variant font-medium">PORT 0.0.0.0</span>
+</div>
+<h1 class="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight mt-1">
+          Authenticate Local Session
+        </h1>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+          Enter cryptographic master passphrase or hardware token. Zero credentials leave volatile memory.
+        </p>
+</div>
+<form class="flex flex-col gap-5" id="auth-form" onsubmit="event.preventDefault(); triggerAuth();">
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-semibold text-on-surface-variant tracking-wider flex items-center justify-between">
+<span>ENCLAVE SCOPE IDENTIFIER</span>
+<span class="text-primary flex items-center gap-1 font-bold text-[11px]">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+              READ-ONLY IMMUTABLE
+            </span>
+</label>
+<div class="relative flex items-center bg-[#FAF8F5] border border-outline-variant/60 rounded-xl px-3 py-2.5">
+<span class="material-symbols-outlined text-primary mr-2 text-[20px]">verified_user</span>
+<input class="bg-transparent text-sm text-on-surface font-medium w-full focus:outline-none cursor-not-allowed select-all" readonly="" type="text" value="privex://ram-enclave.local">
+<span class="text-xs font-semibold bg-surface-container text-on-surface-variant px-2 py-0.5 rounded-md">
+              ISOLATED
+            </span>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="text-xs font-semibold text-on-surface-variant tracking-wider" for="master-key">
+              MASTER CRYPTOGRAPHIC PASSPHRASE
+            </label>
+<button class="text-xs font-bold text-primary hover:text-primary-hover hover:underline transition-colors" onclick="fillMockEntropy()" type="button">
+              GENERATE RANDOM KEY
+            </button>
+</div>
+<div class="relative flex items-center bg-[#FAF8F5] border border-outline-variant/70 rounded-xl focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant/70 ml-3 text-[18px]">key</span>
+<input autocomplete="current-password" class="w-full bg-transparent px-3 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none" id="master-key" oninput="calculateEntropy(this.value)" placeholder="ENTER VOLATILE ENCLAVE SECRET..." type="password">
+<button class="px-3 text-on-surface-variant/60 hover:text-on-surface focus:outline-none transition-colors" id="toggle-visibility" onclick="togglePassphraseVisibility()" title="Toggle reveal" type="button">
+<span class="material-symbols-outlined text-[20px]" id="visibility-icon">visibility</span>
+</button>
+</div>
+</div>
+<div class="bg-[#F6F4EE] border border-[#EAE6DE] rounded-xl p-3 flex flex-col gap-2">
+<div class="flex items-center justify-between text-xs font-semibold">
+<span class="text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-primary">shield</span>
+<span id="entropy-label">ENTROPY: 0.0 BITS [UNINITIALIZED]</span>
+</span>
+<span class="text-primary font-bold" id="entropy-pct">0%</span>
+</div>
+<div class="w-full h-2 bg-[#E3DFD5] rounded-full overflow-hidden flex">
+<div class="h-full bg-primary rounded-full w-0 transition-all duration-300" id="entropy-bar"></div>
+</div>
+</div>
+<label class="flex items-start gap-3 cursor-pointer select-none group mt-1">
+<div class="relative flex items-center justify-center mt-0.5">
+<input checked="" class="peer sr-only" id="offline-hardware" type="checkbox">
+<div class="w-5 h-5 bg-[#FAF8F5] border border-outline-variant rounded-md peer-checked:bg-primary peer-checked:border-primary flex items-center justify-center shadow-sm transition-all">
+<span class="material-symbols-outlined text-[15px] text-white hidden peer-checked:block font-bold">check</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-on-surface uppercase group-hover:text-primary transition-colors">
+              Enforce Offline Hardware Enclave (FIDO2 / WebAuthn)
+            </span>
+<span class="text-xs text-on-surface-variant leading-relaxed">
+              Rejects standard software keychains. Requires unexportable device-bound hardware assertion.
+            </span>
+</div>
+</label>
+<div class="flex flex-col gap-2.5 mt-2">
+<button class="w-full py-3 bg-primary hover:bg-primary-hover text-white font-bold text-sm tracking-wide rounded-xl shadow-md shadow-primary/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2" id="btn-unlock" type="submit">
+<span id="unlock-btn-text">UNLOCK ENCLAVE →</span>
+<span class="material-symbols-outlined text-[18px]">lock_open</span>
+</button>
+<button class="w-full py-2.5 bg-[#FAF8F5] hover:bg-[#F2EFE9] text-on-surface font-semibold text-xs tracking-wide rounded-xl border border-outline-variant/80 shadow-sm active:scale-[0.99] transition-all flex items-center justify-center gap-2" onclick="triggerHardwareKey()" type="button">
+<span class="material-symbols-outlined text-primary text-[18px]">usb</span>
+<span>[⚡ USE HARDWARE SECURITY KEY (WEBAUTHN)]</span>
+</button>
+</div>
+</form>
+<div class="bg-[#FAF8F5] border border-outline-variant/50 rounded-xl p-3.5 flex gap-2.5 items-start">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+<strong class="text-on-surface">ZERO-TELEMETRY GUARANTEE:</strong> Key derivation executed strictly via PBKDF2-SHA256 (600,000 rounds) within sandboxed WebWorker. No credentials transmitted over network.
+        </p>
+</div>
+</div>
+<div class="w-full flex flex-wrap items-center justify-center gap-2">
+<div class="px-3 py-1.5 bg-white/95 backdrop-blur-sm text-primary rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm border border-outline-variant/50">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span>MEMORY_STATE: ISOLATED_RAM</span>
+</div>
+<div class="px-3 py-1.5 bg-white/95 backdrop-blur-sm text-on-surface-variant rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm border border-outline-variant/50">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>OUTBOUND_SOCKETS: BLOCKED (0)</span>
+</div>
+<div class="px-3 py-1.5 bg-white/95 backdrop-blur-sm text-primary rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm border border-outline-variant/50">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span>ACTIVE_CIPHER: AES-256-GCM</span>
+</div>
+</div>
+<a class="text-xs font-bold text-on-surface-variant hover:text-primary uppercase tracking-wider flex items-center gap-1.5 transition-colors mt-2" data-path="overview" href="../privex_overview_dashboard_terra/code.html">
+<span class="material-symbols-outlined text-[16px]">arrow_back</span>
+<span>Return to Home Overview</span>
+</a>
+</div>
+</div>
+<script>
+  // Theme Switching Implementation
+  function applyTheme(theme) {
+    const html = document.documentElement;
+    html.classList.remove('dark', 'light', 'night');
+    if (theme === 'dark') html.classList.add('dark');
+    else if (theme === 'night') html.classList.add('night', 'dark');
+    else html.classList.add('light');
+
+    try { localStorage.setItem('privex_theme', theme); } catch(e) {}
+
+    document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+      const mode = btn.getAttribute('data-theme-btn');
+      if (mode === theme) {
+        btn.className = 'px-3 py-1 text-xs font-semibold bg-surface-container-lowest text-primary rounded-lg shadow-sm transition-colors';
+      } else {
+        btn.className = 'px-3 py-1 text-xs font-medium text-on-surface-variant hover:text-on-surface rounded-lg transition-colors';
+      }
+    });
+  }
+
+  // Restore saved theme on load
+  const savedTheme = (function() {
+    try { return localStorage.getItem('privex_theme') || 'light'; } catch(e) { return 'light'; }
+  })();
+  applyTheme(savedTheme);
+
+  document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyTheme(btn.getAttribute('data-theme-btn'));
+    });
+  });
+
+  function togglePassphraseVisibility() {
+    const input = document.getElementById('master-key');
+    const icon = document.getElementById('visibility-icon');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.textContent = 'visibility_off';
+    } else {
+      input.type = 'password';
+      icon.textContent = 'visibility';
+    }
+  }
+
+  function calculateEntropy(val) {
+    const bar = document.getElementById('entropy-bar');
+    const label = document.getElementById('entropy-label');
+    const pct = document.getElementById('entropy-pct');
+    
+    if (!val || val.length === 0) {
+      bar.style.width = '0%';
+      bar.className = 'h-full bg-primary rounded-full transition-all duration-300';
+      label.textContent = 'ENTROPY: 0.0 BITS [UNINITIALIZED]';
+      pct.textContent = '0%';
+      return;
+    }
+
+    let charsetSize = 0;
+    if (/[a-z]/.test(val)) charsetSize += 26;
+    if (/[A-Z]/.test(val)) charsetSize += 26;
+    if (/[0-9]/.test(val)) charsetSize += 10;
+    if (/[^a-zA-Z0-9]/.test(val)) charsetSize += 33;
+
+    const bits = Math.min(128, Math.round(val.length * (Math.log2(charsetSize || 1))));
+    const percentage = Math.min(100, Math.round((bits / 128) * 100));
+
+    bar.style.width = percentage + '%';
+    pct.textContent = percentage + '%';
+
+    if (bits < 40) {
+      bar.className = 'h-full bg-error rounded-full transition-all duration-300';
+      label.textContent = 'ENTROPY: ' + bits.toFixed(1) + ' BITS [WEAK / INSUFFICIENT]';
+    } else if (bits < 80) {
+      bar.className = 'h-full bg-tertiary-container rounded-full transition-all duration-300';
+      label.textContent = 'ENTROPY: ' + bits.toFixed(1) + ' BITS [MODERATE ENCLAVE]';
+    } else {
+      bar.className = 'h-full bg-primary rounded-full transition-all duration-300';
+      label.textContent = 'ENTROPY: ' + bits.toFixed(1) + ' BITS [CRYPTOGRAPHIC GRADE]';
+    }
+  }
+
+  function fillMockEntropy() {
+    const input = document.getElementById('master-key');
+    input.value = 'PX9-98F1-4E8A-02DC-C993-B071';
+    calculateEntropy(input.value);
+  }
+
+  function triggerAuth() {
+    const btn = document.getElementById('btn-unlock');
+    const txt = document.getElementById('unlock-btn-text');
+    txt.textContent = 'DERIVING SHA-256 (600,000 ROUNDS)...';
+    btn.disabled = true;
+    setTimeout(() => {
+      txt.textContent = 'VERIFYING VOLATILE ENCLAVE...';
+      setTimeout(() => {
+        txt.textContent = 'SESSION UNLOCKED [REDIRECTING]';
+        btn.classList.remove('bg-primary');
+        btn.classList.add('bg-primary-hover', 'text-white');
+        setTimeout(() => {
+          window.location.href = '../privex_overview_dashboard_terra/code.html';
+        }, 600);
+      }, 700);
+    }, 800);
+  }
+
+  function triggerHardwareKey() {
+    const btn = document.getElementById('btn-unlock');
+    const txt = document.getElementById('unlock-btn-text');
+    txt.textContent = 'POLLING CTAP2 / FIDO2 HARDWARE...';
+    setTimeout(() => {
+      txt.textContent = 'HARDWARE ASSERTION CONFIRMED';
+      btn.classList.remove('bg-primary');
+      btn.classList.add('bg-primary-hover', 'text-white');
+      setTimeout(() => {
+        window.location.href = '../privex_overview_dashboard_terra/code.html';
+      }, 700);
+    }, 900);
+  }
+</script></main><footer class="w-full relative z-10 bg-[#EFECE6]/90 backdrop-blur-md border-t border-surface-variant/80 py-8"><div class="max-w-[1200px] mx-auto px-4 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6"><div class="flex flex-col gap-1 text-left"><div class="flex items-center gap-2.5"><span class="font-bold text-xs uppercase text-on-surface">HARDWARE LEVEL ENCLAVE GUARANTEE</span><span class="px-2 py-0.5 bg-white text-primary font-semibold text-xs rounded-md border border-outline-variant/60 shadow-sm">SHA-256: 7F9A..B281</span></div><p class="text-xs text-on-surface-variant max-w-xl leading-relaxed">Zero cloud telemetry. Client-side heuristic execution only. No sockets open. All dynamic payloads execute in temporary volatile RAM.</p></div><div class="flex items-center gap-4"><button class="px-4 py-2 bg-white hover:bg-surface-container text-on-surface font-semibold text-xs uppercase rounded-xl border border-outline-variant/60 shadow-sm active:scale-95 transition-all flex items-center gap-1.5" type="button"><span class="material-symbols-outlined text-[16px] text-primary">tour</span><span>TRIGGER TOUR</span></button><div class="flex flex-col text-right text-xs font-semibold text-on-surface-variant"><span>CRYPTOGRAPHIC BUILD 4.9.1-GAP</span><span>CORE STATUS: COMPLIANT</span></div></div></div></footer></body></html>

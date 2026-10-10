@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width,initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+<!-- STITCH_SHADER_START:ANIMATION_12 class="fixed inset-0 w-full h-full" -->
+<div class="fixed inset-0 w-full h-full" style="display:block;">
+<canvas id="shader-canvas-ANIMATION_12" style="display:block;width:100%;height:100%"></canvas>
+<script>
+(function() {
+  const canvas = document.getElementById('shader-canvas-ANIMATION_12');
+
+  // Sync the WebGL drawing-buffer size with the CSS-driven layout size.
+  // This fires on initial layout and whenever the element is resized.
+  function syncSize() {
+    const w = canvas.clientWidth  || 1280;
+    const h = canvas.clientHeight || 720;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width  = w;
+      canvas.height = h;
+    }
+  }
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(syncSize).observe(canvas);
+  }
+  syncSize();
+
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+  v_texCoord = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+  const fs = `precision highp float;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+
+// Pseudo-random generator
+float hash(vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+}
+
+void main() {
+    vec2 st = gl_FragCoord.xy / u_resolution.xy;
+    
+    // Background: Terra calm warm organic surface (#F7F5F0)
+    vec3 baseBg = vec3(0.969, 0.961, 0.941);
+    
+    // Columns grid for subtle digital byte rain
+    float cols = 55.0;
+    vec2 grid = vec2(floor(st.x * cols), floor(st.y * 36.0));
+    
+    // Column speed and random offset
+    float colRand = hash(vec2(grid.x, 31.7));
+    float speed = 0.35 + colRand * 0.55;
+    
+    // Falling byte packets (up to down: top st.y = 1.0 to bottom 0.0)
+    float fall = fract(st.y + u_time * speed * 0.22 + colRand * 10.0);
+    
+    // Matrix character pulse / cell randomness
+    float cellRand = hash(vec2(grid.x, floor((st.y + u_time * speed * 0.22) * 36.0)));
+    
+    // Matrix tail trail: sharp head, slow soft fade downwards
+    float head = smoothstep(0.90, 0.98, fall);
+    float trail = pow(fall, 3.0);
+    
+    // Byte glyph simulation within cell
+    vec2 cellUV = fract(vec2(st.x * cols, st.y * 36.0));
+    float charBox = step(0.18, cellUV.x) * step(cellUV.x, 0.82) * step(0.18, cellUV.y) * step(cellUV.y, 0.82);
+    float bitMask = step(0.40, cellRand) * charBox;
+    
+    // Terra Organic Palette:
+    // Forest Green #4a7c59 (0.290, 0.486, 0.349)
+    // Sage / Muted Leaf #7a9a7a (0.478, 0.604, 0.478)
+    // Warm Stone Accent #c2b8a3 (0.761, 0.722, 0.639)
+    vec3 forestGreen = vec3(0.290, 0.486, 0.349);
+    vec3 sageGreen = vec3(0.478, 0.604, 0.478);
+    vec3 highlightGreen = vec3(0.210, 0.380, 0.260);
+    
+    vec3 byteColor = mix(sageGreen, forestGreen, cellRand);
+    vec3 glowColor = mix(byteColor, highlightGreen, head);
+    
+    // Subtle top & bottom edge soft blend
+    float edgeFade = smoothstep(0.0, 0.15, st.y) * (1.0 - smoothstep(0.88, 1.0, st.y) * 0.2);
+    float stream = (trail * 0.65 + head * 1.3) * bitMask * edgeFade;
+    
+    // Delicate organic grid dot texture
+    float gridLine = (step(0.97, fract(st.x * cols)) + step(0.97, fract(st.y * 36.0))) * 0.015;
+    
+    // Blend byte particles softly over warm paper background
+    // Since background is light (#F7F5F0), we softly tint towards forest green
+    vec3 finalColor = mix(baseBg, glowColor, stream * 0.28);
+    finalColor = mix(finalColor, forestGreen, gridLine * 0.3);
+    
+    // Subtle warm organic vignette
+    float vig = 16.0 * st.x * st.y * (1.0 - st.x) * (1.0 - st.y);
+    vig = clamp(pow(vig, 0.15), 0.0, 1.0);
+    
+    gl_FragColor = vec4(finalColor * (0.95 + 0.05 * vig), 1.0);
+}`;
+  function cs(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const pos = gl.getAttribLocation(prog, 'a_position');
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+  const uRes = gl.getUniformLocation(prog, 'u_resolution');
+  const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+  // u_mouse is in pixel coordinates matching u_resolution (ShaderToy convention).
+  // Shaders that need normalized coords should use: u_mouse / u_resolution.
+  let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+  window.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width && rect.height) {
+      const nx = (event.clientX - rect.left) / rect.width;
+      const ny = 1.0 - (event.clientY - rect.top) / rect.height;
+      mouse.x = nx * canvas.width;
+      mouse.y = ny * canvas.height;
+    }
+  });
+
+  function render(t) {
+    if (typeof ResizeObserver === 'undefined') syncSize();
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    if (uTime) gl.uniform1f(uTime, t * 0.001);
+    if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+    if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  render(0);
+})();
+</script>
+</div>
+<!-- STITCH_SHADER_END:ANIMATION_12 -->
+
+
+</body></html>

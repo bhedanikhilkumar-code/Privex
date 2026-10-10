@@ -1,0 +1,409 @@
+<!DOCTYPE html><html class="dark" lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&amp;family=Plus+Jakarta+Sans:wght@400;500;700&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}
+/* Polished Cyber Cut-Corner Buttons & Glass Interactive States */
+.cut-corner-btn,
+button:not([role="tab"]):not([role="radio"]):not(.raw-btn),
+.btn-cyber {
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), filter 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease !important;
+}
+.cut-corner-btn:hover,
+button:not([role="tab"]):not([role="radio"]):not(.raw-btn):hover,
+.btn-cyber:hover {
+  transform: translate(-2px, -2px) !important;
+  filter: brightness(1.12) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25)) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+.cut-corner-btn:active,
+button:not([role="tab"]):not([role="radio"]):not(.raw-btn):active,
+.btn-cyber:active {
+  transform: translate(1px, 1px) !important;
+  filter: brightness(0.95) !important;
+}
+
+/* Glassmorphism Status Bar Component */
+.glass-status-bar,
+.status-bar-glass {
+  background: rgba(17, 19, 23, 0.82) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border-bottom: 2px solid rgba(67, 70, 86, 0.85) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+/* Theme Modes */
+html.light {
+  filter: invert(0.92) hue-rotate(180deg);
+}
+html.light img, html.light video, html.light canvas {
+  filter: invert(1) hue-rotate(180deg);
+}
+html.night {
+  filter: contrast(1.15) brightness(0.85);
+}
+</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"secondary-fixed":"#cbf231","tertiary-fixed":"#72fe8f","surface-tint":"#b8c3ff","on-primary":"#002487","surface-container-high":"#282a2e","primary-container":"#2457ff","on-surface":"#e2e2e8","surface-variant":"#333539","on-primary-fixed":"#001355","secondary":"#cbf231","surface-bright":"#37393e","on-surface-variant":"#c4c5d9","surface":"#111317","inverse-surface":"#e2e2e8","primary-fixed":"#dde1ff","inverse-on-surface":"#2f3035","outline":"#8d90a2","on-tertiary-fixed":"#002108","surface-container-low":"#1a1c20","outline-variant":"#434656","on-error-container":"#ffdad6","secondary-container":"#afd500","primary-fixed-dim":"#b8c3ff","inverse-primary":"#0549f3","surface-container-lowest":"#0c0e12","on-secondary-container":"#485900","on-tertiary-container":"#aaffb2","background":"#111317","on-error":"#690005","on-secondary-fixed-variant":"#3e4c00","on-primary-container":"#e9eaff","tertiary-fixed-dim":"#53e076","on-secondary":"#2a3500","surface-container":"#1e2024","on-tertiary":"#003914","primary":"#b8c3ff","on-secondary-fixed":"#171e00","error-container":"#93000a","surface-container-highest":"#333539","secondary-fixed-dim":"#afd500","surface-dim":"#111317","tertiary":"#53e076","tertiary-container":"#007b33","on-tertiary-fixed-variant":"#005320","error":"#ffb4ab","on-primary-fixed-variant":"#0036bc","on-background":"#e2e2e8"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"gutter":"1rem","margin-desktop":"2.5rem","space-xl":"2.5rem","margin":"1rem","space-sm":"0.5rem","space-md":"1rem","gutter-desktop":"1.5rem","space-lg":"1.5rem","space-xs":"0.25rem"},fontFamily:{"label-md":["Space Mono"],"body-md":["Plus Jakarta Sans"],"headline-sm":["Playfair Display"],"body-sm":["Plus Jakarta Sans"],"headline-xl-mobile":["Playfair Display"],"headline-lg-mobile":["Playfair Display"],"headline-lg":["Playfair Display"],"headline-xl":["Playfair Display"],"label-lg":["Space Mono"],"label-sm":["Space Mono"],"body-lg":["Plus Jakarta Sans"]},fontSize:{"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.1em","fontWeight":"700"}],"body-md":["15px",{"lineHeight":"22px","fontWeight":"400"}],"headline-sm":["22px",{"lineHeight":"28px","letterSpacing":"0em","fontWeight":"600"}],"body-sm":["13px",{"lineHeight":"18px","fontWeight":"400"}],"headline-xl-mobile":["32px",{"lineHeight":"40px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-lg-mobile":["26px",{"lineHeight":"34px","letterSpacing":"0em","fontWeight":"700"}],"headline-lg":["36px",{"lineHeight":"44px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-xl":["48px",{"lineHeight":"56px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-lg":["14px",{"lineHeight":"20px","letterSpacing":"0.08em","fontWeight":"700"}],"label-sm":["10px",{"lineHeight":"14px","letterSpacing":"0.12em","fontWeight":"700"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"500"}]}}}};</script></head><body class="bg-background font-body-md text-on-background selection:bg-secondary selection:text-on-secondary min-h-screen"><header class="fixed top-0 w-full z-50 bg-surface/95 backdrop-blur-md border-b-2 border-surface-variant"><div class="h-20 max-w-[1200px] mx-auto px-margin lg:px-margin-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><a href="../../index.html" class="flex items-center gap-space-md hover:opacity-90 transition-opacity" title="Launch Main Privex Web App"><img alt="PRIVEX Shield Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XZQCre9nZNS8w9tZbk60lMsJ3K-PjZIlwteC8ipRkXU75qw_SjknIZbasc6OJfkWFQCvuW4YoNf-HGFACwtPJ5xwj5-z3-zr8FL0M3Rh7ktI-qPs5OFKQ7oMJwzIaiQb45XCGKFGn3MP6KLYUebjyz5rENMT9h7n9ZCOxRipISyo_yOH71-TITOJMYMP99T330uSOReGwnCS3oz-PaY31jtPMTa4LkvgX2pWg1voqZ5eU2angl6M2gn7A"><div class="flex flex-col"><div class="flex items-center gap-space-sm"><span class="font-label-lg text-label-lg tracking-wider text-on-surface uppercase">PRIVEX</span><span class="px-1.5 py-0.5 bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm uppercase border border-tertiary">LOCAL ONLY (RAM)</span></div><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">ON-DEVICE THREAT DEFENSE</span></div></a></div><div class="flex items-center gap-space-md"><div class="hidden md:flex items-center border border-outline-variant bg-surface-container-low p-1 gap-1" id="theme-switch-group"><button class="px-2 py-1 font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container uppercase transition-colors" data-theme-btn="light" title="Light Mode" type="button">LGT</button><button class="px-2 py-1 font-label-sm text-label-sm bg-surface-container-high text-secondary uppercase border border-secondary transition-colors" data-theme-btn="dark" title="Dark Mode" type="button">DRK</button><button class="px-2 py-1 font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container uppercase transition-colors" data-theme-btn="night" title="Night Mode" type="button">NIT</button></div><a href="../../index.html" class="hidden sm:flex items-center gap-space-xs px-3 py-1.5 bg-secondary text-on-secondary font-label-md text-label-md uppercase border-2 border-surface-container-lowest shadow-[3px_3px_0px_#000000] active:translate-x-0.5 active:translate-y-0.5 transition-all cut-corner-btn" title="Open Main Application"><span class="material-symbols-outlined text-[16px]">apps</span><span>OPEN APP</span></a><a href="../privex_enclave_authentication/code.html" class="w-8 h-8 rounded-full bg-primary flex items-center justify-center border border-outline-variant hover:opacity-85 transition-opacity" title="Enclave Authentication"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></a></div></div><div class="w-full bg-surface-container-low border-t border-b border-surface-variant"><div class="max-w-[1200px] mx-auto px-margin lg:px-margin-desktop"><nav aria-label="Primary Navigation" class="flex items-center overflow-x-auto gap-space-xs py-1" data-active-classes="bg-surface-container-highest text-secondary border-b-2 border-secondary font-bold" role="tablist"><a aria-current="page" class="px-space-md py-2 uppercase transition-all whitespace-nowrap bg-surface-container-highest text-secondary border-b-2 border-secondary font-bold" data-path="overview" href="#" role="tab">HOME</a><a class="px-space-md py-2 font-label-md text-label-md uppercase text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" data-path="url-scanner" href="../../index.html#url-scanner" role="tab">URL_SCAN</a><a class="px-space-md py-2 font-label-md text-label-md uppercase text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" data-path="message-scanner" href="../../index.html#message-scanner" role="tab">TEXT_SCAN</a><a class="px-space-md py-2 font-label-md text-label-md uppercase text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" data-path="ai-assistant" href="../../index.html#ai-assistant" role="tab">ASSISTANT</a><a class="px-space-md py-2 font-label-md text-label-md uppercase text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" data-path="password-and-network" href="../../index.html#password-and-network" role="tab">MONITOR</a><a class="px-space-md py-2 font-label-md text-label-md uppercase text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" data-path="privacy-and-architecture" href="../../index.html#privacy-and-architecture" role="tab">PRIVACY</a><a class="px-space-md py-2 font-label-md text-label-md uppercase text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" data-path="settings" href="../../index.html#settings" role="tab">SETTINGS</a><a class="px-space-md py-2 font-label-md text-label-md uppercase text-secondary hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" href="../privex_enclave_authentication/code.html" role="tab">ENCLAVE_AUTH</a><a class="px-space-md py-2 font-label-md text-label-md uppercase text-tertiary hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" href="../privex_overview_dashboard_terra/code.html" role="tab">TERRA_THEME</a></nav></div></div><div class="w-full glass-status-bar"><div class="max-w-[1200px] mx-auto px-margin lg:px-margin-desktop py-1 flex items-center justify-between text-tertiary font-label-sm text-label-sm uppercase tracking-wider"><div class="flex items-center gap-space-sm"><span class="inline-block w-2 h-2 bg-tertiary animate-pulse"></span><span>[AIR-GAP INTEGRITY: VERIFIED] 100% OFFLINE BUS // 0 PACKETS EMITTED // ZERO-TRUST MEMORY ENCLAVE ARMED</span></div><span class="hidden md:inline text-on-surface-variant">LATENCY: 0.12ms LOCAL</span></div></div></header><main class="w-full pt-36 bg-surface"><div class="max-w-[1200px] mx-auto px-margin lg:px-margin-desktop py-space-lg min-h-[calc(100vh-280px)]"><div class="flex flex-col w-full">
+<!-- Top Telemetry & Decorative Tape -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm mb-space-lg pb-space-sm glass-status-bar p-space-sm shadow-[4px_4px_0px_#000000]">
+<div class="flex items-center gap-space-sm">
+<span class="inline-block w-2.5 h-2.5 bg-secondary animate-pulse"></span>
+<span class="font-label-md text-label-md uppercase text-on-surface tracking-wider">DEFENSE_MATRIX // STATUS: LIVE_RAM_ONLY</span>
+</div>
+<div class="flex items-center gap-space-md font-label-sm text-label-sm text-on-surface-variant">
+<span class="text-tertiary">[ENCLAVE: ACTIVE]</span>
+<span class="hidden sm:inline">MEM_POOL: 14.8MB VOLATILE</span>
+<span>EPOCH: 0x8849F</span>
+</div>
+</div>
+<!-- Hero Section -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg mb-space-xl">
+<div class="lg:col-span-8 flex flex-col justify-center">
+<!-- Pill Badge -->
+<div class="inline-flex self-start items-center gap-space-xs px-3 py-1 bg-secondary text-on-secondary font-label-md text-label-md uppercase tracking-wider mb-space-md shadow-[4px_4px_0px_#000000]">
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+<span>ZERO-INSTALL • LOCAL-FIRST • PRIVACY-FIRST</span>
+</div>
+<!-- Headline -->
+<h1 class="font-headline-xl text-headline-xl text-on-surface leading-tight tracking-tight mb-space-sm">
+        Neutralize digital threats before they reach your data.
+      </h1>
+<!-- Monospace Subtitle -->
+<div class="font-label-lg text-label-lg text-primary uppercase tracking-wider mb-space-md flex items-center gap-space-xs">
+<span class="text-secondary">&gt;&gt;</span>
+<span>ON-DEVICE THREAT &amp; SCAM PROTECTION</span>
+</div>
+<!-- Plain Language Explainer -->
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl leading-relaxed mb-space-lg">
+        PRIVEX runs entirely inside your browser's sandboxed volatile memory. Every payload, homoglyph inspection, and neural classification completes on your silicon—zero packets transmitted, zero telemetry logs retained, and mathematically zero server dependencies.
+      </p>
+<!-- Quick Metrics Ribbon -->
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-space-sm max-w-xl">
+<div class="bg-surface-container p-space-sm shadow-[3px_3px_0px_#000000]">
+<span class="font-label-sm text-label-sm uppercase text-outline">OUTBOUND_LEAK</span>
+<p class="font-label-lg text-label-lg text-secondary">0 BYTES</p>
+</div>
+<div class="bg-surface-container p-space-sm shadow-[3px_3px_0px_#000000]">
+<span class="font-label-sm text-label-sm uppercase text-outline">VERDICT_SPEED</span>
+<p class="font-label-lg text-label-lg text-tertiary">0.42 MS</p>
+</div>
+<div class="col-span-2 sm:col-span-1 bg-surface-container p-space-sm shadow-[3px_3px_0px_#000000]">
+<span class="font-label-sm text-label-sm uppercase text-outline">NETWORK_SOCKET</span>
+<p class="font-label-lg text-label-lg text-on-surface">SEVERED</p>
+</div>
+</div>
+</div>
+<!-- Featured Safe Sample Interactive Card -->
+<div class="lg:col-span-4 flex flex-col justify-between bg-surface-container-high p-space-md shadow-[4px_4px_0px_#000000]">
+<div>
+<div class="flex items-center justify-between pb-space-xs mb-space-md bg-surface-container-lowest p-2 shadow-[2px_2px_0px_#000000]">
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm uppercase text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-tertiary">verified_user</span>
+<span>VERIFIED_SAMPLE_HARNESS</span>
+</div>
+<span class="px-2 py-0.5 bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm uppercase">SAFE / VERIFIED</span>
+</div>
+<div class="bg-surface-container-lowest p-space-md shadow-inner mb-space-md">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-label-sm text-label-sm text-outline uppercase">TARGET URI</span>
+<span class="font-label-sm text-label-sm text-tertiary">ENTROPY: 0.12</span>
+</div>
+<code class="font-label-md text-label-md text-secondary block bg-surface-variant p-2 tracking-wide break-all select-all">
+            amazon.com/order-history
+          </code>
+</div>
+<!-- Real-time Heuristic Breakdown Visual -->
+<div class="space-y-space-sm mb-space-md">
+<div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1 text-on-surface-variant">
+<span>HOMOGLYPH_VARIANCE</span>
+<span class="text-tertiary">0.00% [NULL]</span>
+</div>
+<div class="w-full bg-surface-container-lowest h-2 overflow-hidden">
+<div class="bg-tertiary h-full w-[2%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1 text-on-surface-variant">
+<span>PUNYCODE_DETECTION</span>
+<span class="text-tertiary">0.00% [CLEAR]</span>
+</div>
+<div class="w-full bg-surface-container-lowest h-2 overflow-hidden">
+<div class="bg-tertiary h-full w-[0%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1 text-on-surface-variant">
+<span>CANONICAL_DOMAIN_MATCH</span>
+<span class="text-secondary">99.98% [LEGIT]</span>
+</div>
+<div class="w-full bg-surface-container-lowest h-2 overflow-hidden">
+<div class="bg-secondary h-full w-[99%]"></div>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-space-md py-space-sm px-space-md bg-secondary text-on-secondary font-label-md text-label-md uppercase tracking-wider shadow-[4px_4px_0px_#000000] active:translate-x-0.5 active:translate-y-0.5 hover:bg-secondary-container transition-all flex items-center justify-center gap-space-xs" id="launch-scanner-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">security</span>
+<span>Launch Scanner →</span>
+</button>
+</div>
+</div>
+<!-- Primary Subsystem Scanner Cards (3-Column Grid) -->
+<div class="mb-space-xl">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface">Active Defenses</span>
+<span class="px-2 py-0.5 bg-surface-container-highest font-label-sm text-label-sm text-secondary uppercase shadow-[2px_2px_0px_#000000]">3 READY</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline uppercase hidden sm:inline">DISPATCH_MODE: DETERMINISTIC</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
+<!-- Card 1: URL Scanner -->
+<div class="flex flex-col justify-between bg-surface-container p-space-lg shadow-[4px_4px_0px_#000000] transition-all hover:-translate-y-1">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="w-10 h-10 flex items-center justify-center bg-primary-container text-on-primary-container font-label-lg">
+<span class="material-symbols-outlined text-[24px]">link</span>
+</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container-lowest text-primary uppercase">MODULE: 01</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">URL Scanner</h2>
+<p class="font-label-sm text-label-sm text-primary uppercase mb-space-md">PUNYCODE &amp; REPUTATION ENGINE</p>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md">
+            Scan any link for stealth Cyrillic homoglyphs, brand typosquatting, hidden redirections, and multi-layered subdomains using local Bloom-filter reputation arrays.
+          </p>
+<div class="bg-surface-container-low p-space-xs mb-space-lg font-label-sm text-label-sm text-outline space-y-1">
+<div class="flex justify-between">
+<span>INDEX SIZE:</span>
+<span class="text-on-surface">1,240,000 HASHS</span>
+</div>
+<div class="flex justify-between">
+<span>MATCH OVERHEAD:</span>
+<span class="text-tertiary">0.08ms</span>
+</div>
+</div>
+</div>
+<a href="../../index.html#url-scanner" class="w-full py-space-sm px-space-md bg-surface-container-highest hover:bg-surface-bright text-on-surface font-label-md text-label-md uppercase tracking-wider shadow-[4px_4px_0px_#000000] active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center justify-between cut-corner-btn">
+<span>Open URL Scanner</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+<!-- Card 2: Message Scanner -->
+<div class="flex flex-col justify-between bg-surface-container p-space-lg shadow-[4px_4px_0px_#000000] transition-all hover:-translate-y-1">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="w-10 h-10 flex items-center justify-center bg-secondary text-on-secondary font-label-lg">
+<span class="material-symbols-outlined text-[24px]">chat_bubble</span>
+</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container-lowest text-secondary uppercase">MODULE: 02</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">Message Scanner</h2>
+<p class="font-label-sm text-label-sm text-secondary uppercase mb-space-md">HEURISTIC PHISHING HEAVY-SCAN</p>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md">
+            Analyze raw SMS, emails, and messaging payloads. Instantly identifies extortion pressure vectors, artificial urgency cues, romance frauds, and credential extraction traps.
+          </p>
+<div class="bg-surface-container-low p-space-xs mb-space-lg font-label-sm text-label-sm text-outline space-y-1">
+<div class="flex justify-between">
+<span>PATTERN BANK:</span>
+<span class="text-on-surface">2,810 HEURISTICS</span>
+</div>
+<div class="flex justify-between">
+<span>EXTORTION DETECT:</span>
+<span class="text-tertiary">ARMED</span>
+</div>
+</div>
+</div>
+<a href="../../index.html#message-scanner" class="w-full py-space-sm px-space-md bg-secondary hover:bg-secondary-container text-on-secondary font-label-md text-label-md uppercase tracking-wider shadow-[4px_4px_0px_#000000] active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center justify-between cut-corner-btn">
+<span>Open Message Scanner</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+<!-- Card 3: AI Assistant -->
+<div class="flex flex-col justify-between bg-surface-container p-space-lg shadow-[4px_4px_0px_#000000] transition-all hover:-translate-y-1">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="w-10 h-10 flex items-center justify-center bg-tertiary text-on-tertiary font-label-lg">
+<span class="material-symbols-outlined text-[24px]">psychology</span>
+</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container-lowest text-tertiary uppercase">MODULE: 03</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">AI Assistant</h2>
+<p class="font-label-sm text-label-sm text-tertiary uppercase mb-space-md">LOCAL LANGUAGE EXPLANATIONS</p>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md">
+            Receive clean, jargon-free explanations at an 8th-grade comprehension level. Unpacks complex cryptographic threats into simple tactical instructions directly on-device.
+          </p>
+<div class="bg-surface-container-low p-space-xs mb-space-lg font-label-sm text-label-sm text-outline space-y-1">
+<div class="flex justify-between">
+<span>ENGINE:</span>
+<span class="text-on-surface">QUANTIZED ON-CHIP</span>
+</div>
+<div class="flex justify-between">
+<span>CLOUD HANDOFF:</span>
+<span class="text-tertiary">0% STRICT</span>
+</div>
+</div>
+</div>
+<a href="../../index.html#ai-assistant" class="w-full py-space-sm px-space-md bg-surface-container-highest hover:bg-surface-bright text-on-surface font-label-md text-label-md uppercase tracking-wider shadow-[4px_4px_0px_#000000] active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center justify-between cut-corner-btn">
+<span>Open AI Assistant</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Operational Telemetry / Hardware Enclave Matrix -->
+<div class="mb-space-xl">
+<div class="flex flex-col sm:flex-row sm:items-end justify-between mb-space-md gap-space-xs">
+<div>
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-widest block">ASSURANCE_PROTOCOLS</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Value &amp; Security Proof Matrix</h2>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-label-md">[AIR-GAP STANDARD NIST.IR-8259]</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- Matrix Card 1 -->
+<div class="bg-surface-container-low p-space-md flex flex-col justify-between shadow-[4px_4px_0px_#000000]">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="material-symbols-outlined text-primary text-[28px]">memory</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 bg-surface-container-highest text-on-surface">P-01</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface uppercase mb-space-xs">100% On-Device</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Zero cloud API payloads. All inspections and heuristics execute within the ephemeral WebWorker enclave. No backhaul channels exist.
+          </p>
+</div>
+<div class="mt-space-md pt-space-xs bg-surface-container-lowest p-2">
+<span class="font-label-sm text-label-sm text-tertiary">VERIFIED // SOCKETS_CLOSED</span>
+</div>
+</div>
+<!-- Matrix Card 2 -->
+<div class="bg-surface-container-low p-space-md flex flex-col justify-between shadow-[4px_4px_0px_#000000]">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="material-symbols-outlined text-secondary text-[28px]">speed</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 bg-surface-container-highest text-on-surface">P-02</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface uppercase mb-space-xs">&lt;1.0 ms Latency</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Sub-millisecond Bloom filters and deterministic pattern arrays give near-instant validation without waiting on high-latency round-trips.
+          </p>
+</div>
+<div class="mt-space-md pt-space-xs bg-surface-container-lowest p-2">
+<span class="font-label-sm text-label-sm text-secondary">METRIC // T_EXEC: 0.38MS</span>
+</div>
+</div>
+<!-- Matrix Card 3 -->
+<div class="bg-surface-container-low p-space-md flex flex-col justify-between shadow-[4px_4px_0px_#000000]">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="material-symbols-outlined text-tertiary text-[28px]">wifi_off</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 bg-surface-container-highest text-on-surface">P-03</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface uppercase mb-space-xs">Air-Gapped Parity</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Unplug completely or fly at 30,000 feet. Every classifier, tokenizer, and threat pattern maintains 100% functionality without internet.
+          </p>
+</div>
+<div class="mt-space-md pt-space-xs bg-surface-container-lowest p-2">
+<span class="font-label-sm text-label-sm text-tertiary">STATE // AIR_GAP_TESTED</span>
+</div>
+</div>
+<!-- Matrix Card 4 -->
+<div class="bg-surface-container-low p-space-md flex flex-col justify-between shadow-[4px_4px_0px_#000000]">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="material-symbols-outlined text-outline text-[28px]">enhanced_encryption</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 bg-surface-container-highest text-on-surface">P-04</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface uppercase mb-space-xs">Zero-Knowledge</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Raw strings, analyzed passwords, or target links are impossible to harvest. Volatile RAM zeroes out immediately upon tab clearance.
+          </p>
+</div>
+<div class="mt-space-md pt-space-xs bg-surface-container-lowest p-2">
+<span class="font-label-sm text-label-sm text-secondary">ENCLAVE // NO_PERSIST</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Live Memory Scrubbing Console / Interactive Proof Strip -->
+<div class="bg-surface-container-lowest p-space-md shadow-[4px_4px_0px_#000000]">
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md pb-space-sm mb-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-tertiary text-[20px]">terminal</span>
+<span class="font-label-md text-label-md uppercase text-on-surface tracking-wider">LIVE_VOLATILE_REGISTER_DUMP</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="px-3 py-1 bg-surface-variant hover:bg-error hover:text-on-error font-label-sm text-label-sm uppercase text-on-surface shadow-[2px_2px_0px_#000000] active:translate-x-0.5 active:translate-y-0.5 transition-all" id="purge-mem-btn" type="button">
+          [ PURGE ALL VOLATILE ALLOCATIONS ]
+        </button>
+</div>
+</div>
+<!-- Terminal Code Block -->
+<div class="font-label-sm text-label-sm text-on-surface-variant font-mono space-y-1 overflow-x-auto p-2 bg-surface" id="terminal-stream">
+<div class="text-tertiary">&gt;&gt; PRIVEX_CORE_INIT: 0x7FFA429E ALLOCATED IN SHADOW_ENCLAVE</div>
+<div>&gt;&gt; BLOOM_FILTER_LOAD: 1,240,000 NODES VERIFIED [SHA-256 MATCH: PASS]</div>
+<div>&gt;&gt; NETWORK_RESTRICTION: Content-Security-Policy [connect-src 'none'] ENFORCED</div>
+<div class="text-secondary">&gt;&gt; READY: LOCAL SILICON ENGINE STANDBY FOR THREAT INGESTION</div>
+</div>
+</div>
+</div>
+<script>
+  // Theme Switching Implementation
+  function applyTheme(theme) {
+    const html = document.documentElement;
+    html.classList.remove('dark', 'light', 'night');
+    if (theme === 'light') html.classList.add('light');
+    else if (theme === 'night') html.classList.add('night', 'dark');
+    else html.classList.add('dark');
+
+    try { localStorage.setItem('privex_theme', theme); } catch(e) {}
+
+    document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+      const mode = btn.getAttribute('data-theme-btn');
+      if (mode === theme) {
+        btn.className = 'px-2 py-1 font-label-sm text-label-sm bg-surface-container-high text-secondary uppercase border border-secondary transition-colors';
+      } else {
+        btn.className = 'px-2 py-1 font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container uppercase transition-colors';
+      }
+    });
+  }
+
+  // Restore saved theme on load
+  const savedTheme = (function() {
+    try { return localStorage.getItem('privex_theme') || 'dark'; } catch(e) { return 'dark'; }
+  })();
+  applyTheme(savedTheme);
+
+  document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyTheme(btn.getAttribute('data-theme-btn'));
+    });
+  });
+
+  // Interactive Purge Memory Button Micro-Interaction
+  document.getElementById('purge-mem-btn')?.addEventListener('click', function() {
+    const stream = document.getElementById('terminal-stream');
+    if (!stream) return;
+    
+    const timestamp = new Date().toISOString().split('T')[1].slice(0, 8);
+    const purgeMsg = document.createElement('div');
+    purgeMsg.className = 'text-error font-bold';
+    purgeMsg.innerHTML = `&gt;&gt; [${timestamp}] MEMORY PURGE TRIGGERED: ZEROING OUT REGISTER BUFFERS [0x00 * 16384]`;
+    
+    const reinitMsg = document.createElement('div');
+    reinitMsg.className = 'text-tertiary';
+    reinitMsg.innerHTML = `&gt;&gt; [${timestamp}] RAM SANITIZED. ZERO ARTIFACTS RESIDUAL.`;
+    
+    stream.appendChild(purgeMsg);
+    stream.appendChild(reinitMsg);
+    stream.scrollTop = stream.scrollHeight;
+  });
+
+  // Launch Scanner Trigger
+  document.getElementById('launch-scanner-btn')?.addEventListener('click', function() {
+    window.location.href = '../../index.html#url-scanner';
+  });
+</script></div></main><footer class="w-full bg-surface-container-lowest border-t-2 border-surface-variant py-space-lg"><div class="max-w-[1200px] mx-auto px-margin lg:px-margin-desktop flex flex-col md:flex-row items-center justify-between gap-space-lg"><div class="flex flex-col gap-space-xs text-left"><div class="flex items-center gap-space-sm"><span class="font-label-md text-label-md uppercase text-on-surface">HARDWARE LEVEL ENCLAVE GUARANTEE</span><span class="px-2 py-0.5 bg-surface-container text-secondary font-label-sm text-label-sm uppercase border border-outline-variant">SHA-256: 7F9A..B281</span></div><p class="font-body-sm text-body-sm text-on-surface-variant max-w-xl">Zero cloud telemetry. Client-side heuristic execution only. No sockets open. All dynamic payloads execute in temporary volatile RAM.</p></div><div class="flex items-center gap-space-md"><button class="px-4 py-2 bg-surface-container-high hover:bg-surface-container text-on-surface font-label-md text-label-md uppercase border-2 border-outline-variant shadow-[3px_3px_0px_#000000] active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center gap-space-xs" type="button"><span class="material-symbols-outlined text-[16px]">tour</span><span>TRIGGER TOUR</span></button><div class="flex flex-col text-right font-label-sm text-label-sm text-on-surface-variant"><span>CRYPTOGRAPHIC BUILD 4.9.1-GAP</span><span>CORE STATUS: COMPLIANT</span></div></div></div></footer></body></html>

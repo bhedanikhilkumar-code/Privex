@@ -112,11 +112,33 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange }) => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
         <ThemeToggle theme={theme} onThemeChange={onThemeChange} />
 
+        <a
+          href="/stitch_privex_security_web_ui/privex_enclave_authentication/code.html"
+          title="Open Enclave Authentication Session"
+          className="cut-corner-btn"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            padding: '0.4rem 0.85rem',
+            backgroundColor: 'var(--bg-card)',
+            border: '2px solid var(--border-dark)',
+            boxShadow: '2px 2px 0px #111111',
+            fontSize: '0.75rem',
+            color: 'var(--text-primary)',
+            fontWeight: 700,
+            textDecoration: 'none',
+            fontFamily: 'var(--font-mono)'
+          }}
+        >
+          <span>🔐</span> Enclave
+        </a>
 
         {installPrompt && !isInstalled && (
           <button
             type="button"
             onClick={handleInstallClick}
+            className="cut-corner-btn"
             style={{
               display: 'inline-flex',
               alignItems: 'center',

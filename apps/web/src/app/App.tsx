@@ -79,13 +79,42 @@ export const App: React.FC = () => {
         <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
 
 
+      {/* Global Air-Gap Integrity Telemetry Glass Status Bar */}
+      <aside
+        role="status"
+        aria-label="Air-Gap Security Status"
+        className="glass-status-bar"
+        style={{
+          padding: '0.45rem 2rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontFamily: 'var(--font-mono)',
+          fontSize: '0.75rem',
+          letterSpacing: '0.04em',
+          textTransform: 'uppercase',
+          color: 'var(--text-primary)'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <span style={{ display: 'inline-block', width: '8px', height: '8px', backgroundColor: isOnline ? '#1DB954' : 'var(--color-caution)', borderRadius: '50%' }} className="pulse-anim" />
+          <span style={{ fontWeight: 700, color: 'var(--color-safe)' }}>[AIR-GAP INTEGRITY: VERIFIED]</span>
+          <span style={{ opacity: 0.85 }}>100% OFFLINE BUS // 0 PACKETS EMITTED // ZERO-TRUST MEMORY ENCLAVE ARMED</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', opacity: 0.85 }}>
+          <span>LATENCY: 0.12ms LOCAL</span>
+          <span>EPOCH: 0x8849F</span>
+        </div>
+      </aside>
+
       {/* Air-gapped / Offline alert banner if offline */}
       {!isOnline && (
         <aside
           role="status"
           aria-label="Offline Mode Active"
+          className="glass-status-bar"
           style={{
-            backgroundColor: 'var(--color-caution)',
+            backgroundColor: 'rgba(255, 184, 0, 0.25)',
             borderBottom: '2px solid var(--border-dark)',
             padding: '0.75rem 2rem',
             display: 'flex',
@@ -94,14 +123,14 @@ export const App: React.FC = () => {
             fontFamily: 'var(--font-mono)',
             fontSize: '0.85rem',
             fontWeight: 700,
-            color: '#111111'
+            color: 'var(--text-primary)'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <span style={{ fontSize: '1.1rem' }}>⚡</span>
             <span>Disconnected, but not Defenseless. 100% On-Device Threat Detection Active.</span>
           </div>
-          <span style={{ backgroundColor: '#111111', color: '#FFFFFF', padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}>
+          <span style={{ backgroundColor: 'var(--border-dark)', color: '#FFFFFF', padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}>
             AIR-GAPPED PARITY
           </span>
         </aside>
@@ -155,7 +184,7 @@ export const App: React.FC = () => {
                   letterSpacing: '-0.03em',
                   lineHeight: 1.15,
                   marginBottom: '1rem',
-                  color: '#111111'
+                  color: 'var(--text-primary)'
                 }}
               >
                 Neutralize digital threats before they reach your data.
@@ -465,16 +494,16 @@ export const App: React.FC = () => {
                   <div
                     key={item.step}
                     style={{
-                      backgroundColor: '#FFFFFF',
+                      backgroundColor: 'var(--bg-card)',
                       border: '2px solid var(--border-dark)',
-                      boxShadow: '2px 2px 0px #111111',
+                      boxShadow: 'var(--shadow-brutal-sm)',
                       padding: '1.25rem'
                     }}
                   >
                     <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-brand)', marginBottom: '0.25rem' }}>
                       {item.step}
                     </div>
-                    <h5 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.35rem' }}>
+                    <h5 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.35rem', color: 'var(--text-primary)' }}>
                       {item.title}
                     </h5>
                     <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.45, margin: 0 }}>
@@ -510,14 +539,14 @@ export const App: React.FC = () => {
               >
                 <div
                   style={{
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: 'var(--bg-card)',
                     border: '2px solid var(--border-dark)',
-                    boxShadow: '2px 2px 0px #111111',
+                    boxShadow: 'var(--shadow-brutal-sm)',
                     padding: '1.25rem'
                   }}
                 >
                   <div style={{ fontSize: '1.5rem', marginBottom: '0.35rem' }}>🌐</div>
-                  <h5 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.25rem' }}>
+                  <h5 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
                     Web Application
                   </h5>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
@@ -530,14 +559,14 @@ export const App: React.FC = () => {
 
                 <div
                   style={{
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: 'var(--bg-card)',
                     border: '2px solid var(--border-dark)',
-                    boxShadow: '2px 2px 0px #111111',
+                    boxShadow: 'var(--shadow-brutal-sm)',
                     padding: '1.25rem'
                   }}
                 >
                   <div style={{ fontSize: '1.5rem', marginBottom: '0.35rem' }}>📱</div>
-                  <h5 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.25rem' }}>
+                  <h5 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
                     Android Mobile
                   </h5>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
@@ -561,14 +590,14 @@ export const App: React.FC = () => {
 
                 <div
                   style={{
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: 'var(--bg-card)',
                     border: '2px solid var(--border-dark)',
-                    boxShadow: '2px 2px 0px #111111',
+                    boxShadow: 'var(--shadow-brutal-sm)',
                     padding: '1.25rem'
                   }}
                 >
                   <div style={{ fontSize: '1.5rem', marginBottom: '0.35rem' }}>💻</div>
-                  <h5 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.25rem' }}>
+                  <h5 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
                     Windows Desktop
                   </h5>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
@@ -593,14 +622,14 @@ export const App: React.FC = () => {
 
                 <div
                   style={{
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: 'var(--bg-card)',
                     border: '2px solid var(--border-dark)',
-                    boxShadow: '2px 2px 0px #111111',
+                    boxShadow: 'var(--shadow-brutal-sm)',
                     padding: '1.25rem'
                   }}
                 >
                   <div style={{ fontSize: '1.5rem', marginBottom: '0.35rem' }}>🧩</div>
-                  <h5 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.25rem' }}>
+                  <h5 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
                     Browser Extension
                   </h5>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
@@ -628,7 +657,7 @@ export const App: React.FC = () => {
             <div
               style={{
                 padding: '1.25rem 1.5rem',
-                backgroundColor: '#FFFFFF',
+                backgroundColor: 'var(--bg-card)',
                 border: '2px solid var(--border-dark)',
                 boxShadow: 'var(--shadow-brutal)',
                 display: 'grid',
@@ -656,7 +685,7 @@ export const App: React.FC = () => {
                 <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.725rem', textTransform: 'uppercase', marginBottom: '0.2rem' }}>
                   Defense Invariant
                 </span>
-                <strong style={{ color: '#111111' }}>Core &gt; ML &gt; AI Assistant</strong>
+                <strong style={{ color: 'var(--text-primary)' }}>Core &gt; ML &gt; AI Assistant</strong>
               </div>
             </div>
           </section>

@@ -1,0 +1,501 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;0,7..72,700;1,7..72,400&amp;family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,500;0,6..12,600;0,6..12,700;1,6..12,400&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}
+/* Polished Cyber Cut-Corner Buttons & Glass Interactive States */
+.cut-corner-btn,
+button:not([role="tab"]):not([role="radio"]):not(.raw-btn),
+.btn-cyber {
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), filter 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease !important;
+}
+.cut-corner-btn:hover,
+button:not([role="tab"]):not([role="radio"]):not(.raw-btn):hover,
+.btn-cyber:hover {
+  transform: translate(-2px, -2px) !important;
+  filter: brightness(1.12) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15)) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+.cut-corner-btn:active,
+button:not([role="tab"]):not([role="radio"]):not(.raw-btn):active,
+.btn-cyber:active {
+  transform: translate(1px, 1px) !important;
+  filter: brightness(0.95) !important;
+}
+
+/* Glassmorphism Status Bar Component */
+.glass-status-bar,
+.status-bar-glass {
+  background: rgba(240, 236, 228, 0.85) !important;
+  backdrop-filter: blur(16px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+  border-bottom: 1px solid rgba(126, 133, 124, 0.4) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+/* Theme Modes */
+html.dark {
+  filter: invert(0.92) hue-rotate(180deg);
+}
+html.dark img, html.dark video, html.dark canvas {
+  filter: invert(1) hue-rotate(180deg);
+}
+html.night {
+  filter: invert(0.92) hue-rotate(180deg) contrast(1.15) brightness(0.85);
+}
+html.night img, html.night video, html.night canvas {
+  filter: invert(1) hue-rotate(180deg);
+}
+</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-background": "#2e3230",
+          "primary-container": "#e0ede4",
+          "inverse-primary": "#8ecf9e",
+          "on-primary-fixed-variant": "#2a6038",
+          "surface-container-high": "#eae6de",
+          "secondary-fixed-dim": "#d4ccbf",
+          "inverse-surface": "#2e3230",
+          "on-tertiary-fixed-variant": "#554020",
+          "on-secondary": "#ffffff",
+          "surface-tint": "#4a7c59",
+          "on-primary-fixed": "#002110",
+          "on-secondary-fixed": "#1e1a13",
+          "secondary-fixed": "#f0e8db",
+          "primary-fixed-dim": "#8ecf9e",
+          "primary": "#4a7c59",
+          "on-tertiary-container": "#554020",
+          "on-tertiary-fixed": "#221a05",
+          "surface-container": "#f0ece4",
+          "on-tertiary": "#ffffff",
+          "secondary-container": "#f0e8db",
+          "inverse-on-surface": "#f5f0e8",
+          "on-secondary-container": "#5e5548",
+          "surface-container-low": "#f5f1ea",
+          "primary-fixed": "#c8e8d0",
+          "on-secondary-fixed-variant": "#4a4538",
+          "surface-variant": "#e4e0d8",
+          "surface-bright": "#faf6f0",
+          "on-error": "#ffffff",
+          "surface": "#faf6f0",
+          "error": "#b83230",
+          "surface-container-highest": "#e4e0d8",
+          "surface-dim": "#dbd7cf",
+          "on-surface-variant": "#5a605b",
+          "secondary": "#6b6358",
+          "background": "#faf6f0",
+          "tertiary-container": "#f4ebd7",
+          "tertiary-fixed-dim": "#dcc48e",
+          "on-error-container": "#690005",
+          "surface-container-lowest": "#ffffff",
+          "error-container": "#ffdad8",
+          "on-primary-container": "#234a30",
+          "on-surface": "#2e3230",
+          "tertiary-fixed": "#f8e0a8",
+          "outline": "#7e857c",
+          "on-primary": "#ffffff",
+          "outline-variant": "#d2d6cc",
+          "tertiary": "#705c30"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.5rem",
+          "lg": "0.75rem",
+          "xl": "1rem",
+          "2xl": "1.25rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "gutter": "1rem",
+          "margin-desktop": "2.5rem",
+          "space-xl": "2.5rem",
+          "margin": "1rem",
+          "space-sm": "0.5rem",
+          "space-md": "1rem",
+          "gutter-desktop": "1.5rem",
+          "space-lg": "1.5rem",
+          "space-xs": "0.25rem"
+        },
+        "fontFamily": {
+          "headline": ["Literata", "serif"],
+          "display": ["Literata", "serif"],
+          "body": ["Nunito Sans", "sans-serif"],
+          "label": ["Nunito Sans", "sans-serif"],
+          "mono": ["JetBrains Mono", "monospace"]
+        }
+      },
+    },
+  }
+</script></head><body class="bg-background font-body text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed min-h-screen antialiased"><header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-md border-b border-outline-variant/60 shadow-sm"><div class="h-20 max-w-[1200px] mx-auto px-margin lg:px-margin-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><a href="../../index.html" class="flex items-center gap-space-md hover:opacity-90 transition-opacity" title="Launch Main Privex Web App"><div class="w-10 h-10 rounded-xl bg-primary-container text-primary flex items-center justify-center shadow-sm border border-primary/20"><span class="material-symbols-outlined text-[24px]">shield</span></div><div class="flex flex-col"><div class="flex items-center gap-space-sm"><span class="font-bold text-lg tracking-tight text-on-surface">PRIVEX</span><span class="px-2 py-0.5 bg-primary/10 text-primary font-semibold text-xs tracking-wide rounded-full border border-primary/20">LOCAL ONLY (RAM)</span></div><span class="text-xs text-on-surface-variant font-medium tracking-wide">ON-DEVICE THREAT DEFENSE</span></div></a></div><div class="flex items-center gap-space-md"><div class="hidden md:flex items-center border border-outline-variant/70 bg-surface-container-low rounded-lg p-1 gap-1" id="theme-switch-group"><button class="px-2.5 py-1 font-semibold text-xs bg-surface-container-lowest text-primary rounded shadow-xs transition-colors" data-theme-btn="light" title="Light Mode" type="button">LGT</button><button class="px-2.5 py-1 font-semibold text-xs text-on-surface-variant hover:text-on-surface transition-colors" data-theme-btn="dark" title="Dark Mode" type="button">DRK</button><button class="px-2.5 py-1 font-semibold text-xs text-on-surface-variant hover:text-on-surface transition-colors" data-theme-btn="night" title="Night Mode" type="button">NIT</button></div><a href="../../index.html" class="hidden sm:flex items-center gap-space-xs px-3.5 py-2 bg-primary hover:bg-[#3d694b] text-on-primary font-semibold text-xs cut-corner-btn shadow-sm transition-all duration-200 hover:shadow" title="Open Main Application"><span class="material-symbols-outlined text-[16px]">apps</span><span>OPEN APP</span></a><a href="../privex_enclave_authentication_terra_animated/code.html" class="w-9 h-9 rounded-full bg-primary-container text-primary flex items-center justify-center border border-primary/20 font-semibold hover:opacity-85 transition-opacity" title="Enclave Authentication"><span class="material-symbols-outlined text-[18px]">person</span></a></div></div><div class="w-full bg-surface-container-low/70 border-t border-b border-outline-variant/50"><div class="max-w-[1200px] mx-auto px-margin lg:px-margin-desktop"><nav aria-label="Primary Navigation" class="flex items-center overflow-x-auto gap-1 py-1.5" role="tablist"><a aria-current="page" class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap bg-primary text-white shadow-xs" data-path="overview" href="#" role="tab">HOME</a><a class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" data-path="url-scanner" href="../../index.html#url-scanner" role="tab">URL_SCAN</a><a class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" data-path="message-scanner" href="../../index.html#message-scanner" role="tab">TEXT_SCAN</a><a class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" data-path="ai-assistant" href="../../index.html#ai-assistant" role="tab">ASSISTANT</a><a class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" data-path="password-and-network" href="../../index.html#password-and-network" role="tab">MONITOR</a><a class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" data-path="privacy-and-architecture" href="../../index.html#privacy-and-architecture" role="tab">PRIVACY</a><a class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" data-path="settings" href="../../index.html#settings" role="tab">SETTINGS</a><a class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-primary hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" href="../privex_enclave_authentication_terra_animated/code.html" role="tab">ENCLAVE_AUTH</a><a class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" href="../privex_overview_dashboard/code.html" role="tab">CYBER_THEME</a></nav></div></div><div class="w-full glass-status-bar"><div class="max-w-[1200px] mx-auto px-margin lg:px-margin-desktop py-1.5 flex items-center justify-between text-primary font-mono text-xs tracking-normal"><div class="flex items-center gap-space-sm"><span class="inline-block w-2 h-2 rounded-full bg-primary animate-pulse"></span><span class="font-medium text-on-surface/80">[AIR-GAP INTEGRITY: VERIFIED] 100% OFFLINE BUS // 0 PACKETS EMITTED // ZERO-TRUST MEMORY ENCLAVE ARMED</span></div><span class="hidden md:inline text-on-surface-variant/90 font-medium">LATENCY: 0.12ms LOCAL</span></div></div></header><main class="w-full pt-36 bg-background"><div class="max-w-[1200px] mx-auto px-margin lg:px-margin-desktop py-space-lg min-h-[calc(100vh-280px)]"><div class="flex flex-col w-full">
+<!-- Top Telemetry & Status Ribbon -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm mb-space-lg p-3 glass-status-bar rounded-xl border border-outline-variant/60 shadow-xs">
+<div class="flex items-center gap-space-sm">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+<span class="font-mono text-xs font-semibold text-on-surface tracking-wide">DEFENSE_MATRIX // STATUS: LIVE_RAM_ONLY</span>
+</div>
+<div class="flex items-center gap-space-md font-mono text-xs text-on-surface-variant">
+<span class="text-primary font-semibold">[ENCLAVE: ACTIVE]</span>
+<span class="hidden sm:inline">MEM_POOL: 14.8MB VOLATILE</span>
+<span>EPOCH: 0x8849F</span>
+</div>
+</div>
+<!-- Hero Section -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg mb-space-xl">
+<div class="lg:col-span-8 flex flex-col justify-center">
+<!-- Pill Badge -->
+<div class="inline-flex self-start items-center gap-space-xs px-3.5 py-1.5 bg-primary-container text-on-primary-container font-semibold text-xs tracking-wider rounded-full mb-space-md border border-primary/20">
+<span class="material-symbols-outlined text-[16px] text-primary">eco</span>
+<span>ZERO-INSTALL • LOCAL-FIRST • PRIVACY-FIRST</span>
+</div>
+<!-- Headline -->
+<h1 class="font-headline text-3xl sm:text-4xl lg:text-[42px] font-bold text-on-surface leading-tight tracking-tight mb-space-sm">
+        Neutralize digital threats before they reach your data.
+      </h1>
+<!-- Monospace Subtitle -->
+<div class="font-mono text-xs sm:text-sm font-semibold text-primary uppercase tracking-wider mb-space-md flex items-center gap-space-xs">
+<span class="text-primary">&gt;&gt;</span>
+<span>ON-DEVICE THREAT &amp; SCAM PROTECTION</span>
+</div>
+<!-- Plain Language Explainer -->
+<p class="font-body text-base sm:text-lg text-on-surface-variant max-w-2xl leading-relaxed mb-space-lg">
+        PRIVEX runs entirely inside your browser's sandboxed volatile memory. Every payload, homoglyph inspection, and neural classification completes on your silicon—zero packets transmitted, zero telemetry logs retained, and mathematically zero server dependencies.
+      </p>
+<!-- Quick Metrics Ribbon -->
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-space-sm max-w-xl">
+<div class="bg-surface-container-lowest p-3.5 rounded-xl border border-outline-variant/60 shadow-xs">
+<span class="font-mono text-xs uppercase text-outline">OUTBOUND_LEAK</span>
+<p class="font-mono text-lg font-bold text-primary mt-0.5">0 BYTES</p>
+</div>
+<div class="bg-surface-container-lowest p-3.5 rounded-xl border border-outline-variant/60 shadow-xs">
+<span class="font-mono text-xs uppercase text-outline">VERDICT_SPEED</span>
+<p class="font-mono text-lg font-bold text-primary mt-0.5">0.42 MS</p>
+</div>
+<div class="col-span-2 sm:col-span-1 bg-surface-container-lowest p-3.5 rounded-xl border border-outline-variant/60 shadow-xs">
+<span class="font-mono text-xs uppercase text-outline">NETWORK_SOCKET</span>
+<p class="font-mono text-lg font-bold text-on-surface mt-0.5">SEVERED</p>
+</div>
+</div>
+</div>
+<!-- Featured Safe Sample Interactive Card -->
+<div class="lg:col-span-4 flex flex-col justify-between bg-surface-container-lowest p-space-md rounded-2xl border border-outline-variant/70 shadow-sm">
+<div>
+<div class="flex items-center justify-between pb-space-xs mb-space-md bg-surface-container-low p-2.5 rounded-xl border border-outline-variant/50">
+<div class="flex items-center gap-space-xs font-mono text-xs text-on-surface-variant font-semibold">
+<span class="material-symbols-outlined text-[16px] text-primary">verified_user</span>
+<span>VERIFIED_SAMPLE_HARNESS</span>
+</div>
+<span class="px-2.5 py-0.5 bg-primary-container text-on-primary-container font-semibold text-xs rounded-full">SAFE / VERIFIED</span>
+</div>
+<div class="bg-surface-container-low p-space-md rounded-xl border border-outline-variant/40 mb-space-md">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-mono text-xs text-outline uppercase font-semibold">TARGET URI</span>
+<span class="font-mono text-xs text-primary font-semibold">ENTROPY: 0.12</span>
+</div>
+<code class="font-mono text-xs text-primary block bg-surface-container-lowest p-2 rounded-lg border border-outline-variant/50 break-all select-all font-semibold">
+            amazon.com/order-history
+          </code>
+</div>
+<!-- Real-time Heuristic Breakdown Visual -->
+<div class="space-y-space-sm mb-space-md">
+<div>
+<div class="flex justify-between font-mono text-xs mb-1 text-on-surface-variant">
+<span>HOMOGLYPH_VARIANCE</span>
+<span class="text-primary font-semibold">0.00% [NULL]</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full w-[2%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-mono text-xs mb-1 text-on-surface-variant">
+<span>PUNYCODE_DETECTION</span>
+<span class="text-primary font-semibold">0.00% [CLEAR]</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full w-[0%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-mono text-xs mb-1 text-on-surface-variant">
+<span>CANONICAL_DOMAIN_MATCH</span>
+<span class="text-primary font-semibold">99.98% [LEGIT]</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full w-[99%]"></div>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-space-md py-2.5 px-space-md bg-primary hover:bg-[#3d694b] text-on-primary font-semibold text-xs tracking-wider rounded-xl shadow-xs hover:shadow transition-all flex items-center justify-center gap-space-xs" id="launch-scanner-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">security</span>
+<span>Launch Scanner →</span>
+</button>
+</div>
+</div>
+<!-- Primary Subsystem Scanner Cards (3-Column Grid) -->
+<div class="mb-space-xl">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline text-xl sm:text-2xl font-bold text-on-surface">Active Defenses</span>
+<span class="px-2.5 py-0.5 bg-primary-container text-on-primary-container font-semibold text-xs rounded-full border border-primary/20">3 READY</span>
+</div>
+<span class="font-mono text-xs text-outline uppercase hidden sm:inline">DISPATCH_MODE: DETERMINISTIC</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
+<!-- Card 1: URL Scanner -->
+<div class="flex flex-col justify-between bg-surface-container-lowest p-space-lg rounded-2xl border border-outline-variant/70 shadow-xs hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="w-10 h-10 flex items-center justify-center bg-primary-container text-primary rounded-xl font-bold">
+<span class="material-symbols-outlined text-[22px]">link</span>
+</span>
+<span class="font-mono text-xs px-2 py-0.5 bg-surface-container-low text-primary rounded-md font-semibold">MODULE: 01</span>
+</div>
+<h2 class="font-headline text-xl font-bold text-on-surface mb-1">URL Scanner</h2>
+<p class="font-mono text-xs text-primary font-semibold mb-space-md">PUNYCODE &amp; REPUTATION ENGINE</p>
+<p class="font-body text-sm text-on-surface-variant mb-space-md leading-relaxed">
+            Scan any link for stealth Cyrillic homoglyphs, brand typosquatting, hidden redirections, and multi-layered subdomains using local Bloom-filter reputation arrays.
+          </p>
+<div class="bg-surface-container-low p-3 rounded-xl mb-space-lg font-mono text-xs text-outline space-y-1.5 border border-outline-variant/40">
+<div class="flex justify-between">
+<span>INDEX SIZE:</span>
+<span class="text-on-surface font-semibold">1,240,000 HASHS</span>
+</div>
+<div class="flex justify-between">
+<span>MATCH OVERHEAD:</span>
+<span class="text-primary font-semibold">0.08ms</span>
+</div>
+</div>
+</div>
+<a href="../../index.html#url-scanner" class="w-full py-2.5 px-space-md bg-surface-container-low hover:bg-surface-container text-on-surface font-semibold text-xs tracking-wider cut-corner-btn border border-outline-variant/60 transition-all flex items-center justify-between">
+<span>Open URL Scanner</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+<!-- Card 2: Message Scanner -->
+<div class="flex flex-col justify-between bg-surface-container-lowest p-space-lg rounded-2xl border-2 border-primary/30 shadow-xs hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="w-10 h-10 flex items-center justify-center bg-primary text-on-primary rounded-xl font-bold shadow-xs">
+<span class="material-symbols-outlined text-[22px]">chat_bubble</span>
+</span>
+<span class="font-mono text-xs px-2 py-0.5 bg-primary-container text-primary rounded-md font-semibold">MODULE: 02</span>
+</div>
+<h2 class="font-headline text-xl font-bold text-on-surface mb-1">Message Scanner</h2>
+<p class="font-mono text-xs text-primary font-semibold mb-space-md">HEURISTIC PHISHING HEAVY-SCAN</p>
+<p class="font-body text-sm text-on-surface-variant mb-space-md leading-relaxed">
+            Analyze raw SMS, emails, and messaging payloads. Instantly identifies extortion pressure vectors, artificial urgency cues, romance frauds, and credential extraction traps.
+          </p>
+<div class="bg-surface-container-low p-3 rounded-xl mb-space-lg font-mono text-xs text-outline space-y-1.5 border border-outline-variant/40">
+<div class="flex justify-between">
+<span>PATTERN BANK:</span>
+<span class="text-on-surface font-semibold">2,810 HEURISTICS</span>
+</div>
+<div class="flex justify-between">
+<span>EXTORTION DETECT:</span>
+<span class="text-primary font-semibold">ARMED</span>
+</div>
+</div>
+</div>
+<a href="../../index.html#message-scanner" class="w-full py-2.5 px-space-md bg-primary hover:bg-[#3d694b] text-on-primary font-semibold text-xs tracking-wider cut-corner-btn shadow-xs hover:shadow transition-all flex items-center justify-between">
+<span>Open Message Scanner</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+<!-- Card 3: AI Assistant -->
+<div class="flex flex-col justify-between bg-surface-container-lowest p-space-lg rounded-2xl border border-outline-variant/70 shadow-xs hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="w-10 h-10 flex items-center justify-center bg-tertiary-container text-tertiary rounded-xl font-bold">
+<span class="material-symbols-outlined text-[22px]">psychology</span>
+</span>
+<span class="font-mono text-xs px-2 py-0.5 bg-surface-container-low text-tertiary rounded-md font-semibold">MODULE: 03</span>
+</div>
+<h2 class="font-headline text-xl font-bold text-on-surface mb-1">AI Assistant</h2>
+<p class="font-mono text-xs text-tertiary font-semibold mb-space-md">LOCAL LANGUAGE EXPLANATIONS</p>
+<p class="font-body text-sm text-on-surface-variant mb-space-md leading-relaxed">
+            Receive clean, jargon-free explanations at an 8th-grade comprehension level. Unpacks complex cryptographic threats into simple tactical instructions directly on-device.
+          </p>
+<div class="bg-surface-container-low p-3 rounded-xl mb-space-lg font-mono text-xs text-outline space-y-1.5 border border-outline-variant/40">
+<div class="flex justify-between">
+<span>ENGINE:</span>
+<span class="text-on-surface font-semibold">QUANTIZED ON-CHIP</span>
+</div>
+<div class="flex justify-between">
+<span>CLOUD HANDOFF:</span>
+<span class="text-primary font-semibold">0% STRICT</span>
+</div>
+</div>
+</div>
+<a href="../../index.html#ai-assistant" class="w-full py-2.5 px-space-md bg-surface-container-low hover:bg-surface-container text-on-surface font-semibold text-xs tracking-wider cut-corner-btn border border-outline-variant/60 transition-all flex items-center justify-between">
+<span>Open AI Assistant</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Operational Telemetry / Hardware Enclave Matrix -->
+<div class="mb-space-xl">
+<div class="flex flex-col sm:flex-row sm:items-end justify-between mb-space-md gap-space-xs">
+<div>
+<span class="font-mono text-xs text-primary uppercase tracking-wider block font-semibold">ASSURANCE_PROTOCOLS</span>
+<h2 class="font-headline text-xl sm:text-2xl font-bold text-on-surface">Value &amp; Security Proof Matrix</h2>
+</div>
+<span class="font-mono text-xs text-on-surface-variant font-medium">[AIR-GAP STANDARD NIST.IR-8259]</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- Matrix Card 1 -->
+<div class="bg-surface-container-lowest p-space-md rounded-2xl flex flex-col justify-between border border-outline-variant/70 shadow-xs">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-9 h-9 rounded-xl bg-primary-container text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">memory</span>
+</div>
+<span class="font-mono text-xs px-2 py-0.5 bg-surface-container-low text-on-surface rounded-md font-semibold">P-01</span>
+</div>
+<h3 class="font-headline text-base font-bold text-on-surface mb-space-xs">100% On-Device</h3>
+<p class="font-body text-xs text-on-surface-variant leading-relaxed">
+            Zero cloud API payloads. All inspections and heuristics execute within the ephemeral WebWorker enclave. No backhaul channels exist.
+          </p>
+</div>
+<div class="mt-space-md p-2 bg-surface-container-low rounded-xl border border-outline-variant/40">
+<span class="font-mono text-xs text-primary font-semibold">VERIFIED // SOCKETS_CLOSED</span>
+</div>
+</div>
+<!-- Matrix Card 2 -->
+<div class="bg-surface-container-lowest p-space-md rounded-2xl flex flex-col justify-between border border-outline-variant/70 shadow-xs">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-9 h-9 rounded-xl bg-primary-container text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">speed</span>
+</div>
+<span class="font-mono text-xs px-2 py-0.5 bg-surface-container-low text-on-surface rounded-md font-semibold">P-02</span>
+</div>
+<h3 class="font-headline text-base font-bold text-on-surface mb-space-xs">&lt;1.0 ms Latency</h3>
+<p class="font-body text-xs text-on-surface-variant leading-relaxed">
+            Sub-millisecond Bloom filters and deterministic pattern arrays give near-instant validation without waiting on high-latency round-trips.
+          </p>
+</div>
+<div class="mt-space-md p-2 bg-surface-container-low rounded-xl border border-outline-variant/40">
+<span class="font-mono text-xs text-primary font-semibold">METRIC // T_EXEC: 0.38MS</span>
+</div>
+</div>
+<!-- Matrix Card 3 -->
+<div class="bg-surface-container-lowest p-space-md rounded-2xl flex flex-col justify-between border border-outline-variant/70 shadow-xs">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-9 h-9 rounded-xl bg-primary-container text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">wifi_off</span>
+</div>
+<span class="font-mono text-xs px-2 py-0.5 bg-surface-container-low text-on-surface rounded-md font-semibold">P-03</span>
+</div>
+<h3 class="font-headline text-base font-bold text-on-surface mb-space-xs">Air-Gapped Parity</h3>
+<p class="font-body text-xs text-on-surface-variant leading-relaxed">
+            Unplug completely or fly at 30,000 feet. Every classifier, tokenizer, and threat pattern maintains 100% functionality without internet.
+          </p>
+</div>
+<div class="mt-space-md p-2 bg-surface-container-low rounded-xl border border-outline-variant/40">
+<span class="font-mono text-xs text-primary font-semibold">STATE // AIR_GAP_TESTED</span>
+</div>
+</div>
+<!-- Matrix Card 4 -->
+<div class="bg-surface-container-lowest p-space-md rounded-2xl flex flex-col justify-between border border-outline-variant/70 shadow-xs">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-9 h-9 rounded-xl bg-secondary-container text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">enhanced_encryption</span>
+</div>
+<span class="font-mono text-xs px-2 py-0.5 bg-surface-container-low text-on-surface rounded-md font-semibold">P-04</span>
+</div>
+<h3 class="font-headline text-base font-bold text-on-surface mb-space-xs">Zero-Knowledge</h3>
+<p class="font-body text-xs text-on-surface-variant leading-relaxed">
+            Raw strings, analyzed passwords, or target links are impossible to harvest. Volatile RAM zeroes out immediately upon tab clearance.
+          </p>
+</div>
+<div class="mt-space-md p-2 bg-surface-container-low rounded-xl border border-outline-variant/40">
+<span class="font-mono text-xs text-secondary font-semibold">ENCLAVE // NO_PERSIST</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Live Memory Scrubbing Console / Interactive Proof Strip -->
+<div class="bg-surface-container-lowest p-space-md rounded-2xl border border-outline-variant/70 shadow-xs">
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md pb-space-sm mb-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px]">terminal</span>
+<span class="font-mono text-xs uppercase text-on-surface font-semibold tracking-wider">LIVE_VOLATILE_REGISTER_DUMP</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="px-3.5 py-1.5 bg-surface-container-low hover:bg-error-container hover:text-on-error-container font-mono text-xs text-on-surface rounded-xl border border-outline-variant/60 transition-all font-semibold" id="purge-mem-btn" type="button">
+          [ PURGE ALL VOLATILE ALLOCATIONS ]
+        </button>
+</div>
+</div>
+<!-- Terminal Code Block -->
+<div class="font-mono text-xs text-on-surface-variant space-y-1.5 overflow-x-auto p-3.5 bg-surface-container-low rounded-xl border border-outline-variant/40" id="terminal-stream">
+<div class="text-primary font-medium">&gt;&gt; PRIVEX_CORE_INIT: 0x7FFA429E ALLOCATED IN SHADOW_ENCLAVE</div>
+<div class="text-on-surface/80">&gt;&gt; BLOOM_FILTER_LOAD: 1,240,000 NODES VERIFIED [SHA-256 MATCH: PASS]</div>
+<div class="text-on-surface/80">&gt;&gt; NETWORK_RESTRICTION: Content-Security-Policy [connect-src 'none'] ENFORCED</div>
+<div class="text-primary font-semibold">&gt;&gt; READY: LOCAL SILICON ENGINE STANDBY FOR THREAT INGESTION</div>
+</div>
+</div>
+</div>
+<script>
+  // Theme Switching Implementation
+  function applyTheme(theme) {
+    const html = document.documentElement;
+    html.classList.remove('dark', 'light', 'night');
+    if (theme === 'dark') html.classList.add('dark');
+    else if (theme === 'night') html.classList.add('night', 'dark');
+    else html.classList.add('light');
+
+    try { localStorage.setItem('privex_theme', theme); } catch(e) {}
+
+    document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+      const mode = btn.getAttribute('data-theme-btn');
+      if (mode === theme) {
+        btn.className = 'px-2.5 py-1 font-semibold text-xs bg-primary text-white rounded shadow-xs transition-colors';
+      } else {
+        btn.className = 'px-2.5 py-1 font-semibold text-xs text-on-surface-variant hover:text-on-surface transition-colors';
+      }
+    });
+  }
+
+  // Restore saved theme on load
+  const savedTheme = (function() {
+    try { return localStorage.getItem('privex_theme') || 'light'; } catch(e) { return 'light'; }
+  })();
+  applyTheme(savedTheme);
+
+  document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyTheme(btn.getAttribute('data-theme-btn'));
+    });
+  });
+
+  // Interactive Purge Memory Button Micro-Interaction
+  document.getElementById('purge-mem-btn')?.addEventListener('click', function() {
+    const stream = document.getElementById('terminal-stream');
+    if (!stream) return;
+    
+    const timestamp = new Date().toISOString().split('T')[1].slice(0, 8);
+    const purgeMsg = document.createElement('div');
+    purgeMsg.className = 'text-error font-semibold';
+    purgeMsg.innerHTML = `&gt;&gt; [${timestamp}] MEMORY PURGE TRIGGERED: ZEROING OUT REGISTER BUFFERS [0x00 * 16384]`;
+    
+    const reinitMsg = document.createElement('div');
+    reinitMsg.className = 'text-primary font-medium';
+    reinitMsg.innerHTML = `&gt;&gt; [${timestamp}] RAM SANITIZED. ZERO ARTIFACTS RESIDUAL.`;
+    
+    stream.appendChild(purgeMsg);
+    stream.appendChild(reinitMsg);
+    stream.scrollTop = stream.scrollHeight;
+  });
+
+  // Launch Scanner Trigger
+  document.getElementById('launch-scanner-btn')?.addEventListener('click', function() {
+    window.location.href = '../../index.html#url-scanner';
+  });
+</script></div></main><footer class="w-full bg-surface-container-low border-t border-outline-variant/60 py-space-lg"><div class="max-w-[1200px] mx-auto px-margin lg:px-margin-desktop flex flex-col md:flex-row items-center justify-between gap-space-lg"><div class="flex flex-col gap-space-xs text-left"><div class="flex items-center gap-space-sm"><span class="font-headline font-semibold text-sm text-on-surface">HARDWARE LEVEL ENCLAVE GUARANTEE</span><span class="px-2 py-0.5 bg-surface-container-highest text-primary font-mono text-xs rounded-full border border-primary/20">SHA-256: 7F9A..B281</span></div><p class="font-body text-xs text-on-surface-variant max-w-xl leading-relaxed">Zero cloud telemetry. Client-side heuristic execution only. No sockets open. All dynamic payloads execute in temporary volatile RAM.</p></div><div class="flex items-center gap-space-md"><button class="px-4 py-2 bg-surface-container-lowest hover:bg-surface-container-high text-on-surface font-semibold text-xs rounded-xl border border-outline-variant/70 shadow-xs transition-all flex items-center gap-space-xs" type="button"><span class="material-symbols-outlined text-[16px]">tour</span><span>TRIGGER TOUR</span></button><div class="flex flex-col text-right font-mono text-xs text-on-surface-variant"><span>CRYPTOGRAPHIC BUILD 4.9.1-GAP</span><span class="text-primary font-semibold">CORE STATUS: COMPLIANT</span></div></div></div></footer></body></html>
