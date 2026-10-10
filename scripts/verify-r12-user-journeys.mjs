@@ -60,8 +60,8 @@ async function main() {
     // =========================================================================
     // JOURNEY 1: WEBSITE USER JOURNEY (R12-B)
     // =========================================================================
-    console.log('--- TEST 1: WEBSITE USER JOURNEY (https://private-protection.pages.dev) ---');
-    const { targetId: webTargetId } = await send('Target.createTarget', { url: 'https://private-protection.pages.dev' });
+    console.log('--- TEST 1: WEBSITE USER JOURNEY (https://privex.pages.dev) ---');
+    const { targetId: webTargetId } = await send('Target.createTarget', { url: 'https://privex.pages.dev' });
     const { sessionId: webSessionId } = await send('Target.attachToTarget', { targetId: webTargetId, flatten: true });
     await send('Page.enable', {}, webSessionId);
     await send('Runtime.enable', {}, webSessionId);

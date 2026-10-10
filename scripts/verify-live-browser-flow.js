@@ -1,10 +1,10 @@
 // scripts/verify-live-browser-flow.js
-// Automated live browser verification against https://private-protection.pages.dev
+// Automated live browser verification against https://privex.pages.dev
 import { spawn, execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
-const LIVE_URL = 'https://private-protection.pages.dev';
+const LIVE_URL = 'https://privex.pages.dev';
 const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const PORT = 9580;
 
@@ -299,7 +299,7 @@ async function runLiveTest() {
 
     cdp.close();
     console.log('======================================================================');
-    console.log('ALL LIVE PRODUCTION CHECKS ON HTTPS://PRIVATE-PROTECTION.PAGES.DEV PASSED!');
+    console.log('ALL LIVE PRODUCTION CHECKS ON HTTPS://PRIVEX.PAGES.DEV PASSED!');
     console.log('======================================================================');
   } finally {
     try { execSync(`taskkill /F /T /PID ${chromeProc.pid}`); } catch (e) {}

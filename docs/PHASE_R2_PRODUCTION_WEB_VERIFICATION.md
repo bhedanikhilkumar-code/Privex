@@ -2,7 +2,7 @@
 
 > **DOCUMENT STATUS:** OFFICIALLY SIGNED OFF & LIVE IN PRODUCTION  
 > **EVALUATION TARGET:** PRIVEX — Web Platform Production Distribution  
-> **CANONICAL PRODUCTION URL:** `https://private-protection.pages.dev`  
+> **CANONICAL PRODUCTION URL:** `https://privex.pages.dev`  
 > **ARTIFACT TESTED & DEPLOYED:** `apps/web/dist` & `release/private-protection-web-0.1.0.zip`  
 > **EVALUATION DATE:** 2026-10-04  
 > **PRODUCTION STATUS:** **LIVE & PUBLICLY ACCESSIBLE (PASS)**  
@@ -15,7 +15,7 @@
 In accordance with Master Prompt Phase R2 and R2-A, this verification assesses the real-world operational readiness and live public deployment of the **PRIVEX Web Application** (`apps/web`).
 
 ### Canonical Target Specification
-* **Canonical Production URL:** `https://private-protection.pages.dev`
+* **Canonical Production URL:** `https://privex.pages.dev`
 * **Deployment Provider:** Cloudflare Pages (Static Edge CDN)
 * **Application Architecture:** Zero-Install Client-Side Web Application (Vite 6 + React 18 + TypeScript + Web Worker `@private-protection/core` + Service Worker PWA shell)
 * **Live Deployment Execution:** Successfully provisioned and deployed via Cloudflare Pages CLI (`private-protection` project).
@@ -27,9 +27,9 @@ In accordance with Master Prompt Phase R2 and R2-A, this verification assesses t
 
 ## 2. R2-A: PRODUCTION AVAILABILITY & INFRASTRUCTURE AUDIT
 
-### Live Cloudflare Edge Status (`https://private-protection.pages.dev`)
+### Live Cloudflare Edge Status (`https://privex.pages.dev`)
 
-| Check Item | Target Requirement | Live Edge (`private-protection.pages.dev`) | Local Production Bundle (`apps/web/dist`) | Empirical Finding / Diagnostic |
+| Check Item | Target Requirement | Live Edge (`privex.pages.dev`) | Local Production Bundle (`apps/web/dist`) | Empirical Finding / Diagnostic |
 |---|---|---|---|---|
 | **DNS Resolution** | Resolves to Cloudflare Edge IPs | **PASS (`172.66.44.61`, `172.66.47.195`)** | N/A (Local / Self-hosted) | Successfully resolves globally on public Cloudflare edge |
 | **HTTPS Support** | TLS 1.3 with HSTS | **PASS (HTTP 200 OK)** | Pre-configured in `_headers` | `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload` |
@@ -46,7 +46,7 @@ In accordance with Master Prompt Phase R2 and R2-A, this verification assesses t
 ### Empirical Network Diagnostics (Post-Activation)
 1. **Public DNS Query:**
    ```
-   Query: private-protection.pages.dev -> [ '172.66.44.61', '172.66.47.195' ]
+   Query: privex.pages.dev -> [ '172.66.44.61', '172.66.47.195' ]
    Status: NO NXDOMAIN, NO ENOTFOUND
    ```
 2. **Edge Response Headers:**
@@ -84,7 +84,7 @@ Inspection of `.github/workflows/deploy-pages.yml` reveals:
   3. Add Repository Secrets:
      - `CLOUDFLARE_API_TOKEN`: `<your-cloudflare-token>`
      - `CLOUDFLARE_ACCOUNT_ID`: `<your-cloudflare-account-id>`
-  4. Trigger workflow `.github/workflows/deploy-pages.yml` (or push a commit to `main`). Cloudflare Pages will instantly provision edge routing for `private-protection.pages.dev`.
+  4. Trigger workflow `.github/workflows/deploy-pages.yml` (or push a commit to `main`). Cloudflare Pages will instantly provision edge routing for `privex.pages.dev`.
 
 ---
 
@@ -251,10 +251,10 @@ Empirical measurements gathered from real browser test runs:
 | **Local Production Distribution** | **PASS** | 100% verified across Chrome, Edge, and Brave. 65/65 unit/integration tests pass. |
 | **Security & Privacy Invariants** | **PASS** | Local-first, zero cloud leakage, strict CSP, AI boundary strictly read-only. |
 | **Offline Parity** | **PASS** | 100% core detection parity when completely disconnected via Service Worker. |
-| **Remote Cloudflare Edge DNS** | **PASS** | `private-protection.pages.dev` resolves globally (`172.66.44.61`, `172.66.47.195`). |
+| **Remote Cloudflare Edge DNS** | **PASS** | `privex.pages.dev` resolves globally (`172.66.44.61`, `172.66.47.195`). |
 | **Live Production Verification** | **PASS** | Real user flows A, B, C, D verified on live HTTPS endpoint via Chrome CDP. |
 | **Secret Exposure Audit** | **PASS** | 0 secrets or tokens exposed across code, docs, logs, or git commit history. |
-| **OVERALL PHASE R2 & R2-A VERDICT** | **COMPLETE & LIVE IN PRODUCTION** | Web application is publicly deployed and live at `https://private-protection.pages.dev`. |
+| **OVERALL PHASE R2 & R2-A VERDICT** | **COMPLETE & LIVE IN PRODUCTION** | Web application is publicly deployed and live at `https://privex.pages.dev`. |
 
 ---
 

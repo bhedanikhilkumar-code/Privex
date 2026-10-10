@@ -63,7 +63,7 @@ The authoritative product release version is strictly **`0.1.0`** across all man
 - **No Localhost / Dev Mode:** Static inspection confirmed 0 development server endpoints, 0 sourcemaps, 0 mock dependencies.
 
 ### Live Production Deployment Verification
-- **Verified Public URL:** `https://private-protection.pages.dev`
+- **Verified Public URL:** `https://privex.pages.dev`
 - **Protocol:** `HTTPS` (Verified live with Cloudflare edge SSL/TLS)
 - **Live Headless Chrome CDP Verification:**
   - **Page Load:** Title: `"PRIVEX — Security Dashboard"`, `#root` active
@@ -78,8 +78,8 @@ The authoritative product release version is strictly **`0.1.0`** across all man
 
 - **Custom Domain Status:** None configured.
 - **Rule Adherence:** No custom domain purchased.
-- **Production URL:** **`https://private-protection.pages.dev`** (Platform-provided free production edge URL on Cloudflare Pages).
-- **Setup Path for Free Custom Domain:** If a free custom domain is desired in the future, the operator navigates to Cloudflare Pages Dashboard $\rightarrow$ Custom Domains $\rightarrow$ Enter domain $\rightarrow$ Add CNAME pointing to `private-protection.pages.dev`.
+- **Production URL:** **`https://privex.pages.dev`** (Platform-provided free production edge URL on Cloudflare Pages).
+- **Setup Path for Free Custom Domain:** If a free custom domain is desired in the future, the operator navigates to Cloudflare Pages Dashboard $\rightarrow$ Custom Domains $\rightarrow$ Enter domain $\rightarrow$ Add CNAME pointing to `privex.pages.dev`.
 
 ---
 
@@ -170,7 +170,7 @@ d0f42ab50db530b752cffd3b6e39a6f3a1e23f888e145375fe4b8cc5c67b25dc  private-protec
 
 ### 1. WEB APPLICATION
 - **Distribution Method:** Public web access.
-- **Direct Link:** `https://private-protection.pages.dev`
+- **Direct Link:** `https://privex.pages.dev`
 - **Verification:** Live over public HTTPS, cached locally via Progressive Web App (PWA) Service Worker for zero-install offline usage.
 
 ### 2. ANDROID MOBILE
@@ -194,7 +194,7 @@ d0f42ab50db530b752cffd3b6e39a6f3a1e23f888e145375fe4b8cc5c67b25dc  private-protec
 ## 11. R11-J — USER INSTALLATION & USAGE DOCUMENTATION
 
 ### Web Application User Guide
-1. **Open:** Navigate to `https://private-protection.pages.dev` in any modern web browser.
+1. **Open:** Navigate to `https://privex.pages.dev` in any modern web browser.
 2. **Scan URL:** Click the "URL Scanner" tab, paste any untrusted URL, and click "Scan URL".
 3. **Scan Message:** Click the "Message Scanner" tab, paste any suspicious SMS or email text, and click "Scan Message".
 4. **Offline Mode:** The application installs as a PWA and functions completely offline even without internet access.
@@ -264,7 +264,7 @@ Full monorepo regression suite executed across all 6 workspaces:
 
 ## 15. R11-O — FINAL HUMAN CHECKLIST
 
-- [x] **Web public URL verified** (`https://private-protection.pages.dev`)
+- [x] **Web public URL verified** (`https://privex.pages.dev`)
 - [x] **Web production build verified** (`dist/` clean, no localhost, no dev mode)
 - [x] **Android APK exists** (`release/private-protection-mobile-0.1.0.apk`)
 - [x] **Android APK installs** (Direct APK sideload format verified)

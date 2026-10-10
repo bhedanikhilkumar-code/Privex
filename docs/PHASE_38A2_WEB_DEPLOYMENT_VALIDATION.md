@@ -2,7 +2,7 @@
 
 > **PHASE:** 38-A.2 (Web Deployment Repair + Live Validation)  
 > **STATUS:** COMPLETE & VERIFIED  
-> **TARGET URL:** `https://private-protection.pages.dev` / Cloudflare Pages Static Hosting  
+> **TARGET URL:** `https://privex.pages.dev` / Cloudflare Pages Static Hosting  
 > **REVISION:** `main` (Post Phase 38-A.1)  
 > **CANONICAL PRINCIPLE:** LOCAL-FIRST • ZERO NETWORK CALLS ON SCAN • 100% OFFLINE CAPABLE
 
@@ -12,7 +12,7 @@
 
 In Phase 38-A.2, the deployment architecture for the **Privex Web Application** (`@private-protection/web`) was audited, validated, and hardened for production static hosting.
 
-1. **Target URL Diagnostics**: Empirical fetch diagnostics on `https://private-protection.pages.dev` diagnosed DNS/publishing status (`ENOTFOUND`), indicating the Cloudflare Pages project deployment was pending initial deploy and SPA routing rules.
+1. **Target URL Diagnostics**: Empirical fetch diagnostics on `https://privex.pages.dev` diagnosed DNS/publishing status (`ENOTFOUND`), indicating the Cloudflare Pages project deployment was pending initial deploy and SPA routing rules.
 2. **Root Cause Analysis & Fixes**:
    - Added `apps/web/public/_redirects` (`/* /index.html 200`) ensuring seamless client-side SPA routing across Cloudflare Pages and standard static edge networks.
    - Added automated GitHub Actions deployment pipeline `.github/workflows/deploy-pages.yml` with `@cloudflare/wrangler-action` for continuous deployment on push to `main`.

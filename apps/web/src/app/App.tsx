@@ -11,12 +11,27 @@ import { AssistantView } from '../components/assistant/AssistantView';
 import { PrivacyView } from '../components/privacy/PrivacyView';
 import { SettingsView } from '../components/settings/SettingsView';
 import { SecurityDashboardView } from '../components/security/SecurityDashboardView';
+import { IntroOverlay, IntroStorage } from '../components/intro';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('HOME');
   const [preferences, setPreferences] = useState<UserPreferences>(() => PreferenceStorage.loadPreferences());
   const [theme, setTheme] = useState<AppTheme>(() => preferences.theme || PreferenceStorage.loadTheme());
   const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const [showIntro, setShowIntro] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('intro') === 'true' || window.location.hash === '#intro') {
+        return true;
+      }
+    }
+    return !IntroStorage.hasSeenIntro();
+  });
+
+  const handleReplayIntro = () => {
+    IntroStorage.resetIntro();
+    setShowIntro(true);
+  };
 
   // Initialize WorkerBridge
   const scannerBridge = useMemo(() => new WorkerBridge(), []);
@@ -55,9 +70,13 @@ export const App: React.FC = () => {
   }, [scannerBridge]);
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)' }}>
-      <Header theme={theme} onThemeChange={handleThemeChange} />
-      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+    <>
+      {showIntro && (
+        <IntroOverlay onComplete={() => setShowIntro(false)} />
+      )}
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)' }}>
+        <Header theme={theme} onThemeChange={handleThemeChange} />
+        <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
 
 
       {/* Air-gapped / Offline alert banner if offline */}
@@ -663,11 +682,16 @@ export const App: React.FC = () => {
         )}
 
         {activeTab === 'SETTINGS' && (
-          <SettingsView preferences={preferences} onPreferencesChange={handlePreferencesChange} />
+          <SettingsView
+            preferences={preferences}
+            onPreferencesChange={handlePreferencesChange}
+            onReplayIntro={handleReplayIntro}
+          />
         )}
       </main>
 
-      <Footer />
+      <Footer onReplayIntro={handleReplayIntro} />
     </div>
+    </>
   );
 };

@@ -144,7 +144,7 @@ Privex operates under a strict 3-tier zero-knowledge data classification model:
 
 ## 5. WEB
 
-- **Zero-Install Client PWA:** Access the fully functional web dashboard at [`https://private-protection.pages.dev`](https://private-protection.pages.dev).
+- **Zero-Install Client PWA:** Access the fully functional web dashboard at [`https://privex.pages.dev`](https://privex.pages.dev).
 - **Client-Side Execution:** The web application downloads static assets from the edge CDN and executes all threat analysis locally inside a dedicated Web Worker sandbox in your browser's volatile RAM.
 - **Installable PWA:** Can be installed directly to your desktop or mobile home screen as a standalone Progressive Web App with full offline caching via Service Worker.
 - **Password Security & Network Protection Module:**
@@ -193,12 +193,12 @@ All release packages are independently verified and available from both producti
 
 | Platform / Artifact | File Name | Size | Cryptographic SHA-256 Checksum | Direct Public Download Link |
 |---|---|---|---|---|
-| **Web PWA** | Web Application | Hosted | Same-origin edge verified | [Launch Web App](https://private-protection.pages.dev) |
-| **Android APK** | `private-protection-mobile-0.1.0.apk` | 1.03 MB | `95ee838e739e69feed4f007c431cb6a7e74304f6751e17a38c6e21269fcdb5b5` | [Direct APK](https://private-protection.pages.dev/downloads/private-protection-mobile-0.1.0.apk) |
+| **Web PWA** | Web Application | Hosted | Same-origin edge verified | [Launch Web App](https://privex.pages.dev) |
+| **Android APK** | `private-protection-mobile-0.1.0.apk` | 1.03 MB | `95ee838e739e69feed4f007c431cb6a7e74304f6751e17a38c6e21269fcdb5b5` | [Direct APK](https://privex.pages.dev/downloads/private-protection-mobile-0.1.0.apk) |
 | **Windows Setup** | `PrivateProtection-Setup-0.1.0.exe` | 158 MB | `529bee4bc50bb73a0a282575f088099ef264bd0e8a5004be7eba3275eca9e569` | [GitHub Release v0.1.0](https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0) |
 | **Windows Portable** | `PrivateProtection-0.1.0-win-x64.exe` | 245 MB | `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa` | [GitHub Release v0.1.0](https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0) |
-| **Browser Extension** | `private-protection-extension-0.1.0.zip` | 100 KB | `d0f42ab50db530b752cffd3b6e39a6f3a1e23f888e145375fe4b8cc5c67b25dc` | [Direct ZIP](https://private-protection.pages.dev/downloads/private-protection-extension-0.1.0.zip) |
-| **Integrity Manifest**| `SHA256SUMS.txt` | 610 B | Authoritative | [Direct Manifest](https://private-protection.pages.dev/downloads/SHA256SUMS.txt) |
+| **Browser Extension** | `private-protection-extension-0.1.0.zip` | 100 KB | `d0f42ab50db530b752cffd3b6e39a6f3a1e23f888e145375fe4b8cc5c67b25dc` | [Direct ZIP](https://privex.pages.dev/downloads/private-protection-extension-0.1.0.zip) |
+| **Integrity Manifest**| `SHA256SUMS.txt` | 610 B | Authoritative | [Direct Manifest](https://privex.pages.dev/downloads/SHA256SUMS.txt) |
 
 All release checksums are authoritatively recorded in [`release/SHA256SUMS.txt`](./release/SHA256SUMS.txt).
 
@@ -207,12 +207,12 @@ All release checksums are authoritatively recorded in [`release/SHA256SUMS.txt`]
 ## 10. INSTALLATION
 
 ### 🌐 1. Web Application (Zero Install)
-1. Navigate to [`https://private-protection.pages.dev`](https://private-protection.pages.dev).
+1. Navigate to [`https://privex.pages.dev`](https://privex.pages.dev).
 2. Click the **URL Scanner** or **Message Scanner** tab to inspect suspicious content immediately.
 3. (Optional) Click **Install Web App** in your browser's address bar for offline home-screen usage.
 
 ### 📱 2. Android Mobile (Direct APK Sideload)
-1. Download [`private-protection-mobile-0.1.0.apk`](https://private-protection.pages.dev/downloads/private-protection-mobile-0.1.0.apk).
+1. Download [`private-protection-mobile-0.1.0.apk`](https://privex.pages.dev/downloads/private-protection-mobile-0.1.0.apk).
 2. Open your device's **Files** or **Downloads** app and tap the APK.
 3. If prompted with *"Install unknown apps"*, enable **"Allow from this source"**.
 4. Tap **Install**, then tap **Open**.
@@ -224,7 +224,7 @@ All release checksums are authoritatively recorded in [`release/SHA256SUMS.txt`]
 3. The application opens immediately into your local desktop threat scanner.
 
 ### 🧩 4. Browser Extension (Chromium: Chrome, Edge, Brave)
-1. Download [`private-protection-extension-0.1.0.zip`](https://private-protection.pages.dev/downloads/private-protection-extension-0.1.0.zip) and extract it to a local folder.
+1. Download [`private-protection-extension-0.1.0.zip`](https://privex.pages.dev/downloads/private-protection-extension-0.1.0.zip) and extract it to a local folder.
 2. In your browser, open `chrome://extensions` (or `edge://extensions`).
 3. Toggle on **Developer mode** in the top-right corner.
 4. Click **Load unpacked** and select the extracted folder.

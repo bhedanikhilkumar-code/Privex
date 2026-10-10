@@ -126,7 +126,7 @@ All network activity across all 4 surfaces was audited via static source analysi
 
 | Surface | Category 1: Static Asset Load | Category 2: Threat-Intel Update | Category 3: Optional Link Preview | Category 4: Telemetry | Category 5: User-Sensitive Content | Category 6: Other | Privacy Verdict |
 |---|---|---|---|---|---|---|---|
-| **Web (`apps/web`)** | Initial HTTPS GET for static bundle (`index.html`, `assets/*.js`, `manifest.json`, `sw.js`) from `private-protection.pages.dev` | `0` requests (bundled in Core) | `0` requests | `0` requests | **`0` requests / `0` bytes** | `0` requests (`connect-src 'self'`) | **PASS (ZERO LEAKAGE)** |
+| **Web (`apps/web`)** | Initial HTTPS GET for static bundle (`index.html`, `assets/*.js`, `manifest.json`, `sw.js`) from `privex.pages.dev` | `0` requests (bundled in Core) | `0` requests | `0` requests | **`0` requests / `0` bytes** | `0` requests (`connect-src 'self'`) | **PASS (ZERO LEAKAGE)** |
 | **Android (`apps/mobile`)** | `0` network requests (`file:///android_asset/index.html`) | `0` requests (bundled in APK) | `0` requests | `0` requests | **`0` requests / `0` bytes** | `0` requests (`usesCleartextTraffic="false"`) | **PASS (ZERO LEAKAGE)** |
 | **Desktop (`apps/desktop`)** | `0` network requests (`file://` local bundle) | `0` requests (offline Ed25519 verifier library) | `0` requests | `0` requests | **`0` requests / `0` bytes** | `0` requests | **PASS (ZERO LEAKAGE)** |
 | **Extension (`apps/extension`)** | `0` network requests (`chrome-extension://` local bundle) | `0` requests (bundled in MV3 zip) | `0` requests | `0` requests | **`0` requests / `0` bytes** | `0` requests (`connect-src 'none'`) | **PASS (ZERO LEAKAGE)** |

@@ -69,8 +69,8 @@ async function main() {
     }
 
     // 1. WEB HOME
-    console.log('[+] Loading Web Home (https://private-protection.pages.dev)...');
-    const { targetId: webTargetId } = await send('Target.createTarget', { url: 'https://private-protection.pages.dev' });
+    console.log('[+] Loading Web Home (https://privex.pages.dev)...');
+    const { targetId: webTargetId } = await send('Target.createTarget', { url: 'https://privex.pages.dev' });
     const { sessionId: webSessionId } = await send('Target.attachToTarget', { targetId: webTargetId, flatten: true });
     await send('Page.enable', {}, webSessionId);
     await send('Runtime.enable', {}, webSessionId);

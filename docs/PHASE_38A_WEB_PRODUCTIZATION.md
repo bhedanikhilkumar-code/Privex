@@ -194,7 +194,7 @@ All aspects of the Web product have been empirically verified against the core d
 
 ## 15. DOMAIN STRATEGY & PUBLIC URL
 
-- **Target Edge URL:** `https://private-protection.pages.dev` (or organization-assigned Cloudflare Pages subdomain).
+- **Target Edge URL:** `https://privex.pages.dev` (or organization-assigned Cloudflare Pages subdomain).
 - **HTTPS:** Fully automated TLS 1.3 certificates via Cloudflare Edge.
 - **Custom Domain Support:** Configurable via CNAME to `<project>.pages.dev` with automatic SSL/TLS.
 

@@ -178,7 +178,7 @@ To maintain complete architectural integrity without overclaiming capabilities:
 
 1. **Remote Cloudflare Pages DNS Resolution:**
    - The compiled web application distribution (`apps/web/dist`) is 100% verified, production-ready, and tested with real local HTTP servers and strict security headers.
-   - Live DNS propagation on `private-protection.pages.dev` requires configuration of repository secrets (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`) or manual project association in the Cloudflare dashboard.
+   - Live DNS propagation on `privex.pages.dev` requires configuration of repository secrets (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`) or manual project association in the Cloudflare dashboard.
 2. **Desktop Filesystem Deep I/O Latency:**
    - On mechanical hard drives or systems scanning deeply nested directory trees ($> 10,000$ files), initial recursive enumeration is bound by OS disk I/O throughput ($200\text{ ms} - 450\text{ ms}$ for large files). Single-file URL and header checks remain sub-millisecond ($< 1\text{ ms}$).
 3. **Browser Extension Scope:**

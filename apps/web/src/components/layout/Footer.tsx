@@ -1,6 +1,10 @@
 import React from 'react';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onReplayIntro?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onReplayIntro }) => {
   return (
     <footer
       role="contentinfo"
@@ -36,6 +40,29 @@ export const Footer: React.FC = () => {
         <span>100% Offline Air-Gapped Capable</span>
         <span aria-hidden="true" style={{ opacity: 0.4 }}>•</span>
         <span>WCAG 2.1 AA Compliant</span>
+        {onReplayIntro && (
+          <>
+            <span aria-hidden="true" style={{ opacity: 0.4 }}>•</span>
+            <button
+              type="button"
+              onClick={onReplayIntro}
+              aria-label="Replay intro animation"
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-accent)',
+                cursor: 'pointer',
+                fontSize: '0.75rem',
+                fontFamily: 'var(--font-mono)',
+                fontWeight: 700,
+                textDecoration: 'underline',
+                padding: 0
+              }}
+            >
+              🎬 Intro
+            </button>
+          </>
+        )}
       </div>
     </footer>
   );

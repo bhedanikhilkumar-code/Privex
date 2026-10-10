@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { UserPreferences, AppTheme } from '../../scanner/types';
 import { PreferenceStorage } from '../../lib/storage';
+import { IntroStorage } from '../intro/IntroStorage';
 
 interface SettingsViewProps {
   preferences: UserPreferences;
   onPreferencesChange: (newPrefs: UserPreferences) => void;
+  onReplayIntro?: () => void;
 }
 
-export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPreferencesChange }) => {
+export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPreferencesChange, onReplayIntro }) => {
   const [newDomain, setNewDomain] = useState<string>('');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
@@ -444,6 +446,55 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
             }}
           >
             Clear All Local Data
+          </button>
+        </div>
+
+        {/* 5. Cinematic Intro Replay */}
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            border: '2px solid var(--border-dark)',
+            boxShadow: 'var(--shadow-brutal)',
+            padding: '1.5rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '1rem'
+          }}
+        >
+          <div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-brand)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+              VISUAL STORYTELLING
+            </div>
+            <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 800, color: '#111111', marginBottom: '0.35rem' }}>
+              Cinematic Intro Animation
+            </h3>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', margin: 0 }}>
+              Watch the PRIVEX on-device threat protection story animation again.
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-label="Replay intro animation from settings"
+            onClick={() => {
+              IntroStorage.resetIntro();
+              if (onReplayIntro) onReplayIntro();
+            }}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: 'var(--color-brand)',
+              border: '2px solid var(--border-dark)',
+              boxShadow: '3px 3px 0px #111111',
+              color: '#FFFFFF',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.85rem',
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              cursor: 'pointer'
+            }}
+          >
+            🎬 Replay Intro
           </button>
         </div>
       </div>

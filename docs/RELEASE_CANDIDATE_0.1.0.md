@@ -40,7 +40,7 @@ All official release artifacts are stored in `release/` and matched against `rel
 
 ### 3.1 Web Application
 - **Distribution Target:** Edge CDN / Static Web Hosting.
-- **Production URL:** `https://private-protection.pages.dev`
+- **Production URL:** `https://privex.pages.dev`
 - **Hosting Strategy:** Cloudflare Pages with automated GitHub Actions pipeline (`.github/workflows/deploy-pages.yml`).
 - **SPA Fallback Routing:** `_redirects` (`/* /index.html 200`) ensures clean URL navigation.
 - **Security Headers:** Enforced via `_headers` (`HSTS`, `X-Frame-Options: DENY`, strict `CSP`, `X-Content-Type-Options: nosniff`).
@@ -69,7 +69,7 @@ All official release artifacts are stored in `release/` and matched against `rel
 The product owner can manually verify each surface following this protocol:
 
 ### Web Application Checklist
-- [ ] 1. Open `https://private-protection.pages.dev` in a clean browser session (or private browsing window).
+- [ ] 1. Open `https://privex.pages.dev` in a clean browser session (or private browsing window).
 - [ ] 2. Enter a safe URL (e.g. `https://www.wikipedia.org`) and click **Scan**. Verify instant green **ALLOW** verdict and score 0.
 - [ ] 3. Enter a synthetic phishing test link (e.g. `http://192.168.1.1/admin/login.php` or `https://paypa1-security-verification.com/login`). Verify instant red **DANGEROUS** verdict, risk score $\ge 85$, and Grade 6 AI explanation.
 - [ ] 4. Open Developer Tools Network tab during scans; verify **0 network requests** occur.

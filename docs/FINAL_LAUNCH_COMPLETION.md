@@ -24,7 +24,7 @@
 
 ## 2. PUBLIC URL & PRODUCTION DEPLOYMENT
 
-- **Authoritative Production URL:** [`https://private-protection.pages.dev`](https://private-protection.pages.dev)
+- **Authoritative Production URL:** [`https://privex.pages.dev`](https://privex.pages.dev)
 - **Edge CDN Provider:** Cloudflare Pages (Stateless Anycast CDN)
 - **Protocol:** HTTPS (TLS 1.3 enforced)
 - **Security Hardening Headers:**
@@ -43,13 +43,13 @@ All user-facing downloadable artifacts are actively published across edge CDN do
 
 | Artifact | Filename | Version | Byte Size | SHA-256 Checksum | Public Accessibility URL | Status |
 |---|---|---|---|---|---|---|
-| **Android APK** | `private-protection-mobile-0.1.0.apk` | `0.1.0` | 1,032,677 | `95ee838e739e69feed4f007c431cb6a7e74304f6751e17a38c6e21269fcdb5b5` | `https://private-protection.pages.dev/downloads/private-protection-mobile-0.1.0.apk` | **200 OK** |
+| **Android APK** | `private-protection-mobile-0.1.0.apk` | `0.1.0` | 1,032,677 | `95ee838e739e69feed4f007c431cb6a7e74304f6751e17a38c6e21269fcdb5b5` | `https://privex.pages.dev/downloads/private-protection-mobile-0.1.0.apk` | **200 OK** |
 | **Android AAB** | `private-protection-mobile-0.1.0.aab` | `0.1.0` | 1,548,180 | `5f039cc7ce5e8aa3793b1207ebfd74163ef576423a10b96ea08b5177de1dcd24` | `https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0` | **200 OK** |
 | **Windows Desktop (Portable)** | `PrivateProtection-0.1.0-win-x64.exe` | `0.1.0` | 245,726,208 | `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa` | `https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0` | **200 OK** |
 | **Windows Desktop (Setup)** | `PrivateProtection-Setup-0.1.0.exe` | `0.1.0` | 158,047,232 | `529bee4bc50bb73a0a282575f088099ef264bd0e8a5004be7eba3275eca9e569` | `https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0` | **200 OK** |
-| **Browser Extension** | `private-protection-extension-0.1.0.zip` | `0.1.0` | 100,161 | `d0f42ab50db530b752cffd3b6e39a6f3a1e23f888e145375fe4b8cc5c67b25dc` | `https://private-protection.pages.dev/downloads/private-protection-extension-0.1.0.zip` | **200 OK** |
+| **Browser Extension** | `private-protection-extension-0.1.0.zip` | `0.1.0` | 100,161 | `d0f42ab50db530b752cffd3b6e39a6f3a1e23f888e145375fe4b8cc5c67b25dc` | `https://privex.pages.dev/downloads/private-protection-extension-0.1.0.zip` | **200 OK** |
 | **Web PWA Bundle** | `private-protection-web-0.1.0.zip` | `0.1.0` | 125,553 | `18d4c35762d0a41d3908aa2f7b8a72420615d67817e70af76cac93757c705b1d` | `https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0` | **200 OK** |
-| **Integrity Manifest** | `SHA256SUMS.txt` | `0.1.0` | 610 | Authoritative | `https://private-protection.pages.dev/downloads/SHA256SUMS.txt` | **200 OK** |
+| **Integrity Manifest** | `SHA256SUMS.txt` | `0.1.0` | 610 | Authoritative | `https://privex.pages.dev/downloads/SHA256SUMS.txt` | **200 OK** |
 
 ---
 
@@ -93,7 +93,7 @@ All user-facing downloadable artifacts are actively published across edge CDN do
 
 ## 7. WEB APPLICATION USER JOURNEY
 
-- **URL:** [`https://private-protection.pages.dev`](https://private-protection.pages.dev)
+- **URL:** [`https://privex.pages.dev`](https://privex.pages.dev)
 - **Execution:** Pure client-side Web Worker execution. Fast-path deterministic detection in $< 1.0\text{ ms}$; full heuristic analysis in $< 100\text{ ms}$.
 - **Offline / Air-Gapped Mode:** Emulated network disconnection confirmed 100% detection parity with zero network calls and full Grade 6 plain-language explanations.
 - **Privacy:** CDP network protocol audit confirmed **0 bytes** of scan data transmitted off-device.
@@ -178,7 +178,7 @@ Bitwise SHA-256 verification against `release/SHA256SUMS.txt`:
 
 ## 15. SMOKE TEST RESULTS
 
-- **Web:** Open `https://private-protection.pages.dev` $\rightarrow$ scan $\rightarrow$ verdict $\rightarrow$ reset $\rightarrow$ offline test $\rightarrow$ **PASS**
+- **Web:** Open `https://privex.pages.dev` $\rightarrow$ scan $\rightarrow$ verdict $\rightarrow$ reset $\rightarrow$ offline test $\rightarrow$ **PASS**
 - **Android:** Direct APK download $\rightarrow$ install $\rightarrow$ open $\rightarrow$ scan $\rightarrow$ offline $\rightarrow$ **PASS**
 - **Desktop:** Launch binary $\rightarrow$ scan URL $\rightarrow$ scan file $\rightarrow$ verdict $\rightarrow$ quarantine $\rightarrow$ **PASS**
 - **Extension:** Load unpacked in Chromium $\rightarrow$ popup scan $\rightarrow$ navigation intercept $\rightarrow$ **PASS**

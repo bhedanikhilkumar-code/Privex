@@ -1,6 +1,6 @@
 async function checkLiveDeploy() {
   console.log('=== VERIFYING PRODUCTION WEB APPLICATION DEPLOYMENT ===');
-  const url = 'https://private-protection.pages.dev';
+  const url = 'https://privex.pages.dev';
   console.log('Target Production URL:', url);
 
   let remoteSuccess = false;
@@ -22,8 +22,8 @@ async function checkLiveDeploy() {
     console.log('  PWA Manifest Linked:', body.includes('manifest.webmanifest') || body.includes('manifest.json'));
     console.log('  Title:', body.match(/<title>(.*?)<\/title>/)?.[1]);
 
-    console.log('\nChecking SPA Deep Link Fallback (https://private-protection.pages.dev/scanner):');
-    const spaRes = await fetch('https://private-protection.pages.dev/scanner');
+    console.log('\nChecking SPA Deep Link Fallback (https://privex.pages.dev/scanner):');
+    const spaRes = await fetch('https://privex.pages.dev/scanner');
     console.log('SPA Status:', spaRes.status, spaRes.statusText);
     const spaBody = await spaRes.text();
     console.log('SPA Fallback Serves App Shell:', spaBody.includes('id="root"'));

@@ -1,0 +1,460 @@
+/* ==========================================================================
+   PRIVEX 5-SECOND CINEMATIC INTRO — NEOBRUTALIST CYBERSECURITY UI/UX
+   Tailored to PRIVEX design system: Acid Lime #D7FF3F, Brand Blue #2457FF,
+   Deep Midnight #070B14, Bold 2px Borders & Brutalist Shadows.
+   ========================================================================== */
+
+#privex-intro {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #070B14;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  color: #F8FAFC;
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.45s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#privex-intro.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Atmospheric Grid & Grain */
+.privex-intro-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(215, 255, 63, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(215, 255, 63, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: center center;
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Scene Container */
+.intro-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease-in-out;
+  z-index: 10;
+}
+
+.intro-scene.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Cinematic Human Background Photography/Illustration */
+.human-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 1;
+  transform: scale(1.04);
+  transition: transform 4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+#scene-1.active .human-bg { transform: scale(1); }
+#scene-2.active .human-bg { transform: scale(1.02) translateX(-1%); }
+#scene-3.active .human-bg { transform: scale(1.01) translateY(1%); }
+
+/* Neobrutalist Film Gradient Overlay */
+.intro-scene::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 55%;
+  background: linear-gradient(to top, rgba(7, 11, 20, 0.98) 0%, rgba(7, 11, 20, 0.6) 60%, transparent 100%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Neobrutalist Floating HUD Cards */
+.privex-brutal-card {
+  background: #FFFFFF;
+  color: #111111;
+  border: 2.5px solid #111111;
+  box-shadow: 6px 6px 0px #111111;
+  border-radius: 4px;
+  padding: 1.25rem 1.6rem;
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 24vh;
+  max-width: 90vw;
+  width: 380px;
+  animation: brutalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes brutalSlideUp {
+  0% { transform: translateY(18px) scale(0.96); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* Neobrutalist Badges */
+.privex-badge-acid {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #D7FF3F;
+  color: #111111;
+  border: 2px solid #111111;
+  box-shadow: 2px 2px 0px #111111;
+  font-family: 'Space Grotesk', monospace, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.25rem 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.6rem;
+}
+
+.privex-badge-alert {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #FF5A36;
+  color: #FFFFFF;
+  border: 2px solid #111111;
+  box-shadow: 2px 2px 0px #111111;
+  font-family: 'Space Grotesk', monospace, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.3rem 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  animation: brutalFlash 0.5s infinite alternate;
+}
+
+@keyframes brutalFlash {
+  0% { transform: scale(0.98); }
+  100% { transform: scale(1.02); }
+}
+
+/* Request Network Nodes */
+.privex-brutal-flow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.75rem;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.privex-flow-pill {
+  background: #F1F5F9;
+  border: 1.5px solid #111111;
+  padding: 0.2rem 0.5rem;
+  font-weight: 700;
+  color: #111111;
+}
+
+.privex-flow-pill.danger {
+  background: #FFECE8;
+  border-color: #FF5A36;
+  color: #FF5A36;
+  font-weight: 800;
+}
+
+/* Scene 3: Holographic Neobrutalist Shield */
+.privex-shield-wrap {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 5;
+  margin-top: 10vh;
+}
+
+.privex-shield-ring-out {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px dashed #D7FF3F;
+  animation: ringSpin 4s linear infinite;
+}
+
+.privex-shield-ring-in {
+  position: absolute;
+  width: 72%;
+  height: 72%;
+  border-radius: 50%;
+  border: 2px solid #2457FF;
+  border-top-color: transparent;
+  animation: ringSpinRev 3s linear infinite;
+}
+
+@keyframes ringSpin { 100% { transform: rotate(360deg); } }
+@keyframes ringSpinRev { 100% { transform: rotate(-360deg); } }
+
+.privex-shield-center-icon {
+  font-size: 4.8rem;
+  filter: drop-shadow(0 0 20px rgba(215, 255, 63, 0.8)) drop-shadow(0 0 35px rgba(36, 87, 255, 0.6));
+  animation: shieldConstruct 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes shieldConstruct {
+  0% { transform: scale(0.3); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.privex-shield-wave {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 15px;
+  height: 15px;
+  background: radial-gradient(circle, rgba(215, 255, 63, 0.8) 0%, rgba(36, 87, 255, 0.4) 40%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  z-index: 3;
+  pointer-events: none;
+  animation: wavePulse 1.2s ease-out infinite;
+}
+
+@keyframes wavePulse {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(35); opacity: 0; }
+}
+
+/* Security Diagnostic Card Row */
+.privex-status-row {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  z-index: 6;
+}
+
+.privex-status-chip {
+  background: #FFFFFF;
+  color: #111111;
+  border: 2px solid #111111;
+  box-shadow: 3px 3px 0px #111111;
+  padding: 0.35rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.725rem;
+  font-weight: 700;
+}
+
+.chip-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid #111111;
+}
+
+/* Scene 4: PRIVEX Brand Reveal Lockup */
+.privex-brand-lockup {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: brandPop 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes brandPop {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.privex-brand-shield-logo {
+  width: 84px;
+  height: 84px;
+  background: #2457FF;
+  border: 3px solid #111111;
+  box-shadow: 6px 6px 0px #D7FF3F;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.4rem;
+  margin-bottom: 1.2rem;
+}
+
+.privex-brand-heading {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(2.8rem, 8vw, 4.8rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: #FFFFFF;
+  text-shadow: 4px 4px 0px #111111;
+  margin: 0;
+}
+
+.privex-brand-subtag {
+  font-family: 'Space Grotesk', monospace;
+  font-size: clamp(0.85rem, 2vw, 1.15rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #D7FF3F;
+  margin-top: 0.75rem;
+  background: #111111;
+  border: 1.5px solid #D7FF3F;
+  padding: 0.35rem 1rem;
+  box-shadow: 3px 3px 0px #2457FF;
+}
+
+/* Bottom Story Caption Bar */
+.privex-caption-bar {
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 640px;
+  text-align: center;
+  z-index: 25;
+}
+
+.privex-caption-text {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+  color: #F8FAFC;
+  font-weight: 500;
+  line-height: 1.5;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+}
+
+.privex-caption-text.alert {
+  color: #FF5A36;
+  font-weight: 700;
+}
+
+/* 5-Second Timeline Progress Bar */
+.privex-progress-line {
+  position: absolute;
+  bottom: 2.2%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  z-index: 30;
+}
+
+.privex-progress-fill {
+  height: 100%;
+  background: #D7FF3F;
+  width: 0%;
+  animation: progressFill 5s linear forwards;
+}
+
+@keyframes progressFill {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+/* Brutalist Skip Button */
+.intro-skip-btn {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: #FFFFFF;
+  color: #111111;
+  border: 2px solid #111111;
+  box-shadow: 3px 3px 0px #111111;
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 0.45rem 0.95rem;
+  cursor: pointer;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.intro-skip-btn:hover {
+  background: #D7FF3F;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #111111;
+}
+
+.intro-skip-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px #111111;
+}
+
+/* Reduced Motion Mode */
+@media (prefers-reduced-motion: reduce) {
+  .human-bg,
+  .privex-shield-ring-out,
+  .privex-shield-ring-in,
+  .privex-shield-wave,
+  .privex-badge-alert,
+  .privex-progress-fill {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .privex-brutal-card {
+    margin-top: 18vh;
+    width: 320px;
+    padding: 1rem 1.2rem;
+  }
+  .privex-shield-wrap {
+    margin-top: 8vh;
+    width: 140px;
+    height: 140px;
+  }
+  .privex-shield-center-icon {
+    font-size: 3.8rem;
+  }
+  .intro-skip-btn {
+    top: 1rem;
+    right: 1rem;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}

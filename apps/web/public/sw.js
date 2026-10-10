@@ -6,7 +6,7 @@
  * ZERO user data, scan requests, URLs, text, or results are EVER cached in this Service Worker.
  */
 
-const CACHE_NAME = 'private-protection-shell-v1';
+const CACHE_NAME = 'privex-shell-v1';
 const SHELL_ASSETS = [
   '/',
   '/index.html',

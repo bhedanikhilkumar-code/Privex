@@ -15,7 +15,7 @@ This audit represents the final phase of validation for Privex (PS-05). Having a
 > *"Can a real, non-developer end user discover, obtain, install, understand, and use Privex successfully without specialized tooling, developer knowledge, or cloud dependencies?"*
 
 The audit evaluated all 4 user-facing release surfaces:
-1. **Production Web Application**: Direct browser access (`https://private-protection.pages.dev`)
+1. **Production Web Application**: Direct browser access (`https://privex.pages.dev`)
 2. **Android Mobile Application**: Direct APK installation (`release/private-protection-mobile-0.1.0.apk`)
 3. **Windows Desktop Application**: Direct Setup installer and standalone Portable executable (`release/PrivateProtection-Setup-0.1.0.exe` and `release/PrivateProtection-0.1.0-win-x64.exe`)
 4. **Browser Extension**: Direct unpacked sideloading into Chromium browsers (`release/private-protection-extension-0.1.0.zip`)
@@ -37,7 +37,7 @@ To ensure realistic, unbiased auditing, three distinct non-developer personas we
 ## 3. WEBSITE USER JOURNEY AUDIT
 
 ### 3.1 Live Production Web Application
-- **Production URL**: `https://private-protection.pages.dev`
+- **Production URL**: `https://privex.pages.dev`
 - **Hosting**: Cloudflare Pages (Stateless Edge CDN, zero PII logging)
 - **Protocol**: HTTPS (TLS 1.3)
 - **Entrypoint**: `index.html` (Vite production single-page application)
@@ -156,7 +156,7 @@ The documentation and UI provide 3 concrete, reproducible test scenarios that an
 
 | Release Channel | Artifact Path | Format | Verification Status | Cloud Dependency |
 |---|---|---|---|---|
-| **Web Production** | `https://private-protection.pages.dev` | Static Single Page App | **VERIFIED LIVE** | Zero (Client-side execution) |
+| **Web Production** | `https://privex.pages.dev` | Static Single Page App | **VERIFIED LIVE** | Zero (Client-side execution) |
 | **Android Direct** | `release/private-protection-mobile-0.1.0.apk` | Signed Release APK | **VERIFIED STANDALONE** | Zero |
 | **Desktop Setup** | `release/PrivateProtection-Setup-0.1.0.exe` | NSIS Windows Installer | **VERIFIED STANDALONE** | Zero |
 | **Desktop Portable** | `release/PrivateProtection-0.1.0-win-x64.exe` | Single-File Executable | **VERIFIED STANDALONE** | Zero |

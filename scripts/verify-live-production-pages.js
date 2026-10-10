@@ -3,7 +3,7 @@ import https from 'https';
 
 function fetchUrl(urlPath) {
   return new Promise((resolve, reject) => {
-    https.get('https://private-protection.pages.dev' + urlPath, (res) => {
+    https.get('https://privex.pages.dev' + urlPath, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => resolve({

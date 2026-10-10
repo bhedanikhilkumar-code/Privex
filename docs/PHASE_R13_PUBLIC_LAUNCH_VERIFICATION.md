@@ -10,7 +10,7 @@
 
 ## 1. PUBLIC URL & WEBSITE INTEGRITY (R13-A)
 
-- **Authoritative Production URL:** `https://private-protection.pages.dev`
+- **Authoritative Production URL:** `https://privex.pages.dev`
 - **Hosting Infrastructure:** Cloudflare Pages (Stateless Edge CDN, TLS 1.3, Global Anycast)
 - **Deployment Status:** Active, Live, and Independently Verified
 - **Security Headers Verified:**
@@ -30,20 +30,20 @@ Every user-facing downloadable artifact has been compiled, hashed, and published
 
 | Artifact Category | Exact Filename | Version | Byte Size | SHA-256 Checksum | Public Accessibility & Direct Download URL | Verification Status |
 |---|---|---|---|---|---|---|
-| **Android APK** | `private-protection-mobile-0.1.0.apk` | `0.1.0` | 1,032,677 | `95ee838e739e69feed4f007c431cb6a7e74304f6751e17a38c6e21269fcdb5b5` | `https://private-protection.pages.dev/downloads/private-protection-mobile-0.1.0.apk` | **VERIFIED PASS (200 OK)** |
+| **Android APK** | `private-protection-mobile-0.1.0.apk` | `0.1.0` | 1,032,677 | `95ee838e739e69feed4f007c431cb6a7e74304f6751e17a38c6e21269fcdb5b5` | `https://privex.pages.dev/downloads/private-protection-mobile-0.1.0.apk` | **VERIFIED PASS (200 OK)** |
 | **Android AAB** | `private-protection-mobile-0.1.0.aab` | `0.1.0` | 1,548,180 | `5f039cc7ce5e8aa3793b1207ebfd74163ef576423a10b96ea08b5177de1dcd24` | `https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0` | **VERIFIED PASS** |
 | **Windows Desktop (Portable)** | `PrivateProtection-0.1.0-win-x64.exe` | `0.1.0` | 245,726,208 | `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa` | `https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0` | **VERIFIED PASS** |
 | **Windows Desktop (Setup)** | `PrivateProtection-Setup-0.1.0.exe` | `0.1.0` | 158,047,232 | `529bee4bc50bb73a0a282575f088099ef264bd0e8a5004be7eba3275eca9e569` | `https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0` | **VERIFIED PASS** |
-| **Browser Extension** | `private-protection-extension-0.1.0.zip` | `0.1.0` | 100,161 | `d0f42ab50db530b752cffd3b6e39a6f3a1e23f888e145375fe4b8cc5c67b25dc` | `https://private-protection.pages.dev/downloads/private-protection-extension-0.1.0.zip` | **VERIFIED PASS (200 OK)** |
+| **Browser Extension** | `private-protection-extension-0.1.0.zip` | `0.1.0` | 100,161 | `d0f42ab50db530b752cffd3b6e39a6f3a1e23f888e145375fe4b8cc5c67b25dc` | `https://privex.pages.dev/downloads/private-protection-extension-0.1.0.zip` | **VERIFIED PASS (200 OK)** |
 | **Web PWA Bundle** | `private-protection-web-0.1.0.zip` | `0.1.0` | 125,553 | `18d4c35762d0a41d3908aa2f7b8a72420615d67817e70af76cac93757c705b1d` | `https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0` | **VERIFIED PASS** |
-| **Integrity Manifest** | `SHA256SUMS.txt` | `0.1.0` | 610 | Authoritative | `https://private-protection.pages.dev/downloads/SHA256SUMS.txt` | **VERIFIED PASS (200 OK)** |
+| **Integrity Manifest** | `SHA256SUMS.txt` | `0.1.0` | 610 | Authoritative | `https://privex.pages.dev/downloads/SHA256SUMS.txt` | **VERIFIED PASS (200 OK)** |
 
 ---
 
 ## 3. ANDROID PUBLIC DISTRIBUTION (R13-C)
 
 - **Discovery & Sideloading Journey:**
-  1. A user on an Android phone navigates to `https://private-protection.pages.dev` or `README.md`.
+  1. A user on an Android phone navigates to `https://privex.pages.dev` or `README.md`.
   2. Tapping "Direct APK (1.0 MB)" triggers immediate download of `private-protection-mobile-0.1.0.apk` via HTTP 200 with content-type `application/vnd.android.package-archive`.
   3. User opens download notification or Files app $\rightarrow$ taps APK $\rightarrow$ enables "Install unknown apps" toggle when prompted $\rightarrow$ taps "Install".
   4. App icon ("Privex") launches into on-device dashboard.
@@ -59,7 +59,7 @@ Every user-facing downloadable artifact has been compiled, hashed, and published
 ## 4. DESKTOP PUBLIC DISTRIBUTION (R13-D)
 
 - **Discovery & Installation Journey:**
-  1. Windows PC user navigates to `https://private-protection.pages.dev` or `README.md`.
+  1. Windows PC user navigates to `https://privex.pages.dev` or `README.md`.
   2. Clicks "Desktop Downloads" $\rightarrow$ GitHub Release `v0.1.0`.
   3. Downloads `PrivateProtection-0.1.0-win-x64.exe` (Portable) or `PrivateProtection-Setup-0.1.0.exe` (Setup).
   4. Double-clicks executable. The portable version runs immediately without installation or admin rights; the setup installer installs to `%LOCALAPPDATA%\Programs\Privex`.
@@ -88,7 +88,7 @@ Every user-facing downloadable artifact has been compiled, hashed, and published
 
 ## 6. WEB PRODUCT EVALUATION (R13-F)
 
-Evaluated via live automated CDP session against production `https://private-protection.pages.dev`:
+Evaluated via live automated CDP session against production `https://privex.pages.dev`:
 - **Safe Test:** `https://en.wikipedia.org/wiki/Computer_security` $\rightarrow$ `SAFE` (0/100 risk, Green badge, latency 100 ms).
 - **Warning Test:** `http://192.168.1.100/login.php?update_banking_auth=immediate` $\rightarrow$ `DANGEROUS / BLOCK` (100/100 risk, Crimson banner, latency 100 ms).
 - **Explanation Check:** Jargon-free explanation detailing raw numerical IP deception and urgent credential harvesting.
@@ -106,7 +106,7 @@ Evaluated strictly from the perspective of an external user who has never viewed
 | First-Time User Question | Public Location Found | Answer Clarity & Accuracy |
 |---|---|---|
 | *"What is Privex?"* | Website hero & README Section 1 | "Local-first, privacy-first cybersecurity platform protecting users from phishing links, scam messages, deceptive websites, and malicious files directly on their endpoint." |
-| *"How do I use it?"* | Website scanner tabs & README Section 8 | Visit `https://private-protection.pages.dev` and paste a URL or message into the scanner, or install native apps. |
+| *"How do I use it?"* | Website scanner tabs & README Section 8 | Visit `https://privex.pages.dev` and paste a URL or message into the scanner, or install native apps. |
 | *"Where do I download Android?"* | Website Overview & README Section 8 | Direct APK download link (`/downloads/private-protection-mobile-0.1.0.apk`) with 5-step sideloading guide. |
 | *"Where do I download Windows?"* | Website Overview & README Section 8 | GitHub release links for Setup installer and Portable executable. |
 | *"How do I install the Extension?"* | Website Overview & README Section 8 | Direct ZIP download (`/downloads/private-protection-extension-0.1.0.zip`) with 5-step "Load unpacked" guide. |
@@ -121,10 +121,10 @@ Evaluated strictly from the perspective of an external user who has never viewed
 ## 8. LINK INTEGRITY AUDIT (R13-H)
 
 Every user-facing link across the live website and `README.md` was programmatically verified:
-- `https://private-protection.pages.dev`: **200 OK**
-- `https://private-protection.pages.dev/downloads/SHA256SUMS.txt`: **200 OK**
-- `https://private-protection.pages.dev/downloads/private-protection-mobile-0.1.0.apk`: **200 OK**
-- `https://private-protection.pages.dev/downloads/private-protection-extension-0.1.0.zip`: **200 OK**
+- `https://privex.pages.dev`: **200 OK**
+- `https://privex.pages.dev/downloads/SHA256SUMS.txt`: **200 OK**
+- `https://privex.pages.dev/downloads/private-protection-mobile-0.1.0.apk`: **200 OK**
+- `https://privex.pages.dev/downloads/private-protection-extension-0.1.0.zip`: **200 OK**
 - `https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0`: **200 OK**
 - `release/private-protection-mobile-0.1.0.apk`: **Real file exists on disk (1,032,677 bytes)**
 - `release/PrivateProtection-Setup-0.1.0.exe`: **Real file exists on disk (158,047,232 bytes)**

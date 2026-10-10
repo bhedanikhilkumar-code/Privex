@@ -6,7 +6,7 @@
 **Release Version:** `v0.1.0`  
 **Distribution Channel:** Public GitHub Release & Production Static Edge CDN  
 **Public Release Tag:** [`v0.1.0`](https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0)  
-**Public Web Application:** [`https://private-protection.pages.dev`](https://private-protection.pages.dev)  
+**Public Web Application:** [`https://privex.pages.dev`](https://privex.pages.dev)  
 **Release Date:** 2026-10-04  
 **Launch Authority:** Autonomous Master Orchestrator on behalf of Product Owner  
 **Launch Status:** **100% PRODUCTION-LIVE & DISTRIBUTED**
@@ -29,7 +29,7 @@ Every capability adheres strictly to the constitutional invariants defined in `A
 
 | Surface | Distribution Channel | Public URL / Access Point | Format / Package |
 |---|---|---|---|
-| **Web Application** | Cloudflare Pages Global CDN | [https://private-protection.pages.dev](https://private-protection.pages.dev) | Production Static PWA with Web Worker Engine |
+| **Web Application** | Cloudflare Pages Global CDN | [https://privex.pages.dev](https://privex.pages.dev) | Production Static PWA with Web Worker Engine |
 | **Android (Direct Install)** | GitHub Release Assets | [GitHub Release v0.1.0](https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0) | `private-protection-mobile-0.1.0.apk` |
 | **Android (Google Play)** | GitHub Release Assets | [GitHub Release v0.1.0](https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0) | `private-protection-mobile-0.1.0.aab` |
 | **Windows Desktop (Installer)**| GitHub Release Assets | [GitHub Release v0.1.0](https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0) | `PrivateProtection-Setup-0.1.0.exe` |
@@ -68,7 +68,7 @@ e4fac38b9195969490f9e1fa8e1b2727dff74545cf13a7e13578b2e7b9a00b8e  private-protec
 ## 4. End-to-End Surface Validation Summary
 
 ### 4.1 Web Application
-- **Production URL:** `https://private-protection.pages.dev`
+- **Production URL:** `https://privex.pages.dev`
 - **Delivery Mechanism:** Cloudflare Pages edge deployment backed by `.github/workflows/deploy-pages.yml`.
 - **Security Headers:** Strict CSP with `default-src 'self'`, `script-src 'self' 'wasm-unsafe-eval'`, `style-src 'self' 'unsafe-inline'`, `connect-src 'self'`, `frame-ancestors 'none'`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`.
 - **Offline / PWA:** PWA manifest (`manifest.json`) and Service Worker (`sw.js`) pre-caching shell assets for 100% air-gapped web usage.
@@ -103,7 +103,7 @@ e4fac38b9195969490f9e1fa8e1b2727dff74545cf13a7e13578b2e7b9a00b8e  private-protec
 ## 6. Release Verification & Launch Sign-off
 
 - [x] All 6 release artifacts built, hashed, and published to GitHub Release `v0.1.0`.
-- [x] Web application deployed and accessible via `https://private-protection.pages.dev`.
+- [x] Web application deployed and accessible via `https://privex.pages.dev`.
 - [x] Full monorepo automated test suite passing (100% test pass rate across all packages).
 - [x] Cross-platform path safety and quarantine tests verified for Windows and Linux environments.
 - [x] SHA-256 checksum file `SHA256SUMS.txt` committed and attached to release.

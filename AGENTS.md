@@ -485,10 +485,10 @@ All 18 foundational capabilities are fully completed, verified against actual re
 - **Status:** **PASS (VERIFIED)**.
 
 ### Phase R2 — Production Web Verification
-- **Target URL:** `https://private-protection.pages.dev`
+- **Target URL:** `https://privex.pages.dev`
 - **Verification Status:**
   - Production static bundle (`apps/web/dist`) and release archive (`release/private-protection-web-0.1.0.zip`) verified with 100% offline parity, strict CSP, and zero dev dependencies.
-  - Live deployment diagnosis: `private-protection.pages.dev` currently encounters DNS `ENOTFOUND` because:
+  - Live deployment diagnosis: `privex.pages.dev` currently encounters DNS `ENOTFOUND` because:
     1. Project name configured in `apps/web/wrangler.toml` is `private-protection-web` (which targets `https://private-protection-web.pages.dev`).
     2. GitHub Actions workflow `.github/workflows/deploy-pages.yml` executes conditionally upon the presence of repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
   - Deployment remediation: When the project owner configures Cloudflare credentials or imports `apps/web/dist` directly into the Cloudflare Pages dashboard, the production URL becomes live with 0 code changes.
@@ -532,7 +532,7 @@ All 18 foundational capabilities are fully completed, verified against actual re
 
 ### Phase R6 — Domain Configuration
 - **Status:** **OPTIONAL**.
-- **Current Production Endpoint:** `https://private-protection.pages.dev` / `https://private-protection-web.pages.dev`.
+- **Current Production Endpoint:** `https://privex.pages.dev` / `https://private-protection-web.pages.dev`.
 - **Policy:** A custom apex domain (e.g. `privateprotection.app`) is strictly OPTIONAL and does not block project completion. If requested later by the project owner: configure DNS CNAME/ALIAS $\rightarrow$ enable Cloudflare Universal SSL $\rightarrow$ configure automatic HTTPS redirection.
 - **Status:** **OPTIONAL (NON-BLOCKING)**.
 

@@ -9,7 +9,7 @@ fs.mkdirSync(tempDir, { recursive: true });
 
 async function main() {
   console.log('=== VERIFYING LIVE PRODUCTION WEB DEPLOYMENT (R11-B) ===');
-  console.log('Target URL: https://private-protection.pages.dev');
+  console.log('Target URL: https://privex.pages.dev');
 
   const proc = spawn(chromePath, [
     '--headless=new',
@@ -54,7 +54,7 @@ async function main() {
       });
     }
 
-    const { targetId } = await send('Target.createTarget', { url: 'https://private-protection.pages.dev' });
+    const { targetId } = await send('Target.createTarget', { url: 'https://privex.pages.dev' });
     const { sessionId } = await send('Target.attachToTarget', { targetId, flatten: true });
     await send('Page.enable', {}, sessionId);
     await send('Runtime.enable', {}, sessionId);

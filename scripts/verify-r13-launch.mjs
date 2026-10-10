@@ -43,7 +43,7 @@ async function verifyR13Launch() {
 
   // 1. Production Website Verification
   console.log('--- 1. PUBLIC WEBSITE (R13-A) ---');
-  const webRes = await get('https://private-protection.pages.dev/');
+  const webRes = await get('https://privex.pages.dev/');
   assert(webRes.status === 200, 'Web URL resolves with HTTP 200');
   assert(webRes.headers['strict-transport-security'] !== undefined, 'HSTS header enforced on Cloudflare Pages');
   assert(webRes.headers['content-security-policy'] !== undefined, 'Content-Security-Policy header enforced');
@@ -56,14 +56,14 @@ async function verifyR13Launch() {
   console.log('\n--- 2. DIRECT PUBLIC DOWNLOADS (R13-B, R13-C, R13-E) ---');
   
   // SHA256SUMS.txt
-  const sumsRes = await get('https://private-protection.pages.dev/downloads/SHA256SUMS.txt');
+  const sumsRes = await get('https://privex.pages.dev/downloads/SHA256SUMS.txt');
   assert(sumsRes.status === 200, 'Public SHA256SUMS.txt accessible (HTTP 200)');
   const localSums = fs.readFileSync(path.join(process.cwd(), 'release', 'SHA256SUMS.txt'), 'utf-8');
   assert(sumsRes.body.toString('utf-8').trim() === localSums.trim(), 'Public SHA256SUMS.txt matches local release manifest exactly');
 
   // Android APK
   console.log('Downloading public Android APK from production edge CDN...');
-  const apkRes = await get('https://private-protection.pages.dev/downloads/private-protection-mobile-0.1.0.apk');
+  const apkRes = await get('https://privex.pages.dev/downloads/private-protection-mobile-0.1.0.apk');
   assert(apkRes.status === 200, 'Public Android APK accessible (HTTP 200)');
   assert(apkRes.headers['content-type'] === 'application/vnd.android.package-archive', 'APK content-type is valid android package');
   assert(apkRes.body.length === 1032677, `APK size matches exact byte count (1,032,677 bytes, got ${apkRes.body.length})`);
@@ -72,7 +72,7 @@ async function verifyR13Launch() {
 
   // Extension ZIP
   console.log('Downloading public Extension ZIP from production edge CDN...');
-  const zipRes = await get('https://private-protection.pages.dev/downloads/private-protection-extension-0.1.0.zip');
+  const zipRes = await get('https://privex.pages.dev/downloads/private-protection-extension-0.1.0.zip');
   assert(zipRes.status === 200, 'Public Extension ZIP accessible (HTTP 200)');
   assert(zipRes.headers['content-type'] === 'application/zip', 'Extension content-type is application/zip');
   assert(zipRes.body.length === 100161, `Extension size matches exact byte count (100,161 bytes, got ${zipRes.body.length})`);

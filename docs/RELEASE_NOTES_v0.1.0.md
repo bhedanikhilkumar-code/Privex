@@ -20,7 +20,7 @@ Privex `v0.1.0` is the official initial public release of the on-device cybersec
   `SHA-256: 49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa`
 
 ## Supported Platforms
-- **Web App:** Available as PWA and static site bundle (`https://private-protection.pages.dev`).
+- **Web App:** Available as PWA and static site bundle (`https://privex.pages.dev`).
 - **Android:** Direct APK sideloading and Google Play release bundle (Android 8.0+ / API 26-34).
 - **Windows:** Consumer installer and portable executable for 64-bit Windows 10/11.
 - **Browser Extension:** Manifest V3 extension for Google Chrome, Microsoft Edge, and Chromium-based browsers.

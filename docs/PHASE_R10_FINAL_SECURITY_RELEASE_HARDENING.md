@@ -104,7 +104,7 @@ Privex's core doctrine is **Zero Cloud Dependence** and **Zero Network Egress fo
 
 ## 5. WEB PLATFORM SECURITY AUDIT
 
-The production Web client (`https://private-protection.pages.dev` and `apps/web/dist`) was audited against OWASP Web Security standards:
+The production Web client (`https://privex.pages.dev` and `apps/web/dist`) was audited against OWASP Web Security standards:
 
 ### Controls & Headers
 - **Content Security Policy (CSP):**

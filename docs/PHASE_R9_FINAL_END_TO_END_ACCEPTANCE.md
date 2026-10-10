@@ -21,7 +21,7 @@ This phase validates the actual distributed artifacts, real browser interactions
 
 | Surface | Target Environment | Tested Artifact | Hash / Verification Status |
 |---|---|---|---|
-| **Web App** | Production Edge CDN (`https://private-protection.pages.dev`) via Google Chrome & Puppeteer | `release/private-protection-web-0.1.0.zip` | `8a73ba28239565816382bd6f7e89b5669db647f142387a4a59c0fa138f37db88` (HTTP 200 OK) |
+| **Web App** | Production Edge CDN (`https://privex.pages.dev`) via Google Chrome & Puppeteer | `release/private-protection-web-0.1.0.zip` | `8a73ba28239565816382bd6f7e89b5669db647f142387a4a59c0fa138f37db88` (HTTP 200 OK) |
 | **Android App** | Android 17 / API 35 (`sdk_gphone16k_x86_64`) Emulator | `release/private-protection-mobile-0.1.0.apk` | `95ee838e739e69feed4f007c431cb6a7e74304f6751e17a38c6e21269fcdb5b5` (100% Match) |
 | **Desktop App** | Windows 11 x64 Native Runtime (Electron `44.5.1`, Node `24.21.0`, Chrome `152.0.7977.130`) | `release/PrivateProtection-0.1.0-win-x64.exe` & `PrivateProtection.exe` | `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa` (100% Match) |
 | **Browser Extension** | Chromium Manifest V3 (`Chrome 154`, `Edge 154`, `Brave 154`) | `release/private-protection-extension-0.1.0.zip` | `3a2db690f2c33b1bc90d45843fc43df23aa81bd0744cadd49ed6c25f406fa15c` (100% Match) |
@@ -32,7 +32,7 @@ This phase validates the actual distributed artifacts, real browser interactions
 
 | Surface | Function | Acceptance SLA / Criteria | Observed Behavior | Verdict | Evidence |
 |---|---|---|---|---|---|
-| **Web** | START | Public URL loads in browser $< 3\text{ s}$ | Loaded in `980 ms` from Cloudflare Pages CDN | **PASS** | `https://private-protection.pages.dev` |
+| **Web** | START | Public URL loads in browser $< 3\text{ s}$ | Loaded in `980 ms` from Cloudflare Pages CDN | **PASS** | `https://privex.pages.dev` |
 | **Web** | INPUT | Accepts URL and message text | Input and Textarea accept input and sample chips | **PASS** | UI Form DOM Evaluation |
 | **Web** | SCAN | On-device scan execution $< 50\text{ ms}$ | Scans executed in `9.7–18.6 ms` in Web Worker | **PASS** | Realtime telemetry stream |
 | **Web** | VERDICT | Deterministic Core risk verdict | `ALLOW` (score 0), `DANGEROUS` (score 93 & 96) | **PASS** | Result cards in DOM |
@@ -71,9 +71,9 @@ This phase validates the actual distributed artifacts, real browser interactions
 
 ## 4. Web User Journey (R9-B)
 
-The public production web application was exercised end-to-end via automated Puppeteer browser tooling against the live CDN endpoint `https://private-protection.pages.dev`:
+The public production web application was exercised end-to-end via automated Puppeteer browser tooling against the live CDN endpoint `https://privex.pages.dev`:
 
-1. **Open & Load:** Navigated to `https://private-protection.pages.dev`. Loaded in `980 ms` with HTTP 200. Zero development or localhost asset references.
+1. **Open & Load:** Navigated to `https://privex.pages.dev`. Loaded in `980 ms` with HTTP 200. Zero development or localhost asset references.
 2. **UI Ready:** Rendered header, status badge (`100% Local On-Device Processing`), navigation tabs (`OVERVIEW`, `URL SCANNER`, `MESSAGE SCANNER`, `AI SECURITY ASSISTANT`, `SETTINGS`), and telemetry stream.
 3. **Safe URL Scan:** Selected `Safe Domain` (`https://www.google.com/search`). Evaluated in `15.8 ms`. Verdict: `ALLOW` (Risk Score `0 / 100`, Severity `None`, Confidence `100%`, Action `PROCEED`). AI Assistant provided Grade 6 plain-language reassurance (`"Verified Safe to Proceed"`).
 4. **Dangerous URL Scan:** Selected `IP Host Phish` (`http://192.168.1.100/account/login`). Evaluated in `18.6 ms`. Verdict: `DANGEROUS` (Risk Score `93 / 100`, Action `BLOCK_NAVIGATION`). Enforced a 1-second safety friction gate. Identified 4 technical threat signals (`IP Address URL`, `Internal Network Target`, `Unencrypted Connection`).

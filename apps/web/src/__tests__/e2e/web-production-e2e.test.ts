@@ -81,14 +81,14 @@ describe('Web Production Runtime E2E & Server Verification (Phase 38-A.1)', () =
     const manifestRes = await fetch(`${BASE_URL}/manifest.json`);
     expect(manifestRes.status).toBe(200);
     const manifest = await manifestRes.json();
-    expect(manifest.short_name).toBe('PrivateProtection');
+    expect(manifest.short_name).toBe('Privex');
     expect(manifest.display).toBe('standalone');
     expect(manifest.icons.length).toBeGreaterThan(0);
 
     const swRes = await fetch(`${BASE_URL}/sw.js`);
     expect(swRes.status).toBe(200);
     const swCode = await swRes.text();
-    expect(swCode).toContain('private-protection-shell-v1');
+    expect(swCode).toContain('privex-shell-v1');
     expect(swCode).toContain('caches.open');
   });
 
