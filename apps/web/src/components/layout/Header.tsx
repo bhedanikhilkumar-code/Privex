@@ -59,19 +59,23 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange }) => {
         <div
           aria-hidden="true"
           style={{
-            width: '2.4rem',
-            height: '2.4rem',
-            backgroundColor: 'var(--color-brand)',
+            width: '2.5rem',
+            height: '2.5rem',
+            backgroundColor: '#090d16',
             border: '2px solid var(--border-dark)',
             boxShadow: 'var(--shadow-brutal-sm)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '1.25rem',
-            color: '#ffffff'
+            padding: '2px',
+            overflow: 'hidden'
           }}
         >
-          🛡️
+          <img
+            src="/privex-logo.svg"
+            alt="PRIVEX logo"
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          />
         </div>
         <div>
           <h1

@@ -52,13 +52,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onSelectResu
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '1rem', color: '#f8fafc' }}>
       {/* Top Bar with System Status & User Badge */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: '0.25rem' }}>
-        <div>
-          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-            PRIVEX MOBILE
-          </span>
-          <h1 style={{ margin: '0.15rem 0 0 0', fontSize: '1.85rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
-            System Status
-          </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          <img
+            src="./privex-logo.svg"
+            alt="PRIVEX"
+            style={{ width: '38px', height: '38px', objectFit: 'contain' }}
+            onError={(e) => {
+              // Graceful fallback if relative asset path differs
+              (e.currentTarget as HTMLElement).style.display = 'none';
+            }}
+          />
+          <div>
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              PRIVEX MOBILE
+            </span>
+            <h1 style={{ margin: '0.15rem 0 0 0', fontSize: '1.85rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
+              System Status
+            </h1>
+          </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <button

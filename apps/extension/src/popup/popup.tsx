@@ -121,8 +121,12 @@ export const PopupApp: React.FC = () => {
     <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.65rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <span style={{ fontSize: '1.25rem' }}>🛡️</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <img
+            src="icons/icon-32.png"
+            alt="PRIVEX"
+            style={{ width: '22px', height: '22px', objectFit: 'contain' }}
+          />
           <strong style={{ fontSize: '0.95rem', letterSpacing: '-0.02em' }}>PRIVEX</strong>
         </div>
         <button

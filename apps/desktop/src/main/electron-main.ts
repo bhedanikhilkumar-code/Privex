@@ -42,6 +42,18 @@ function getStorageDir(): string {
  * without external asset dependencies.
  */
 function createTrayIcon(): Electron.NativeImage {
+  const iconPath = getAppIconPath();
+  if (iconPath && fs.existsSync(iconPath)) {
+    try {
+      const nativeImg = nativeImage.createFromPath(iconPath);
+      if (!nativeImg.isEmpty()) {
+        return nativeImg.resize({ width: 16, height: 16 });
+      }
+    } catch {
+      // Fallback to bitmap
+    }
+  }
+
   const size = 16;
   const buf = Buffer.alloc(size * size * 4);
   for (let y = 0; y < size; y++) {
@@ -130,8 +142,22 @@ function setupSystemTray(win: BrowserWindow): void {
 }
 
 
+function getAppIconPath(): string {
+  const possiblePaths = [
+    path.resolve(__dirname, '../../icon.png'),
+    path.resolve(__dirname, '../icon.png'),
+    path.resolve(process.cwd(), 'apps/desktop/icon.png'),
+    path.resolve(process.cwd(), 'icon.png')
+  ];
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) return p;
+  }
+  return '';
+}
+
 function createMainWindow(isHeadlessVerify: boolean): BrowserWindow {
   const preloadPath = path.resolve(__dirname, '../preload/electron-preload.cjs');
+  const iconPath = getAppIconPath();
 
   const win = new BrowserWindow({
     width: 1200,
@@ -139,6 +165,7 @@ function createMainWindow(isHeadlessVerify: boolean): BrowserWindow {
     minWidth: 960,
     minHeight: 640,
     title: 'Privex — On-Device Desktop Security',
+    icon: iconPath || undefined,
     show: !isHeadlessVerify,
     backgroundColor: '#f8fafc',
     webPreferences: {

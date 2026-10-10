@@ -67,6 +67,13 @@ async function buildBundles() {
     path.join(distDir, 'renderer/index.html')
   );
 
+  if (fs.existsSync(path.join(desktopRoot, 'icon.png'))) {
+    fs.copyFileSync(
+      path.join(desktopRoot, 'icon.png'),
+      path.join(distDir, 'icon.png')
+    );
+  }
+
   console.log('[Desktop Build] Compiled bundles ready in apps/desktop/dist/');
 }
 
