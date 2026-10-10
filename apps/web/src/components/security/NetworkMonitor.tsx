@@ -377,23 +377,31 @@ export const NetworkMonitor: React.FC<NetworkMonitorProps> = ({
               </tr>
             </thead>
             <tbody>
-              {filteredRequests.map((req) => {
+              {filteredRequests.map((req, idx) => {
                 let badgeColor = 'var(--color-safe)';
                 let badgeText = '✓ Safe';
+                let leftBorderColor = 'var(--color-safe)';
                 if (req.riskLevel === 'SUSPICIOUS' || req.destinationType === 'UNKNOWN_SUSPICIOUS') {
                   badgeColor = 'var(--color-danger)';
                   badgeText = '🔴 Suspicious';
+                  leftBorderColor = 'var(--color-danger)';
                 } else if (req.riskLevel === 'WARNING') {
                   badgeColor = 'var(--color-caution)';
                   badgeText = '⚠ Warning';
+                  leftBorderColor = 'var(--color-caution)';
+                } else if (req.destinationType === 'THIRD_PARTY') {
+                  leftBorderColor = 'var(--motion-color-cyber)';
                 }
 
                 return (
                   <tr
                     key={req.id}
+                    className={idx < 8 ? 'motion-fade-down' : ''}
                     style={{
                       borderBottom: '1px solid #EEEEEE',
-                      backgroundColor: req.riskLevel === 'SUSPICIOUS' ? '#FFF5F3' : '#FFFFFF'
+                      borderLeft: `3px solid ${leftBorderColor}`,
+                      backgroundColor: req.riskLevel === 'SUSPICIOUS' ? '#FFF5F3' : '#FFFFFF',
+                      transition: 'background-color var(--motion-duration-micro) var(--motion-ease-standard)'
                     }}
                   >
                     <td style={{ padding: '0.5rem 0.75rem' }}>

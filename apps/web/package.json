@@ -15,6 +15,7 @@
   "dependencies": {
     "@private-protection/core": "*",
     "@private-protection/ml": "*",
+    "@private-protection/ui": "*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

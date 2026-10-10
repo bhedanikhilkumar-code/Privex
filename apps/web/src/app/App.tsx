@@ -120,6 +120,7 @@ export const App: React.FC = () => {
           outline: 'none'
         }}
       >
+        <div key={activeTab} className="motion-tab-panel">
         {activeTab === 'HOME' && (
           <section aria-labelledby="home-heading" style={{ maxWidth: '1020px', margin: '0 auto' }}>
             {/* Hero Section */}
@@ -688,6 +689,7 @@ export const App: React.FC = () => {
             onReplayIntro={handleReplayIntro}
           />
         )}
+        </div>
       </main>
 
       <Footer onReplayIntro={handleReplayIntro} />

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { scrambleText } from '@private-protection/ui';
 import { generateSecurePassword, analyzePasswordSecurity } from '../../lib/security/password-security';
 
 export const PasswordGenerator: React.FC = () => {
@@ -11,6 +12,7 @@ export const PasswordGenerator: React.FC = () => {
   const [avoidSimilar, setAvoidSimilar] = useState<boolean>(false);
 
   const [generatedPassword, setGeneratedPassword] = useState<string>('');
+  const [displayPassword, setDisplayPassword] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
 
   // Generate initial password on mount or option change
@@ -27,6 +29,9 @@ export const PasswordGenerator: React.FC = () => {
       });
       setGeneratedPassword(pwd);
       setCopied(false);
+      scrambleText(pwd, 280, (scrambled: string) => {
+        setDisplayPassword(scrambled);
+      });
     } catch {
       // Ignore
     }
@@ -50,7 +55,7 @@ export const PasswordGenerator: React.FC = () => {
         document.body.removeChild(textarea);
       }
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 1500);
     } catch {
       // Fallback
     }
@@ -130,7 +135,7 @@ export const PasswordGenerator: React.FC = () => {
               color: '#111111'
             }}
           >
-            {generatedPassword || '—'}
+            {displayPassword || generatedPassword || '—'}
           </span>
         </div>
 
@@ -139,6 +144,7 @@ export const PasswordGenerator: React.FC = () => {
             type="button"
             onClick={handleGenerate}
             title="Regenerate password"
+            className="motion-pressable"
             style={{
               padding: '0.55rem 0.85rem',
               backgroundColor: '#FFFFFF',
@@ -156,6 +162,7 @@ export const PasswordGenerator: React.FC = () => {
           <button
             type="button"
             onClick={handleCopy}
+            className="motion-pressable"
             style={{
               padding: '0.55rem 1rem',
               backgroundColor: copied ? 'var(--color-safe)' : 'var(--color-brand)',
@@ -166,7 +173,7 @@ export const PasswordGenerator: React.FC = () => {
               fontSize: '0.8rem',
               fontWeight: 800,
               cursor: 'pointer',
-              transition: 'background-color 0.15s ease'
+              transition: 'background-color var(--motion-duration-micro) var(--motion-ease-standard), transform var(--motion-duration-micro-fast) var(--motion-ease-standard)'
             }}
           >
             {copied ? '✓ Copied!' : '📋 Copy Password'}

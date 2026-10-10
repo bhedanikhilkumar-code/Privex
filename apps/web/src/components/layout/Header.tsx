@@ -58,6 +58,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange }) => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
         <div
           aria-hidden="true"
+          className="motion-card"
           style={{
             width: '2.5rem',
             height: '2.5rem',

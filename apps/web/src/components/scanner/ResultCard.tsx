@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Verdict } from '@private-protection/core';
+import { animateCountUp } from '@private-protection/ui';
 import { ScanResultViewData } from '../../scanner/types';
 import { formatSeverity } from '../../lib/formatters';
 
@@ -11,6 +12,16 @@ interface ResultCardProps {
 export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
   const isDangerous = result.verdict === Verdict.DANGEROUS || result.verdict === Verdict.SUSPICIOUS;
   const isSafe = result.verdict === Verdict.ALLOW;
+
+  // Animated display score (0 -> result.overallScore)
+  const [displayScore, setDisplayScore] = useState<number>(0);
+
+  useEffect(() => {
+    const cancel = animateCountUp(0, result.overallScore, 360, (val: number) => {
+      setDisplayScore(val);
+    });
+    return cancel;
+  }, [result.id, result.overallScore]);
 
   // 5-second friction gate for dangerous threats
   const [frictionSeconds, setFrictionSeconds] = useState<number>(isDangerous ? 5 : 0);
@@ -43,6 +54,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
   return (
     <article
       aria-labelledby="scan-result-verdict"
+      className={isDangerous ? 'motion-threat-alert' : 'motion-fade-up'}
       style={{
         backgroundColor: 'var(--bg-card)',
         border: '2px solid var(--border-dark)',
@@ -125,7 +137,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', textTransform: 'uppercase' }}>
               <span style={{ color: 'var(--text-muted)' }}>Risk Score</span>
               <strong style={{ fontSize: '0.9rem', color: isDangerous ? 'var(--color-danger)' : isSafe ? 'var(--color-safe)' : 'var(--color-caution)' }}>
-                {result.overallScore} / 100
+                {displayScore} / 100
               </strong>
             </div>
             <div
@@ -147,7 +159,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
                   width: `${result.overallScore}%`,
                   height: '100%',
                   backgroundColor: isDangerous ? 'var(--color-danger)' : isSafe ? 'var(--color-safe)' : 'var(--color-caution)',
-                  transition: 'width 0.4s ease'
+                  transition: 'width var(--motion-duration-emphasis-fast) var(--motion-ease-enter)'
                 }}
               />
             </div>
