@@ -38,10 +38,9 @@ export const NetworkMonitor: React.FC<NetworkMonitorProps> = ({
 
   return (
     <div
+      className="cyber-panel"
       style={{
-        backgroundColor: '#FFFFFF',
-        border: '2px solid var(--border-dark)',
-        boxShadow: 'var(--shadow-brutal)',
+        backgroundColor: 'var(--bg-card)',
         padding: '1.75rem',
         display: 'flex',
         flexDirection: 'column',
@@ -69,7 +68,7 @@ export const NetworkMonitor: React.FC<NetworkMonitorProps> = ({
               fontSize: '1.4rem',
               fontWeight: 800,
               margin: '0.4rem 0 0 0',
-              color: '#111111'
+              color: 'var(--text-primary)'
             }}
           >
             URL &amp; Network Request Monitor

@@ -17,10 +17,9 @@ export const PasswordChecker: React.FC = () => {
 
   return (
     <div
+      className="cyber-panel"
       style={{
-        backgroundColor: '#FFFFFF',
-        border: '2px solid var(--border-dark)',
-        boxShadow: 'var(--shadow-brutal)',
+        backgroundColor: 'var(--bg-card)',
         padding: '1.75rem',
         display: 'flex',
         flexDirection: 'column',
@@ -48,7 +47,7 @@ export const PasswordChecker: React.FC = () => {
               fontSize: '1.4rem',
               fontWeight: 800,
               margin: '0.4rem 0 0 0',
-              color: '#111111'
+              color: 'var(--text-primary)'
             }}
           >
             Password Security Checker
@@ -124,14 +123,14 @@ export const PasswordChecker: React.FC = () => {
 
           <button
             type="button"
+            className="cut-corner-btn"
             onClick={handleClear}
             disabled={password.length === 0}
             style={{
               padding: '0.75rem 1.25rem',
-              backgroundColor: '#FFFFFF',
-              color: '#111111',
+              backgroundColor: password.length > 0 ? 'var(--color-danger)' : 'var(--bg-secondary)',
+              color: password.length > 0 ? '#FFFFFF' : 'var(--text-muted)',
               border: '2px solid var(--border-dark)',
-              boxShadow: password.length > 0 ? '2px 2px 0px #111111' : 'none',
               fontFamily: 'var(--font-mono)',
               fontSize: '0.8rem',
               fontWeight: 700,

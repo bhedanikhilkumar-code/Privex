@@ -65,10 +65,9 @@ export const PasswordGenerator: React.FC = () => {
 
   return (
     <div
+      className="cyber-panel"
       style={{
-        backgroundColor: '#FFFFFF',
-        border: '2px solid var(--border-dark)',
-        boxShadow: 'var(--shadow-brutal)',
+        backgroundColor: 'var(--bg-card)',
         padding: '1.75rem',
         display: 'flex',
         flexDirection: 'column',
@@ -96,7 +95,7 @@ export const PasswordGenerator: React.FC = () => {
               fontSize: '1.4rem',
               fontWeight: 800,
               margin: '0.4rem 0 0 0',
-              color: '#111111'
+              color: 'var(--text-primary)'
             }}
           >
             Strong Password Generator
@@ -144,12 +143,12 @@ export const PasswordGenerator: React.FC = () => {
             type="button"
             onClick={handleGenerate}
             title="Regenerate password"
-            className="motion-pressable"
+            className="cut-corner-btn"
             style={{
               padding: '0.55rem 0.85rem',
-              backgroundColor: '#FFFFFF',
+              backgroundColor: 'var(--bg-secondary)',
               border: '2px solid var(--border-dark)',
-              boxShadow: '2px 2px 0px #111111',
+              color: 'var(--text-primary)',
               fontFamily: 'var(--font-mono)',
               fontSize: '0.8rem',
               fontWeight: 800,
@@ -162,13 +161,12 @@ export const PasswordGenerator: React.FC = () => {
           <button
             type="button"
             onClick={handleCopy}
-            className="motion-pressable"
+            className="cut-corner-btn"
             style={{
               padding: '0.55rem 1rem',
               backgroundColor: copied ? 'var(--color-safe)' : 'var(--color-brand)',
               color: '#FFFFFF',
               border: '2px solid var(--border-dark)',
-              boxShadow: '2px 2px 0px #111111',
               fontFamily: 'var(--font-mono)',
               fontSize: '0.8rem',
               fontWeight: 800,
