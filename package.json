@@ -8,14 +8,15 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build:web",
     "build:web": "npm run build --workspace=@private-protection/core && npm run build --workspace=@private-protection/ml && npm run build --workspace=@private-protection/web",
     "test": "npm run test --workspaces --if-present",
     "test:coverage": "npm run test:coverage --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "package": "node scripts/package-release.js",
-    "deploy": "deploy.bat",
+    "deploy": "npx wrangler deploy",
+    "deploy:local": "deploy.bat",
     "audit:secrets": "node scripts/audit-secrets.js"
   },
   "devDependencies": {
