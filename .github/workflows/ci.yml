@@ -864,7 +864,14 @@ jobs:
       - name: Install Dependencies
         run: npm ci
       - name: Build All Workspaces
-        run: npm run build
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
+          npm run build --workspace=@private-protection/web
+          npm run build --workspace=@private-protection/extension
+          npm run build --workspace=@private-protection/desktop
+          npm run build --workspace=@private-protection/mobile
       - name: Package Desktop & Mobile Installers
         run: |
           npm run package --workspace=@private-protection/desktop

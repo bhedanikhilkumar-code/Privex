@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "build": "npm run build:web",
+    "build:all": "npm run build:web && npm run build --workspace=@private-protection/extension && npm run build --workspace=@private-protection/desktop && npm run build --workspace=@private-protection/mobile",
     "build:web": "npm run build --workspace=@private-protection/core && npm run build --workspace=@private-protection/ml && npm run build --workspace=@private-protection/ui && npm run build --workspace=@private-protection/web",
     "test": "npm run test --workspaces --if-present",
     "test:coverage": "npm run test:coverage --workspaces --if-present",
