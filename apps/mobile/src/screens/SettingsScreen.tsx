@@ -112,6 +112,32 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
               style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#38bdf8' }}
             />
           </div>
+
+          <div style={{ borderTop: '1px solid #1e293b', paddingTop: '0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <strong style={{ display: 'block', fontSize: '0.95rem', color: '#f8fafc' }}>Autonomous Threat Containment</strong>
+              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Auto-execute on-device safe mitigations on critical threats</span>
+            </div>
+            <input
+              type="checkbox"
+              checked={settings.autoContainmentEnabled !== false}
+              onChange={(e) => handleToggle('autoContainmentEnabled', e.target.checked)}
+              style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#38bdf8' }}
+            />
+          </div>
+
+          <div style={{ borderTop: '1px solid #1e293b', paddingTop: '0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <strong style={{ display: 'block', fontSize: '0.95rem', color: '#f8fafc' }}>Background Continuous Shield</strong>
+              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Run autonomous guardian workers continuously in background</span>
+            </div>
+            <input
+              type="checkbox"
+              checked={settings.backgroundMonitoringEnabled !== false}
+              onChange={(e) => handleToggle('backgroundMonitoringEnabled', e.target.checked)}
+              style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#38bdf8' }}
+            />
+          </div>
         </div>
       </div>
 
