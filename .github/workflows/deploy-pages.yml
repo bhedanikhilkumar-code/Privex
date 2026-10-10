@@ -1,19 +1,26 @@
-name: Manual Deploy to Cloudflare Pages (privex.io)
+name: Deploy to GitHub Pages
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
-    name: Build & Deploy to Cloudflare Pages (privex.io)
+    name: Build & Deploy to GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      deployments: write
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -31,37 +38,33 @@ jobs:
         run: |
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
 
       - name: Build Web Application
         run: npm run build --workspace=@private-protection/web
 
-      - name: Verify Web Dist Output & CNAME
+      - name: Verify Web Dist Output
         run: |
           ls -la apps/web/dist
           test -f apps/web/dist/index.html
-          test -f apps/web/dist/_headers
-          test -f apps/web/dist/CNAME
-          cat apps/web/dist/CNAME
+          echo "Web application build successful."
 
-      - name: Deploy to Cloudflare Pages (privex.io)
-        uses: cloudflare/wrangler-action@v3
-        if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/web/dist --project-name=privex --branch=main
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          path: 'apps/web/dist'
 
-      - name: Deployment Instructions Note
-        if: env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == ''
-        run: |
-          echo "=========================================================================="
-          echo "Notice: CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID secrets not found."
-          echo "Target Domain: https://privex.io/ (Fallback: https://privex.pages.dev/)"
-          echo "If Cloudflare Pages is connected directly via Git repository integration,"
-          echo "Cloudflare automatically builds and deploys from branch main."
-          echo "To enable direct GitHub Actions deployment via wrangler, add these secrets"
-          echo "in GitHub Repository Settings -> Secrets and variables -> Actions."
-          echo "=========================================================================="
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Deploy to gh-pages Branch (Fallback Mirror)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./apps/web/dist
+          keep_files: false
+          force_orphan: true

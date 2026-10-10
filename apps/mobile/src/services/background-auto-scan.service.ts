@@ -1,7 +1,7 @@
 import { DeviceAuditService } from './device-audit.service';
 import { SecureStorageService } from './secure-storage.service';
 import { NotificationService } from './notification.service';
-import { Verdict } from '@private-protection/core';
+import { Verdict, SeverityLevel, ActionRecommendation } from '@private-protection/core';
 import { MobileScanResult } from '../types/mobile.types';
 
 export interface AutoScanStatus {
@@ -196,33 +196,44 @@ export class BackgroundAutoScanService {
         // Trigger alert notification & haptics
         const syntheticResult: MobileScanResult = {
           scanId: `autoscan_${Date.now()}`,
-          targetType: 'DEVICE',
+          targetType: 'FILE',
           rawInput: 'Continuous Device Auto-Scan',
+          sanitizedTarget: 'Continuous Device Auto-Scan',
           verdict: Verdict.DANGEROUS,
           overallScore: score,
-          confidence: 'HIGH',
-          evidenceList: [
+          severity: SeverityLevel.HIGH,
+          confidence: 0.95,
+          threatCategory: 'DEVICE_POSTURE',
+          evidence: [
             {
-              source: 'AUTO_SCAN_GUARDIAN',
+              ruleId: 'device-baseline-risk',
               name: 'Device Security Baseline Anomaly',
               description: this.lastScanMessage,
               weight: 80,
               scoreContribution: 80,
               confidence: 0.95,
-              indicator: 'device-posture-risk'
-            }
+              indicator: 'device-posture-risk',
+              category: 'MALICIOUS_CONTENT'
+            } as any
           ],
-          aiExplanation: {
-            summary: this.lastScanMessage,
-            detailedExplanation: 'Privex continuous background auto-scan detected an insecure device baseline setting.',
-            readingGrade: 'GRADE_6',
-            recommendedAction: 'WARN_USER',
-            confidence: 'HIGH'
+          recommendation: {
+            action: ActionRecommendation.WARN,
+            frictionLevel: 'HIGH',
+            suggestedAction: 'Review device posture and disable developer options/untrusted sources.',
+            bypassPermitted: true
           },
-          remediationAdvice: 'Follow Privex security posture recommendations to secure the endpoint.',
-          executionTimeMs: 12,
+          aiExplanation: {
+            headline: 'Device Security Baseline Anomaly',
+            summaryParagraph: this.lastScanMessage,
+            dangerFactors: [this.lastScanMessage],
+            recommendedSteps: ['Follow Privex security posture recommendations to secure the endpoint.'],
+            uncertaintyNote: 'Continuous background auto-scan assessment.',
+            inferenceStatus: 'DETERMINISTIC_FALLBACK',
+            executionTimeMs: 12
+          },
+          timestamp: Date.now(),
           overridden: false,
-          offlineVerified: true
+          executionTimeMs: 12
         };
 
         await NotificationService.notifyScanResult(syntheticResult);

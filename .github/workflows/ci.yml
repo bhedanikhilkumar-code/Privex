@@ -786,7 +786,7 @@ jobs:
           npm run build --workspace=@private-protection/ml
           npm run build --workspace=@private-protection/ui
       - name: Test Mobile Quarantine Vault, Privacy & Coordinator
-        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/mobile-quarantine.test.ts src/__tests__/services/secure-storage.test.ts src/__tests__/services/permissions-privacy.test.ts src/__tests__/services/pre-threat-warning.test.ts src/__tests__/services/gap18-gap19-remediation.test.ts src/__tests__/services/password-generator.test.ts src/__tests__/services/notification.test.ts src/__tests__/services/deep-link.test.ts src/__tests__/services/native-coordinator.test.ts
+        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/mobile-quarantine.test.ts src/__tests__/services/secure-storage.test.ts src/__tests__/services/permissions-privacy.test.ts src/__tests__/services/pre-threat-warning.test.ts src/__tests__/services/gap18-gap19-remediation.test.ts src/__tests__/services/password-generator.test.ts src/__tests__/services/notification.test.ts src/__tests__/services/deep-link.test.ts src/__tests__/services/native-coordinator.test.ts src/__tests__/services/background-auto-scan.test.ts
 
   mobile-security-benchmarks:
     name: "40. Mobile Offline Parity, Isolation & SLA Benchmarks"
@@ -912,14 +912,14 @@ jobs:
           npm run build --workspace=@private-protection/ml
           npm run build --workspace=@private-protection/ui
           npm run build --workspace=@private-protection/web
-      - name: Verify Web Dist & Custom Domain (privex.io)
+      - name: Verify Web Dist Output & Custom Domain (privex.io)
         run: |
           ls -la apps/web/dist
           test -f apps/web/dist/index.html
           test -f apps/web/dist/_headers
           test -f apps/web/dist/CNAME
-          echo "Verifying CNAME points to privex.io..."
           cat apps/web/dist/CNAME
+          echo "Web build output verified successfully for privex.io."
       - name: Deploy to Cloudflare Pages (privex.io)
         uses: cloudflare/wrangler-action@v3
         if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''

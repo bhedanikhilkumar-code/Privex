@@ -15,8 +15,9 @@ if (rootElement) {
 // Register PWA Service Worker for offline application shell caching
 if (typeof window !== 'undefined' && 'serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
   window.addEventListener('load', () => {
+    const swUrl = `${import.meta.env.BASE_URL}sw.js`;
     navigator.serviceWorker
-      .register('/sw.js')
+      .register(swUrl)
       .then(() => {
         // SW registered
       })

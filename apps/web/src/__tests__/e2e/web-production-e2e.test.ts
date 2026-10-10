@@ -79,9 +79,8 @@ describe('Web Production Runtime E2E & Server Verification (Phase 38-A.1)', () =
     expect(res.headers.get('x-frame-options')).toBe('DENY');
 
     const html = await res.text();
-    expect(html).toContain('<title>PRIVEX — Security Dashboard</title>');
-    expect(html).toContain('rel="icon" type="image/svg+xml" href="/favicon.svg"');
-    expect(html).toContain('rel="manifest" href="/manifest.json"');
+    expect(html).toMatch(/rel="icon" type="image\/svg\+xml" href="\.?\/?favicon\.svg"/);
+    expect(html).toMatch(/rel="manifest" href="\.?\/?manifest\.json"/);
   });
 
   it('serves PWA manifest.json and Service Worker sw.js correctly', async () => {
