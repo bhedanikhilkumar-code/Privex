@@ -45,10 +45,14 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
     <nav
       aria-label="Dashboard navigation tabs"
       style={{
-        backgroundColor: 'var(--bg-secondary)',
+        backgroundColor: 'var(--surface-container-low, var(--bg-secondary))',
         borderBottom: '2px solid var(--border-dark)',
-        padding: '0.6rem 2rem',
-        overflowX: 'auto'
+        padding: '0.45rem 2rem',
+        overflowX: 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '1rem'
       }}
     >
       <div
@@ -56,7 +60,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
         role="tablist"
         style={{
           display: 'flex',
-          gap: '0.65rem',
+          gap: '0.5rem',
           minWidth: 'max-content'
         }}
       >
@@ -76,19 +80,20 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.65rem 1.15rem',
+                gap: '0.45rem',
+                padding: '0.55rem 1rem',
                 backgroundColor: isActive ? 'var(--color-brand)' : 'var(--bg-card)',
                 color: isActive ? '#FFFFFF' : 'var(--text-primary)',
                 border: '2px solid var(--border-dark)',
+                borderBottom: isActive ? '3px solid var(--color-accent)' : '2px solid var(--border-dark)',
                 boxShadow: isActive ? '3px 3px 0px var(--border-dark)' : '1px 1px 0px var(--border-dark)',
-                fontSize: '0.825rem',
+                fontSize: '0.8rem',
                 fontWeight: 700,
                 fontFamily: 'var(--font-mono)',
                 textTransform: 'uppercase',
-                letterSpacing: '0.03em',
+                letterSpacing: '0.04em',
                 cursor: 'pointer',
-                transition: 'transform var(--motion-duration-micro-fast) var(--motion-ease-standard), background-color var(--motion-duration-micro) var(--motion-ease-standard), box-shadow var(--motion-duration-micro-fast) var(--motion-ease-standard)',
+                transition: 'all 0.14s cubic-bezier(0.16, 1, 0.3, 1)',
                 outlineOffset: '2px',
                 transform: isActive ? 'translateY(-1px)' : 'none'
               }}
@@ -98,6 +103,27 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
             </button>
           );
         })}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 'max-content' }}>
+        <a
+          href="/stitch_privex_security_web_ui/privex_overview_dashboard_terra/code.html"
+          title="Switch to Terra Organic Theme Prototype"
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            color: 'var(--color-safe)',
+            padding: '0.35rem 0.65rem',
+            border: '1px solid var(--border-dark)',
+            backgroundColor: 'var(--bg-card)',
+            textDecoration: 'none'
+          }}
+        >
+          [TERRA_THEME]
+        </a>
       </div>
     </nav>
   );

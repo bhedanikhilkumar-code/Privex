@@ -48,9 +48,13 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange }) => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '1rem 2rem',
+        padding: '0.85rem 2rem',
         backgroundColor: 'var(--bg-card)',
         borderBottom: '2px solid var(--border-dark)',
+        boxShadow: 'var(--shadow-brutal-sm)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
         flexWrap: 'wrap',
         gap: '1rem'
       }}
@@ -82,26 +86,44 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange }) => {
           />
         </div>
         <div>
-          <h1
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.4rem',
-              fontWeight: 800,
-              letterSpacing: '-0.02em',
-              lineHeight: 1.1,
-              color: 'var(--text-primary)'
-            }}
-          >
-            PRIVEX
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <h1
+              style={{
+                fontFamily: 'var(--font-serif)',
+                fontSize: '1.45rem',
+                fontWeight: 800,
+                letterSpacing: '-0.02em',
+                lineHeight: 1.1,
+                color: 'var(--text-primary)',
+                margin: 0
+              }}
+            >
+              PRIVEX
+            </h1>
+            <span
+              style={{
+                backgroundColor: 'var(--color-safe-bg, #003914)',
+                color: 'var(--color-safe, #53e076)',
+                border: '1px solid var(--color-safe, #53e076)',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.625rem',
+                fontWeight: 700,
+                padding: '0.1rem 0.45rem',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase'
+              }}
+            >
+              LOCAL ONLY (RAM)
+            </span>
+          </div>
           <p
             style={{
               fontFamily: 'var(--font-mono)',
               fontSize: '0.725rem',
               color: 'var(--text-muted)',
               textTransform: 'uppercase',
-              letterSpacing: '0.04em',
-              marginTop: '0.15rem'
+              letterSpacing: '0.05em',
+              margin: '0.2rem 0 0 0'
             }}
           >
             Zero-Install Client-Side Cyber Threat Dashboard
@@ -120,18 +142,20 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange }) => {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.4rem',
-            padding: '0.4rem 0.85rem',
-            backgroundColor: 'var(--bg-card)',
+            padding: '0.45rem 0.85rem',
+            backgroundColor: 'var(--bg-secondary)',
             border: '2px solid var(--border-dark)',
-            boxShadow: '2px 2px 0px #111111',
+            boxShadow: '2px 2px 0px var(--border-dark)',
             fontSize: '0.75rem',
             color: 'var(--text-primary)',
             fontWeight: 700,
             textDecoration: 'none',
-            fontFamily: 'var(--font-mono)'
+            fontFamily: 'var(--font-mono)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em'
           }}
         >
-          <span>🔐</span> Enclave
+          <span>🔐</span> ENCLAVE
         </a>
 
         {installPrompt && !isInstalled && (
@@ -143,21 +167,22 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange }) => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.4rem',
-              padding: '0.4rem 0.9rem',
+              padding: '0.45rem 0.9rem',
               backgroundColor: 'var(--color-brand)',
               border: '2px solid var(--border-dark)',
-              boxShadow: '2px 2px 0px #111111',
+              boxShadow: '2px 2px 0px var(--border-dark)',
               fontSize: '0.75rem',
               color: '#ffffff',
               fontWeight: 700,
               cursor: 'pointer',
-              fontFamily: 'var(--font-mono)'
+              fontFamily: 'var(--font-mono)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em'
             }}
           >
             <span>📥</span> Install Web App
           </button>
         )}
-
       </div>
     </header>
   );

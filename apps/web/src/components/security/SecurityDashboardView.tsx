@@ -77,18 +77,16 @@ export const SecurityDashboardView: React.FC = () => {
 
         <h2
           id="security-monitor-heading"
+          className="font-headline-lg"
           style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '2.25rem',
-            fontWeight: 800,
             letterSpacing: '-0.02em',
             marginBottom: '0.5rem',
-            color: '#111111'
+            color: 'var(--text-primary)'
           }}
         >
           Password Security &amp; Network Protection
         </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1rem', maxWidth: '750px', lineHeight: 1.5 }}>
+        <p className="font-body-md" style={{ color: 'var(--text-muted)', maxWidth: '750px', lineHeight: 1.5, margin: 0 }}>
           Evaluate credential strength, generate cryptographically secure passwords, monitor application requests,
           and detect suspicious network destinations in real time.
         </p>
@@ -112,14 +110,13 @@ export const SecurityDashboardView: React.FC = () => {
         }}
       >
         <div
+          className="cyber-panel"
           style={{
             backgroundColor: systemStatusBg,
-            border: '2px solid var(--border-dark)',
-            boxShadow: 'var(--shadow-brutal)',
             padding: '1.25rem'
           }}
         >
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.35rem' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.35rem', color: 'var(--text-primary)' }}>
             System Status
           </div>
           <div style={{ fontSize: '1.4rem', fontWeight: 900, color: systemStatusColor, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -136,17 +133,16 @@ export const SecurityDashboardView: React.FC = () => {
         </div>
 
         <div
+          className="cyber-panel"
           style={{
-            backgroundColor: '#FFFFFF',
-            border: '2px solid var(--border-dark)',
-            boxShadow: 'var(--shadow-brutal)',
+            backgroundColor: 'var(--bg-card)',
             padding: '1.25rem'
           }}
         >
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
             Network Activity
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
             {requests.length} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>requests</span>
           </div>
           <p style={{ fontSize: '0.775rem', color: 'var(--text-muted)', marginTop: '0.4rem', margin: 0 }}>
@@ -155,17 +151,16 @@ export const SecurityDashboardView: React.FC = () => {
         </div>
 
         <div
+          className="cyber-panel"
           style={{
-            backgroundColor: '#FFFFFF',
-            border: '2px solid var(--border-dark)',
-            boxShadow: 'var(--shadow-brutal)',
+            backgroundColor: 'var(--bg-card)',
             padding: '1.25rem'
           }}
         >
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
             Third-Party Requests
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
             {thirdPartyCount}
           </div>
           <p style={{ fontSize: '0.775rem', color: 'var(--text-muted)', marginTop: '0.4rem', margin: 0 }}>
@@ -174,17 +169,16 @@ export const SecurityDashboardView: React.FC = () => {
         </div>
 
         <div
+          className="cyber-panel"
           style={{
-            backgroundColor: '#FFFFFF',
-            border: '2px solid var(--border-dark)',
-            boxShadow: 'var(--shadow-brutal)',
+            backgroundColor: 'var(--bg-card)',
             padding: '1.25rem'
           }}
         >
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: suspiciousCount > 0 ? 'var(--color-danger)' : 'var(--text-muted)', marginBottom: '0.35rem' }}>
             Suspicious Requests
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)', color: suspiciousCount > 0 ? 'var(--color-danger)' : '#111111' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)', color: suspiciousCount > 0 ? 'var(--color-danger)' : 'var(--text-primary)' }}>
             {suspiciousCount}
           </div>
           <p style={{ fontSize: '0.775rem', color: 'var(--text-muted)', marginTop: '0.4rem', margin: 0 }}>
@@ -206,12 +200,13 @@ export const SecurityDashboardView: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveSection('PASSWORD')}
+          className="cut-corner-btn"
           style={{
             padding: '0.65rem 1.25rem',
-            backgroundColor: activeSection === 'PASSWORD' ? 'var(--color-brand)' : '#FFFFFF',
-            color: activeSection === 'PASSWORD' ? '#FFFFFF' : '#111111',
+            backgroundColor: activeSection === 'PASSWORD' ? 'var(--color-brand)' : 'var(--bg-card)',
+            color: activeSection === 'PASSWORD' ? '#FFFFFF' : 'var(--text-primary)',
             border: '2px solid var(--border-dark)',
-            boxShadow: activeSection === 'PASSWORD' ? '2px 2px 0px #111111' : 'none',
+            boxShadow: activeSection === 'PASSWORD' ? 'var(--shadow-brutal-sm)' : 'none',
             fontFamily: 'var(--font-mono)',
             fontSize: '0.85rem',
             fontWeight: 800,

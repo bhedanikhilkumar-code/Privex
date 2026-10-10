@@ -139,18 +139,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
 
         <h2
           id="settings-heading"
+          className="font-headline-lg"
           style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '2.25rem',
-            fontWeight: 800,
             letterSpacing: '-0.02em',
             marginBottom: '0.5rem',
-            color: '#111111'
+            color: 'var(--text-primary)'
           }}
         >
           Dashboard Settings &amp; Preferences
         </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1rem', maxWidth: '750px', lineHeight: 1.5 }}>
+        <p className="font-body-md" style={{ color: 'var(--text-muted)', maxWidth: '750px', lineHeight: 1.5, margin: 0 }}>
           Customize on-device scanner behavior, reading levels, and local allowlists.
           All settings reside in browser storage and are never uploaded.
         </p>
@@ -159,12 +157,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
       {statusMessage && (
         <div
           role="status"
+          className="cyber-panel"
           style={{
             padding: '0.85rem 1.25rem',
             backgroundColor: 'var(--color-accent)',
-            border: '2px solid var(--border-dark)',
-            boxShadow: 'var(--shadow-brutal-sm)',
-            color: '#111111',
+            color: '#050608',
             fontFamily: 'var(--font-mono)',
             fontSize: '0.85rem',
             fontWeight: 700,
@@ -178,10 +175,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
         {/* Appearance & Color Theme */}
         <div
+          className="cyber-panel"
           style={{
             backgroundColor: 'var(--bg-card)',
-            border: '2px solid var(--border-dark)',
-            boxShadow: 'var(--shadow-brutal)',
             padding: '1.5rem'
           }}
         >
@@ -233,10 +229,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
 
         {/* 1. Cognitive Reading Grade Level */}
         <div
+          className="cyber-panel"
           style={{
             backgroundColor: 'var(--bg-card)',
-            border: '2px solid var(--border-dark)',
-            boxShadow: 'var(--shadow-brutal)',
             padding: '1.5rem'
           }}
         >
@@ -253,13 +248,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
             <button
               type="button"
+              className="cut-corner-btn"
               onClick={() => handleGradeChange(6)}
               style={{
                 padding: '0.65rem 1.25rem',
                 backgroundColor: preferences.cognitiveReadingGrade === 6 ? 'var(--color-brand)' : 'var(--bg-secondary)',
                 color: preferences.cognitiveReadingGrade === 6 ? '#FFFFFF' : 'var(--text-primary)',
                 border: '2px solid var(--border-dark)',
-                boxShadow: preferences.cognitiveReadingGrade === 6 ? '3px 3px 0px var(--border-dark)' : '1px 1px 0px var(--border-dark)',
                 fontSize: '0.85rem',
                 fontWeight: 700,
                 fontFamily: 'var(--font-mono)',
@@ -271,13 +266,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
             </button>
             <button
               type="button"
+              className="cut-corner-btn"
               onClick={() => handleGradeChange(8)}
               style={{
                 padding: '0.65rem 1.25rem',
                 backgroundColor: preferences.cognitiveReadingGrade === 8 ? 'var(--color-brand)' : 'var(--bg-secondary)',
                 color: preferences.cognitiveReadingGrade === 8 ? '#FFFFFF' : 'var(--text-primary)',
                 border: '2px solid var(--border-dark)',
-                boxShadow: preferences.cognitiveReadingGrade === 8 ? '3px 3px 0px var(--border-dark)' : '1px 1px 0px var(--border-dark)',
                 fontSize: '0.85rem',
                 fontWeight: 700,
                 fontFamily: 'var(--font-mono)',
@@ -292,10 +287,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
 
         {/* 2. Web Worker Execution */}
         <div
+          className="cyber-panel"
           style={{
             backgroundColor: 'var(--bg-card)',
-            border: '2px solid var(--border-dark)',
-            boxShadow: 'var(--shadow-brutal)',
             padding: '1.5rem'
           }}
         >
@@ -313,13 +307,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
             </div>
             <button
               type="button"
+              className="cut-corner-btn"
               onClick={handleWorkerToggle}
               style={{
                 padding: '0.65rem 1.25rem',
                 backgroundColor: preferences.enableWorkerOffloading ? 'var(--color-accent)' : 'var(--bg-secondary)',
-                color: '#111111',
+                color: '#050608',
                 border: '2px solid var(--border-dark)',
-                boxShadow: '3px 3px 0px var(--border-dark)',
                 fontSize: '0.85rem',
                 fontWeight: 800,
                 fontFamily: 'var(--font-mono)',
@@ -334,10 +328,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
 
         {/* 3. Autonomous Threat Containment */}
         <div
+          className="cyber-panel"
           style={{
             backgroundColor: 'var(--bg-card)',
-            border: '2px solid var(--border-dark)',
-            boxShadow: 'var(--shadow-brutal)',
             padding: '1.5rem'
           }}
         >
@@ -355,13 +348,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
             </div>
             <button
               type="button"
+              className="cut-corner-btn"
               onClick={handleAutoContainmentToggle}
               style={{
                 padding: '0.65rem 1.25rem',
                 backgroundColor: (preferences.autoContainmentEnabled !== false) ? 'var(--color-safe-bg)' : 'var(--bg-secondary)',
                 color: (preferences.autoContainmentEnabled !== false) ? 'var(--color-safe)' : 'var(--text-primary)',
                 border: '2px solid var(--border-dark)',
-                boxShadow: '3px 3px 0px var(--border-dark)',
                 fontSize: '0.85rem',
                 fontWeight: 800,
                 fontFamily: 'var(--font-mono)',
@@ -376,10 +369,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
 
         {/* 4. Background Security Guardian */}
         <div
+          className="cyber-panel"
           style={{
             backgroundColor: 'var(--bg-card)',
-            border: '2px solid var(--border-dark)',
-            boxShadow: 'var(--shadow-brutal)',
             padding: '1.5rem'
           }}
         >
@@ -397,13 +389,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
             </div>
             <button
               type="button"
+              className="cut-corner-btn"
               onClick={handleBackgroundMonitoringToggle}
               style={{
                 padding: '0.65rem 1.25rem',
                 backgroundColor: (preferences.backgroundMonitoringEnabled !== false) ? 'var(--color-brand)' : 'var(--bg-secondary)',
                 color: (preferences.backgroundMonitoringEnabled !== false) ? '#FFFFFF' : 'var(--text-primary)',
                 border: '2px solid var(--border-dark)',
-                boxShadow: '3px 3px 0px var(--border-dark)',
                 fontSize: '0.85rem',
                 fontWeight: 800,
                 fontFamily: 'var(--font-mono)',
@@ -416,12 +408,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
           </div>
         </div>
 
-        {/* 3. Custom Local Allowlist */}
+        {/* 5. Custom Local Allowlist */}
         <div
+          className="cyber-panel"
           style={{
             backgroundColor: 'var(--bg-card)',
-            border: '2px solid var(--border-dark)',
-            boxShadow: 'var(--shadow-brutal)',
             padding: '1.5rem'
           }}
         >
@@ -454,13 +445,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
             />
             <button
               type="submit"
+              className="cut-corner-btn"
               disabled={!newDomain.trim()}
               style={{
                 padding: '0.65rem 1.25rem',
                 backgroundColor: !newDomain.trim() ? 'var(--bg-secondary)' : 'var(--color-brand)',
                 color: !newDomain.trim() ? 'var(--text-muted)' : '#FFFFFF',
                 border: '2px solid var(--border-dark)',
-                boxShadow: !newDomain.trim() ? 'none' : '2px 2px 0px var(--border-dark)',
                 fontSize: '0.85rem',
                 fontWeight: 800,
                 fontFamily: 'var(--font-mono)',
@@ -518,12 +509,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
           )}
         </div>
 
-        {/* 4. Crypto-Shred & Reset */}
+        {/* 6. Crypto-Shred & Reset */}
         <div
+          className="cyber-panel"
           style={{
             backgroundColor: 'var(--bg-card)',
-            border: '2px solid var(--border-dark)',
-            boxShadow: 'var(--shadow-brutal)',
             padding: '1.5rem',
             display: 'flex',
             justifyContent: 'space-between',
@@ -545,12 +535,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
           </div>
           <button
             type="button"
+            className="cut-corner-btn"
             onClick={handleClearAll}
             style={{
               padding: '0.75rem 1.5rem',
               backgroundColor: 'var(--color-danger)',
               border: '2px solid var(--border-dark)',
-              boxShadow: '3px 3px 0px var(--border-dark)',
               color: '#FFFFFF',
               fontFamily: 'var(--font-mono)',
               fontSize: '0.85rem',
@@ -563,12 +553,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
           </button>
         </div>
 
-        {/* 5. Cinematic Intro Replay */}
+        {/* 7. Cinematic Intro Replay */}
         <div
+          className="cyber-panel"
           style={{
-            backgroundColor: '#FFFFFF',
-            border: '2px solid var(--border-dark)',
-            boxShadow: 'var(--shadow-brutal)',
+            backgroundColor: 'var(--bg-card)',
             padding: '1.5rem',
             display: 'flex',
             justifyContent: 'space-between',
@@ -581,7 +570,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-brand)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
               VISUAL STORYTELLING
             </div>
-            <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 800, color: '#111111', marginBottom: '0.35rem' }}>
+            <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.35rem' }}>
               Cinematic Intro Animation
             </h3>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', margin: 0 }}>
@@ -590,6 +579,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
           </div>
           <button
             type="button"
+            className="cut-corner-btn"
             aria-label="Replay intro animation from settings"
             onClick={() => {
               IntroStorage.resetIntro();
@@ -599,7 +589,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
               padding: '0.75rem 1.5rem',
               backgroundColor: 'var(--color-brand)',
               border: '2px solid var(--border-dark)',
-              boxShadow: '3px 3px 0px #111111',
               color: '#FFFFFF',
               fontFamily: 'var(--font-mono)',
               fontSize: '0.85rem',

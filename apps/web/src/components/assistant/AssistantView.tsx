@@ -100,18 +100,16 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ preferences }) => 
 
         <h2
           id="assistant-view-heading"
+          className="font-headline-lg"
           style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '2.25rem',
-            fontWeight: 800,
             letterSpacing: '-0.02em',
             marginBottom: '0.5rem',
-            color: '#111111'
+            color: 'var(--text-primary)'
           }}
         >
           On-Device AI Security Assistant
         </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1rem', maxWidth: '750px', lineHeight: 1.5 }}>
+        <p className="font-body-md" style={{ color: 'var(--text-muted)', maxWidth: '750px', lineHeight: 1.5, margin: 0 }}>
           Unlike cloud-based chatbots, this assistant is an evidence-based security synthesizer running completely
           inside your browser. It strictly interprets structured security signals into plain-language Grade 6 explanations.
         </p>
@@ -119,11 +117,10 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ preferences }) => 
 
       {/* Security Assistant Boundary Notice */}
       <div
+        className="cyber-panel"
         style={{
           padding: '1.25rem',
           backgroundColor: 'var(--color-accent)',
-          border: '2px solid var(--border-dark)',
-          boxShadow: 'var(--shadow-brutal)',
           marginBottom: '2rem',
           display: 'flex',
           alignItems: 'center',
@@ -131,7 +128,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ preferences }) => 
         }}
       >
         <span style={{ fontSize: '1.75rem' }}>🛡️</span>
-        <div style={{ fontSize: '0.875rem', color: '#111111', lineHeight: 1.5 }}>
+        <div style={{ fontSize: '0.875rem', color: '#050608', lineHeight: 1.5 }}>
           <strong style={{ fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Strict Safety Boundary:
           </strong>{' '}
@@ -141,10 +138,9 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ preferences }) => 
 
       {/* Interactive Threat Simulator Section */}
       <div
+        className="cyber-panel"
         style={{
-          backgroundColor: '#FFFFFF',
-          border: '2px solid var(--border-dark)',
-          boxShadow: 'var(--shadow-brutal-lg)',
+          backgroundColor: 'var(--bg-card)',
           padding: '1.75rem',
           marginBottom: '2rem'
         }}
@@ -159,7 +155,8 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ preferences }) => 
               fontWeight: 800,
               textTransform: 'uppercase',
               letterSpacing: '0.04em',
-              marginBottom: '0.75rem'
+              marginBottom: '0.75rem',
+              color: 'var(--text-primary)'
             }}
           >
             SELECT SECURITY SCENARIO TO EXPLAIN:
@@ -180,12 +177,13 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ preferences }) => 
                     setSelectedTopic(topic.id);
                     handleSynthesize(topic.id);
                   }}
+                  className="cut-corner-btn"
                   style={{
                     padding: '0.6rem 1.15rem',
-                    backgroundColor: isSelected ? 'var(--color-brand)' : '#FFFFFF',
+                    backgroundColor: isSelected ? 'var(--color-brand)' : 'var(--surface-container-high, var(--bg-secondary))',
                     color: isSelected ? '#FFFFFF' : 'var(--text-primary)',
                     border: '2px solid var(--border-dark)',
-                    boxShadow: isSelected ? '3px 3px 0px #111111' : '1px 1px 0px #111111',
+                    boxShadow: isSelected ? 'var(--shadow-brutal-sm)' : '1px 1px 0px var(--border-dark)',
                     fontSize: '0.85rem',
                     fontWeight: 700,
                     fontFamily: 'var(--font-mono)',
@@ -211,7 +209,8 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ preferences }) => 
               fontWeight: 800,
               textTransform: 'uppercase',
               letterSpacing: '0.04em',
-              marginBottom: '0.5rem'
+              marginBottom: '0.5rem',
+              color: 'var(--text-primary)'
             }}
           >
             OPTIONAL CONTENT SNIPPET (TESTS ADVERSARIAL CONTAINMENT):
@@ -226,7 +225,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ preferences }) => 
               style={{
                 flex: '1 1 280px',
                 padding: '0.85rem 1rem',
-                backgroundColor: 'var(--bg-primary)',
+                backgroundColor: 'var(--surface-container-lowest, var(--bg-secondary))',
                 border: '2px solid var(--border-dark)',
                 color: 'var(--text-primary)',
                 fontSize: '0.95rem',
@@ -238,12 +237,13 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ preferences }) => 
               type="button"
               onClick={() => handleSynthesize(selectedTopic, customSnippet)}
               disabled={isSynthesizing}
+              className="cut-corner-btn"
               style={{
                 padding: '0.85rem 1.5rem',
                 backgroundColor: 'var(--color-brand)',
                 color: '#FFFFFF',
                 border: '2px solid var(--border-dark)',
-                boxShadow: '3px 3px 0px #111111',
+                boxShadow: 'var(--shadow-brutal-sm)',
                 fontWeight: 800,
                 fontSize: '0.85rem',
                 fontFamily: 'var(--font-mono)',
@@ -260,10 +260,9 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ preferences }) => 
       {/* Synthesized Output Display */}
       {explanation && (
         <article
+          className="cyber-panel"
           style={{
-            backgroundColor: '#FFFFFF',
-            border: '2px solid var(--border-dark)',
-            boxShadow: 'var(--shadow-brutal-xl)',
+            backgroundColor: 'var(--bg-card)',
             padding: '1.75rem',
             display: 'flex',
             flexDirection: 'column',

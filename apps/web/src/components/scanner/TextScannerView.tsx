@@ -63,18 +63,16 @@ export const TextScannerView: React.FC<TextScannerViewProps> = ({ scannerBridge,
 
         <h2
           id="text-scanner-heading"
+          className="font-headline-lg"
           style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '2.25rem',
-            fontWeight: 800,
             letterSpacing: '-0.02em',
             marginBottom: '0.5rem',
-            color: '#111111'
+            color: 'var(--text-primary)'
           }}
         >
           On-Device Message &amp; Text Scam Analyzer
         </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1rem', maxWidth: '750px', lineHeight: 1.5 }}>
+        <p className="font-body-md" style={{ color: 'var(--text-muted)', maxWidth: '750px', lineHeight: 1.5, margin: 0 }}>
           Paste suspicious SMS texts, emails, WhatsApp messages, or extortion demands.
           Evaluated for urgency pressure, cryptocurrency extortion, task scams, and fake invoices directly on your device.
         </p>
@@ -92,45 +90,43 @@ export const TextScannerView: React.FC<TextScannerViewProps> = ({ scannerBridge,
         {/* Left Column: Status Widget */}
         <aside style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div
+            className="cyber-panel"
             style={{
               backgroundColor: 'var(--color-accent)',
-              border: '2px solid var(--border-dark)',
-              boxShadow: 'var(--shadow-brutal)',
               padding: '1.25rem'
             }}
           >
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.725rem', fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.725rem', fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.5rem', color: '#050608' }}>
               SCAM DEFENSES: ACTIVE
             </div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 800, lineHeight: 1.2, marginBottom: '0.75rem', color: '#111111' }}>
+            <div style={{ fontSize: '1.2rem', fontWeight: 800, lineHeight: 1.2, marginBottom: '0.75rem', color: '#050608' }}>
               NLP INTENT SHIELD
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: '#1a1c20' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#444444' }}>MODEL:</span>
+                <span>MODEL:</span>
                 <strong>ON-DEVICE SLM</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#444444' }}>OFFLINE:</span>
+                <span>OFFLINE:</span>
                 <strong>100% AIR-GAPPED</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#444444' }}>EXFILTRATION:</span>
+                <span>EXFILTRATION:</span>
                 <strong>0 BYTES</strong>
               </div>
             </div>
           </div>
 
           <div
+            className="cyber-panel"
             style={{
-              backgroundColor: 'var(--bg-card)',
-              border: '2px solid var(--border-dark)',
-              boxShadow: 'var(--shadow-brutal-sm)',
               padding: '1rem',
-              fontSize: '0.8rem'
+              fontSize: '0.8rem',
+              backgroundColor: 'var(--bg-card)'
             }}
           >
-            <strong style={{ display: 'block', marginBottom: '0.4rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+            <strong style={{ display: 'block', marginBottom: '0.4rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
               Zero-Knowledge Processing
             </strong>
             <p style={{ color: 'var(--text-muted)', lineHeight: 1.45, margin: 0 }}>
@@ -142,12 +138,11 @@ export const TextScannerView: React.FC<TextScannerViewProps> = ({ scannerBridge,
         {/* Center Column: Scanner Target Input & Form */}
         <div>
           <div
+            className="cyber-panel"
             style={{
-              backgroundColor: 'var(--bg-card)',
-              border: '2px solid var(--border-dark)',
-              boxShadow: 'var(--shadow-brutal-lg)',
               padding: '1.75rem',
-              marginBottom: '1.5rem'
+              marginBottom: '1.5rem',
+              backgroundColor: 'var(--bg-card)'
             }}
           >
             <form onSubmit={handleScan} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -161,7 +156,8 @@ export const TextScannerView: React.FC<TextScannerViewProps> = ({ scannerBridge,
                     fontWeight: 700,
                     textTransform: 'uppercase',
                     marginBottom: '0.5rem',
-                    letterSpacing: '0.04em'
+                    letterSpacing: '0.04em',
+                    color: 'var(--text-primary)'
                   }}
                 >
                   MESSAGE CONTENT TO INSPECT:
@@ -177,7 +173,7 @@ export const TextScannerView: React.FC<TextScannerViewProps> = ({ scannerBridge,
                   style={{
                     width: '100%',
                     padding: '0.85rem 1rem',
-                    backgroundColor: 'var(--bg-primary)',
+                    backgroundColor: 'var(--surface-container-lowest, var(--bg-secondary))',
                     border: '2px solid var(--border-dark)',
                     color: 'var(--text-primary)',
                     fontSize: '0.95rem',
@@ -194,7 +190,7 @@ export const TextScannerView: React.FC<TextScannerViewProps> = ({ scannerBridge,
               </div>
 
               {/* Action row */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', paddingTop: '0.5rem', borderTop: '1px solid #EBE7DE' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-dark)' }}>
                 {/* Quick Test Samples */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', fontSize: '0.75rem' }}>
                   <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
@@ -203,28 +199,32 @@ export const TextScannerView: React.FC<TextScannerViewProps> = ({ scannerBridge,
                   <button
                     type="button"
                     onClick={() => handleQuickFill('Hi Sarah, see you tomorrow at lunch around 12:30 PM.')}
-                    style={{ padding: '0.3rem 0.6rem', backgroundColor: 'var(--color-safe-bg)', border: '1px solid var(--border-dark)', color: '#111111', fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer' }}
+                    className="cut-corner-btn"
+                    style={{ padding: '0.3rem 0.6rem', backgroundColor: 'var(--color-safe-bg)', border: '1px solid var(--border-dark)', color: 'var(--color-safe)', fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer' }}
                   >
                     Benign Chat
                   </button>
                   <button
                     type="button"
                     onClick={() => handleQuickFill('Work from home task! Earn $500 daily rating apps on Telegram. Deposit $50 to unlock commission.')}
-                    style={{ padding: '0.3rem 0.6rem', backgroundColor: 'var(--color-caution-bg)', border: '1px solid var(--border-dark)', color: '#111111', fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer' }}
+                    className="cut-corner-btn"
+                    style={{ padding: '0.3rem 0.6rem', backgroundColor: 'var(--color-caution-bg)', border: '1px solid var(--border-dark)', color: 'var(--color-caution)', fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer' }}
                   >
                     Task Scam
                   </button>
                   <button
                     type="button"
                     onClick={() => handleQuickFill('USPS: Your package is detained due to incomplete address. Pay $1.99 redelivery fee at usps-redelivery.info')}
-                    style={{ padding: '0.3rem 0.6rem', backgroundColor: 'var(--color-danger-bg)', border: '1px solid var(--border-dark)', color: '#111111', fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer' }}
+                    className="cut-corner-btn"
+                    style={{ padding: '0.3rem 0.6rem', backgroundColor: 'var(--color-danger-bg)', border: '1px solid var(--border-dark)', color: 'var(--color-danger)', fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer' }}
                   >
                     Postal Fraud
                   </button>
                   <button
                     type="button"
                     onClick={() => handleQuickFill('Invoice #49281: Your Geek Squad subscription renewed for $499. Call support immediately to refund.')}
-                    style={{ padding: '0.3rem 0.6rem', backgroundColor: '#FFF9E6', border: '1px solid var(--border-dark)', color: '#111111', fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer' }}
+                    className="cut-corner-btn"
+                    style={{ padding: '0.3rem 0.6rem', backgroundColor: 'var(--surface-container-high)', border: '1px solid var(--border-dark)', color: 'var(--color-caution)', fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer' }}
                   >
                     Fake Invoice
                   </button>
@@ -233,12 +233,13 @@ export const TextScannerView: React.FC<TextScannerViewProps> = ({ scannerBridge,
                 <button
                   type="submit"
                   disabled={isScanning || !textInput.trim()}
+                  className={`cut-corner-btn ${!isScanning && textInput.trim() ? 'motion-pressable' : ''}`}
                   style={{
                     padding: '0.85rem 1.75rem',
-                    backgroundColor: isScanning || !textInput.trim() ? '#EBE7DE' : 'var(--color-brand)',
-                    color: isScanning || !textInput.trim() ? '#888888' : '#FFFFFF',
+                    backgroundColor: isScanning || !textInput.trim() ? 'var(--surface-container-high)' : 'var(--color-brand)',
+                    color: isScanning || !textInput.trim() ? 'var(--text-muted)' : '#FFFFFF',
                     border: '2px solid var(--border-dark)',
-                    boxShadow: isScanning || !textInput.trim() ? 'none' : '3px 3px 0px #111111',
+                    boxShadow: isScanning || !textInput.trim() ? 'none' : 'var(--shadow-brutal-sm)',
                     fontSize: '0.9rem',
                     fontWeight: 800,
                     fontFamily: 'var(--font-mono)',

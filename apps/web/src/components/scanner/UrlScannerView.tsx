@@ -85,18 +85,16 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
 
         <h2
           id="url-scanner-heading"
+          className="font-headline-lg"
           style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '2.25rem',
-            fontWeight: 800,
             letterSpacing: '-0.02em',
             marginBottom: '0.5rem',
-            color: '#111111'
+            color: 'var(--text-primary)'
           }}
         >
           On-Device URL Security Scanner
         </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1rem', maxWidth: '750px', lineHeight: 1.5 }}>
+        <p className="font-body-md" style={{ color: 'var(--text-muted)', maxWidth: '750px', lineHeight: 1.5, margin: 0 }}>
           Inspect untrusted URLs, domain spoofing, typosquatting, and deceptive redirects before visiting.
           All lexical and threat intelligence calculations run 100% locally in your browser.
         </p>
@@ -114,45 +112,43 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
         {/* Left Column: System Status Widget */}
         <aside style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div
+            className="cyber-panel"
             style={{
               backgroundColor: 'var(--color-accent)',
-              border: '2px solid var(--border-dark)',
-              boxShadow: 'var(--shadow-brutal)',
               padding: '1.25rem'
             }}
           >
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.725rem', fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.725rem', fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.5rem', color: '#050608' }}>
               SYSTEM STATUS: SECURE
             </div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 800, lineHeight: 1.2, marginBottom: '0.75rem', color: '#111111' }}>
+            <div style={{ fontSize: '1.2rem', fontWeight: 800, lineHeight: 1.2, marginBottom: '0.75rem', color: '#050608' }}>
               ALL DEFENSES ACTIVE
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: '#1a1c20' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#444444' }}>OFFLINE PARITY:</span>
+                <span>OFFLINE PARITY:</span>
                 <strong>100%</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#444444' }}>BLOOM CACHE:</span>
+                <span>BLOOM CACHE:</span>
                 <strong>LOADED</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#444444' }}>ENGINE:</span>
+                <span>ENGINE:</span>
                 <strong>ON-DEVICE</strong>
               </div>
             </div>
           </div>
 
           <div
+            className="cyber-panel"
             style={{
-              backgroundColor: 'var(--bg-card)',
-              border: '2px solid var(--border-dark)',
-              boxShadow: 'var(--shadow-brutal-sm)',
               padding: '1rem',
-              fontSize: '0.8rem'
+              fontSize: '0.8rem',
+              backgroundColor: 'var(--bg-card)'
             }}
           >
-            <strong style={{ display: 'block', marginBottom: '0.4rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+            <strong style={{ display: 'block', marginBottom: '0.4rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
               Privacy Invariant
             </strong>
             <p style={{ color: 'var(--text-muted)', lineHeight: 1.45, margin: 0 }}>
@@ -164,12 +160,11 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
         {/* Center Column: Scanner Target Input & Form */}
         <div>
           <div
+            className="cyber-panel"
             style={{
-              backgroundColor: 'var(--bg-card)',
-              border: '2px solid var(--border-dark)',
-              boxShadow: 'var(--shadow-brutal-lg)',
               padding: '1.75rem',
-              marginBottom: '1.5rem'
+              marginBottom: '1.5rem',
+              backgroundColor: 'var(--bg-card)'
             }}
           >
             <form onSubmit={handleScan} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -183,7 +178,8 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
                     fontWeight: 700,
                     textTransform: 'uppercase',
                     marginBottom: '0.5rem',
-                    letterSpacing: '0.04em'
+                    letterSpacing: '0.04em',
+                    color: 'var(--text-primary)'
                   }}
                 >
                   TARGET URL TO ANALYZE:
@@ -201,7 +197,7 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
                       style={{
                         width: '100%',
                         padding: '0.85rem 1rem',
-                        backgroundColor: 'var(--bg-primary)',
+                        backgroundColor: 'var(--surface-container-lowest, var(--bg-secondary))',
                         border: '2px solid var(--border-dark)',
                         color: 'var(--text-primary)',
                         fontSize: '0.95rem',
@@ -215,13 +211,13 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
                   <button
                     type="submit"
                     disabled={isScanning || !urlInput.trim()}
-                    className={!isScanning && urlInput.trim() ? 'motion-pressable' : ''}
+                    className={`cut-corner-btn ${!isScanning && urlInput.trim() ? 'motion-pressable' : ''}`}
                     style={{
                       padding: '0.85rem 1.75rem',
-                      backgroundColor: isScanning || !urlInput.trim() ? '#EBE7DE' : 'var(--color-brand)',
-                      color: isScanning || !urlInput.trim() ? '#888888' : '#FFFFFF',
+                      backgroundColor: isScanning || !urlInput.trim() ? 'var(--surface-container-high)' : 'var(--color-brand)',
+                      color: isScanning || !urlInput.trim() ? 'var(--text-muted)' : '#FFFFFF',
                       border: '2px solid var(--border-dark)',
-                      boxShadow: isScanning || !urlInput.trim() ? 'none' : '3px 3px 0px #111111',
+                      boxShadow: isScanning || !urlInput.trim() ? 'none' : 'var(--shadow-brutal-sm)',
                       fontSize: '0.9rem',
                       fontWeight: 800,
                       fontFamily: 'var(--font-mono)',
@@ -239,18 +235,19 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
               </div>
 
               {/* Quick Test Samples */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', fontSize: '0.75rem', paddingTop: '0.5rem', borderTop: '1px solid #EBE7DE' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', fontSize: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-dark)' }}>
                 <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
                   Quick Samples:
                 </span>
                 <button
                   type="button"
                   onClick={() => handleQuickFill('https://www.google.com/search')}
+                  className="cut-corner-btn"
                   style={{
                     padding: '0.3rem 0.65rem',
                     backgroundColor: 'var(--color-safe-bg)',
                     border: '1px solid var(--border-dark)',
-                    color: '#111111',
+                    color: 'var(--color-safe)',
                     fontFamily: 'var(--font-mono)',
                     fontWeight: 700,
                     cursor: 'pointer'
@@ -261,11 +258,12 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
                 <button
                   type="button"
                   onClick={() => handleQuickFill('http://192.168.1.100/account/login')}
+                  className="cut-corner-btn"
                   style={{
                     padding: '0.3rem 0.65rem',
                     backgroundColor: 'var(--color-danger-bg)',
                     border: '1px solid var(--border-dark)',
-                    color: '#111111',
+                    color: 'var(--color-danger)',
                     fontFamily: 'var(--font-mono)',
                     fontWeight: 700,
                     cursor: 'pointer'
@@ -276,11 +274,12 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
                 <button
                   type="button"
                   onClick={() => handleQuickFill('http://paypal-security-update.buzz/login/verify')}
+                  className="cut-corner-btn"
                   style={{
                     padding: '0.3rem 0.65rem',
                     backgroundColor: 'var(--color-caution-bg)',
                     border: '1px solid var(--border-dark)',
-                    color: '#111111',
+                    color: 'var(--color-caution)',
                     fontFamily: 'var(--font-mono)',
                     fontWeight: 700,
                     cursor: 'pointer'
@@ -291,11 +290,12 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
                 <button
                   type="button"
                   onClick={() => handleQuickFill('http://company-internal.com:3306')}
+                  className="cut-corner-btn"
                   style={{
                     padding: '0.3rem 0.65rem',
-                    backgroundColor: '#fee2e2',
+                    backgroundColor: 'var(--color-danger-bg)',
                     border: '1px solid var(--border-dark)',
-                    color: '#991b1b',
+                    color: 'var(--color-danger)',
                     fontFamily: 'var(--font-mono)',
                     fontWeight: 700,
                     cursor: 'pointer'
@@ -306,11 +306,12 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
                 <button
                   type="button"
                   onClick={() => handleQuickFill('https://example.com/.env')}
+                  className="cut-corner-btn"
                   style={{
                     padding: '0.3rem 0.65rem',
-                    backgroundColor: '#ffedd5',
+                    backgroundColor: 'var(--color-caution-bg)',
                     border: '1px solid var(--border-dark)',
-                    color: '#c2410c',
+                    color: 'var(--color-caution)',
                     fontFamily: 'var(--font-mono)',
                     fontWeight: 700,
                     cursor: 'pointer'
@@ -321,11 +322,12 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
                 <button
                   type="button"
                   onClick={() => handleQuickFill('https://atmiyauni.ac.in/')}
+                  className="cut-corner-btn"
                   style={{
                     padding: '0.3rem 0.65rem',
-                    backgroundColor: '#ede9fe',
+                    backgroundColor: 'var(--surface-container-high)',
                     border: '1px solid var(--border-dark)',
-                    color: '#6d28d9',
+                    color: 'var(--color-brand)',
                     fontFamily: 'var(--font-mono)',
                     fontWeight: 700,
                     cursor: 'pointer'

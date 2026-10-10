@@ -26,18 +26,16 @@ export const PrivacyView: React.FC = () => {
 
         <h2
           id="privacy-heading"
+          className="font-headline-lg"
           style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '2.25rem',
-            fontWeight: 800,
             letterSpacing: '-0.02em',
             marginBottom: '0.5rem',
-            color: '#111111'
+            color: 'var(--text-primary)'
           }}
         >
           Privacy Architecture &amp; Cryptographic Boundaries
         </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1rem', maxWidth: '750px', lineHeight: 1.5 }}>
+        <p className="font-body-md" style={{ color: 'var(--text-muted)', maxWidth: '750px', lineHeight: 1.5, margin: 0 }}>
           Traditional security services upload your visited URLs, private SMS messages, and emails to remote cloud servers.
           PRIVEX is architected on a zero-cloud, client-side execution model.
         </p>
@@ -45,11 +43,10 @@ export const PrivacyView: React.FC = () => {
 
       {/* Main Privacy Guarantee Banner (Matches How It Works.png) */}
       <div
+        className="cyber-panel"
         style={{
           padding: '1.5rem',
           backgroundColor: 'var(--color-accent)',
-          border: '2px solid var(--border-dark)',
-          boxShadow: 'var(--shadow-brutal)',
           marginBottom: '2rem',
           display: 'flex',
           flexDirection: 'column',
@@ -58,11 +55,11 @@ export const PrivacyView: React.FC = () => {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
           <span style={{ fontSize: '1.5rem' }}>🔒</span>
-          <strong style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', color: '#111111' }}>
+          <strong style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', color: '#050608' }}>
             Your scan is processed locally in your browser.
           </strong>
         </div>
-        <p style={{ fontSize: '0.9rem', color: '#111111', lineHeight: 1.6, margin: 0 }}>
+        <p style={{ fontSize: '0.9rem', color: '#050608', lineHeight: 1.6, margin: 0 }}>
           All URL parsers, homograph decoders, Shannon entropy calculations, Bloom filters, and intent classification
           engines run in volatile device memory on this endpoint. No network socket is opened to process your input.
         </p>
@@ -78,39 +75,37 @@ export const PrivacyView: React.FC = () => {
         }}
       >
         <div
+          className="cyber-panel"
           style={{
-            backgroundColor: '#FFFFFF',
-            border: '2px solid var(--border-dark)',
-            boxShadow: 'var(--shadow-brutal)',
+            backgroundColor: 'var(--bg-card)',
             padding: '1.5rem'
           }}
         >
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-brand)', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
             SECURITY DECISION MAKER
           </div>
-          <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.5rem' }}>
+          <h3 className="font-headline-sm" style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
             Core Detection Engine
           </h3>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
+          <p className="font-body-sm" style={{ color: 'var(--text-muted)', margin: 0 }}>
             <strong>100% Authority.</strong> Deterministic rule evaluation, IP host detection, Shannon entropy, and Bloom filters establish the final risk verdict and action recommendations.
           </p>
         </div>
 
         <div
+          className="cyber-panel"
           style={{
-            backgroundColor: '#FFFFFF',
-            border: '2px solid var(--border-dark)',
-            boxShadow: 'var(--shadow-brutal)',
+            backgroundColor: 'var(--bg-card)',
             padding: '1.5rem'
           }}
         >
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, color: '#888888', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
             EXPLANATION SYNTHESIZER
           </div>
-          <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.5rem' }}>
+          <h3 className="font-headline-sm" style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
             AI Security Assistant
           </h3>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
+          <p className="font-body-sm" style={{ color: 'var(--text-muted)', margin: 0 }}>
             <strong>0% Decision Authority.</strong> Read-only synthesis layer. Translates structured deterministic evidence tokens into plain-language Grade 6 explanations. Cannot downgrade verdicts.
           </p>
         </div>
@@ -118,15 +113,14 @@ export const PrivacyView: React.FC = () => {
 
       {/* Data Handling Classification Table */}
       <div
+        className="cyber-panel"
         style={{
-          backgroundColor: '#FFFFFF',
-          border: '2px solid var(--border-dark)',
-          boxShadow: 'var(--shadow-brutal-lg)',
+          backgroundColor: 'var(--bg-card)',
           overflow: 'hidden',
           marginBottom: '2rem'
         }}
       >
-        <div style={{ padding: '1rem 1.5rem', backgroundColor: 'var(--bg-secondary)', borderBottom: '2px solid var(--border-dark)', fontWeight: 800, fontFamily: 'var(--font-mono)', fontSize: '0.85rem', textTransform: 'uppercase' }}>
+        <div style={{ padding: '1rem 1.5rem', backgroundColor: 'var(--surface-container-lowest, var(--bg-secondary))', borderBottom: '2px solid var(--border-dark)', fontWeight: 800, fontFamily: 'var(--font-mono)', fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
           Data Handling Principles Matrix
         </div>
 

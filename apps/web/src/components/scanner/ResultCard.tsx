@@ -241,6 +241,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
                 <button
                   type="button"
                   onClick={() => setUserBypassed(true)}
+                  className="cut-corner-btn"
                   style={{
                     padding: '0.5rem 1rem',
                     backgroundColor: 'var(--bg-card)',
@@ -442,6 +443,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
             <button
               type="button"
               onClick={onReset}
+              className="cut-corner-btn"
               style={{
                 padding: '0.55rem 1.25rem',
                 backgroundColor: 'var(--color-brand)',
