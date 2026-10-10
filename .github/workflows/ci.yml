@@ -53,10 +53,11 @@ jobs:
           cache: 'npm'
       - name: Install Dependencies
         run: npm ci
-      - name: Build Core & ML Shared Packages
+      - name: Build Core, ML & UI Shared Packages
         run: |
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
       - name: Run Workspace Linting
         run: npm run lint
 
@@ -73,10 +74,11 @@ jobs:
           cache: 'npm'
       - name: Install Dependencies
         run: npm ci
-      - name: Build Core & ML Shared Packages
+      - name: Build Core, ML & UI Shared Packages
         run: |
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
       - name: Run TypeScript Strict Typecheck
         run: npm run typecheck
 
@@ -93,6 +95,10 @@ jobs:
           cache: 'npm'
       - name: Install Dependencies
         run: npm ci
+      - name: Build Core & ML Dependencies
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
       - name: Run Architectural Verification Test Suite
         run: npx vitest run tests/validation/phase8-audit.test.ts
 
@@ -409,10 +415,11 @@ jobs:
           cache: 'npm'
       - name: Install Dependencies
         run: npm ci
-      - name: Build Core & ML Dependencies
+      - name: Build Core, ML & UI Dependencies
         run: |
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
       - name: Test Web Client Scanner
         run: npm --workspace=@private-protection/web exec vitest run src/__tests__/scanner
 
@@ -429,10 +436,11 @@ jobs:
           cache: 'npm'
       - name: Install Dependencies
         run: npm ci
-      - name: Build Core & ML Dependencies
+      - name: Build Core, ML & UI Dependencies
         run: |
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
       - name: Test Password Shields & Request Monitors
         run: npm --workspace=@private-protection/web exec vitest run src/__tests__/security
 
@@ -449,10 +457,11 @@ jobs:
           cache: 'npm'
       - name: Install Dependencies
         run: npm ci
-      - name: Build Core & ML Dependencies
+      - name: Build Core, ML & UI Dependencies
         run: |
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
       - name: Test Offline PWA & Worker Bridge
         run: npm --workspace=@private-protection/web exec vitest run src/__tests__/offline src/__tests__/workers
 
@@ -469,10 +478,11 @@ jobs:
           cache: 'npm'
       - name: Install Dependencies
         run: npm ci
-      - name: Build Core & ML Dependencies
+      - name: Build Core, ML & UI Dependencies
         run: |
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
       - name: Test Web Network Isolation
         run: npm --workspace=@private-protection/web exec vitest run src/__tests__/privacy
 
@@ -489,10 +499,11 @@ jobs:
           cache: 'npm'
       - name: Install Dependencies
         run: npm ci
-      - name: Build Core & ML Dependencies
+      - name: Build Core, ML & UI Dependencies
         run: |
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
       - name: Run Web E2E, Smoke & Formatter Tests
         run: npm --workspace=@private-protection/web exec vitest run src/__tests__/e2e src/__tests__/smoke src/__tests__/lib
 
@@ -727,10 +738,11 @@ jobs:
           cache: 'npm'
       - name: Install Dependencies
         run: npm ci
-      - name: Build Core & ML Dependencies
+      - name: Build Core, ML & UI Dependencies
         run: |
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
       - name: Test Mobile Threat Protection Services
         run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/web-shield.test.ts src/__tests__/services/app-installation-shield.test.ts src/__tests__/services/realtime-download-protection.test.ts src/__tests__/services/camera-scanner.test.ts src/__tests__/services/mobile-threat-intel.test.ts
 
@@ -747,10 +759,11 @@ jobs:
           cache: 'npm'
       - name: Install Dependencies
         run: npm ci
-      - name: Build Core & ML Dependencies
+      - name: Build Core, ML & UI Dependencies
         run: |
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
       - name: Test Mobile File & Audit Protections
         run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/device-audit.test.ts src/__tests__/services/full-device-scan.test.ts src/__tests__/services/file-scanner.test.ts src/__tests__/services/universal-file-shield.test.ts
 
@@ -767,10 +780,11 @@ jobs:
           cache: 'npm'
       - name: Install Dependencies
         run: npm ci
-      - name: Build Core & ML Dependencies
+      - name: Build Core, ML & UI Dependencies
         run: |
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
       - name: Test Mobile Quarantine Vault, Privacy & Coordinator
         run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/mobile-quarantine.test.ts src/__tests__/services/secure-storage.test.ts src/__tests__/services/permissions-privacy.test.ts src/__tests__/services/pre-threat-warning.test.ts src/__tests__/services/gap18-gap19-remediation.test.ts src/__tests__/services/password-generator.test.ts src/__tests__/services/notification.test.ts src/__tests__/services/deep-link.test.ts src/__tests__/services/native-coordinator.test.ts
 
@@ -787,10 +801,11 @@ jobs:
           cache: 'npm'
       - name: Install Dependencies
         run: npm ci
-      - name: Build Core & ML Dependencies
+      - name: Build Core, ML & UI Dependencies
         run: |
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
       - name: Test Mobile Security, Benchmarks & Network Isolation
         run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/security src/__tests__/benchmarks src/__tests__/offline src/__tests__/privacy src/__tests__/adapters
 
@@ -822,6 +837,10 @@ jobs:
           cache: 'npm'
       - name: Install Dependencies
         run: npm ci
+      - name: Build Core & ML Dependencies
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
       - name: Run Core Coverage
         run: npm run test:coverage --workspace=@private-protection/core
       - name: Run ML Coverage
@@ -884,6 +903,7 @@ jobs:
         run: |
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
           npm run build --workspace=@private-protection/web
       - name: Verify Web Dist & Custom Domain (privex.io)
         run: |
