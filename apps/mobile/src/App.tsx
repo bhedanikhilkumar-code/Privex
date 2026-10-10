@@ -16,6 +16,7 @@ import { PrivacyScreen } from './screens/PrivacyScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { PasswordGeneratorScreen } from './screens/PasswordGeneratorScreen';
 import { WebsiteVulnerabilityScreen } from './screens/WebsiteVulnerabilityScreen';
+import { PortScannerScreen } from './screens/PortScannerScreen';
 
 import { PreThreatWarningModal } from './components/PreThreatWarningModal';
 import { PreThreatWarningService } from './services/pre-threat-warning.service';
@@ -240,6 +241,20 @@ export const App: React.FC = () => {
               setInboundUrl(undefined);
               setAutoScanTrigger(false);
               setCurrentTab('HOME');
+            }}
+          />
+        )}
+        {currentTab === 'PORT_SCAN' && (
+          <PortScannerScreen
+            initialHost={inboundUrl}
+            onNavigateHome={() => {
+              setInboundUrl(undefined);
+              setAutoScanTrigger(false);
+              setCurrentTab('HOME');
+            }}
+            onNavigateVulnerabilityAudit={(target) => {
+              if (target) setInboundUrl(target);
+              setCurrentTab('VULNERABILITY_AUDIT');
             }}
           />
         )}

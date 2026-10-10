@@ -603,6 +603,95 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onSelectResu
 
         <button
           type="button"
+          onClick={() => onNavigate('PORT_SCAN')}
+          style={{
+            padding: '1.1rem 1rem',
+            backgroundColor: '#111b2e',
+            border: '1px solid #38bdf8',
+            borderRadius: '16px',
+            color: '#f8fafc',
+            cursor: 'pointer',
+            textAlign: 'left',
+            minHeight: '52px',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            boxShadow: '0 4px 12px rgba(56, 189, 248, 0.1)'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+            <div
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '10px',
+                backgroundColor: 'rgba(56, 189, 248, 0.18)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.35rem',
+                color: '#38bdf8'
+              }}
+            >
+              ⚡
+            </div>
+            <span style={{ color: '#38bdf8', fontSize: '0.85rem' }}>↗</span>
+          </div>
+          <div>
+            <strong style={{ display: 'block', fontSize: '0.95rem', fontWeight: 700 }}>Port Scanner</strong>
+            <span style={{ fontSize: '0.74rem', color: '#94a3b8', lineHeight: 1.3, display: 'block', marginTop: '0.2rem' }}>
+              Exposed ports, DBs & attack vectors
+            </span>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigate('VULNERABILITY_AUDIT')}
+          style={{
+            padding: '1.1rem 1rem',
+            backgroundColor: '#111b2e',
+            border: '1px solid #27364b',
+            borderRadius: '16px',
+            color: '#f8fafc',
+            cursor: 'pointer',
+            textAlign: 'left',
+            minHeight: '52px',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+            <div
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '10px',
+                backgroundColor: 'rgba(129, 140, 248, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.35rem',
+                color: '#818cf8'
+              }}
+            >
+              🌐
+            </div>
+            <span style={{ color: '#64748b', fontSize: '0.85rem' }}>↗</span>
+          </div>
+          <div>
+            <strong style={{ display: 'block', fontSize: '0.95rem', fontWeight: 700 }}>Web Auditor</strong>
+            <span style={{ fontSize: '0.74rem', color: '#94a3b8', lineHeight: 1.3, display: 'block', marginTop: '0.2rem' }}>
+              OWASP & website weaknesses
+            </span>
+          </div>
+        </button>
+
+        <button
+          type="button"
           onClick={() => onNavigate('PRIVACY')}
           style={{
             padding: '1rem',

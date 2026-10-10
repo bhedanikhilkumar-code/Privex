@@ -6,6 +6,7 @@ export type MobileTab =
   | 'TEXT_SCAN'
   | 'FILE_SCAN'
   | 'QR_SCAN'
+  | 'PORT_SCAN'
   | 'PASSWORD'
   | 'ASSISTANT'
   | 'STATUS'
@@ -21,8 +22,8 @@ interface TabBarProps {
 export const TabBar: React.FC<TabBarProps> = ({ currentTab, onSelectTab }) => {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
-  const isScannerTab = ['URL_SCAN', 'TEXT_SCAN', 'FILE_SCAN', 'QR_SCAN', 'VULNERABILITY_AUDIT'].includes(currentTab);
-  const isMoreActive = ['SETTINGS', 'PRIVACY', 'PASSWORD', 'VULNERABILITY_AUDIT'].includes(currentTab);
+  const isScannerTab = ['URL_SCAN', 'TEXT_SCAN', 'FILE_SCAN', 'QR_SCAN', 'PORT_SCAN', 'VULNERABILITY_AUDIT'].includes(currentTab);
+  const isMoreActive = ['SETTINGS', 'PRIVACY', 'PASSWORD', 'PORT_SCAN', 'VULNERABILITY_AUDIT'].includes(currentTab);
 
   const primaryTabs: {
     id: MobileTab | 'MORE';
@@ -88,6 +89,7 @@ export const TabBar: React.FC<TabBarProps> = ({ currentTab, onSelectTab }) => {
   ];
 
   const drawerItems: { id: MobileTab; label: string; icon: string; description: string }[] = [
+    { id: 'PORT_SCAN', label: 'On-Device Port Scanner', icon: '⚡', description: 'Real-time audit of open ports, services & hacker exploitation vectors' },
     { id: 'VULNERABILITY_AUDIT', label: 'Website Vulnerability Auditor', icon: '🌐', description: 'Detect website weaknesses, open ports & hacker vectors' },
     { id: 'SETTINGS', label: 'Protection Settings', icon: '⚡', description: 'Configure active shields & thresholds' },
     { id: 'PRIVACY', label: 'Privacy Center', icon: '🔒', description: 'Zero-knowledge guarantees & crypto-shredder' },

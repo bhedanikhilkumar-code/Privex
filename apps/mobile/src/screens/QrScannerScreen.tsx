@@ -46,18 +46,28 @@ export const QrScannerScreen: React.FC<QrScannerScreenProps> = ({ cameraService,
         return;
       }
 
-      if (!videoRef.current) return;
-      const stream = await cameraService.startCameraStream(videoRef.current);
-      if (!isMountedRef.current) {
-        cameraService.stopCameraStream(stream);
-        return;
-      }
-      streamRef.current = stream;
       setIsCameraActive(true);
       setStatusMessage('Camera active — Point at a QR code');
 
-      // Start frame scanning loop
-      startFramePolling();
+      // Allow state update to render video element before playing
+      setTimeout(async () => {
+        if (!isMountedRef.current) return;
+        try {
+          if (videoRef.current) {
+            const stream = await cameraService.startCameraStream(videoRef.current);
+            if (!isMountedRef.current) {
+              cameraService.stopCameraStream(stream);
+              return;
+            }
+            streamRef.current = stream;
+            startFramePolling();
+          }
+        } catch (streamErr: any) {
+          if (!isMountedRef.current) return;
+          setError(streamErr.message || 'Failed to start camera video stream.');
+          setIsCameraActive(false);
+        }
+      }, 50);
     } catch (err: any) {
       if (!isMountedRef.current) return;
       setError(err.message || 'Failed to start camera.');
@@ -121,7 +131,7 @@ export const QrScannerScreen: React.FC<QrScannerScreenProps> = ({ cameraService,
       const summary = payload.length > 20 ? payload.substring(0, 20) + '...' : payload;
       await SecureStorageService.recordScan({
         scanId: result.scanId,
-        targetType: 'URL',
+        targetType: result.targetType,
         sanitizedSummary: `QR: ${summary}`,
         verdict: result.verdict,
         score: result.overallScore,
@@ -228,42 +238,88 @@ export const QrScannerScreen: React.FC<QrScannerScreenProps> = ({ cameraService,
         </div>
       )}
 
-      {/* Camera Toggle Button */}
-      {!isCameraActive ? (
-        <button
-          type="button"
-          onClick={startCamera}
+      {/* Camera Toggle & Alternative Scanning Options */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+        {!isCameraActive ? (
+          <button
+            type="button"
+            onClick={startCamera}
+            style={{
+              padding: '0.85rem',
+              backgroundColor: '#38bdf8',
+              color: '#0f172a',
+              fontWeight: 700,
+              borderRadius: '12px',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '1rem'
+            }}
+          >
+            Start Camera Scanner
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={stopCamera}
+            style={{
+              padding: '0.85rem',
+              backgroundColor: '#ef4444',
+              color: '#f8fafc',
+              fontWeight: 700,
+              borderRadius: '12px',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '1rem'
+            }}
+          >
+            Stop Camera
+          </button>
+        )}
+
+        {/* Scan QR from Photo / Gallery Button */}
+        <label
           style={{
-            padding: '0.85rem',
-            backgroundColor: '#38bdf8',
-            color: '#0f172a',
+            padding: '0.75rem',
+            backgroundColor: '#1e293b',
+            color: '#38bdf8',
             fontWeight: 700,
             borderRadius: '12px',
-            border: 'none',
+            border: '1px solid #334155',
             cursor: 'pointer',
-            fontSize: '1rem'
+            fontSize: '0.9rem',
+            textAlign: 'center',
+            display: 'block'
           }}
         >
-          Start Camera Scanner
-        </button>
-      ) : (
-        <button
-          type="button"
-          onClick={stopCamera}
-          style={{
-            padding: '0.85rem',
-            backgroundColor: '#ef4444',
-            color: '#f8fafc',
-            fontWeight: 700,
-            borderRadius: '12px',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: '1rem'
-          }}
-        >
-          Stop Camera
-        </button>
-      )}
+          📁 Scan QR Code from Photo / Gallery
+          <input
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              try {
+                setStatusMessage('Decoding QR image...');
+                const reader = new FileReader();
+                reader.onload = async () => {
+                  const dataUrl = reader.result as string;
+                  const decodeRes = await cameraService.decodeFrame(dataUrl);
+                  if (decodeRes.detected && decodeRes.payload) {
+                    await processDecodedPayload(decodeRes.payload);
+                  } else {
+                    setError('No readable QR code found in selected image.');
+                    setStatusMessage('Ready to scan');
+                  }
+                };
+                reader.readAsDataURL(file);
+              } catch (err: any) {
+                setError(err.message || 'Failed to read image.');
+              }
+            }}
+          />
+        </label>
+      </div>
 
       {/* Synthetic Test Scenarios (Master Prompt Requirement) */}
       <div style={{ borderTop: '1px solid #334155', paddingTop: '1rem' }}>

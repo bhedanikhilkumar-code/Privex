@@ -167,8 +167,33 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Genuine Android SAF file picker integration (GAP-18)
+        // Genuine Android SAF file picker and WebChrome permissions integration (GAP-18)
         view.setWebChromeClient(new android.webkit.WebChromeClient() {
+            @Override
+            public void onPermissionRequest(android.webkit.PermissionRequest request) {
+                // Grant camera access if requested by sandboxed app webview
+                String[] resources = request.getResources();
+                boolean requestsCamera = false;
+                for (String res : resources) {
+                    if (android.webkit.PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(res)) {
+                        requestsCamera = true;
+                        break;
+                    }
+                }
+
+                if (requestsCamera) {
+                    if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                        request.grant(new String[]{android.webkit.PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+                    } else {
+                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
+                        // Deny or defer until user response
+                        request.deny();
+                    }
+                } else {
+                    request.deny();
+                }
+            }
+
             @Override
             public boolean onShowFileChooser(WebView webView, android.webkit.ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
                 if (fileUploadCallback != null) {
@@ -193,6 +218,20 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_CAMERA) {
+            boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            if (webView != null) {
+                webView.post(() -> webView.evaluateJavascript(
+                        "window.dispatchEvent(new CustomEvent('privateprotection:camera_permission_result', { detail: { granted: " + granted + " } }));",
+                        null
+                ));
+            }
+        }
     }
 
     @Override

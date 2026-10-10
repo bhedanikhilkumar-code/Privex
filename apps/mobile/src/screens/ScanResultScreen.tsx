@@ -5,8 +5,7 @@ import {
   WebsiteAuditReport,
   ExposedEntryPoint,
   WebsiteEntryPointAnalyzer,
-  KnownPortProfile,
-  EntryPointSeverity
+  KnownPortProfile
 } from '@private-protection/core';
 import { SecurityBadge } from '../components/SecurityBadge';
 import { EvidenceCard } from '../components/EvidenceCard';
@@ -61,7 +60,7 @@ export const ScanResultScreen: React.FC<ScanResultScreenProps> = ({
   const evaluatedPorts = entryPointAnalyzer.auditPortsForTarget(result.sanitizedTarget);
 
   const exposedPortsCount = evaluatedPorts.filter(p => p.status === 'OPEN').length;
-  const isTargetUrl = result.targetType === 'URL' || result.sanitizedTarget.includes('.') || result.sanitizedTarget.startsWith('http');
+  const isTargetUrl = result.targetType === 'URL';
 
   const handleReProbePorts = () => {
     setIsProbingPorts(true);

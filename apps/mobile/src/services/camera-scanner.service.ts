@@ -74,9 +74,29 @@ export class CameraScannerService {
   public async requestCameraPermission(): Promise<boolean> {
     if (typeof window !== 'undefined' && (window as any).AndroidSecurityBridge) {
       const bridge = (window as any).AndroidSecurityBridge;
+      if (typeof bridge.hasCameraPermission === 'function' && bridge.hasCameraPermission()) {
+        return true;
+      }
       if (typeof bridge.requestCameraPermission === 'function') {
         bridge.requestCameraPermission();
-        return true;
+        // Wait for user permission response or check permission
+        return new Promise<boolean>((resolve) => {
+          let timeout: any = null;
+          const onPermResult = (e: any) => {
+            if (timeout) clearTimeout(timeout);
+            window.removeEventListener('privateprotection:camera_permission_result', onPermResult);
+            resolve(!!e.detail?.granted);
+          };
+          window.addEventListener('privateprotection:camera_permission_result', onPermResult);
+          timeout = setTimeout(() => {
+            window.removeEventListener('privateprotection:camera_permission_result', onPermResult);
+            if (typeof bridge.hasCameraPermission === 'function') {
+              resolve(bridge.hasCameraPermission());
+            } else {
+              resolve(false);
+            }
+          }, 3000);
+        });
       }
     }
 
