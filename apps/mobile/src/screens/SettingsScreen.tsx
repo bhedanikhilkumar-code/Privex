@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SecureStorageService } from '../services/secure-storage.service';
 import { MobileSettings, DEFAULT_MOBILE_SETTINGS } from '../types/mobile.types';
+import { BackgroundAutoScanService } from '../services/background-auto-scan.service';
 
 interface SettingsScreenProps {
   onBack?: () => void;
@@ -18,6 +19,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, theme = 
   }, []);
 
   const handleToggle = async (key: keyof MobileSettings, value: any) => {
+    if (key === 'backgroundMonitoringEnabled') {
+      await BackgroundAutoScanService.getInstance().setEnabled(Boolean(value));
+    }
     const updated = await SecureStorageService.saveSettings({ [key]: value });
     setSettings(updated);
   };

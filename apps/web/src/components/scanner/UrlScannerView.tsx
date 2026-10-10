@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { WorkerBridge } from '../../workers/worker-bridge';
 import { ScanResultViewData, UserPreferences } from '../../scanner/types';
 import { ResultCard } from './ResultCard';
+import {
+  WebsiteEntryPointAnalyzer,
+  WebsiteAuditReport,
+  ExposedEntryPoint
+} from '@private-protection/core';
 
 interface UrlScannerViewProps {
   scannerBridge: WorkerBridge;
@@ -12,7 +17,11 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
   const [urlInput, setUrlInput] = useState<string>('');
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [scanResult, setScanResult] = useState<ScanResultViewData | null>(null);
+  const [auditReport, setAuditReport] = useState<WebsiteAuditReport | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const entryPointAnalyzer = new WebsiteEntryPointAnalyzer();
 
   const handleScan = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -25,6 +34,10 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
     try {
       const result = await scannerBridge.scanUrl(targetUrl, preferences);
       setScanResult(result);
+
+      // Offline website open points & port attack surface analysis
+      const report = entryPointAnalyzer.analyzeWebsite(targetUrl);
+      setAuditReport(report);
     } catch (err: any) {
       setErrorMessage(err?.message || 'An error occurred during local URL analysis.');
     } finally {
@@ -35,7 +48,16 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
   const handleQuickFill = (exampleUrl: string) => {
     setUrlInput(exampleUrl);
     setScanResult(null);
+    setAuditReport(null);
     setErrorMessage(null);
+  };
+
+  const handleCopyCode = (code: string, id: string) => {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(code);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2500);
+    }
   };
 
   return (
@@ -266,6 +288,36 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
                 >
                   Brand Deception
                 </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill('http://company-internal.com:3306')}
+                  style={{
+                    padding: '0.3rem 0.65rem',
+                    backgroundColor: '#fee2e2',
+                    border: '1px solid var(--border-dark)',
+                    color: '#991b1b',
+                    fontFamily: 'var(--font-mono)',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Exposed MySQL :3306
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill('https://example.com/.env')}
+                  style={{
+                    padding: '0.3rem 0.65rem',
+                    backgroundColor: '#ffedd5',
+                    border: '1px solid var(--border-dark)',
+                    color: '#c2410c',
+                    fontFamily: 'var(--font-mono)',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Exposed /.env Secret
+                </button>
               </div>
             </form>
           </div>
@@ -393,9 +445,222 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
               result={scanResult}
               onReset={() => {
                 setScanResult(null);
+                setAuditReport(null);
                 setUrlInput('');
               }}
             />
+          )}
+
+          {/* Attack Surface & Open Points Audit */}
+          {auditReport && (
+            <div
+              style={{
+                marginTop: '1.5rem',
+                backgroundColor: 'var(--bg-card)',
+                border: '2px solid var(--border-dark)',
+                boxShadow: 'var(--shadow-brutal-lg)',
+                padding: '1.5rem'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', borderBottom: '2px solid var(--border-dark)', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
+                <div>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '0.7rem',
+                      fontWeight: 800,
+                      color: 'var(--color-brand)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em'
+                    }}
+                  >
+                    OFFLINE ATTACK SURFACE AUDIT
+                  </span>
+                  <h3
+                    style={{
+                      margin: '0.2rem 0 0 0',
+                      fontFamily: 'var(--font-serif)',
+                      fontSize: '1.35rem',
+                      fontWeight: 800,
+                      color: 'var(--text-primary)'
+                    }}
+                  >
+                    Open Points &amp; Exposed Port Analysis
+                  </h3>
+                </div>
+
+                <div
+                  style={{
+                    padding: '0.4rem 0.85rem',
+                    backgroundColor:
+                      auditReport.overallExposureRisk === 'CRITICAL'
+                        ? '#fee2e2'
+                        : auditReport.overallExposureRisk === 'HIGH'
+                        ? '#ffedd5'
+                        : auditReport.overallExposureRisk === 'MODERATE'
+                        ? '#fef3c7'
+                        : '#ecfdf5',
+                    color:
+                      auditReport.overallExposureRisk === 'CRITICAL'
+                        ? '#991b1b'
+                        : auditReport.overallExposureRisk === 'HIGH'
+                        ? '#c2410c'
+                        : auditReport.overallExposureRisk === 'MODERATE'
+                        ? '#b45309'
+                        : '#047857',
+                    border: '2px solid var(--border-dark)',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.8rem',
+                    fontWeight: 800,
+                    textTransform: 'uppercase'
+                  }}
+                >
+                  EXPOSURE: {auditReport.overallExposureRisk} ({auditReport.openPointsDetected} OPEN POINT{auditReport.openPointsDetected === 1 ? '' : 'S'})
+                </div>
+              </div>
+
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', margin: '0 0 1rem 0' }}>
+                {auditReport.summaryExplanation}
+              </p>
+
+              {auditReport.openEntryPoints.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {auditReport.openEntryPoints.map((point: ExposedEntryPoint) => (
+                    <div
+                      key={point.id}
+                      style={{
+                        backgroundColor: 'var(--bg-primary)',
+                        border: '2px solid var(--border-dark)',
+                        padding: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.75rem'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span
+                            style={{
+                              padding: '0.2rem 0.5rem',
+                              backgroundColor:
+                                point.severity === 'CRITICAL' ? '#fee2e2' : point.severity === 'HIGH' ? '#ffedd5' : '#fef3c7',
+                              color:
+                                point.severity === 'CRITICAL' ? '#991b1b' : point.severity === 'HIGH' ? '#c2410c' : '#b45309',
+                              border: '1px solid var(--border-dark)',
+                              fontFamily: 'var(--font-mono)',
+                              fontSize: '0.7rem',
+                              fontWeight: 800
+                            }}
+                          >
+                            {point.severity}
+                          </span>
+                          <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
+                            {point.name}
+                          </strong>
+                        </div>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--color-brand)', fontWeight: 700 }}>
+                          {point.target}
+                        </span>
+                      </div>
+
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', lineHeight: 1.45 }}>
+                        {point.description}
+                      </div>
+
+                      {/* Hacker Exploitation Vector */}
+                      <div
+                        style={{
+                          backgroundColor: '#FEF2F2',
+                          border: '1px solid #F87171',
+                          padding: '0.75rem',
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '0.75rem',
+                          color: '#991B1B'
+                        }}
+                      >
+                        <strong style={{ display: 'block', marginBottom: '0.25rem', textTransform: 'uppercase' }}>
+                          🥷 How Hackers Exploit This Entry Point:
+                        </strong>
+                        {point.hackerAttackVector}
+                      </div>
+
+                      {/* Step-by-Step Remediation / Solution */}
+                      <div
+                        style={{
+                          backgroundColor: '#F0FDF4',
+                          border: '1px solid #4ADE80',
+                          padding: '0.75rem',
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '0.75rem',
+                          color: '#166534'
+                        }}
+                      >
+                        <strong style={{ display: 'block', marginBottom: '0.35rem', textTransform: 'uppercase' }}>
+                          🛠️ Remediation Blueprint &amp; Solution:
+                        </strong>
+                        <div style={{ fontWeight: 700, marginBottom: '0.35rem' }}>
+                          {point.remediationSolution.summary}
+                        </div>
+                        <ol style={{ margin: 0, paddingLeft: '1.25rem' }}>
+                          {point.remediationSolution.steps.map((step, idx) => (
+                            <li key={idx} style={{ marginBottom: '0.2rem' }}>{step}</li>
+                          ))}
+                        </ol>
+
+                        {point.remediationSolution.technicalCodeSnippet && (
+                          <div style={{ marginTop: '0.5rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                              <span style={{ fontWeight: 800 }}>Server Directive / Rule:</span>
+                              <button
+                                type="button"
+                                onClick={() => handleCopyCode(point.remediationSolution.technicalCodeSnippet!, point.id)}
+                                style={{
+                                  padding: '0.15rem 0.5rem',
+                                  backgroundColor: '#FFFFFF',
+                                  border: '1px solid var(--border-dark)',
+                                  fontSize: '0.65rem',
+                                  fontFamily: 'var(--font-mono)',
+                                  fontWeight: 700,
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {copiedId === point.id ? '✓ Copied' : '📋 Copy Code'}
+                              </button>
+                            </div>
+                            <pre
+                              style={{
+                                margin: 0,
+                                padding: '0.5rem',
+                                backgroundColor: '#111111',
+                                color: '#A3E635',
+                                fontSize: '0.7rem',
+                                overflowX: 'auto',
+                                border: '1px solid var(--border-dark)'
+                              }}
+                            >
+                              {point.remediationSolution.technicalCodeSnippet}
+                            </pre>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div
+                  style={{
+                    backgroundColor: 'var(--color-safe-bg)',
+                    border: '1px solid var(--border-dark)',
+                    padding: '0.85rem',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.8rem',
+                    color: '#111111'
+                  }}
+                >
+                  ✓ Zero known dangerous entry ports or exposed secret files detected on this website. Baseline perimeter secure.
+                </div>
+              )}
+            </div>
           )}
         </div>
 

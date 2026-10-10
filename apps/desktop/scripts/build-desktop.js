@@ -54,9 +54,39 @@ async function buildBundles() {
     platform: 'browser',
     target: ['chrome120'],
     format: 'iife',
+    alias: {
+      crypto: path.join(desktopRoot, 'src/shims/crypto-browser-shim.js')
+    },
     outfile: path.join(distDir, 'renderer/renderer.js'),
     define: {
-      'process.env.NODE_ENV': '"production"'
+      'process.env.NODE_ENV': '"production"',
+      'global': 'window'
+    },
+    banner: {
+      js: `
+if (typeof window !== 'undefined' && typeof window.Buffer === 'undefined') {
+  window.Buffer = {
+    isBuffer: () => false,
+    from: (data, enc) => {
+      if (typeof data === 'string') {
+        return new TextEncoder().encode(data);
+      }
+      return new Uint8Array(data);
+    },
+    alloc: (size) => new Uint8Array(size),
+    concat: (list) => {
+      const totalLen = list.reduce((acc, c) => acc + (c.length || 0), 0);
+      const res = new Uint8Array(totalLen);
+      let offset = 0;
+      for (const item of list) {
+        res.set(item, offset);
+        offset += item.length;
+      }
+      return res;
+    }
+  };
+}
+`
     },
     sourcemap: false,
     minify: true

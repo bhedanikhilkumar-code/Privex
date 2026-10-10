@@ -17,4 +17,5 @@ export * from './analyzers/archive-analyzer';
 export * from './analyzers/document-analyzer';
 export * from './analyzers/script-analyzer';
 export * from './pipeline/detection-pipeline';
+export * from './analyzers/website-entry-point-analyzer';
 export * from './utils/crypto';

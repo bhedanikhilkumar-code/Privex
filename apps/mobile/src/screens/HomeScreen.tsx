@@ -5,6 +5,7 @@ import { DeviceSecurityPosture, MobileSettings } from '../types/mobile.types';
 import { DevicePostureCard } from '../components/DevicePostureCard';
 import { MobileTab } from '../components/TabBar';
 import { MobileThreatIntelService } from '../services/mobile-threat-intel.service';
+import { BackgroundAutoScanService, AutoScanStatus } from '../services/background-auto-scan.service';
 
 interface HomeScreenProps {
   onNavigate: (tab: MobileTab) => void;
@@ -19,6 +20,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onSelectResu
   const [history, setHistory] = useState<ScanHistoryRecord[]>([]);
   const [intelSeq, setIntelSeq] = useState<number>(100);
   const [intelRecords, setIntelRecords] = useState<number>(11);
+  const [autoScanStatus, setAutoScanStatus] = useState<AutoScanStatus | null>(null);
+  const [isTriggeringScan, setIsTriggeringScan] = useState<boolean>(false);
 
   useEffect(() => {
     const auditService = new DeviceAuditService();
@@ -32,6 +35,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onSelectResu
         setIntelRecords(meta.recordsCount);
       }
     }).catch(() => {});
+
+    // Subscribe to Continuous Background Auto-Scan Guardian
+    const autoScan = BackgroundAutoScanService.getInstance();
+    const unsubscribe = autoScan.subscribe((status) => {
+      setAutoScanStatus(status);
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const handleHistoryItemClick = (record: ScanHistoryRecord) => {
@@ -223,6 +236,96 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onSelectResu
           }}
         >
           Run Deep Audit
+        </button>
+      </div>
+
+      {/* Background Continuous Phone Auto-Scan Guardian Card */}
+      <div
+        style={{
+          backgroundColor: '#0b1329',
+          border: '1px solid #1e3a8a',
+          borderRadius: '16px',
+          padding: '1.15rem',
+          boxShadow: '0 4px 14px rgba(30, 58, 138, 0.25)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.85rem'
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <span style={{ fontSize: '1.25rem' }}>🛡️</span>
+            <div>
+              <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                BACKGROUND PHONE GUARDIAN
+              </span>
+              <h4 style={{ margin: '0.1rem 0 0 0', fontSize: '0.98rem', fontWeight: 800, color: '#f8fafc' }}>
+                Continuous Auto-Scan Active
+              </h4>
+            </div>
+          </div>
+          <span
+            style={{
+              padding: '0.25rem 0.65rem',
+              borderRadius: '9999px',
+              fontSize: '0.7rem',
+              fontWeight: 800,
+              backgroundColor: autoScanStatus?.isRunning ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+              color: autoScanStatus?.isRunning ? '#34d399' : '#f87171',
+              border: `1px solid ${autoScanStatus?.isRunning ? '#10b981' : '#ef4444'}`
+            }}
+          >
+            {autoScanStatus?.isRunning ? '● SCANNING' : '○ PAUSED'}
+          </span>
+        </div>
+
+        <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8', lineHeight: 1.45 }}>
+          {autoScanStatus?.lastScanMessage || 'Phone is continuously protected against phishing links, malware, and rogue apps.'}
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', backgroundColor: '#090e1a', borderRadius: '10px', padding: '0.65rem' }}>
+          <div>
+            <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', display: 'block' }}>TOTAL SCANS</span>
+            <strong style={{ fontSize: '0.9rem', color: '#f8fafc' }}>{autoScanStatus?.totalScansCount || 0}</strong>
+          </div>
+          <div>
+            <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', display: 'block' }}>THREATS CAUGHT</span>
+            <strong style={{ fontSize: '0.9rem', color: (autoScanStatus?.threatsFoundCount || 0) > 0 ? '#f87171' : '#34d399' }}>
+              {autoScanStatus?.threatsFoundCount || 0}
+            </strong>
+          </div>
+          <div>
+            <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', display: 'block' }}>FREQUENCY</span>
+            <strong style={{ fontSize: '0.9rem', color: '#38bdf8' }}>{autoScanStatus?.intervalSeconds || 30}s</strong>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          disabled={isTriggeringScan}
+          onClick={async () => {
+            setIsTriggeringScan(true);
+            try {
+              await BackgroundAutoScanService.getInstance().executeScanCycle();
+              const updatedHistory = await SecureStorageService.getScanHistory();
+              setHistory(updatedHistory);
+            } finally {
+              setIsTriggeringScan(false);
+            }
+          }}
+          style={{
+            padding: '0.6rem',
+            backgroundColor: 'rgba(56, 189, 248, 0.15)',
+            border: '1px solid #38bdf8',
+            borderRadius: '10px',
+            color: '#38bdf8',
+            fontSize: '0.82rem',
+            fontWeight: 800,
+            cursor: isTriggeringScan ? 'wait' : 'pointer',
+            textAlign: 'center'
+          }}
+        >
+          {isTriggeringScan ? '⚡ Running Auto-Scan Cycle...' : '⚡ Scan Phone Now (Instant)'}
         </button>
       </div>
 
