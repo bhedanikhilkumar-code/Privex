@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { PermissionsPrivacyService } from '../services/permissions-privacy.service';
 import { SecureStorageService } from '../services/secure-storage.service';
 import { NotificationService } from '../services/notification.service';
@@ -15,6 +15,7 @@ export const PrivacyScreen: React.FC<PrivacyScreenProps> = ({ onBack }) => {
   const [error, setError] = useState<string | null>(null);
 
   const service = PermissionsPrivacyService.getInstance();
+  const shredTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadReport = useCallback(async () => {
     try {
@@ -35,9 +36,16 @@ export const PrivacyScreen: React.FC<PrivacyScreenProps> = ({ onBack }) => {
     const handleResume = () => {
       loadReport();
     };
-    window.addEventListener('privateprotection:app_resume', handleResume);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('privateprotection:app_resume', handleResume);
+    }
     return () => {
-      window.removeEventListener('privateprotection:app_resume', handleResume);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('privateprotection:app_resume', handleResume);
+      }
+      if (shredTimerRef.current) {
+        clearTimeout(shredTimerRef.current);
+      }
     };
   }, [loadReport]);
 
@@ -45,7 +53,14 @@ export const PrivacyScreen: React.FC<PrivacyScreenProps> = ({ onBack }) => {
     await SecureStorageService.purgeAllData();
     NotificationService.clearNotifications();
     setShredded(true);
-    setTimeout(() => setShredded(false), 3000);
+    if (shredTimerRef.current) {
+      clearTimeout(shredTimerRef.current);
+    }
+    shredTimerRef.current = setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        setShredded(false);
+      }
+    }, 3000);
     loadReport();
   };
 
