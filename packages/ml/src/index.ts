@@ -14,3 +14,4 @@ export * from './classifiers/intent-classifier';
 export * from './classifiers/semantic-classifier';
 export * from './models/preprocessing/text-preprocessor';
 export * from './evaluation/model-evaluator';
+export * from './assistant/autonomous-task-planner';
