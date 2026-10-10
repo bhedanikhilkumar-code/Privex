@@ -6,7 +6,7 @@ import {
 } from '@private-protection/core';
 import { AssistantOutput } from '@private-protection/ml';
 
-export type ScanTargetType = 'URL' | 'TEXT' | 'FILE';
+export type ScanTargetType = 'URL' | 'TEXT' | 'FILE' | 'DEVICE';
 
 declare global {
   interface Window {

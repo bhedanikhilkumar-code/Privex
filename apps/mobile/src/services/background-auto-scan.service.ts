@@ -1,7 +1,7 @@
 import { DeviceAuditService } from './device-audit.service';
 import { SecureStorageService } from './secure-storage.service';
 import { NotificationService } from './notification.service';
-import { Verdict, SeverityLevel, ActionRecommendation } from '@private-protection/core';
+import { Verdict, SeverityLevel, ActionRecommendation, FrictionLevel } from '@private-protection/core';
 import { MobileScanResult } from '../types/mobile.types';
 
 export interface AutoScanStatus {
@@ -206,19 +206,20 @@ export class BackgroundAutoScanService {
           threatCategory: 'DEVICE_POSTURE',
           evidence: [
             {
-              ruleId: 'device-baseline-risk',
+              source: 'AUTO_SCAN_GUARDIAN',
               name: 'Device Security Baseline Anomaly',
+              ruleId: 'device-posture-risk',
               description: this.lastScanMessage,
               weight: 80,
               scoreContribution: 80,
               confidence: 0.95,
-              indicator: 'device-posture-risk',
-              category: 'MALICIOUS_CONTENT'
-            } as any
+              severityLevel: SeverityLevel.HIGH,
+              indicator: 'device-posture-risk'
+            }
           ],
           recommendation: {
             action: ActionRecommendation.WARN,
-            frictionLevel: 'HIGH',
+            frictionLevel: FrictionLevel.HIGH,
             suggestedAction: 'Review device posture and disable developer options/untrusted sources.',
             bypassPermitted: true
           },

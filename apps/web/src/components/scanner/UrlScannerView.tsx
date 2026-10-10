@@ -617,7 +617,7 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
                           {point.remediationSolution.summary}
                         </div>
                         <ol style={{ margin: 0, paddingLeft: '1.25rem' }}>
-                          {point.remediationSolution.steps.map((step, idx) => (
+                          {point.remediationSolution.steps.map((step: string, idx: number) => (
                             <li key={idx} style={{ marginBottom: '0.2rem' }}>{step}</li>
                           ))}
                         </ol>

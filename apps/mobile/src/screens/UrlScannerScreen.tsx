@@ -386,7 +386,7 @@ export const UrlScannerScreen: React.FC<UrlScannerScreenProps> = ({
                       {point.remediationSolution.summary}
                     </div>
                     <ul style={{ margin: 0, paddingLeft: '14px' }}>
-                      {point.remediationSolution.steps.map((st, i) => (
+                      {point.remediationSolution.steps.map((st: string, i: number) => (
                         <li key={i} style={{ marginBottom: '2px' }}>{st}</li>
                       ))}
                     </ul>

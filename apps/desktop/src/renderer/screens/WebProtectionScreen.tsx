@@ -561,7 +561,7 @@ export const WebProtectionScreen: React.FC = () => {
                             {point.remediationSolution.summary}
                           </div>
                           <ul style={{ margin: 0, paddingLeft: '18px' }}>
-                            {point.remediationSolution.steps.map((step, idx) => (
+                            {point.remediationSolution.steps.map((step: string, idx: number) => (
                               <li key={idx} style={{ marginBottom: '2px' }}>{step}</li>
                             ))}
                           </ul>

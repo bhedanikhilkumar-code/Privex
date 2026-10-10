@@ -1,4 +1,4 @@
-﻿import fs from 'node:fs';
+import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { stripTypeScriptTypes } from 'node:module';
@@ -38,6 +38,9 @@ export async function resolve(specifier, context, nextResolve) {
   }
   if (specifier === '@private-protection/ml') {
     return nextResolve(pathToFileURL(path.resolve('packages/ml/src/index.ts')).href, context);
+  }
+  if (specifier === '@private-protection/ui') {
+    return nextResolve(pathToFileURL(path.resolve('packages/ui/src/index.ts')).href, context);
   }
   
   if (specifier.startsWith('.') && !path.extname(specifier)) {

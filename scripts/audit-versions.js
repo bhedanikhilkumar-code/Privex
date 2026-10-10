@@ -10,6 +10,7 @@ const pkgs = [
   'package.json',
   'packages/core/package.json',
   'packages/ml/package.json',
+  'packages/ui/package.json',
   'apps/web/package.json',
   'apps/mobile/package.json',
   'apps/desktop/package.json',
@@ -18,7 +19,8 @@ const pkgs = [
 
 console.log('=== AUDITING WORKSPACE PACKAGE VERSIONS ===');
 let consistent = true;
-const targetVersion = '0.1.1';
+const rootPkg = JSON.parse(fs.readFileSync(path.resolve(rootDir, 'package.json'), 'utf8'));
+const targetVersion = rootPkg.version || '0.1.2';
 
 for (const rel of pkgs) {
   const full = path.resolve(rootDir, rel);
