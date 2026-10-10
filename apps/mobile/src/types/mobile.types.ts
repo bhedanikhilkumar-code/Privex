@@ -83,6 +83,8 @@ export interface MobileSettings {
   hapticFeedbackEnabled: boolean;
   frictionGateDurationSec: number;
   allowlistDomains: string[];
+  autoContainmentEnabled?: boolean;
+  backgroundMonitoringEnabled?: boolean;
 }
 
 export const DEFAULT_MOBILE_SETTINGS: MobileSettings = {
@@ -91,7 +93,9 @@ export const DEFAULT_MOBILE_SETTINGS: MobileSettings = {
   notificationsEnabled: true,
   hapticFeedbackEnabled: true,
   frictionGateDurationSec: 5,
-  allowlistDomains: []
+  allowlistDomains: [],
+  autoContainmentEnabled: true,
+  backgroundMonitoringEnabled: true
 };
 
 export interface FileMetadataInput {
@@ -141,7 +145,8 @@ export type SecurityJobType =
   | 'DOWNLOAD_INSPECT'
   | 'STORAGE_SCAN'
   | 'HEALTH_CHECK'
-  | 'MAINTENANCE';
+  | 'MAINTENANCE'
+  | 'AUTONOMOUS_AI_AUDIT';
 
 export interface SecurityJobDescriptor {
   id: string;

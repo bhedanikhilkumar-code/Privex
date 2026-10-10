@@ -41,6 +41,36 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
     );
   };
 
+  const handleAutoContainmentToggle = () => {
+    const currentVal = preferences.autoContainmentEnabled !== false;
+    const updated: UserPreferences = {
+      ...preferences,
+      autoContainmentEnabled: !currentVal
+    };
+    onPreferencesChange(updated);
+    PreferenceStorage.savePreferences(updated);
+    showNotice(
+      updated.autoContainmentEnabled
+        ? 'Autonomous threat containment & auto-mitigation enabled.'
+        : 'Autonomous threat containment disabled (Manual only).'
+    );
+  };
+
+  const handleBackgroundMonitoringToggle = () => {
+    const currentVal = preferences.backgroundMonitoringEnabled !== false;
+    const updated: UserPreferences = {
+      ...preferences,
+      backgroundMonitoringEnabled: !currentVal
+    };
+    onPreferencesChange(updated);
+    PreferenceStorage.savePreferences(updated);
+    showNotice(
+      updated.backgroundMonitoringEnabled
+        ? 'Continuous background security monitoring active.'
+        : 'Continuous background security monitoring suspended.'
+    );
+  };
+
   const handleAddDomain = (e: React.FormEvent) => {
     e.preventDefault();
     const clean = newDomain.trim().toLowerCase();
@@ -298,6 +328,90 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
               }}
             >
               {preferences.enableWorkerOffloading ? 'Enabled (Smooth 60fps)' : 'Disabled (Main Thread)'}
+            </button>
+          </div>
+        </div>
+
+        {/* 3. Autonomous Threat Containment */}
+        <div
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            border: '2px solid var(--border-dark)',
+            boxShadow: 'var(--shadow-brutal)',
+            padding: '1.5rem'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-brand)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+                AUTONOMOUS DEFENSE
+              </div>
+              <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.35rem', color: 'var(--text-primary)' }}>
+                Autonomous Threat Containment &amp; Tasks
+              </h3>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', margin: 0 }}>
+                Automatically triggers safe on-device mitigation actions (clipboard scrubbing, session isolation, credential alerts) upon high-risk detection.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleAutoContainmentToggle}
+              style={{
+                padding: '0.65rem 1.25rem',
+                backgroundColor: (preferences.autoContainmentEnabled !== false) ? 'var(--color-safe-bg)' : 'var(--bg-secondary)',
+                color: (preferences.autoContainmentEnabled !== false) ? 'var(--color-safe)' : 'var(--text-primary)',
+                border: '2px solid var(--border-dark)',
+                boxShadow: '3px 3px 0px var(--border-dark)',
+                fontSize: '0.85rem',
+                fontWeight: 800,
+                fontFamily: 'var(--font-mono)',
+                textTransform: 'uppercase',
+                cursor: 'pointer'
+              }}
+            >
+              {(preferences.autoContainmentEnabled !== false) ? '⚡ Auto-Contain Active' : 'Manual Approval Only'}
+            </button>
+          </div>
+        </div>
+
+        {/* 4. Background Security Guardian */}
+        <div
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            border: '2px solid var(--border-dark)',
+            boxShadow: 'var(--shadow-brutal)',
+            padding: '1.5rem'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-brand)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+                PERSISTENT DEFENSE
+              </div>
+              <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.35rem', color: 'var(--text-primary)' }}>
+                Background Continuous Shield
+              </h3>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', margin: 0 }}>
+                Maintains continuous on-device security monitoring via Service Worker and background agents even when minimized.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleBackgroundMonitoringToggle}
+              style={{
+                padding: '0.65rem 1.25rem',
+                backgroundColor: (preferences.backgroundMonitoringEnabled !== false) ? 'var(--color-brand)' : 'var(--bg-secondary)',
+                color: (preferences.backgroundMonitoringEnabled !== false) ? '#FFFFFF' : 'var(--text-primary)',
+                border: '2px solid var(--border-dark)',
+                boxShadow: '3px 3px 0px var(--border-dark)',
+                fontSize: '0.85rem',
+                fontWeight: 800,
+                fontFamily: 'var(--font-mono)',
+                textTransform: 'uppercase',
+                cursor: 'pointer'
+              }}
+            >
+              {(preferences.backgroundMonitoringEnabled !== false) ? '🛡️ Shield Online' : 'Suspended'}
             </button>
           </div>
         </div>

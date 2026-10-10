@@ -15,7 +15,9 @@ const DEFAULT_PREFERENCES: UserPreferences = {
   cognitiveReadingGrade: 6,
   enableWorkerOffloading: true,
   allowlistDomains: [],
-  theme: 'light'
+  theme: 'light',
+  autoContainmentEnabled: true,
+  backgroundMonitoringEnabled: true
 };
 
 export class PreferenceStorage {
@@ -58,7 +60,9 @@ export class PreferenceStorage {
         cognitiveReadingGrade: parsed.cognitiveReadingGrade === 8 ? 8 : 6,
         enableWorkerOffloading: parsed.enableWorkerOffloading !== false,
         allowlistDomains: Array.isArray(parsed.allowlistDomains) ? parsed.allowlistDomains : [],
-        theme: validTheme
+        theme: validTheme,
+        autoContainmentEnabled: parsed.autoContainmentEnabled !== false,
+        backgroundMonitoringEnabled: parsed.backgroundMonitoringEnabled !== false
       };
     } catch {
       return { ...DEFAULT_PREFERENCES };

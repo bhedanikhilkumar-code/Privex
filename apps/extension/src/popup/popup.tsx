@@ -148,7 +148,7 @@ export const PopupApp: React.FC = () => {
         </div>
       ) : (
         /* Active Tab Status Card */
-        <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <div className="popup-card" style={{ padding: '0.85rem', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '0.75rem', color: '#94a3b8', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {tabState?.domain || 'Active Page'}
@@ -244,6 +244,7 @@ export const PopupApp: React.FC = () => {
           <button
             type="submit"
             disabled={isScanning || !manualUrl.trim()}
+            className="popup-btn"
             style={{
               padding: '0.4rem 0.75rem',
               backgroundColor: 'var(--color-brand)',

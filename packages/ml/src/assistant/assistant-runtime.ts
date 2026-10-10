@@ -6,11 +6,13 @@ import { SchemaValidator } from '../security/schema-validator';
 import { AssistantInput, AssistantOutput, ModelProvider } from '../types';
 import { ResponsePolicy } from './response-policy';
 import { TemplateFallbackEngine } from './template-fallback';
+import { AutonomousTaskPlanner } from './autonomous-task-planner';
 
 export class AISecurityAssistant {
   private modelLoader: ModelLoader;
   private activeProviderId?: string;
   private executionTimeoutMs: number;
+  private taskPlanner: AutonomousTaskPlanner;
 
   constructor(options?: {
     modelLoader?: ModelLoader;
@@ -20,6 +22,7 @@ export class AISecurityAssistant {
     this.modelLoader = options?.modelLoader ?? new ModelLoader();
     this.activeProviderId = options?.activeProviderId;
     this.executionTimeoutMs = options?.executionTimeoutMs ?? 50;
+    this.taskPlanner = new AutonomousTaskPlanner();
   }
 
   public getLoader(): ModelLoader {
@@ -30,12 +33,26 @@ export class AISecurityAssistant {
     this.activeProviderId = providerId;
   }
 
+  public getTaskPlanner(): AutonomousTaskPlanner {
+    return this.taskPlanner;
+  }
+
   /**
    * Synthesizes an evidence-based threat explanation adhering to strict safety boundaries.
    * Conforms to docs/AI_ASSISTANT_CONTRACT.md and docs/AI_SECURITY_BOUNDARY.md
    */
   public async explain(input: AssistantInput): Promise<AssistantOutput> {
     const startTime = Date.now();
+
+    const planAutoTasks = () => {
+      return this.taskPlanner.planAutoTasks({
+        verdict: input.verdict,
+        riskAssessment: input.riskAssessment,
+        evidenceTokens: input.evidenceTokens,
+        targetType: input.targetType,
+        untrustedSnippet: input.untrustedSnippet
+      });
+    };
 
     // 1. Safety Guardrail: Check for weaponization / evasion intent in snippets or queries
     if (input.untrustedSnippet) {
@@ -49,7 +66,8 @@ export class AISecurityAssistant {
           recommendedSteps: ['Use protection tools only for authorized defensive purposes.'],
           uncertaintyNote: 'Enforced by on-device safety boundary.',
           inferenceStatus: 'SANITIZED',
-          executionTimeMs: elapsed
+          executionTimeMs: elapsed,
+          autoTaskPlan: planAutoTasks()
         };
       }
     }
@@ -82,7 +100,8 @@ export class AISecurityAssistant {
         ],
         uncertaintyNote: 'Captured by on-device adversarial token sanitizer.',
         inferenceStatus: 'SANITIZED',
-        executionTimeMs: elapsed
+        executionTimeMs: elapsed,
+        autoTaskPlan: planAutoTasks()
       };
     }
 
@@ -135,7 +154,8 @@ export class AISecurityAssistant {
               ...validation.output,
               modelId: provider.id,
               inferenceStatus: 'LOCAL_MODEL',
-              executionTimeMs: elapsed
+              executionTimeMs: elapsed,
+              autoTaskPlan: planAutoTasks()
             };
           }
         }
@@ -148,6 +168,10 @@ export class AISecurityAssistant {
 
     // 4. Safe Deterministic Fallback: Parity with deterministic template engine (< 0.1 ms)
     const elapsed = Math.max(0.01, Date.now() - startTime);
-    return TemplateFallbackEngine.generateFallback(input, elapsed);
+    const fallback = TemplateFallbackEngine.generateFallback(input, elapsed);
+    return {
+      ...fallback,
+      autoTaskPlan: planAutoTasks()
+    };
   }
 }

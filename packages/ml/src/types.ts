@@ -155,4 +155,25 @@ export interface AssistantOutput {
   readonly inferenceStatus: 'LOCAL_MODEL' | 'DETERMINISTIC_FALLBACK' | 'SANITIZED';
   readonly modelId?: string;
   readonly executionTimeMs: number;
+  readonly autoTaskPlan?: {
+    readonly tasks: Array<{
+      readonly taskId: string;
+      readonly type: string;
+      readonly priority: string;
+      readonly title: string;
+      readonly reasoning: string;
+      readonly plannedActions: Array<{
+        readonly id: string;
+        readonly title: string;
+        readonly description: string;
+        readonly command: string;
+        readonly canAutoExecute: boolean;
+        readonly requiresUserConsent: boolean;
+      }>;
+      readonly createdAtMs: number;
+    }>;
+    readonly autoExecutedCount: number;
+    readonly pendingUserConsentCount: number;
+    readonly executionTimeMs: number;
+  };
 }

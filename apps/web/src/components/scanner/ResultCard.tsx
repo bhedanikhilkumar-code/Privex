@@ -332,6 +332,53 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.725rem', color: 'var(--text-muted)', marginTop: '0.75rem', fontStyle: 'italic', margin: 0 }}>
               Notice: {result.aiExplanation.uncertaintyNote}
             </p>
+
+            {result.aiExplanation.autoTaskPlan && result.aiExplanation.autoTaskPlan.tasks.length > 0 && (
+              <div style={{ marginTop: '1.25rem', padding: '1rem', backgroundColor: 'var(--bg-secondary)', border: '1.5px solid var(--border-dark)', borderRadius: '2px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--color-brand)' }}>
+                    ⚡ Autonomous Security Actions ({result.aiExplanation.autoTaskPlan.autoExecutedCount} Auto-Applied)
+                  </span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', backgroundColor: 'var(--color-safe-bg)', color: 'var(--color-safe)', padding: '0.15rem 0.45rem', fontWeight: 800 }}>
+                    ACTIVE PROTECTION
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {result.aiExplanation.autoTaskPlan.tasks.map((task) => (
+                    <div key={task.taskId} style={{ padding: '0.5rem 0.75rem', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-dark)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                        <strong style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>{task.title}</strong>
+                        <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', fontWeight: 800, color: task.priority === 'CRITICAL' ? 'var(--color-danger)' : 'var(--color-brand)' }}>
+                          [{task.priority}]
+                        </span>
+                      </div>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '0 0 0.35rem 0' }}>{task.reasoning}</p>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                        {task.plannedActions.map((action) => (
+                          <span
+                            key={action.id}
+                            style={{
+                              fontSize: '0.675rem',
+                              fontFamily: 'var(--font-mono)',
+                              padding: '0.15rem 0.4rem',
+                              border: '1px solid var(--border-dark)',
+                              backgroundColor: action.canAutoExecute ? 'var(--color-safe-bg)' : 'var(--color-caution-bg)',
+                              color: 'var(--text-primary)',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.25rem'
+                            }}
+                          >
+                            <span>{action.canAutoExecute ? '✓' : '⚠️'}</span>
+                            <span>{action.title}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
         )}
 

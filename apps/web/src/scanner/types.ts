@@ -37,5 +37,7 @@ export interface UserPreferences {
   enableWorkerOffloading: boolean;
   allowlistDomains: string[];
   theme?: AppTheme;
+  autoContainmentEnabled?: boolean;
+  backgroundMonitoringEnabled?: boolean;
 }
 

@@ -587,5 +587,37 @@ The UI must never say "fully protected" if Android denied required access.
 - **Battery & Memory Transparency:**
   - Background scanning schedulers visually reflect power-preservation states (`DEFERRED_LOW_BATTERY` when discharging below 20%) while assuring users that active foreground shields remain 100% armed.
 
+## 18. Motion Design System & Purposeful Animations
+
+### 18.1 Foundations & Philosophy
+Privex uses motion to communicate calm authority, instant clarity, and heightened security awareness without visual noise or alarmism:
+- **Zero Artificial Latency**: Animation never delays or postpones security detection logic. Fast-path engine results ($< 100\text{ ms}$) and warning interstitials ($< 50\text{ ms}$) reveal immediately upon verdict readiness.
+- **Hardware-Accelerated Properties**: Only `transform`, `opacity`, and SVG `stroke-dashoffset` are animated. Layout properties (`width`, `height`, `top`, `left`) are strictly avoided to eliminate reflow and layout thrashing, maintaining continuous 60 FPS performance.
+- **Brand Identity Palette**:
+  - `Deep Void`: `#0B0F19` (Elevated canvas and dark-mode backdrop)
+  - `Alert Red`: `#DC2626` (Threat pulse and high-risk alerts)
+  - `Node White`: `#F8FAFC` (Card surfaces and foreground text)
+  - `Cyber Slate`: `#0284C7` (Interactive accents, tabs, and laser shimmer)
+
+### 18.2 Motion Tokens
+Defined centrally in `@private-protection/ui` (`motion.ts` and `motion.css`):
+- **Durations**:
+  - `Micro` ($120\text{–}160\text{ ms}$): Hover lifts, active button presses (`scale(0.97)`), toggles, copy morphs.
+  - `Standard` ($200\text{–}260\text{ ms}$): Tabs, cards, banners, lists, and dialog entrances.
+  - `Emphasis` ($300\text{–}420\text{ ms}$): Verdict announcements, threat alerts, risk score count-ups, and modal popups.
+- **Easings**:
+  - `Enter`: `cubic-bezier(0.22, 1, 0.36, 1)` (Smooth deceleration onto canvas)
+  - `Exit`: `cubic-bezier(0.4, 0, 1, 1)` (Swift exit acceleration)
+- **Stagger**:
+  - $40\text{–}60\text{ ms}$ delay per item, capped at a maximum of 8 items to eliminate animation fatigue.
+
+### 18.3 Accessibility & Reduced Motion
+In strict compliance with WCAG 2.1 AA (Guideline 2.3.3):
+- `@media (prefers-reduced-motion: reduce)` resets all transitions and animations to `0.01ms` (or instantaneous opacity-only transitions).
+- Disables multi-cycle alert shaking, laser sweeping, count-up numeric progression, and character scrambling.
+- Status indicators and danger badges never rely on motion alone; color, icon, and high-contrast typography communicate threat posture unconditionally.
+- Zero flashing exceeds 3 Hz to prevent photosensitive risks.
+
+
 
 

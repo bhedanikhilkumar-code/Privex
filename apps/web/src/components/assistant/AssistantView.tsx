@@ -313,6 +313,50 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ preferences }) => 
             </div>
           )}
 
+          {explanation.autoTaskPlan && explanation.autoTaskPlan.tasks.length > 0 && (
+            <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1.5px solid var(--border-dark)', padding: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <strong style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--color-brand)', textTransform: 'uppercase' }}>
+                  ⚡ Autonomous Task Plan ({explanation.autoTaskPlan.autoExecutedCount} Auto-Applied)
+                </strong>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.675rem', backgroundColor: 'var(--color-safe-bg)', color: 'var(--color-safe)', padding: '0.15rem 0.45rem', fontWeight: 800 }}>
+                  ON-DEVICE GUARDIAN
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {explanation.autoTaskPlan.tasks.map((task: any) => (
+                  <div key={task.taskId} style={{ padding: '0.5rem 0.75rem', backgroundColor: '#FFFFFF', border: '1px solid var(--border-dark)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-primary)' }}>{task.title}</span>
+                      <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', fontWeight: 800, color: task.priority === 'CRITICAL' ? 'var(--color-danger)' : 'var(--color-brand)' }}>
+                        [{task.priority}]
+                      </span>
+                    </div>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '0 0 0.35rem 0' }}>{task.reasoning}</p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                      {task.plannedActions.map((action: any) => (
+                        <span
+                          key={action.id}
+                          style={{
+                            fontSize: '0.675rem',
+                            fontFamily: 'var(--font-mono)',
+                            padding: '0.15rem 0.4rem',
+                            border: '1px solid var(--border-dark)',
+                            backgroundColor: action.canAutoExecute ? 'var(--color-safe-bg)' : 'var(--color-caution-bg)',
+                            color: 'var(--text-primary)'
+                          }}
+                        >
+                          {action.canAutoExecute ? '✓ ' : '⚠️ '}
+                          {action.title}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.725rem', color: 'var(--text-muted)', borderTop: '1px solid #EBE7DE', paddingTop: '0.75rem' }}>
             <span>🔒 Mode: {explanation.inferenceStatus} • Prompt Boundary: 100% Contained</span>
           </div>

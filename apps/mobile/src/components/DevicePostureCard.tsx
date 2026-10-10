@@ -23,6 +23,7 @@ export const DevicePostureCard: React.FC<DevicePostureCardProps> = ({ posture, o
 
   return (
     <div
+      className="motion-card"
       style={{
         backgroundColor: '#1e293b',
         border: '1px solid #334155',
@@ -51,28 +52,28 @@ export const DevicePostureCard: React.FC<DevicePostureCardProps> = ({ posture, o
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
-        <div style={{ backgroundColor: '#0f172a', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem' }}>
+        <div className="motion-fade-up" style={{ backgroundColor: '#0f172a', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem', animationDelay: '40ms' }}>
           <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.75rem' }}>Screen Lock</span>
           <strong style={{ color: posture.screenLockConfigured ? '#34d399' : '#f87171' }}>
             {posture.screenLockConfigured ? '✓ Configured' : '✗ Not Set'}
           </strong>
         </div>
 
-        <div style={{ backgroundColor: '#0f172a', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem' }}>
+        <div className="motion-fade-up" style={{ backgroundColor: '#0f172a', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem', animationDelay: '80ms' }}>
           <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.75rem' }}>USB Debugging (ADB)</span>
           <strong style={{ color: posture.adbDebuggingEnabled ? '#f87171' : '#34d399' }}>
             {posture.adbDebuggingEnabled ? '⚠️ Enabled' : '✓ Disabled'}
           </strong>
         </div>
 
-        <div style={{ backgroundColor: '#0f172a', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem' }}>
+        <div className="motion-fade-up" style={{ backgroundColor: '#0f172a', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem', animationDelay: '120ms' }}>
           <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.75rem' }}>Developer Options</span>
           <strong style={{ color: posture.developerOptionsEnabled ? '#fcd34d' : '#34d399' }}>
             {posture.developerOptionsEnabled ? 'Active' : 'Disabled'}
           </strong>
         </div>
 
-        <div style={{ backgroundColor: '#0f172a', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem' }}>
+        <div className="motion-fade-up" style={{ backgroundColor: '#0f172a', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem', animationDelay: '160ms' }}>
           <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.75rem' }}>Unknown Sources</span>
           <strong style={{ color: posture.unknownSourcesEnabled ? '#f87171' : '#34d399' }}>
             {posture.unknownSourcesEnabled ? 'Allowed' : '✓ Blocked'}

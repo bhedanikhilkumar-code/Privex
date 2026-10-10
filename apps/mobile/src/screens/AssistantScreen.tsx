@@ -317,6 +317,49 @@ export const AssistantScreen: React.FC = () => {
             </ul>
           </div>
 
+          {explanation.autoTaskPlan && explanation.autoTaskPlan.tasks.length > 0 && (
+            <div style={{ marginTop: '0.85rem', backgroundColor: '#1e293b', border: '1px solid #38bdf8', borderRadius: '12px', padding: '0.85rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 700, textTransform: 'uppercase' }}>
+                  ⚡ Autonomous Actions ({explanation.autoTaskPlan.autoExecutedCount} Applied)
+                </span>
+                <span style={{ fontSize: '0.65rem', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', padding: '0.15rem 0.4rem', borderRadius: '4px', fontWeight: 700 }}>
+                  ON-DEVICE AI
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                {explanation.autoTaskPlan.tasks.map((task: any) => (
+                  <div key={task.taskId} style={{ padding: '0.5rem', backgroundColor: '#0f172a', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#f8fafc' }}>{task.title}</span>
+                      <span style={{ fontSize: '0.65rem', color: task.priority === 'CRITICAL' ? '#f87171' : '#38bdf8', fontWeight: 700 }}>
+                        [{task.priority}]
+                      </span>
+                    </div>
+                    <p style={{ margin: '0 0 0.35rem 0', fontSize: '0.72rem', color: '#94a3b8' }}>{task.reasoning}</p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                      {task.plannedActions.map((action: any) => (
+                        <span
+                          key={action.id}
+                          style={{
+                            fontSize: '0.68rem',
+                            padding: '0.15rem 0.45rem',
+                            borderRadius: '6px',
+                            backgroundColor: action.canAutoExecute ? 'rgba(52, 211, 153, 0.15)' : 'rgba(251, 191, 36, 0.15)',
+                            color: action.canAutoExecute ? '#34d399' : '#fbbf24',
+                            border: `1px solid ${action.canAutoExecute ? 'rgba(52, 211, 153, 0.3)' : 'rgba(251, 191, 36, 0.3)'}`
+                          }}
+                        >
+                          {action.canAutoExecute ? '✓ ' : '⚠️ '}{action.title}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div style={{ marginTop: '1rem', borderTop: '1px solid #1e293b', paddingTop: '0.5rem', fontSize: '0.75rem', color: '#64748b' }}>
             Source: {explanation.modelName || 'On-Device Template Fallback Engine'} • Target: Grade {readingGrade}
           </div>
