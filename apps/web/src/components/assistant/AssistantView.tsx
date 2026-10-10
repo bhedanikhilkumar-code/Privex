@@ -43,7 +43,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ preferences }) => 
         overallScore = 70;
       }
 
-      const demoAssessment: RiskAssessment = {
+      const threatAssessment: RiskAssessment = {
         overallScore,
         confidence: 0.95,
         severity,
@@ -52,9 +52,9 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ preferences }) => 
       };
 
       const input: AssistantInput = {
-        requestId: `assistant-demo-${Date.now()}`,
+        requestId: `assistant-req-${Date.now()}`,
         verdict,
-        riskAssessment: demoAssessment,
+        riskAssessment: threatAssessment,
         evidenceTokens: [
           {
             ruleId,

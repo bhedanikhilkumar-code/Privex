@@ -53,12 +53,20 @@ export class WebShieldService {
     return WebShieldService.instance;
   }
 
+  public isNativeBridgeAvailable(): boolean {
+    return (
+      typeof window !== 'undefined' &&
+      !!window.AndroidBridge &&
+      typeof window.AndroidBridge.inspectUrl === 'function'
+    );
+  }
+
   /**
    * Inspect a URL string for phishing, homoglyphs, typosquatting, credential harvesting,
    * or dangerous schemes.
    */
   public async inspectUrl(url: string): Promise<UrlInspectionReport> {
-    if (window.AndroidBridge && typeof window.AndroidBridge.inspectUrl === 'function') {
+    if (typeof window !== 'undefined' && window.AndroidBridge && typeof window.AndroidBridge.inspectUrl === 'function') {
       try {
         const rawJson = window.AndroidBridge.inspectUrl(url);
         return JSON.parse(rawJson) as UrlInspectionReport;
@@ -85,7 +93,7 @@ export class WebShieldService {
    * Inspect a sequence of redirect hops.
    */
   public async inspectRedirectChain(urls: string[]): Promise<RedirectChainReport> {
-    if (window.AndroidBridge && typeof window.AndroidBridge.inspectRedirectChain === 'function') {
+    if (typeof window !== 'undefined' && window.AndroidBridge && typeof window.AndroidBridge.inspectRedirectChain === 'function') {
       try {
         const rawJson = window.AndroidBridge.inspectRedirectChain(JSON.stringify(urls));
         return JSON.parse(rawJson) as RedirectChainReport;
@@ -109,7 +117,7 @@ export class WebShieldService {
    * Start local Web Shield (DNS filter VPN).
    */
   public async startWebShield(): Promise<boolean> {
-    if (window.AndroidBridge && typeof window.AndroidBridge.startWebShield === 'function') {
+    if (typeof window !== 'undefined' && window.AndroidBridge && typeof window.AndroidBridge.startWebShield === 'function') {
       return window.AndroidBridge.startWebShield();
     }
     this.simActive = true;
@@ -120,7 +128,7 @@ export class WebShieldService {
    * Stop local Web Shield.
    */
   public async stopWebShield(): Promise<boolean> {
-    if (window.AndroidBridge && typeof window.AndroidBridge.stopWebShield === 'function') {
+    if (typeof window !== 'undefined' && window.AndroidBridge && typeof window.AndroidBridge.stopWebShield === 'function') {
       return window.AndroidBridge.stopWebShield();
     }
     this.simActive = false;
@@ -131,7 +139,7 @@ export class WebShieldService {
    * Retrieve current Web Shield status, DNS query counters, and platform capability matrix.
    */
   public async getStatus(): Promise<WebShieldStatus> {
-    if (window.AndroidBridge && typeof window.AndroidBridge.getWebShieldStatus === 'function') {
+    if (typeof window !== 'undefined' && window.AndroidBridge && typeof window.AndroidBridge.getWebShieldStatus === 'function') {
       try {
         const rawJson = window.AndroidBridge.getWebShieldStatus();
         return JSON.parse(rawJson) as WebShieldStatus;

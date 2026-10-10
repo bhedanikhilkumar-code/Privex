@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { ThemeToggle } from './ThemeToggle';
+import { AppTheme } from '../../scanner/types';
 
-export const Header: React.FC = () => {
+export interface HeaderProps {
+  theme?: AppTheme;
+  onThemeChange?: (theme: AppTheme) => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange }) => {
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [isInstalled, setIsInstalled] = useState<boolean>(false);
 
@@ -42,7 +49,7 @@ export const Header: React.FC = () => {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '1rem 2rem',
-        backgroundColor: '#FFFFFF',
+        backgroundColor: 'var(--bg-card)',
         borderBottom: '2px solid var(--border-dark)',
         flexWrap: 'wrap',
         gap: '1rem'
@@ -56,7 +63,7 @@ export const Header: React.FC = () => {
             height: '2.4rem',
             backgroundColor: 'var(--color-brand)',
             border: '2px solid var(--border-dark)',
-            boxShadow: '2px 2px 0px #111111',
+            boxShadow: 'var(--shadow-brutal-sm)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -74,7 +81,7 @@ export const Header: React.FC = () => {
               fontWeight: 800,
               letterSpacing: '-0.02em',
               lineHeight: 1.1,
-              color: '#111111'
+              color: 'var(--text-primary)'
             }}
           >
             PRIVEX
@@ -95,26 +102,8 @@ export const Header: React.FC = () => {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.35rem 0.75rem',
-            backgroundColor: 'var(--bg-secondary)',
-            border: '2px solid var(--border-dark)',
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.725rem',
-            fontWeight: 700,
-            color: '#111111'
-          }}
-        >
-          <span>ENGINE: v0.1.1</span>
-          <span style={{ opacity: 0.4 }}>|</span>
-          <span>RAM: 42MB</span>
-          <span style={{ opacity: 0.4 }}>|</span>
-          <span>LATENCY: &lt;1ms</span>
-        </div>
+        <ThemeToggle theme={theme} onThemeChange={onThemeChange} />
+
 
         {installPrompt && !isInstalled && (
           <button
@@ -138,7 +127,6 @@ export const Header: React.FC = () => {
             <span>📥</span> Install Web App
           </button>
         )}
-
 
       </div>
     </header>

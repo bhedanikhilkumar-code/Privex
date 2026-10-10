@@ -9,13 +9,16 @@ package com.privateprotection.mobile.core;
 public enum JobState {
     QUEUED,
     RUNNING,
+    THROTTLED,
+    DEFERRED,
+    PARTIAL,
     CANCELLING,
     CANCELLED,
     COMPLETED,
     FAILED;
 
     public boolean isTerminal() {
-        return this == CANCELLED || this == COMPLETED || this == FAILED;
+        return this == CANCELLED || this == COMPLETED || this == FAILED || this == DEFERRED || this == PARTIAL;
     }
 
     public boolean canTransitionTo(JobState next) {
@@ -25,9 +28,11 @@ public enum JobState {
 
         switch (this) {
             case QUEUED:
-                return next == RUNNING || next == CANCELLING || next == CANCELLED || next == FAILED;
+                return next == RUNNING || next == THROTTLED || next == DEFERRED || next == CANCELLING || next == CANCELLED || next == FAILED;
             case RUNNING:
-                return next == CANCELLING || next == CANCELLED || next == COMPLETED || next == FAILED;
+                return next == THROTTLED || next == PARTIAL || next == CANCELLING || next == CANCELLED || next == COMPLETED || next == FAILED;
+            case THROTTLED:
+                return next == RUNNING || next == PARTIAL || next == CANCELLING || next == CANCELLED || next == COMPLETED || next == FAILED;
             case CANCELLING:
                 return next == CANCELLED || next == FAILED;
             default:

@@ -79,70 +79,49 @@ public class DownloadNotificationHelper {
 
     /**
      * Dispatches a notification if permitted and within rate limits.
+     * Delegates to MobileNotificationDispatcher for consolidated rate limiting and channel management.
      * Returns true if notification was actually dispatched to NotificationManager.
      */
     public synchronized boolean notify(NotificationCategory category, String fileName, String details) {
         if (context == null) return false;
 
-        // Check POST_NOTIFICATIONS on Android 13+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            int perm = ContextCompat.checkSelfPermission(context, "android.permission.POST_NOTIFICATIONS");
-            if (perm != PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "Notification skipped: POST_NOTIFICATIONS permission not granted");
-                return false;
-            }
-        }
-
-        long now = System.currentTimeMillis();
-        pruneWindow(now);
-
-        // Rate limiting check
-        if (dispatchTimestamps.size() >= MAX_EVENTS_IN_WINDOW) {
-            coalescedBurstCount++;
-            Log.w(TAG, "Rate limit reached. Coalescing download notification #" + coalescedBurstCount);
-            // If burst reaches 5, fire a single coalesced summary
-            if (coalescedBurstCount == 5) {
-                return fireCoalescedAlert(coalescedBurstCount);
-            }
-            return false;
-        }
-
-        coalescedBurstCount = 0;
-        dispatchTimestamps.addLast(now);
-
+        MobileNotificationDispatcher dispatcher = MobileNotificationDispatcher.getInstance(context);
+        MobileNotificationDispatcher.Category mappedCategory;
         String title;
         String body;
-        int priority = NotificationCompat.PRIORITY_HIGH;
-        int icon = android.R.drawable.ic_dialog_alert;
 
         switch (category) {
             case MALWARE_DETECTED:
+                mappedCategory = MobileNotificationDispatcher.Category.CRITICAL_THREAT;
                 title = "⚠️ Malware Detected in Download";
                 body = "Dangerous threat blocked: " + fileName + ". " + (details != null ? details : "");
                 break;
             case DOWNLOAD_QUARANTINED:
+                mappedCategory = MobileNotificationDispatcher.Category.DOWNLOAD_BLOCKED;
                 title = "🛡️ Download Quarantined";
                 body = fileName + " was isolated in the secure vault. " + (details != null ? details : "");
                 break;
             case DOWNLOAD_WARNING:
+                mappedCategory = MobileNotificationDispatcher.Category.DOWNLOAD_BLOCKED;
                 title = "⚡ Suspicious Download Warning";
                 body = "Review needed: " + fileName + ". " + (details != null ? details : "");
                 break;
             case PROTECTION_DEGRADED:
+                mappedCategory = MobileNotificationDispatcher.Category.PROTECTION_DEGRADED;
                 title = "⚠️ Download Protection Degraded";
                 body = details != null ? details : "Download monitoring encountered an issue and is recovering.";
-                priority = NotificationCompat.PRIORITY_DEFAULT;
                 break;
             case DOWNLOAD_SCANNED:
             default:
+                mappedCategory = MobileNotificationDispatcher.Category.SCAN_COMPLETE;
                 title = "✅ Download Scanned & Clean";
                 body = fileName + " verified clean.";
-                priority = NotificationCompat.PRIORITY_LOW;
-                icon = android.R.drawable.ic_dialog_info;
                 break;
         }
 
-        return sendNotification((int) now, title, body, priority, icon);
+        MobileNotificationDispatcher.DispatchResult result = dispatcher.dispatch(mappedCategory, title, body, fileName);
+        return result.outcome == MobileNotificationDispatcher.DispatchOutcome.DISPATCHED
+                || result.outcome == MobileNotificationDispatcher.DispatchOutcome.COALESCED_BATCH;
     }
 
     private boolean fireCoalescedAlert(int count) {
@@ -192,7 +171,9 @@ public class DownloadNotificationHelper {
     }
 
     public synchronized int getRecentDispatchCount() {
-        pruneWindow(System.currentTimeMillis());
-        return dispatchTimestamps.size();
+        if (context != null) {
+            return MobileNotificationDispatcher.getInstance(context).getRecentDispatchCount();
+        }
+        return 0;
     }
 }

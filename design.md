@@ -515,15 +515,77 @@ The UI must never say "fully protected" if Android denied required access.
   - Emergency **"Rollback to Factory Seed"** action with confirmation dialog, reverting sequence and invalidating caches in $<50\text{ ms}$.
 - **Honest Staleness Representation:** If definitions are aged or offline, the UI transparently reports age in days, maintains 100% heuristic baseline protection, and never displays a false "outdated vulnerability" scare banner.
  
-+## 12. Mobile Quarantine & Remediation UX (`ProtectionStatusScreen.tsx`)
-+- **Quarantine Vault Card:**
-+  - Live Vault Statistics: Displays total quarantined items count and aggregate encrypted vault storage size in KB/MB.
-+  - Quarantined Item List: Lists each isolated threat with original filename, threat category, isolation timestamp, and current isolation state (`ISOLATED` vs `SOURCE_REMAINS`).
-+  - Item Actions:
-+    - **Verified Restore:** Confirms restore path, verifies cryptographic GCM auth tag and SHA-256 hash, and atomically restores the original file.
-+    - **Permanent Purge:** Deletes encrypted `.vault` blob, updates the atomic manifest, and permanently removes the item from the device.
-+- **Package Remediation Guidance:**
-+  - Clear Plan Badges: Labels candidate packages with their explicit remediation recommendation (`UNINSTALL_RECOMMENDED`, `FORCE_STOP_RECOMMENDED`, `DISABLE_RECOMMENDED`, or `SYSTEM_APP_PROTECTED`).
-+  - Safe OS Intent Launchers: Directs users into Android's native Application Details Settings or standard system uninstall confirmation dialog.
-+  - Honest Capability Representation: Explicitly clarifies that Android sandbox rules require user confirmation and does not pretend that background silent uninstallation took place.
+## 12. Mobile Quarantine & Remediation UX (`ProtectionStatusScreen.tsx`)
+- **Quarantine Vault Card:**
+  - Live Vault Statistics: Displays total quarantined items count and aggregate encrypted vault storage size in KB/MB.
+  - Quarantined Item List: Lists each isolated threat with original filename, threat category, isolation timestamp, and current isolation state (`ISOLATED` vs `SOURCE_REMAINS`).
+  - Item Actions:
+    - **Verified Restore:** Confirms restore path, verifies cryptographic GCM auth tag and SHA-256 hash, and atomically restores the original file.
+    - **Permanent Purge:** Deletes encrypted `.vault` blob, updates the atomic manifest, and permanently removes the item from the device.
+- **Package Remediation Guidance:**
+  - Clear Plan Badges: Labels candidate packages with their explicit remediation recommendation (`UNINSTALL_RECOMMENDED`, `FORCE_STOP_RECOMMENDED`, `DISABLE_RECOMMENDED`, or `SYSTEM_APP_PROTECTED`).
+  - Safe OS Intent Launchers: Directs users into Android's native Application Details Settings or standard system uninstall confirmation dialog.
+  - Honest Capability Representation: Explicitly clarifies that Android sandbox rules require user confirmation and does not pretend that background silent uninstallation took place.
+
+## 13. Permissions & Privacy Center UX (`PrivacyScreen.tsx`)
+- **Architecture Overview:** Displays live audit across 8 key security cards with color-coded status badges:
+  1. **Storage & File Access:** Shows status (`SAF GRANTED`, `LEGACY GRANTED`, `MEDIASTORE (LIMITED)`, `DENIED`), persisted tree count, accessible scope, and provides deep link button to Android App Settings.
+  2. **Security Notifications:** Displays enabled/disabled status, runtime permission, list of dependent security features, and DND delivery disclaimer, with deep link to Notification Settings.
+  3. **Web Shield (DNS Filter VPN):** Live service state (`ACTIVE`, `CONSENT PENDING`, `EXTERNAL VPN ACTIVE`, `STOPPED`), queries filtered, blocked queries, single-active-VPN notice, and local DNS guarantee.
+  4. **App Install Source Visibility:** Detected installer, third-party sandbox reality notice, and explicit disclosure that Google Play Protect privileges are not claimed.
+  5. **Background Scanning:** ContentObserver registration state, processed event counter, and OEM battery saver limitation disclosure.
+  6. **Battery Optimization:** Real OS exemption state (`EXEMPTED` vs `ENFORCED (STANDARD)`), non-mandatory explanation, and link to Battery Optimization Settings.
+  7. **Telemetry & Data Collection:** Zero-collection audit; confirms 0 bytes uploaded, no telemetry SDKs exist, and presents zero fake toggles.
+  8. **Threat Database Freshness:** Sequence number, record count, staleness badge (`FRESH`, `AGED`, `STALE`, `EXPIRED`), and Ed25519 verification indicator.
+- **Live Lifecycle Synchronization:**
+  - Automatically re-audits and re-renders when the app resumes from the background via `privateprotection:app_resume` event.
+- **One-Click Crypto-Shredder:**
+  - Retains instant cryptographic state shredder for local caches, scan history, and allowlists with feedback banner.
+
+## 14. Adaptive Power & Thermal Shield UX (`ProtectionStatusScreen.tsx`)
+- **Adaptive Protection Card:**
+  - Real-Time Mode Badge: Displays current operational mode with semantic color-coding:
+    - `NORMAL` (Emerald/Green): All systems operating at standard concurrency and buffer sizing.
+    - `BATTERY_SAVER` (Amber/Orange): Battery is below 20% and discharging; non-critical scheduled deep scans deferred.
+    - `THERMAL_THROTTLED` (Orange/Red): Device thermal level elevated; worker thread concurrency throttled and cooling pauses enabled.
+    - `LOW_RAM` (Amber): System memory pressure detected; dynamic streaming buffer scaled to 16 KB and thread pool clamped to 1.
+    - `CRITICAL_RESOURCE_PRESSURE` (Red): Multiple resource constraints active simultaneously.
+  - Thermal Status Badge: Displays exact OS-reported thermal level (`NONE`, `LIGHT`, `MODERATE`, `SEVERE`, `CRITICAL`, `EMERGENCY`, or `UNAVAILABLE`) without fake temperature numbers.
+  - Battery Telemetry: Real-time percentage indicator, charging status (`Plugged in` vs `Discharging`), and charging bypass disclaimer.
+  - Dynamic Buffer Indicator: Explicitly discloses active streaming chunk size (e.g. `64 KB (Standard)` vs `16 KB (Low-RAM Optimization)`).
+  - Scheduled Scan Status: Informs user whether background scans are currently eligible to run or safely deferred to preserve battery and device stability.
+  - Transparent Explanation: Jargon-free explanation reminding the user that active real-time threat detection is never disabled or reduced regardless of power mode.
+
+## 15. Notification Channels & Storm Defense UX (`SettingsScreen.tsx`)
+- **Notification Channels & Rate Limiting Card:**
+  - Channel Mapping Grid: Displays live Android notification channels with their exact OS importance tiers:
+    - `threat_alerts_channel` (`CRITICAL_THREAT`, `APP_INSTALL_WARNING` — High Priority / Heads-Up)
+    - `downloads_protection_channel` (`DOWNLOAD_BLOCKED` — High Priority)
+    - `web_shield_alerts` (`PHISHING_WARNING` — High Priority)
+    - `scans_and_health_channel` (`SCAN_COMPLETE`, `PROTECTION_DEGRADED` — Default Priority)
+    - `threat_updates_channel` (`UPDATE_AVAILABLE` — Low Priority / Silent)
+  - Token-Bucket Storm Defense Indicators:
+    - Real-time rate limiter metrics: displays active window status, maximum allowed alerts (3 per 10s), burst coalescing threshold, and 30-second target cooldown period.
+    - Storm suppression counter: truthfully shows the number of duplicate/excess alerts suppressed from spamming the system notification shade.
+    - Summary coalescing notice: clarifies that when $\ge 3$ alerts trigger rapidly, Privex consolidates them into a single summary alert showing the total blocked threat count and the latest target.
+  - Critical Priority Invariant Callout:
+    - Reassures the user with an explicit invariant disclosure: `CRITICAL_THREAT` alerts (such as active malware or ransomware) are never suppressed or delayed by rate limiting.
+  - Native System Settings Deep Link:
+    - "Configure in Android Settings" button routing directly into the native OS notification channel manager (`Settings.ACTION_APP_NOTIFICATION_SETTINGS`) so users can customize sounds and vibrations per channel.
+
+## 16. Security Test Matrix & Verification Design Standard (Phase T14)
+- **15-Category Coverage Guarantee:** UI components across all security surfaces reflect strictly validated threat states backed by deterministic test categories (CAT-01 through CAT-15).
+- **Physical Device Transparency Standard:**
+  - When displaying security audit results or device compatibility, the interface must never synthesize or simulate real-device hardware approvals when tests were executed on development host runners.
+  - Hardware-dependent features explicitly disclose host capabilities and sandbox limits without synthetic emulation claims.
+
+## 17. Performance & Resource Bounds Design Standard (Phase T15)
+- **Zero-Friction Ingress Guarantee:**
+  - File ingress scanning executes with sub-millisecond fast paths on clean cache hits ($1.02\text{ ms}$) and rapid initial triage ($p50 = 6.00\text{ ms}$ on Android JVM, $p50 = 0.04\text{ ms}$ on TS), eliminating perceptible UI latency during file downloads and app reviews.
+- **Responsive Background Workflows:**
+  - Full device scanning exposes responsive cooperative cancellation ($< 100\text{ ms}$) ensuring users can cancel or pause intensive background tasks instantly without UI freezing or ANR dialogs.
+- **Battery & Memory Transparency:**
+  - Background scanning schedulers visually reflect power-preservation states (`DEFERRED_LOW_BATTERY` when discharging below 20%) while assuring users that active foreground shields remain 100% armed.
+
+
 

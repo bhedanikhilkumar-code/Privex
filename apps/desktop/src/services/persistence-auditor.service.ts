@@ -195,14 +195,14 @@ export class PersistenceAuditorService {
 
     if (parsedCmd.executablePath) {
       try {
+        // Check for RULE-09 OS System Binary
+        if (IpcValidator.isProtectedSystemPath(parsedCmd.executablePath)) {
+          isSystemBinary = true;
+        }
+
         if (fs.existsSync(parsedCmd.executablePath)) {
           existsOnDisk = true;
           isAccessible = true;
-
-          // Check for RULE-09 OS System Binary
-          if (IpcValidator.isProtectedSystemPath(parsedCmd.executablePath)) {
-            isSystemBinary = true;
-          }
 
           // Run canonical FileAnalyzer on target binary
           fileAnalysis = await FileAnalyzer.analyzeFile(parsedCmd.executablePath, {
@@ -216,8 +216,10 @@ export class PersistenceAuditorService {
           }
         } else {
           // Disconnected / Missing binary in persistence
-          indicators.push('MISSING_PERSISTENCE_TARGET');
-          evidenceFactors.push(`Referenced persistence target does not exist on disk: ${parsedCmd.executablePath}`);
+          if (!isSystemBinary) {
+            indicators.push('MISSING_PERSISTENCE_TARGET');
+            evidenceFactors.push(`Referenced persistence target does not exist on disk: ${parsedCmd.executablePath}`);
+          }
         }
       } catch {
         isAccessible = false;

@@ -140,7 +140,18 @@ export const App: React.FC = () => {
               setAutoScanTrigger(false);
               setCurrentTab(tab);
             }}
-            onSelectResult={() => {}}
+            onSelectResult={(record) => {
+              setAutoScanTrigger(false);
+              if (record.targetType === 'URL') {
+                setInboundUrl(record.sanitizedSummary.startsWith('http') ? record.sanitizedSummary : undefined);
+                setCurrentTab('URL_SCAN');
+              } else if (record.targetType === 'TEXT') {
+                setInboundText(record.sanitizedSummary);
+                setCurrentTab('TEXT_SCAN');
+              } else if (record.targetType === 'FILE') {
+                setCurrentTab('FILE_SCAN');
+              }
+            }}
           />
         )}
         {currentTab === 'URL_SCAN' && (

@@ -22,6 +22,8 @@ declare global {
       decodeQrFrame?: (base64Image: string) => string;
       triggerWarningHaptics?: (severity: string) => void;
       dispatchNativeNotification?: (title: string, body: string, priority: string) => boolean;
+      dispatchCategorizedNotification?: (category: string, title: string, body: string, dedupKey: string) => string;
+      getNotificationDispatcherStats?: () => string;
       hasCameraPermission?: () => boolean;
       requestCameraPermission?: () => void;
       getDeviceSecurityPosture?: () => string;
@@ -666,3 +668,169 @@ export interface ThreatUpdateInspectionResult {
   appliedRecordsCount?: number;
   error?: string;
 }
+
+// ==========================================
+// PHASE T11: PERMISSIONS & PRIVACY CENTER DTOs
+// ==========================================
+
+export interface StorageAccessInspectionDTO {
+  status: 'GRANTED_SAF' | 'GRANTED_LEGACY' | 'LIMITED' | 'DENIED';
+  mechanism: 'SAF_AND_MEDIASTORE' | 'LEGACY_STORAGE' | 'MEDIASTORE' | 'UNAVAILABLE';
+  persistedSafTreesCount: number;
+  scopedStorageEnforced: boolean;
+  safTrees: Array<{ uri: string; readable: boolean }>;
+  accessibleScope: string;
+  inaccessibleScope: string;
+}
+
+export interface NotificationPermissionInspectionDTO {
+  runtimePermission: 'GRANTED' | 'DENIED' | 'NOT_REQUIRED';
+  areNotificationsEnabled: boolean;
+  dependentFeatures: string;
+  alertDeliveryDisclaimer: string;
+}
+
+export interface VpnWebShieldInspectionDTO {
+  serviceState: 'ACTIVE' | 'CONSENT_PENDING' | 'COEXISTENCE_CONFLICT' | 'STOPPED' | 'UNAVAILABLE';
+  isVpnActive: boolean;
+  isConsentRequired: boolean;
+  isAnotherVpnActive: boolean;
+  totalDnsQueries: number;
+  blockedDnsQueries: number;
+  lastThreatTimestamp: number;
+  vpnCoexistenceExplanation: string;
+  privacyGuarantee: string;
+}
+
+export interface InstallSourceInspectionDTO {
+  installerPackage: string;
+  isPreInstallInterceptionSupported: boolean;
+  scopeExplanation: string;
+  privilegeTruth: string;
+}
+
+export interface BackgroundScanningInspectionDTO {
+  isDownloadObserverActive: boolean;
+  lastEventTimestamp: number;
+  lastReconciliationTimestamp: number;
+  eventsProcessed: number;
+  threatsDetected: number;
+  status: 'MONITORING_ACTIVE' | 'MONITORING_STOPPED';
+  restrictionsNotice: string;
+}
+
+export interface BatteryOptimizationInspectionDTO {
+  isIgnoringBatteryOptimizations: boolean;
+  status: 'OPTIMIZATION_EXEMPTED' | 'OPTIMIZATION_ENFORCED';
+  explanation: string;
+  isExemptionMandatory: boolean;
+}
+
+export interface TelemetryInspectionDTO {
+  isTelemetryImplemented: boolean;
+  isTelemetryActive: boolean;
+  userPayloadsCollected: number;
+  remoteEndpointsConfigured: string;
+  status: 'NO_TELEMETRY_EXISTS' | 'ACTIVE' | 'DISABLED';
+  explanation: string;
+}
+
+export interface ThreatDatabaseInspectionDTO {
+  activeSequence: number;
+  recordCount: number;
+  lastUpdatedTimestamp: number;
+  ageDays: number;
+  staleness: 'FRESH' | 'AGED' | 'STALE' | 'EXPIRED_CACHE';
+  feedSource: string;
+  isCryptographicallyVerified: boolean;
+  verificationMechanism: string;
+}
+
+export interface PermissionsPrivacyReportDTO {
+  storage: StorageAccessInspectionDTO;
+  notifications: NotificationPermissionInspectionDTO;
+  vpnWebShield: VpnWebShieldInspectionDTO;
+  installSource: InstallSourceInspectionDTO;
+  backgroundScanning: BackgroundScanningInspectionDTO;
+  batteryOptimization: BatteryOptimizationInspectionDTO;
+  telemetry: TelemetryInspectionDTO;
+  threatDatabase: ThreatDatabaseInspectionDTO;
+  timestamp: number;
+}
+
+// ==========================================
+// PHASE T12: BATTERY, THERMAL & LOW-RAM ADAPTIVE PROTECTION
+// ==========================================
+
+export type ResourceModeType =
+  | 'NORMAL'
+  | 'BATTERY_SAVER'
+  | 'THERMAL_THROTTLED'
+  | 'LOW_MEMORY'
+  | 'BACKGROUND_THROTTLED'
+  | 'DEGRADED_CRITICAL';
+
+export type ThermalStatusType =
+  | 'NONE'
+  | 'LIGHT'
+  | 'MODERATE'
+  | 'SEVERE'
+  | 'CRITICAL'
+  | 'EMERGENCY'
+  | 'SHUTDOWN'
+  | 'UNAVAILABLE';
+
+export interface AdaptiveResourceStatusDTO {
+  resourceMode: ResourceModeType;
+  batteryPercentage: number;
+  isCharging: boolean;
+  thermalStatus: ThermalStatusType;
+  isThermalSupported: boolean;
+  isLowMemory: boolean;
+  isForegroundHeavy: boolean;
+  streamingBufferSize: number;
+  canExecuteScheduledDeepScan: boolean;
+  transitionReason: string;
+  disclaimer: string;
+}
+
+// ==========================================
+// PHASE T13: MOBILE NOTIFICATIONS
+// ==========================================
+
+export type NotificationCategoryType =
+  | 'CRITICAL_THREAT'
+  | 'APP_INSTALL_WARNING'
+  | 'DOWNLOAD_BLOCKED'
+  | 'PHISHING_WARNING'
+  | 'SCAN_COMPLETE'
+  | 'PROTECTION_DEGRADED'
+  | 'UPDATE_AVAILABLE';
+
+export type NotificationOutcomeType =
+  | 'DISPATCHED'
+  | 'SUPPRESSED_RATE_LIMIT'
+  | 'SUPPRESSED_PERMISSION'
+  | 'SUPPRESSED_CHANNEL_MUTED'
+  | 'COALESCED_BATCH'
+  | 'ERROR';
+
+export interface NotificationDispatchResultDTO {
+  outcome: NotificationOutcomeType;
+  reason: string;
+  notificationId: number;
+  channelId: string;
+}
+
+export interface NotificationDispatcherStatsDTO {
+  totalAttempted: number;
+  totalDispatched: number;
+  totalSuppressedRateLimit: number;
+  totalSuppressedPermission: number;
+  totalCoalesced: number;
+  activeInWindow: number;
+  maxEventsInWindow: number;
+  windowMs: number;
+}
+
+

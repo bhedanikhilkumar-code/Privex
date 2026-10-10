@@ -125,6 +125,14 @@ public class BoundedWorkerExecutor {
         return executor.getMaximumPoolSize();
     }
 
+    public int getDefaultMaxThreads() {
+        return defaultMaxThreads;
+    }
+
+    public int getDefaultCoreThreads() {
+        return defaultCoreThreads;
+    }
+
     public boolean isShutdown() {
         return executor.isShutdown();
     }

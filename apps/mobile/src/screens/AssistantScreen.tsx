@@ -76,16 +76,32 @@ export const AssistantScreen: React.FC = () => {
 
   return (
     <div style={{ padding: '1rem', color: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-          <span style={{ fontSize: '1.5rem' }}>🤖</span>
-          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#38bdf8' }}>
-            On-Device AI Security Assistant
-          </h2>
+      {/* Header Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            AI-POWERED PROTECTION INSIGHTS
+          </span>
+          <h1 style={{ margin: '0.15rem 0 0 0', fontSize: '1.75rem', fontWeight: 800, color: '#f8fafc' }}>
+            Security Assistant
+          </h1>
         </div>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8' }}>
-          Translates technical threat telemetry into jargon-free, actionable guidance directly on your device.
-        </p>
+        <div style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: '#111b2e', border: '1px solid #27364b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+          🕒
+        </div>
+      </div>
+
+      {/* Intro Assistant Banner Card */}
+      <div style={{ backgroundColor: '#111b2e', border: '1px solid #27364b', borderRadius: '16px', padding: '1.15rem', display: 'flex', gap: '0.85rem', alignItems: 'center' }}>
+        <div style={{ width: '42px', height: '42px', borderRadius: '10px', backgroundColor: 'rgba(56, 189, 248, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
+          ✨
+        </div>
+        <div>
+          <strong style={{ fontSize: '0.95rem', color: '#f8fafc', display: 'block' }}>Privex Assistant</strong>
+          <span style={{ fontSize: '0.76rem', color: '#94a3b8', lineHeight: 1.35, display: 'block' }}>
+            I can explain security verdicts, analyze technical evidence, and provide privacy recommendations.
+          </span>
+        </div>
       </div>
 
       {/* Reading Grade & Scenario Controls */}

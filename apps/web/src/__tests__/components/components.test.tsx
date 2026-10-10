@@ -105,10 +105,10 @@ describe('Web UI Components Testing', () => {
   };
 
   describe('Header, Navigation & Footer', () => {
-    it('renders Header with security badge and local indicator', () => {
+    it('renders Header with brand title and subtitle', () => {
       render(<Header />);
       expect(screen.getByText(/PRIVEX/i)).toBeDefined();
-      expect(screen.getByRole('status')).toBeDefined();
+      expect(screen.getByText(/Zero-Install Client-Side Cyber Threat Dashboard/i)).toBeDefined();
     });
 
     it('renders Navigation with tabs and handles tab changes', () => {

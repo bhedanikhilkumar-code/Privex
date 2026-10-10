@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserPreferences } from '../../scanner/types';
+import { UserPreferences, AppTheme } from '../../scanner/types';
 import { PreferenceStorage } from '../../lib/storage';
 
 interface SettingsViewProps {
@@ -10,6 +10,13 @@ interface SettingsViewProps {
 export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPreferencesChange }) => {
   const [newDomain, setNewDomain] = useState<string>('');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  const handleThemeChange = (newTheme: AppTheme) => {
+    const updated: UserPreferences = { ...preferences, theme: newTheme };
+    onPreferencesChange(updated);
+    PreferenceStorage.saveTheme(newTheme);
+    showNotice(`Theme updated to ${newTheme.toUpperCase()} mode.`);
+  };
 
   const handleGradeChange = (grade: 6 | 8) => {
     const updated: UserPreferences = { ...preferences, cognitiveReadingGrade: grade };
@@ -62,9 +69,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
     const resetPrefs: UserPreferences = {
       cognitiveReadingGrade: 6,
       enableWorkerOffloading: true,
-      allowlistDomains: []
+      allowlistDomains: [],
+      theme: 'light'
     };
     onPreferencesChange(resetPrefs);
+    PreferenceStorage.saveTheme('light');
     showNotice('All local preferences cleared and reset to defaults.');
   };
 
@@ -135,10 +144,65 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+        {/* Appearance & Color Theme */}
+        <div
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            border: '2px solid var(--border-dark)',
+            boxShadow: 'var(--shadow-brutal)',
+            padding: '1.5rem'
+          }}
+        >
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-brand)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+            APPEARANCE &amp; THEME
+          </div>
+          <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.35rem', color: 'var(--text-primary)' }}>
+            Interface Color Mode
+          </h3>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+            Choose between classic brutalist Light mode, cyber-defense Dark mode, or AMOLED pitch-black Night mode.
+          </p>
+
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            {(['light', 'dark', 'night'] as const).map((mode) => {
+              const isSelected = (preferences.theme || 'light') === mode;
+              const icons = { light: '☀️', dark: '🌙', night: '🌑' };
+              const labels = { light: 'Light Mode', dark: 'Dark Mode', night: 'Night Mode' };
+              return (
+                <button
+                  key={mode}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  onClick={() => handleThemeChange(mode)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.65rem 1.25rem',
+                    backgroundColor: isSelected ? 'var(--color-brand)' : 'var(--bg-secondary)',
+                    color: isSelected ? '#FFFFFF' : 'var(--text-primary)',
+                    border: '2px solid var(--border-dark)',
+                    boxShadow: isSelected ? '3px 3px 0px var(--border-dark)' : '1px 1px 0px var(--border-dark)',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    fontFamily: 'var(--font-mono)',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span aria-hidden="true">{icons[mode]}</span>
+                  <span>{labels[mode]}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* 1. Cognitive Reading Grade Level */}
         <div
           style={{
-            backgroundColor: '#FFFFFF',
+            backgroundColor: 'var(--bg-card)',
             border: '2px solid var(--border-dark)',
             boxShadow: 'var(--shadow-brutal)',
             padding: '1.5rem'
@@ -147,7 +211,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-brand)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
             ASSISTANT COMPREHENSION
           </div>
-          <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.35rem' }}>
+          <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.35rem', color: 'var(--text-primary)' }}>
             Explanation Reading Level
           </h3>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
@@ -160,10 +224,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
               onClick={() => handleGradeChange(6)}
               style={{
                 padding: '0.65rem 1.25rem',
-                backgroundColor: preferences.cognitiveReadingGrade === 6 ? 'var(--color-brand)' : '#FFFFFF',
+                backgroundColor: preferences.cognitiveReadingGrade === 6 ? 'var(--color-brand)' : 'var(--bg-secondary)',
                 color: preferences.cognitiveReadingGrade === 6 ? '#FFFFFF' : 'var(--text-primary)',
                 border: '2px solid var(--border-dark)',
-                boxShadow: preferences.cognitiveReadingGrade === 6 ? '3px 3px 0px #111111' : '1px 1px 0px #111111',
+                boxShadow: preferences.cognitiveReadingGrade === 6 ? '3px 3px 0px var(--border-dark)' : '1px 1px 0px var(--border-dark)',
                 fontSize: '0.85rem',
                 fontWeight: 700,
                 fontFamily: 'var(--font-mono)',
@@ -178,10 +242,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
               onClick={() => handleGradeChange(8)}
               style={{
                 padding: '0.65rem 1.25rem',
-                backgroundColor: preferences.cognitiveReadingGrade === 8 ? 'var(--color-brand)' : '#FFFFFF',
+                backgroundColor: preferences.cognitiveReadingGrade === 8 ? 'var(--color-brand)' : 'var(--bg-secondary)',
                 color: preferences.cognitiveReadingGrade === 8 ? '#FFFFFF' : 'var(--text-primary)',
                 border: '2px solid var(--border-dark)',
-                boxShadow: preferences.cognitiveReadingGrade === 8 ? '3px 3px 0px #111111' : '1px 1px 0px #111111',
+                boxShadow: preferences.cognitiveReadingGrade === 8 ? '3px 3px 0px var(--border-dark)' : '1px 1px 0px var(--border-dark)',
                 fontSize: '0.85rem',
                 fontWeight: 700,
                 fontFamily: 'var(--font-mono)',
@@ -197,7 +261,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
         {/* 2. Web Worker Execution */}
         <div
           style={{
-            backgroundColor: '#FFFFFF',
+            backgroundColor: 'var(--bg-card)',
             border: '2px solid var(--border-dark)',
             boxShadow: 'var(--shadow-brutal)',
             padding: '1.5rem'
@@ -208,7 +272,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-brand)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
                 PERFORMANCE ENGINE
               </div>
-              <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.35rem' }}>
+              <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.35rem', color: 'var(--text-primary)' }}>
                 Web Worker Background Processing
               </h3>
               <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', margin: 0 }}>
@@ -220,10 +284,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
               onClick={handleWorkerToggle}
               style={{
                 padding: '0.65rem 1.25rem',
-                backgroundColor: preferences.enableWorkerOffloading ? 'var(--color-accent)' : '#FFFFFF',
+                backgroundColor: preferences.enableWorkerOffloading ? 'var(--color-accent)' : 'var(--bg-secondary)',
                 color: '#111111',
                 border: '2px solid var(--border-dark)',
-                boxShadow: '3px 3px 0px #111111',
+                boxShadow: '3px 3px 0px var(--border-dark)',
                 fontSize: '0.85rem',
                 fontWeight: 800,
                 fontFamily: 'var(--font-mono)',
@@ -239,7 +303,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
         {/* 3. Custom Local Allowlist */}
         <div
           style={{
-            backgroundColor: '#FFFFFF',
+            backgroundColor: 'var(--bg-card)',
             border: '2px solid var(--border-dark)',
             boxShadow: 'var(--shadow-brutal)',
             padding: '1.5rem'
@@ -248,7 +312,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-brand)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
             USER EXCLUSIONS
           </div>
-          <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.35rem' }}>
+          <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.35rem', color: 'var(--text-primary)' }}>
             Custom Local Allowlists
           </h3>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
@@ -277,10 +341,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
               disabled={!newDomain.trim()}
               style={{
                 padding: '0.65rem 1.25rem',
-                backgroundColor: !newDomain.trim() ? '#EBE7DE' : 'var(--color-brand)',
-                color: !newDomain.trim() ? '#888888' : '#FFFFFF',
+                backgroundColor: !newDomain.trim() ? 'var(--bg-secondary)' : 'var(--color-brand)',
+                color: !newDomain.trim() ? 'var(--text-muted)' : '#FFFFFF',
                 border: '2px solid var(--border-dark)',
-                boxShadow: !newDomain.trim() ? 'none' : '2px 2px 0px #111111',
+                boxShadow: !newDomain.trim() ? 'none' : '2px 2px 0px var(--border-dark)',
                 fontSize: '0.85rem',
                 fontWeight: 800,
                 fontFamily: 'var(--font-mono)',
@@ -307,7 +371,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
                     fontFamily: 'var(--font-mono)',
                     fontSize: '0.8rem',
                     fontWeight: 700,
-                    color: '#111111'
+                    color: 'var(--text-primary)'
                   }}
                 >
                   {d}
@@ -341,7 +405,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
         {/* 4. Crypto-Shred & Reset */}
         <div
           style={{
-            backgroundColor: '#FFFFFF',
+            backgroundColor: 'var(--bg-card)',
             border: '2px solid var(--border-dark)',
             boxShadow: 'var(--shadow-brutal)',
             padding: '1.5rem',
@@ -370,7 +434,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ preferences, onPrefe
               padding: '0.75rem 1.5rem',
               backgroundColor: 'var(--color-danger)',
               border: '2px solid var(--border-dark)',
-              boxShadow: '3px 3px 0px #111111',
+              boxShadow: '3px 3px 0px var(--border-dark)',
               color: '#FFFFFF',
               fontFamily: 'var(--font-mono)',
               fontSize: '0.85rem',

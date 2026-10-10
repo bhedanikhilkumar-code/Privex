@@ -44,7 +44,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
     <article
       aria-labelledby="scan-result-verdict"
       style={{
-        backgroundColor: '#FFFFFF',
+        backgroundColor: 'var(--bg-card)',
         border: '2px solid var(--border-dark)',
         boxShadow: 'var(--shadow-brutal-xl)',
         marginTop: '1.75rem',
@@ -137,7 +137,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
               style={{
                 width: '100%',
                 height: '0.65rem',
-                backgroundColor: '#FFFFFF',
+                backgroundColor: 'var(--bg-primary)',
                 border: '1px solid var(--border-dark)',
                 overflow: 'hidden'
               }}
@@ -157,7 +157,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
             style={{
               backgroundColor: 'var(--bg-secondary)',
               border: '2px solid var(--border-dark)',
-              boxShadow: '2px 2px 0px #111111',
+              boxShadow: '2px 2px 0px var(--border-dark)',
               padding: '1rem',
               fontFamily: 'var(--font-mono)'
             }}
@@ -165,7 +165,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>
               Severity Level
             </span>
-            <p style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0.2rem 0 0 0', color: isDangerous ? 'var(--color-danger)' : '#111111' }}>
+            <p style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0.2rem 0 0 0', color: isDangerous ? 'var(--color-danger)' : 'var(--text-primary)' }}>
               {formatSeverity(result.severity as any)}
             </p>
           </div>
@@ -174,7 +174,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
             style={{
               backgroundColor: 'var(--bg-secondary)',
               border: '2px solid var(--border-dark)',
-              boxShadow: '2px 2px 0px #111111',
+              boxShadow: '2px 2px 0px var(--border-dark)',
               padding: '1rem',
               fontFamily: 'var(--font-mono)'
             }}
@@ -182,7 +182,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>
               Detector Confidence
             </span>
-            <p style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0.2rem 0 0 0', color: '#111111' }}>
+            <p style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0.2rem 0 0 0', color: 'var(--text-primary)' }}>
               {Math.round(result.confidence * 100)}%
             </p>
           </div>
@@ -194,7 +194,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
             padding: '1.25rem',
             backgroundColor: isDangerous ? 'var(--color-danger-bg)' : isSafe ? 'var(--color-safe-bg)' : 'var(--color-caution-bg)',
             border: '2px solid var(--border-dark)',
-            boxShadow: '3px 3px 0px #111111'
+            boxShadow: '3px 3px 0px var(--border-dark)'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
@@ -206,7 +206,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
                 fontFamily: 'var(--font-mono)',
                 fontSize: '0.8rem',
                 fontWeight: 900,
-                color: isDangerous ? 'var(--color-danger)' : '#111111',
+                color: isDangerous ? 'var(--color-danger)' : 'var(--text-primary)',
                 textTransform: 'uppercase'
               }}
             >
@@ -214,12 +214,12 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
             </span>
           </div>
 
-          <p style={{ fontSize: '0.95rem', fontWeight: 600, color: '#111111', margin: 0, lineHeight: 1.5 }}>
+          <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0, lineHeight: 1.5 }}>
             {result.recommendation.suggestedAction}
           </p>
 
           {isDangerous && (
-            <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
+            <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-dark)' }}>
               {frictionSeconds > 0 ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-danger)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
                   <span>⏳</span>
@@ -231,7 +231,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
                   onClick={() => setUserBypassed(true)}
                   style={{
                     padding: '0.5rem 1rem',
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: 'var(--bg-card)',
                     border: '2px solid var(--color-danger)',
                     boxShadow: '2px 2px 0px var(--color-danger)',
                     color: 'var(--color-danger)',
@@ -259,7 +259,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
             aria-labelledby="assistant-explanation-title"
             style={{
               padding: '1.5rem',
-              backgroundColor: '#FFFFFF',
+              backgroundColor: 'var(--bg-card)',
               border: '2px solid var(--border-dark)',
               boxShadow: 'var(--shadow-brutal)'
             }}
@@ -340,12 +340,12 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
                     padding: '0.85rem 1.15rem',
                     backgroundColor: 'var(--bg-secondary)',
                     border: '1px solid var(--border-dark)',
-                    boxShadow: '1px 1px 0px #111111',
+                    boxShadow: '1px 1px 0px var(--border-dark)',
                     fontSize: '0.85rem'
                   }}
                 >
                   <div>
-                    <strong style={{ color: '#111111', fontFamily: 'var(--font-mono)' }}>{item.name}</strong>
+                    <strong style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{item.name}</strong>
                     <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0.15rem 0 0 0' }}>
                       {item.description}
                     </p>
@@ -388,7 +388,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
                 backgroundColor: 'var(--color-brand)',
                 color: '#FFFFFF',
                 border: '2px solid var(--border-dark)',
-                boxShadow: '2px 2px 0px #111111',
+                boxShadow: '2px 2px 0px var(--border-dark)',
                 cursor: 'pointer',
                 fontFamily: 'var(--font-mono)',
                 fontSize: '0.8rem',

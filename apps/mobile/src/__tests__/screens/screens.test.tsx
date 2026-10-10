@@ -22,12 +22,22 @@ describe('Mobile Screen Components & Presentation Layer', () => {
 
   it('renders HomeScreen with title, quick actions, and posture card', async () => {
     const navSpy = vi.fn();
-    render(<HomeScreen onNavigate={navSpy} onSelectResult={() => {}} />);
+    const selectSpy = vi.fn();
+    render(<HomeScreen onNavigate={navSpy} onSelectResult={selectSpy} />);
 
-    expect(screen.getByText(/PRIVEX/i)).toBeDefined();
+    expect(screen.getAllByText(/PRIVEX/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/Scan URL/i)).toBeDefined();
     expect(screen.getByText(/Scan Message/i)).toBeDefined();
     expect(screen.getByText(/Inspect File/i)).toBeDefined();
+    expect(screen.getByText(/Privacy Center/i)).toBeDefined();
+    expect(screen.getByText(/Protection Settings/i)).toBeDefined();
+
+    // Verify quick action navigation
+    fireEvent.click(screen.getByText(/Privacy Center/i));
+    expect(navSpy).toHaveBeenCalledWith('PRIVACY');
+
+    fireEvent.click(screen.getByText(/Protection Settings/i));
+    expect(navSpy).toHaveBeenCalledWith('SETTINGS');
   });
 
   it('renders UrlScannerScreen and executes scan on sample click', async () => {
@@ -121,5 +131,42 @@ describe('Mobile Screen Components & Presentation Layer', () => {
       expect(screen.getByText(/Analysis Verdict/i)).toBeDefined();
       expect(screen.getByText(/SAFE \/ ALLOWED/i)).toBeDefined();
     }, { timeout: 4000 });
+  });
+
+  it('handles recent scan history item click in HomeScreen (IMP-002)', async () => {
+    const navSpy = vi.fn();
+    const selectSpy = vi.fn();
+
+    // Mock SecureStorageService to return a record
+    const { SecureStorageService } = await import('../../services/secure-storage.service');
+    const getHistorySpy = vi.spyOn(SecureStorageService, 'getScanHistory').mockResolvedValueOnce([
+      {
+        scanId: 'scan-123',
+        targetType: 'URL',
+        sanitizedSummary: 'https://suspicious-bank-login.com',
+        verdict: 'DANGEROUS',
+        score: 95,
+        timestamp: Date.now()
+      }
+    ]);
+
+    render(<HomeScreen onNavigate={navSpy} onSelectResult={selectSpy} />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/https:\/\/suspicious-bank-login.com/i)).toBeDefined();
+    });
+
+    const historyBtn = screen.getByRole('button', { name: /View URL scan result/i });
+    fireEvent.click(historyBtn);
+
+    expect(selectSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scanId: 'scan-123',
+        targetType: 'URL',
+        verdict: 'DANGEROUS'
+      })
+    );
+
+    getHistorySpy.mockRestore();
   });
 });

@@ -241,8 +241,8 @@ export class PersistenceCommandParser {
     }
 
     // Extract file info
-    const ext = path.extname(executablePath).toLowerCase();
-    const baseName = path.basename(executablePath).toLowerCase();
+    const baseName = (executablePath.split(/[/\\]/).pop() || '').toLowerCase();
+    const ext = path.extname(baseName).toLowerCase();
 
     const isScript = this.SCRIPT_EXTENSIONS.has(ext);
     const isLolbin = this.LOLBINS.has(baseName);

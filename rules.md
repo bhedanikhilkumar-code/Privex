@@ -321,3 +321,45 @@ Privex MUST prefer reversible actions. Quarantine must be isolated and recoverab
    - Routes user actions through explicit, standard OS intents (`Settings.ACTION_APPLICATION_DETAILS_SETTINGS`, `Intent.ACTION_DELETE`).
    - Critical system packages (`android`, `com.android.systemui`, `com.google.android.packageinstaller`, etc.) are classified as `SYSTEM_APP_PROTECTED` and cannot be targeted for destructive removal.
 5. **Crash-Consistent Atomic Manifest:** Vault state is persisted in `quarantine_manifest.json` with `.tmp` fsync writing and automatic `.bak` recovery on corruption.
+
+## RULE-43: Permissions & Privacy Center Ground-Truth Rule
+Privex MUST display ground-truth Android platform state across all 8 security and privacy areas without simulated, fabricated, or optimistic statuses:
+1. **Storage & SAF Truth:** Clearly state available access mechanisms (MediaStore, SAF trees, or legacy storage) and explicitly disclose inaccessible scopes (other app sandboxes `/data/data/*` and protected OS directories).
+2. **Notification Delivery Truth:** Distinguish runtime permission state from actual delivery. Never claim alerts are guaranteed solely because permission is granted.
+3. **VPN & Web Shield Truth:** Service state (`ACTIVE`, `CONSENT_PENDING`, `COEXISTENCE_CONFLICT`, `STOPPED`) must reflect live service instances, never cached flags. Reiterate single-active-VPN platform limit and 100% on-device DNS filtering.
+4. **Install-Source Scope Truth:** Truthfully acknowledge third-party app sandbox boundaries; never claim universal pre-install interception or Google Play Protect system privileges.
+5. **Background Scanning Reality:** Acknowledge OEM battery savers and background execution limitations. Distinguish live observer state from background limits; rely on on-resume catch-up reconciliation.
+6. **Battery Optimization Honesty:** Report real OS exemption status; clarify that exemption is optional and non-mandatory.
+7. **Zero-Telemetry Integrity:** Truthfully report that telemetry is completely uncollected and unimplemented. Never show fake toggles for non-existent telemetry.
+8. **Threat-DB Freshness & Integrity:** Report actual sequence numbers, record counts, and last updated timestamps. Trust requires successful cryptographic verification.
+
+## RULE-44: Battery, Thermal & Adaptive Protection Rule
+Privex mobile protection MUST adapt dynamically to host hardware constraints without compromising user security or reporting simulated metrics:
+1. **Battery-Aware Deferral:** When battery is $< 20\%$ while discharging, non-urgent scheduled batch operations (such as scheduled deep storage scans) MUST transition to `DEFERRED`. Manual user-triggered scans and active device charging MUST bypass this deferral.
+2. **Thermal-Aware Worker Concurrency:** Thermal status MUST be queried truthfully via `PowerManager.OnThermalStatusChangedListener` (API 29+) or reported as `UNAVAILABLE` on older platforms. On `MODERATE` thermal pressure, worker concurrency MUST throttle down from $N$ to $N-1$; on `SEVERE`, `CRITICAL`, or `EMERGENCY` states, concurrency MUST clamp to $1$ thread with inter-file cooling pauses. Fake temperatures MUST NOT be displayed.
+3. **Low-RAM Buffer Scaling:** System memory pressure events (`ComponentCallbacks2.onTrimMemory` / `onLowMemory`) MUST dynamically scale streaming inspection and crypto buffers down from 64 KB to 16 KB and reduce worker threads to 1, bounding heap allocations.
+4. **Foreground Priority:** When heavy user interaction is detected in the foreground, background scan tasks MUST yield CPU time slices to prevent UI stutter.
+5. **Critical Threat Preservation Invariant:** Active real-time threat evaluations (in-flight downloads, user-initiated file scans, APK installation inspections, live URL filtering) MUST NEVER be deferred, cancelled, or downgraded to `ALLOW` due to resource pressure.
+
+## RULE-45: Mobile Notification Channels & Storm Defense Rule
+All native notifications dispatched on Android MUST strictly route through typed channels, respect notification volume constraints, and remain reliable during detection bursts:
+1. **Canonical Notification Channels:** Native channels MUST correspond to the 5 stable channel IDs with exact importance tiers:
+   - `threat_alerts_channel` (`IMPORTANCE_HIGH`) for critical malware, trojans, ransomware, and exploits.
+   - `downloads_protection_channel` (`IMPORTANCE_HIGH`) for suspicious/blocked downloads.
+   - `web_shield_alerts` (`IMPORTANCE_HIGH`) for phishing domains and malicious network intercepts.
+   - `scans_and_health_channel` (`IMPORTANCE_DEFAULT`) for scan completion and protection degraded/warning states.
+   - `threat_updates_channel` (`IMPORTANCE_LOW`) for background signed database updates.
+2. **Token-Bucket Storm Defense:** Burst notifications MUST be capped at a maximum of 3 individual native OS notifications within any rolling 10-second window. Any subsequent notifications within that window MUST be suppressed from spamming the system tray.
+3. **Burst Coalescing:** When a burst threshold ($\ge 3$ events) is reached within the rolling window, the dispatcher MUST synthesize a single consolidated summary notification (notification ID `99999`) displaying the total blocked threat count and the most recent threat name.
+4. **Per-Target Deduplication & Cooldown:** Notifications targeting the identical threat target (same package name, URL, or file path) MUST enforce a 30-second cooldown period before re-alerting, preventing infinite notification loops.
+5. **Critical Threat Priority Invariant:** Active `CRITICAL_THREAT` events (e.g. active ransomware or confirmed malicious APKs) MUST NEVER be suppressed or dropped by the rate limiter; they must always reach the user immediately.
+6. **Payload Sanitization & Unicode Shielding:** Notification titles and bodies MUST be strictly sanitized before presentation: strip Unicode bidirectional override characters (`U+202E`, etc.), control characters, and newlines; truncate titles to 100 characters and bodies to 250 characters; replace empty strings with safe default text.
+
+## RULE-46: Mobile Performance & Memory Bounding Rule
+Mobile file ingestion, threat screening, and background scan queues MUST operate within strictly bounded resources without causing Application Not Responding (ANR) or Out of Memory (OOM) faults:
+1. **Zero Artificial Delays:** File stabilization checks MUST NOT execute arbitrary blocking thread sleeps on readable, non-zero length files. Initial small-file triage MUST satisfy $p50 < 20\text{ ms}$ and $p95 < 50\text{ ms}$.
+2. **Bounded Heap Delta Under Burst Events:** Event deduplication and LRU caches MUST enforce hard capacity boundaries ($\le 5,000$ entries). A 1,000-file burst ingress event storm MUST result in $\Delta \text{Heap} < 32\text{ MB}$.
+3. **Clean-File Fast-Path Acceleration:** Benign files verified as `ALLOW` MAY be cached in `MobileCleanFileCache` with verified bounds (path, length, mtime). Cache hits MUST execute in $< 2.0\text{ ms}$. Disguised binaries and threat indicators MUST NEVER enter or be served from the clean cache.
+4. **Cooperative Cancellation & Offloading:** All intensive disk I/O, hash computations, and file parsing MUST execute on dedicated background worker pools (`BoundedWorkerExecutor`), never blocking the Android main/UI thread. All background scan jobs MUST support cooperative cancellation exiting within $< 100\text{ ms}$.
+
+

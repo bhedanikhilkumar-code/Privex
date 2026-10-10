@@ -213,6 +213,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (webView != null) {
+            webView.post(() -> webView.evaluateJavascript(
+                    "window.dispatchEvent(new CustomEvent('privateprotection:app_resume'));",
+                    null
+            ));
+        }
+    }
+
     /**
      * Handles inbound Intents (Share Target text and Deep links) with cold-start queueing (BLOCKER-05).
      */
@@ -463,37 +474,51 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public boolean dispatchNativeNotification(String title, String body, String priority) {
             try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    if (ContextCompat.checkSelfPermission(activity, android.Manifest.permission.POST_NOTIFICATIONS)
-                            != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(activity,
-                                new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
-                                PERMISSION_REQUEST_POST_NOTIFICATIONS);
-                        return false;
-                    }
-                }
-
-                NotificationManager manager = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
-                if (manager == null) return false;
-
-                Intent intent = new Intent(activity, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, intent,
-                        PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(activity, CHANNEL_ID)
-                        .setSmallIcon(android.R.drawable.ic_dialog_alert)
-                        .setContentTitle(title)
-                        .setContentText(body)
-                        .setPriority(NotificationCompat.PRIORITY_HIGH)
-                        .setAutoCancel(true)
-                        .setContentIntent(pendingIntent);
-
-                manager.notify((int) System.currentTimeMillis(), builder.build());
-                return true;
+                com.privateprotection.mobile.shield.MobileNotificationDispatcher dispatcher =
+                        com.privateprotection.mobile.shield.MobileNotificationDispatcher.getInstance(activity);
+                com.privateprotection.mobile.shield.MobileNotificationDispatcher.Category cat =
+                        "HIGH".equalsIgnoreCase(priority)
+                                ? com.privateprotection.mobile.shield.MobileNotificationDispatcher.Category.CRITICAL_THREAT
+                                : com.privateprotection.mobile.shield.MobileNotificationDispatcher.Category.PHISHING_WARNING;
+                com.privateprotection.mobile.shield.MobileNotificationDispatcher.DispatchResult res =
+                        dispatcher.dispatch(cat, title, body, title);
+                return res.outcome == com.privateprotection.mobile.shield.MobileNotificationDispatcher.DispatchOutcome.DISPATCHED
+                        || res.outcome == com.privateprotection.mobile.shield.MobileNotificationDispatcher.DispatchOutcome.COALESCED_BATCH;
             } catch (Exception e) {
                 Log.e(TAG, "Failed to dispatch native notification", e);
                 return false;
+            }
+        }
+
+        @JavascriptInterface
+        public String dispatchCategorizedNotification(String categoryStr, String title, String body, String dedupKey) {
+            try {
+                com.privateprotection.mobile.shield.MobileNotificationDispatcher dispatcher =
+                        com.privateprotection.mobile.shield.MobileNotificationDispatcher.getInstance(activity);
+                com.privateprotection.mobile.shield.MobileNotificationDispatcher.Category category;
+                try {
+                    category = com.privateprotection.mobile.shield.MobileNotificationDispatcher.Category.valueOf(categoryStr);
+                } catch (Exception ex) {
+                    category = com.privateprotection.mobile.shield.MobileNotificationDispatcher.Category.CRITICAL_THREAT;
+                }
+                com.privateprotection.mobile.shield.MobileNotificationDispatcher.DispatchResult res =
+                        dispatcher.dispatch(category, title, body, dedupKey);
+                return res.toJSON().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to dispatch categorized notification", e);
+                return "{\"outcome\":\"ERROR\",\"reason\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public String getNotificationDispatcherStats() {
+            try {
+                com.privateprotection.mobile.shield.MobileNotificationDispatcher dispatcher =
+                        com.privateprotection.mobile.shield.MobileNotificationDispatcher.getInstance(activity);
+                return dispatcher.getDispatcherStats().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to get notification dispatcher stats", e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
             }
         }
 
@@ -1188,6 +1213,120 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 Log.e(TAG, "rollbackThreatDatabaseToFactorySeed bridge error", e);
                 return false;
+            }
+        }
+
+        // ==========================================
+        // PHASE T11: PERMISSIONS & PRIVACY CENTER
+        // ==========================================
+
+        @JavascriptInterface
+        public String getPermissionsPrivacyReport() {
+            try {
+                com.privateprotection.mobile.shield.PrivacyCenterService service =
+                        com.privateprotection.mobile.shield.PrivacyCenterService.getInstance(activity);
+                return service.getPermissionsPrivacyReport().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "getPermissionsPrivacyReport bridge error", e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public boolean openAppNotificationSettings() {
+            try {
+                com.privateprotection.mobile.shield.PrivacyCenterService service =
+                        com.privateprotection.mobile.shield.PrivacyCenterService.getInstance(activity);
+                activity.startActivity(service.createAppNotificationSettingsIntent());
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "openAppNotificationSettings error", e);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public boolean openAppDetailsSettings() {
+            try {
+                com.privateprotection.mobile.shield.PrivacyCenterService service =
+                        com.privateprotection.mobile.shield.PrivacyCenterService.getInstance(activity);
+                activity.startActivity(service.createAppDetailsSettingsIntent());
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "openAppDetailsSettings error", e);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public boolean openBatteryOptimizationSettings() {
+            try {
+                com.privateprotection.mobile.shield.PrivacyCenterService service =
+                        com.privateprotection.mobile.shield.PrivacyCenterService.getInstance(activity);
+                activity.startActivity(service.createBatteryOptimizationSettingsIntent());
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "openBatteryOptimizationSettings error", e);
+                return false;
+            }
+        }
+
+        // ==========================================
+        // PHASE T12: BATTERY, THERMAL & ADAPTIVE MODE
+        // ==========================================
+
+        @JavascriptInterface
+        public String getAdaptiveResourceStatus() {
+            try {
+                com.privateprotection.mobile.core.AdaptiveResourceManager mgr =
+                        com.privateprotection.mobile.core.AdaptiveResourceManager.getInstance(activity);
+                return mgr.getAdaptiveStatusJSON().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "getAdaptiveResourceStatus error", e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public boolean setForegroundHeavyWorkload(boolean isHeavy) {
+            try {
+                com.privateprotection.mobile.core.AdaptiveResourceManager mgr =
+                        com.privateprotection.mobile.core.AdaptiveResourceManager.getInstance(activity);
+                mgr.setForegroundHeavy(isHeavy);
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "setForegroundHeavyWorkload error", e);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public String triggerScheduledDeepScan() {
+            try {
+                com.privateprotection.mobile.core.MobileSecurityCoordinator coordinator =
+                        com.privateprotection.mobile.core.MobileSecurityCoordinator.getInstance(activity);
+                JSONObject meta = new JSONObject();
+                meta.put("isScheduled", true);
+                meta.put("scanMode", "FULL_ACCESSIBLE_SCAN");
+
+                com.privateprotection.mobile.core.SecurityJob job =
+                        coordinator.submitJob(com.privateprotection.mobile.core.JobType.STORAGE_SCAN, meta, (j, ctrl) -> {
+                            com.privateprotection.mobile.shield.FullDeviceScanService scanService =
+                                    new com.privateprotection.mobile.shield.FullDeviceScanService(activity);
+                            return scanService.executeScan(
+                                    com.privateprotection.mobile.shield.FullDeviceScanService.ScanMode.FULL_ACCESSIBLE_SCAN,
+                                    ctrl,
+                                    (item, scanned, discovered, threats) -> {
+                                        if (discovered > 0) {
+                                            j.setProgress(Math.min(99, (int) ((scanned * 100.0) / discovered)));
+                                        }
+                                    }
+                            );
+                        });
+                return job.toJSON().toString();
+            } catch (Exception e) {
+                Log.e(TAG, "triggerScheduledDeepScan error", e);
+                return "{\"error\":\"" + e.getMessage() + "\"}";
             }
         }
     }
