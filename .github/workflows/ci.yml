@@ -58,6 +58,11 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Build Core & ML Shared Packages
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+
       - name: Run Workspace Linting
         run: npm run lint
 
@@ -77,6 +82,11 @@ jobs:
 
       - name: Install Dependencies
         run: npm ci
+
+      - name: Build Core & ML Shared Packages
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
 
       - name: Run TypeScript Strict Typecheck
         run: npm run typecheck

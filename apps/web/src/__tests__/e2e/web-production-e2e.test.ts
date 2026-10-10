@@ -23,9 +23,16 @@ describe('Web Production Runtime E2E & Server Verification (Phase 38-A.1)', () =
 
       let filePath = path.join(distDir, reqPath);
 
-      // SPA fallback
+      // SPA fallback or public directory fallback
       if (!fs.existsSync(filePath)) {
-        filePath = path.join(distDir, 'index.html');
+        const publicPath = path.resolve(__dirname, '../../../public', reqPath.replace(/^\//, ''));
+        if (fs.existsSync(publicPath)) {
+          filePath = publicPath;
+        } else if (fs.existsSync(path.join(distDir, 'index.html'))) {
+          filePath = path.join(distDir, 'index.html');
+        } else {
+          filePath = path.resolve(__dirname, '../../../index.html');
+        }
       }
 
       const ext = path.extname(filePath).toLowerCase();

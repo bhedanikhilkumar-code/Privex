@@ -72,9 +72,12 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange }) => {
           }}
         >
           <img
-            src="/privex-logo.svg"
+            src="/privex-icon.png"
             alt="PRIVEX logo"
             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = '/privex-logo.svg';
+            }}
           />
         </div>
         <div>

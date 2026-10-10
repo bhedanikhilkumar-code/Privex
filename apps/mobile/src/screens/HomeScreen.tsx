@@ -54,12 +54,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onSelectResu
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: '0.25rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
           <img
-            src="./privex-logo.svg"
+            src="./privex-icon.png"
             alt="PRIVEX"
             style={{ width: '38px', height: '38px', objectFit: 'contain' }}
             onError={(e) => {
-              // Graceful fallback if relative asset path differs
-              (e.currentTarget as HTMLElement).style.display = 'none';
+              (e.currentTarget as HTMLImageElement).src = './privex-logo.svg';
             }}
           />
           <div>
