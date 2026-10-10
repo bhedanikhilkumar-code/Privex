@@ -476,6 +476,46 @@ export class WebsiteEntryPointAnalyzer {
       }
     );
 
+    // WordPress / University CMS XML-RPC & User Enumeration Endpoints
+    checkPath(
+      /\/xmlrpc\.php|\/wp-json\/wp\/v2\/users|\/author-sitemap|\/\?author=1/i,
+      'exposed-xmlrpc-user-enum',
+      'Exposed CMS XML-RPC / User Enumeration Vector',
+      'HIGH',
+      'The website path targets WordPress XML-RPC or the REST API user enumeration endpoint.',
+      'Attackers use xmlrpc.php for high-speed automated amplification brute-force attacks (system.multicall) to test thousands of passwords per second without triggering standard rate limits. They also harvest staff/student usernames via author enumeration.',
+      {
+        summary: 'Block xmlrpc.php and disable REST API user enumeration endpoints.',
+        steps: [
+          'Add a block rule in Nginx or Apache for xmlrpc.php: "location = /xmlrpc.php { deny all; access_log off; log_not_found off; return 403; }".',
+          'Restrict or filter REST API /wp-json/wp/v2/users to authenticated administrators only.',
+          'Enforce Web Application Firewall (WAF) rate limits on all authentication attempts.'
+        ],
+        technicalCodeSnippet: '# Nginx: Block XML-RPC completely\nlocation = /xmlrpc.php {\n  deny all;\n  return 403;\n}',
+        category: 'SERVER_HARDENING'
+      }
+    );
+
+    // File Upload & Arbitrary Attachment Handling Endpoints
+    checkPath(
+      /\/wp-content\/uploads|\/upload\.php|\/file-upload|\/attachments|\/uploadify/i,
+      'exposed-upload-directory-endpoint',
+      'Exposed File Upload / Attachment Storage Path',
+      'HIGH',
+      'The URL targets a direct file upload script or an unprotected public uploads directory.',
+      'If file execution is not disabled in the upload directory, hackers upload malicious web shells (e.g. .php, .phtml, .jsp) disguised with double extensions or image MIME types, and then request the file directly to execute arbitrary code.',
+      {
+        summary: 'Disable PHP/script execution inside all public uploads and media directories.',
+        steps: [
+          'In Nginx, configure the uploads directory to serve static content only and deny script execution.',
+          'Store uploaded files on an isolated object storage service (AWS S3, MinIO, Cloudflare R2) without executable handlers.',
+          'Re-encode and validate images server-side before persisting.'
+        ],
+        technicalCodeSnippet: '# Nginx: Disable script execution in uploads\nlocation ~* ^/wp-content/uploads/.*\\.(php|phtml|pl|py|jsp|asp|sh|cgi)$ {\n  deny all;\n  return 403;\n}',
+        category: 'SERVER_HARDENING'
+      }
+    );
+
     // ========================================================
     // 4. OPEN REDIRECT VECTORS IN QUERY PARAMETERS
     // ========================================================

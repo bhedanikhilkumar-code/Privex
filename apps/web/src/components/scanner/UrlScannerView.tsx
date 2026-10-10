@@ -318,6 +318,21 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
                 >
                   Exposed /.env Secret
                 </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill('https://atmiyauni.ac.in/')}
+                  style={{
+                    padding: '0.3rem 0.65rem',
+                    backgroundColor: '#ede9fe',
+                    border: '1px solid var(--border-dark)',
+                    color: '#6d28d9',
+                    fontFamily: 'var(--font-mono)',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  🏫 atmiyauni.ac.in
+                </button>
               </div>
             </form>
           </div>

@@ -104,4 +104,21 @@ describe('WebsiteEntryPointAnalyzer', () => {
     expect(profiles.some(p => p.port === 22)).toBe(true);
     expect(profiles.some(p => p.port === 3306)).toBe(true);
   });
+
+  it('detects exposed XML-RPC user enumeration vectors', () => {
+    const report = analyzer.analyzeWebsite('https://atmiyauni.ac.in/xmlrpc.php');
+    const point = report.openEntryPoints.find(p => p.id === 'exposed-xmlrpc-user-enum');
+    expect(point).toBeDefined();
+    expect(point?.severity).toBe('HIGH');
+    expect(point?.hackerAttackVector).toContain('xmlrpc.php');
+    expect(point?.remediationSolution.steps.length).toBeGreaterThan(0);
+  });
+
+  it('detects exposed file upload and attachment directories', () => {
+    const report = analyzer.analyzeWebsite('https://atmiyauni.ac.in/wp-content/uploads/shell.php');
+    const point = report.openEntryPoints.find(p => p.id === 'exposed-upload-directory-endpoint');
+    expect(point).toBeDefined();
+    expect(point?.severity).toBe('HIGH');
+    expect(point?.hackerAttackVector).toContain('web shells');
+  });
 });

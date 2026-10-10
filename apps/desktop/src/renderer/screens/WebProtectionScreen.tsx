@@ -431,6 +431,17 @@ export const WebProtectionScreen: React.FC = () => {
                 >
                   SSH Shell :22
                 </button>
+                <span>•</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setWebsiteAuditInput('https://atmiyauni.ac.in/');
+                    handleAuditWebsiteEntryPoints(undefined, 'https://atmiyauni.ac.in/');
+                  }}
+                  style={{ background: 'none', border: 'none', color: '#7c3aed', cursor: 'pointer', padding: 0 }}
+                >
+                  🏫 Test atmiyauni.ac.in
+                </button>
               </div>
             </form>
 

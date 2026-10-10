@@ -545,6 +545,27 @@ export const UrlScannerScreen: React.FC<UrlScannerScreenProps> = ({
           >
             🚨 Exposed Secret File: https://production-app.com/.env
           </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('ATTACK_SURFACE');
+              setUrlInput('https://atmiyauni.ac.in/');
+              handleScan('https://atmiyauni.ac.in/');
+            }}
+            style={{
+              padding: '0.6rem 0.75rem',
+              backgroundColor: '#1e293b',
+              border: '1px solid #7c3aed',
+              borderRadius: '8px',
+              color: '#c084fc',
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              textAlign: 'left'
+            }}
+          >
+            🏫 University Audit Target: https://atmiyauni.ac.in/
+          </button>
         </div>
       </div>
     </div>
