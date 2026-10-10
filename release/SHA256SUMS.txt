@@ -1,6 +1,6 @@
 167aa2c212781a1a5cc21194fe1d9ef6c8948ff063c8932a9a7b432ec8a4a2cc  private-protection-extension-0.1.1.zip
 42e0a4c5fb611f1bea0b550c16159ad45b13e3510ba6d4457a8f7490b8f898a7  private-protection-web-0.1.1.zip
-e90a8d9f56ca096c5ef3f81be5f24dd4e565999a78eb4a04808e71a27ac6888d  private-protection-mobile-0.1.1.apk
-32bb2dabed9f301396b891366e8fcb96cf9f613ed0bf53b30e9e6bd318697c21  private-protection-mobile-0.1.1.aab
+1125135bc01f4988e2585429e607e744adfe6dfe903009be466b202e0aaccf09  private-protection-mobile-0.1.1.apk
+8340e3cfa7a55b1d9a89685d5920260af7804edd9e9fd55ba8aecc1e97228ffb  private-protection-mobile-0.1.1.aab
 49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa  PrivateProtection-0.1.1-win-x64.exe
 9ca273b992bedaabc42d3161dbf3ac1c24aad518b84faf8e99e005c5a54d8d84  PrivateProtection-Setup-0.1.1.exe

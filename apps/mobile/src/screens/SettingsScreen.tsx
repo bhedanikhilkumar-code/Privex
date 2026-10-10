@@ -4,9 +4,11 @@ import { MobileSettings, DEFAULT_MOBILE_SETTINGS } from '../types/mobile.types';
 
 interface SettingsScreenProps {
   onBack?: () => void;
+  theme?: 'dark' | 'light';
+  onThemeChange?: (theme: 'dark' | 'light') => void;
 }
 
-export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
+export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, theme = 'dark', onThemeChange }) => {
   const [settings, setSettings] = useState<MobileSettings>(DEFAULT_MOBILE_SETTINGS);
   const [newDomain, setNewDomain] = useState<string>('');
   const [message, setMessage] = useState<string | null>(null);
@@ -18,6 +20,15 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
   const handleToggle = async (key: keyof MobileSettings, value: any) => {
     const updated = await SecureStorageService.saveSettings({ [key]: value });
     setSettings(updated);
+  };
+
+  const handleThemeSelect = async (newTheme: 'dark' | 'light') => {
+    await handleToggle('theme', newTheme);
+    if (onThemeChange) {
+      onThemeChange(newTheme);
+    }
+    setMessage(`Theme switched to ${newTheme.toUpperCase()} mode.`);
+    setTimeout(() => setMessage(null), 3000);
   };
 
   const handleAddDomain = async () => {
@@ -37,8 +48,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
     setTimeout(() => setMessage(null), 3000);
   };
 
+  const activeTheme = settings.theme || theme;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '1rem', color: '#f8fafc' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '1rem', color: 'var(--text-primary)' }}>
       {/* Top Header matching Settings.png */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -51,9 +64,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
-                backgroundColor: '#111b2e',
-                border: '1px solid #27364b',
-                color: '#38bdf8',
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--color-brand)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -65,10 +78,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
             </button>
           )}
           <div>
-            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--color-brand)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               PRIVEX SECURITY
             </span>
-            <h1 style={{ margin: '0.1rem 0 0 0', fontSize: '1.5rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
+            <h1 style={{ margin: '0.1rem 0 0 0', fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
               Mobile Protection Settings
             </h1>
           </div>
@@ -76,27 +89,89 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
       </div>
 
       {message && (
-        <div style={{ padding: '0.75rem', backgroundColor: 'rgba(56, 189, 248, 0.2)', border: '1px solid #38bdf8', borderRadius: '10px', color: '#7dd3fc', fontSize: '0.85rem' }}>
+        <div style={{ padding: '0.75rem', backgroundColor: 'var(--color-safe-bg)', border: '1px solid var(--color-safe)', borderRadius: '10px', color: 'var(--color-safe)', fontSize: '0.85rem' }}>
           {message}
         </div>
       )}
 
+      {/* APPEARANCE SECTION: LIGHT / DARK THEME TOGGLE */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          APPEARANCE &amp; THEME
+        </span>
+        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '20px', padding: '1.25rem' }}>
+          <strong style={{ display: 'block', fontSize: '0.95rem', marginBottom: '0.2rem', color: 'var(--text-primary)' }}>
+            Color Mode
+          </strong>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.85rem' }}>
+            Choose between high-contrast Dark mode or crisp Light mode
+          </span>
+
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button
+              type="button"
+              onClick={() => handleThemeSelect('dark')}
+              style={{
+                flex: 1,
+                padding: '0.75rem',
+                backgroundColor: activeTheme === 'dark' ? 'var(--color-brand)' : 'var(--bg-secondary)',
+                color: activeTheme === 'dark' ? '#090e1a' : 'var(--text-primary)',
+                fontWeight: 700,
+                borderRadius: '12px',
+                border: activeTheme === 'dark' ? '2px solid var(--color-brand)' : '1px solid var(--border-color)',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.4rem',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <span>🌙</span> Dark Mode
+            </button>
+            <button
+              type="button"
+              onClick={() => handleThemeSelect('light')}
+              style={{
+                flex: 1,
+                padding: '0.75rem',
+                backgroundColor: activeTheme === 'light' ? 'var(--color-brand)' : 'var(--bg-secondary)',
+                color: activeTheme === 'light' ? '#ffffff' : 'var(--text-primary)',
+                fontWeight: 700,
+                borderRadius: '12px',
+                border: activeTheme === 'light' ? '2px solid var(--color-brand)' : '1px solid var(--border-color)',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.4rem',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <span>☀️</span> Light Mode
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* PROTECTION SECTION matching Settings.png */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           PROTECTION
         </span>
-        <div style={{ backgroundColor: '#111b2e', border: '1px solid #27364b', borderRadius: '20px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '20px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <strong style={{ display: 'block', fontSize: '0.95rem', color: '#f8fafc' }}>Real-Time Scanning Engine</strong>
-              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Enables on-device detection rules and heuristics</span>
+              <strong style={{ display: 'block', fontSize: '0.95rem', color: 'var(--text-primary)' }}>Real-Time Scanning Engine</strong>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Enables on-device detection rules and heuristics</span>
             </div>
             <input
               type="checkbox"
               checked={settings.protectionEnabled}
               onChange={(e) => handleToggle('protectionEnabled', e.target.checked)}
-              style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#38bdf8' }}
+              style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--color-brand)' }}
             />
           </div>
 

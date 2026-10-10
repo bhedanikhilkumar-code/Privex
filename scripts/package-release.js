@@ -15,9 +15,18 @@ if (!fs.existsSync(releaseDir)) {
 
 console.log('=== PACKAGING RELEASE ARTIFACTS ===');
 
-function calculateSha256(filePath) {
-  const fileBuffer = fs.readFileSync(filePath);
-  return crypto.createHash('sha256').update(fileBuffer).digest('hex');
+function calculateSha256(filePath, retries = 5) {
+  try {
+    const fileBuffer = fs.readFileSync(filePath);
+    return crypto.createHash('sha256').update(fileBuffer).digest('hex');
+  } catch (err) {
+    if (retries > 0 && (err.code === 'EBUSY' || err.code === 'EPERM')) {
+      const start = Date.now();
+      while (Date.now() - start < 500) {}
+      return calculateSha256(filePath, retries - 1);
+    }
+    throw err;
+  }
 }
 
 const rootPkg = JSON.parse(fs.readFileSync(path.resolve(rootDir, 'package.json'), 'utf8'));

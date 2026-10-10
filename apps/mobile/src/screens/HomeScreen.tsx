@@ -9,9 +9,11 @@ import { MobileThreatIntelService } from '../services/mobile-threat-intel.servic
 interface HomeScreenProps {
   onNavigate: (tab: MobileTab) => void;
   onSelectResult: (record: ScanHistoryRecord) => void;
+  theme?: 'dark' | 'light';
+  onToggleTheme?: () => void;
 }
 
-export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onSelectResult }) => {
+export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onSelectResult, theme, onToggleTheme }) => {
   const [posture, setPosture] = useState<DeviceSecurityPosture | null>(null);
   const [settings, setSettings] = useState<MobileSettings | null>(null);
   const [history, setHistory] = useState<ScanHistoryRecord[]>([]);
@@ -49,8 +51,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onSelectResu
   const isHealthy = settings?.protectionEnabled !== false && posture?.overallHealth !== 'RISK';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '1rem', color: '#f8fafc' }}>
-      {/* Top Bar with System Status & User Badge */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '1rem', color: 'var(--text-primary)' }}>
+      {/* Top Bar with System Status, Theme Toggle & User Badge */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: '0.25rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
           <img
@@ -62,15 +64,40 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onSelectResu
             }}
           />
           <div>
-            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-brand)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               PRIVEX MOBILE
             </span>
-            <h1 style={{ margin: '0.15rem 0 0 0', fontSize: '1.85rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
+            <h1 style={{ margin: '0.15rem 0 0 0', fontSize: '1.85rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
               System Status
             </h1>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {onToggleTheme && (
+            <button
+              type="button"
+              onClick={onToggleTheme}
+              aria-label={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+              title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-primary)',
+                fontWeight: 700,
+                fontSize: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'background-color 0.15s ease'
+              }}
+            >
+              {theme === 'light' ? '🌙' : '☀️'}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => onNavigate('SETTINGS')}
@@ -79,9 +106,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onSelectResu
               width: '38px',
               height: '38px',
               borderRadius: '50%',
-              backgroundColor: '#1e293b',
-              border: '1px solid #334155',
-              color: '#38bdf8',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+              color: 'var(--color-brand)',
               fontWeight: 700,
               fontSize: '0.85rem',
               display: 'flex',
@@ -90,7 +117,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onSelectResu
               cursor: 'pointer'
             }}
           >
-            JD
+            ⚙️
           </button>
         </div>
       </div>

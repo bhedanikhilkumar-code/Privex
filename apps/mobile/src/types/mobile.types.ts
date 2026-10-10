@@ -85,6 +85,7 @@ export interface MobileSettings {
   allowlistDomains: string[];
   autoContainmentEnabled?: boolean;
   backgroundMonitoringEnabled?: boolean;
+  theme?: 'dark' | 'light';
 }
 
 export const DEFAULT_MOBILE_SETTINGS: MobileSettings = {
@@ -95,7 +96,8 @@ export const DEFAULT_MOBILE_SETTINGS: MobileSettings = {
   frictionGateDurationSec: 5,
   allowlistDomains: [],
   autoContainmentEnabled: true,
-  backgroundMonitoringEnabled: true
+  backgroundMonitoringEnabled: true,
+  theme: 'dark'
 };
 
 export interface FileMetadataInput {

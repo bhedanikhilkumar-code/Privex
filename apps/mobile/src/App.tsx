@@ -35,8 +35,20 @@ export const App: React.FC = () => {
   const [inboundText, setInboundText] = useState<string | undefined>(undefined);
   const [autoScanTrigger, setAutoScanTrigger] = useState<boolean>(false);
   const [activePreThreatWarning, setActivePreThreatWarning] = useState<PreThreatWarningPayload | null>(null);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
   useEffect(() => {
+    // 0. Load persisted theme preference
+    SecureStorageService.getSettings()
+      .then((settings) => {
+        const activeTheme = settings.theme === 'light' ? 'light' : 'dark';
+        setTheme(activeTheme);
+        if (typeof document !== 'undefined') {
+          document.documentElement.setAttribute('data-theme', activeTheme);
+        }
+      })
+      .catch(() => {});
+
     // 1. Notify native Android bridge that UI is ready (BLOCKER-05)
     if (typeof window !== 'undefined' && (window as any).AndroidSecurityBridge?.notifyClientReady) {
       try {
@@ -123,19 +135,31 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleThemeToggle = async (newTheme?: 'dark' | 'light') => {
+    const targetTheme = newTheme || (theme === 'dark' ? 'light' : 'dark');
+    setTheme(targetTheme);
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', targetTheme);
+    }
+    await SecureStorageService.saveSettings({ theme: targetTheme });
+  };
+
   return (
     <div
       style={{
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundColor: '#0b1120',
+        backgroundColor: 'var(--bg-primary)',
+        color: 'var(--text-primary)',
         fontFamily: 'system-ui, -apple-system, sans-serif'
       }}
     >
       <main style={{ flex: 1, paddingBottom: '4rem' }}>
         {currentTab === 'HOME' && (
           <HomeScreen
+            theme={theme}
+            onToggleTheme={() => handleThemeToggle()}
             onNavigate={(tab) => {
               setAutoScanTrigger(false);
               setCurrentTab(tab);
@@ -196,7 +220,13 @@ export const App: React.FC = () => {
         {currentTab === 'ASSISTANT' && <AssistantScreen />}
         {currentTab === 'STATUS' && <ProtectionStatusScreen />}
         {currentTab === 'PRIVACY' && <PrivacyScreen />}
-        {currentTab === 'SETTINGS' && <SettingsScreen />}
+        {currentTab === 'SETTINGS' && (
+          <SettingsScreen
+            theme={theme}
+            onThemeChange={(t) => handleThemeToggle(t)}
+            onBack={() => setCurrentTab('HOME')}
+          />
+        )}
       </main>
 
       <TabBar

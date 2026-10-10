@@ -186,8 +186,8 @@ export const TabBar: React.FC<TabBarProps> = ({ currentTab, onSelectTab }) => {
           display: 'flex',
           justifyContent: 'space-around',
           alignItems: 'center',
-          backgroundColor: '#0f172a',
-          borderTop: '1px solid #1e293b',
+          backgroundColor: 'var(--tab-bar-bg)',
+          borderTop: '1px solid var(--border-color)',
           position: 'sticky',
           bottom: 0,
           zIndex: 100,
@@ -215,7 +215,7 @@ export const TabBar: React.FC<TabBarProps> = ({ currentTab, onSelectTab }) => {
               minHeight: '52px',
               minWidth: '56px',
               padding: '0.4rem 0.2rem',
-              color: tab.isActive ? '#38bdf8' : '#64748b',
+              color: tab.isActive ? 'var(--color-brand)' : 'var(--text-muted)',
               transition: 'color 0.15s ease'
             }}
           >

@@ -8,6 +8,7 @@
   "scripts": {
     "build:web": "vite build",
     "sync:assets": "node scripts/copy-assets.js",
+    "package": "node scripts/copy-assets.js",
     "build": "vite build && node scripts/copy-assets.js",
     "build:apk": "vite build && node scripts/copy-assets.js && cd android && .\\gradlew.bat assembleDebug",
     "test": "vitest run",
