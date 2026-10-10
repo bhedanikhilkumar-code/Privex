@@ -166,29 +166,34 @@ export const UrlScannerView: React.FC<UrlScannerViewProps> = ({ scannerBridge, p
                 >
                   TARGET URL TO ANALYZE:
                 </label>
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <input
-                    type="text"
-                    id="url-scan-input"
-                    aria-label="URL to scan for cyber threats"
-                    placeholder="Enter or paste web address (e.g. https://example.com/login)..."
-                    value={urlInput}
-                    onChange={(e) => setUrlInput(e.target.value)}
-                    disabled={isScanning}
-                    style={{
-                      flex: '1 1 280px',
-                      padding: '0.85rem 1rem',
-                      backgroundColor: 'var(--bg-primary)',
-                      border: '2px solid var(--border-dark)',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.95rem',
-                      fontFamily: 'var(--font-mono)',
-                      outline: 'none'
-                    }}
-                  />
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', position: 'relative' }}>
+                  <div style={{ flex: '1 1 280px', position: 'relative' }}>
+                    <input
+                      type="text"
+                      id="url-scan-input"
+                      aria-label="URL to scan for cyber threats"
+                      placeholder="Enter or paste web address (e.g. https://example.com/login)..."
+                      value={urlInput}
+                      onChange={(e) => setUrlInput(e.target.value)}
+                      disabled={isScanning}
+                      style={{
+                        width: '100%',
+                        padding: '0.85rem 1rem',
+                        backgroundColor: 'var(--bg-primary)',
+                        border: '2px solid var(--border-dark)',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.95rem',
+                        fontFamily: 'var(--font-mono)',
+                        outline: 'none',
+                        transition: 'border-color var(--motion-duration-micro) var(--motion-ease-standard)'
+                      }}
+                    />
+                    {isScanning && <div className="motion-scanline" aria-hidden="true" />}
+                  </div>
                   <button
                     type="submit"
                     disabled={isScanning || !urlInput.trim()}
+                    className={!isScanning && urlInput.trim() ? 'motion-pressable' : ''}
                     style={{
                       padding: '0.85rem 1.75rem',
                       backgroundColor: isScanning || !urlInput.trim() ? '#EBE7DE' : 'var(--color-brand)',

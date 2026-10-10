@@ -72,6 +72,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
               tabIndex={isActive ? 0 : -1}
               onClick={() => onTabChange(item.key)}
               onKeyDown={(e) => handleKeyDown(e, index)}
+              className="motion-pressable"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -87,8 +88,9 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
                 textTransform: 'uppercase',
                 letterSpacing: '0.03em',
                 cursor: 'pointer',
-                transition: 'all 0.1s ease',
-                outlineOffset: '2px'
+                transition: 'transform var(--motion-duration-micro-fast) var(--motion-ease-standard), background-color var(--motion-duration-micro) var(--motion-ease-standard), box-shadow var(--motion-duration-micro-fast) var(--motion-ease-standard)',
+                outlineOffset: '2px',
+                transform: isActive ? 'translateY(-1px)' : 'none'
               }}
             >
               <span aria-hidden="true">{item.icon}</span>

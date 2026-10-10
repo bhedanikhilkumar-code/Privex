@@ -26,6 +26,7 @@ export const SecurityAlertBanner: React.FC<SecurityAlertBannerProps> = ({
     <aside
       role="alert"
       aria-live="polite"
+      className="motion-fade-down"
       style={{
         backgroundColor: bgColor,
         border: `2px solid ${borderColor}`,
@@ -42,7 +43,7 @@ export const SecurityAlertBanner: React.FC<SecurityAlertBannerProps> = ({
       }}
     >
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem', flex: '1 1 450px' }}>
-        <span style={{ fontSize: '1.5rem' }}>🔐</span>
+        <span className="motion-shield-beacon" style={{ fontSize: '1.5rem', display: 'inline-block' }}>🔐</span>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
             <strong style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', textTransform: 'uppercase', color: '#111111' }}>

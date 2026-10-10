@@ -227,7 +227,7 @@ export const PasswordChecker: React.FC = () => {
               height: '100%',
               width: `${analysis.score}%`,
               backgroundColor: analysis.color,
-              transition: 'width 0.2s ease, background-color 0.2s ease'
+              transition: 'width var(--motion-duration-standard) var(--motion-ease-standard), background-color var(--motion-duration-standard) var(--motion-ease-standard)'
             }}
           />
         </div>
@@ -246,9 +246,10 @@ export const PasswordChecker: React.FC = () => {
           gap: '0.75rem'
         }}
       >
-        {analysis.criteria.map((item) => (
+        {analysis.criteria.map((item, idx) => (
           <div
             key={item.id}
+            className={`motion-fade-up motion-stagger-${Math.min(idx + 1, 8)}`}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -256,7 +257,8 @@ export const PasswordChecker: React.FC = () => {
               padding: '0.65rem 0.85rem',
               backgroundColor: item.met ? 'var(--color-safe-bg)' : '#FFFFFF',
               border: '1px solid var(--border-dark)',
-              borderLeft: `4px solid ${item.met ? 'var(--color-safe)' : 'var(--color-danger)'}`
+              borderLeft: `4px solid ${item.met ? 'var(--color-safe)' : 'var(--color-danger)'}`,
+              transition: 'border-color var(--motion-duration-micro) var(--motion-ease-standard), background-color var(--motion-duration-micro) var(--motion-ease-standard)'
             }}
           >
             <span
