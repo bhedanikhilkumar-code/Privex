@@ -4,7 +4,7 @@ title PRIVEX - Deploy to Cloudflare Pages
 
 echo ======================================================================
 echo           PRIVEX - CLOUDFLARE PAGES AUTO DEPLOY SCRIPT
-echo           Target: https://private-protection.pages.dev/
+echo           Target: https://privex.pages.dev/
 echo ======================================================================
 echo.
 
@@ -79,7 +79,7 @@ echo.
 echo ======================================================================
 echo  [SUCCESS] All latest commits have been pushed to 'main'!
 echo  Cloudflare Pages / GitHub Actions will now automatically deploy:
-echo  URL: https://private-protection.pages.dev/
+echo  URL: https://privex.pages.dev/
 echo ======================================================================
 echo.
 
