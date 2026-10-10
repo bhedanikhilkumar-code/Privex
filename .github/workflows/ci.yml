@@ -155,7 +155,7 @@ jobs:
         run: npm --workspace=@private-protection/core exec vitest run src/__tests__/analyzers/text-analyzer.test.ts src/__tests__/analyzers/text-analyzer-hardening.test.ts
 
   core-binary-analyzers:
-    name: "8. Core Binary, PE & Document File Analyzers"
+    name: "8. Core Binary, PE & Executable Analyzers"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -167,11 +167,27 @@ jobs:
           cache: 'npm'
       - name: Install Dependencies
         run: npm ci
-      - name: Test Binary & Executable Analyzers
-        run: npm --workspace=@private-protection/core exec vitest run src/__tests__/analyzers/file-analyzer.test.ts src/__tests__/analyzers/archive-analyzer.test.ts src/__tests__/analyzers/document-analyzer.test.ts src/__tests__/analyzers/pe-analyzer.test.ts src/__tests__/analyzers/script-analyzer.test.ts
+      - name: Test Binary File & Portable Executable Analyzers
+        run: npm --workspace=@private-protection/core exec vitest run src/__tests__/analyzers/file-analyzer.test.ts src/__tests__/analyzers/pe-analyzer.test.ts
+
+  core-archive-document-analyzers:
+    name: "9. Core Archive, Document & Script Analyzers"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Test Archive, Document & Script Analyzers
+        run: npm --workspace=@private-protection/core exec vitest run src/__tests__/analyzers/archive-analyzer.test.ts src/__tests__/analyzers/document-analyzer.test.ts src/__tests__/analyzers/script-analyzer.test.ts
 
   core-threat-intelligence:
-    name: "9. Core Threat Intelligence & Bloom Filters"
+    name: "10. Core Threat Intelligence & Bloom Filters"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -187,7 +203,7 @@ jobs:
         run: npm --workspace=@private-protection/core exec vitest run src/__tests__/threat-intel
 
   core-risk-scoring:
-    name: "10. Core Weighted Risk Math & Fail-Closed Scorer"
+    name: "11. Core Weighted Risk Math & Fail-Closed Scorer"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -203,7 +219,7 @@ jobs:
         run: npm --workspace=@private-protection/core exec vitest run src/__tests__/scoring
 
   core-detection-pipeline:
-    name: "11. Core Multi-Stage Pipeline & Offline Airgap"
+    name: "12. Core Multi-Stage Pipeline & Offline Airgap"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -219,7 +235,7 @@ jobs:
         run: npm --workspace=@private-protection/core exec vitest run src/__tests__/pipeline
 
   core-security-privacy:
-    name: "12. Core Memory Zeroing & Defense Hardening"
+    name: "13. Core Memory Zeroing & Defense Hardening"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -235,7 +251,7 @@ jobs:
         run: npm --workspace=@private-protection/core exec vitest run src/__tests__/security
 
   core-explanation-cache:
-    name: "13. Core Template Synthesizer & LRU Cache"
+    name: "14. Core Template Synthesizer & LRU Cache"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -251,7 +267,7 @@ jobs:
         run: npm --workspace=@private-protection/core exec vitest run src/__tests__/explanation src/__tests__/cache src/__tests__/utils
 
   core-performance-benchmarks:
-    name: "14. Core Engine Sub-Millisecond & SLA Benchmarks"
+    name: "15. Core Engine Sub-Millisecond & SLA Benchmarks"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -271,7 +287,7 @@ jobs:
   # =========================================================================
 
   ml-intent-classifiers:
-    name: "15. ML Intent Classifiers & Preprocessors"
+    name: "16. ML Intent Classifiers & Preprocessors"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -289,7 +305,7 @@ jobs:
         run: npm --workspace=@private-protection/ml exec vitest run src/__tests__/classifiers src/__tests__/preprocessing
 
   ml-model-loaders:
-    name: "16. ML ONNX Runtime & Model Lifecycle"
+    name: "17. ML ONNX Runtime & Model Lifecycle"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -307,7 +323,7 @@ jobs:
         run: npm --workspace=@private-protection/ml exec vitest run src/__tests__/models
 
   ml-assistant-runtime:
-    name: "17. Local AI Assistant & Autonomous Task Planner"
+    name: "18. Local AI Assistant & Autonomous Task Planner"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -325,7 +341,7 @@ jobs:
         run: npm --workspace=@private-protection/ml exec vitest run src/__tests__/assistant
 
   ml-adversarial-security:
-    name: "18. ML Prompt Armor & Adversarial Injection Battery"
+    name: "19. ML Prompt Armor & Adversarial Injection Battery"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -343,7 +359,7 @@ jobs:
         run: npm --workspace=@private-protection/ml exec vitest run src/__tests__/security
 
   ml-privacy-offline:
-    name: "19. ML Privacy Isolation & Zero-Cloud Telemetry"
+    name: "20. ML Privacy Isolation & Zero-Cloud Telemetry"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -361,7 +377,7 @@ jobs:
         run: npm --workspace=@private-protection/ml exec vitest run src/__tests__/privacy
 
   ml-evaluation-benchmarks:
-    name: "20. ML Model Evaluation & Latency Benchmarks"
+    name: "21. ML Model Evaluation & Latency Benchmarks"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -383,7 +399,7 @@ jobs:
   # =========================================================================
 
   ui-motion-tokens:
-    name: "21. UI Motion Tokens & Micro-Interactions"
+    name: "22. UI Motion Tokens & Micro-Interactions"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -403,7 +419,7 @@ jobs:
   # =========================================================================
 
   web-client-scanner:
-    name: "22. Web Client Zero-Install Scanner"
+    name: "23. Web Client Zero-Install Scanner"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -424,7 +440,7 @@ jobs:
         run: npm --workspace=@private-protection/web exec vitest run src/__tests__/scanner
 
   web-security-monitors:
-    name: "23. Web In-Browser Security & Request Monitors"
+    name: "24. Web In-Browser Security & Request Monitors"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -445,7 +461,7 @@ jobs:
         run: npm --workspace=@private-protection/web exec vitest run src/__tests__/security
 
   web-offline-workers:
-    name: "24. Web Offline PWA & WebWorker Isolation"
+    name: "25. Web Offline PWA & WebWorker Isolation"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -465,8 +481,29 @@ jobs:
       - name: Test Offline PWA & Worker Bridge
         run: npm --workspace=@private-protection/web exec vitest run src/__tests__/offline src/__tests__/workers
 
+  web-components-accessibility:
+    name: "26. Web Components & WCAG Accessibility"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Core, ML & UI Dependencies
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
+      - name: Test Accessibility & Components
+        run: npm --workspace=@private-protection/web exec vitest run src/__tests__/accessibility src/__tests__/components
+
   web-privacy-isolation:
-    name: "25. Web Zero-Telemetry & RAM Privacy Isolation"
+    name: "27. Web Zero-Telemetry & RAM Privacy Isolation"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -487,7 +524,7 @@ jobs:
         run: npm --workspace=@private-protection/web exec vitest run src/__tests__/privacy
 
   web-e2e-smoke:
-    name: "26. Web Client E2E Flows & Smoke Verification"
+    name: "28. Web Client E2E Flows, Intro & Smoke Verification"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -504,15 +541,15 @@ jobs:
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
           npm run build --workspace=@private-protection/ui
-      - name: Run Web E2E, Smoke & Formatter Tests
-        run: npm --workspace=@private-protection/web exec vitest run src/__tests__/e2e src/__tests__/smoke src/__tests__/lib
+      - name: Run Web E2E, Smoke, Intro & Formatter Tests
+        run: npm --workspace=@private-protection/web exec vitest run src/__tests__/e2e src/__tests__/smoke src/__tests__/intro src/__tests__/lib
 
   # =========================================================================
   # GROUP 6: BROWSER EXTENSION (@private-protection/extension)
   # =========================================================================
 
   extension-background:
-    name: "27. Extension Service Worker & Navigation Hooks"
+    name: "29. Extension Service Worker & Navigation Hooks"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -532,7 +569,7 @@ jobs:
         run: npm --workspace=@private-protection/extension exec vitest run src/__tests__/background
 
   extension-content-scripts:
-    name: "28. Extension Shadow DOM Banner & DOM Shield"
+    name: "30. Extension Shadow DOM Banner & DOM Shield"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -552,7 +589,7 @@ jobs:
         run: npm --workspace=@private-protection/extension exec vitest run src/__tests__/content
 
   extension-security-ipc:
-    name: "29. Extension IPC Messaging & Prompt Armor"
+    name: "31. Extension IPC Messaging & Prompt Armor"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -571,8 +608,28 @@ jobs:
       - name: Test IPC Security & Prompt Armor
         run: npm --workspace=@private-protection/extension exec vitest run src/__tests__/security
 
+  extension-ui-warning:
+    name: "32. Extension Interstitial & Options UI"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Core & ML Dependencies
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+      - name: Test Extension Popup, Options & Interstitial
+        run: npm --workspace=@private-protection/extension exec vitest run src/__tests__/popup src/__tests__/options src/__tests__/warning
+
   extension-privacy-offline:
-    name: "30. Extension Offline Parity & Network Isolation"
+    name: "33. Extension Offline Parity & Network Isolation"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -596,7 +653,7 @@ jobs:
   # =========================================================================
 
   desktop-realtime-monitor:
-    name: "31. Desktop Real-Time Monitor & File Scanners"
+    name: "34. Desktop Real-Time Monitor & File Scanners"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -617,7 +674,7 @@ jobs:
         run: npm --workspace=@private-protection/desktop exec vitest run src/__tests__/services/realtime-monitor.test.ts src/__tests__/services/realtime-monitor-burst.test.ts src/__tests__/services/realtime-monitor.service.test.ts src/__tests__/services/scanner.test.ts
 
   desktop-quarantine-vault:
-    name: "32. Desktop AES-256 Quarantine Shadow Vault"
+    name: "35. Desktop AES-256 Quarantine Shadow Vault"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -634,11 +691,11 @@ jobs:
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
           npm run build --workspace=@private-protection/desktop
-      - name: Test Shadow Vault & Secure Storage
-        run: npm --workspace=@private-protection/desktop exec vitest run src/__tests__/services/shadow-vault.test.ts src/__tests__/services/secure-storage.test.ts src/__tests__/services/storage-migration.test.ts
+      - name: Test Shadow Vault, Secure Storage & Path Safety
+        run: npm --workspace=@private-protection/desktop exec vitest run src/__tests__/services/shadow-vault.test.ts src/__tests__/services/secure-storage.test.ts src/__tests__/services/storage-migration.test.ts src/__tests__/services/quarantine.service.test.ts src/__tests__/services/quarantine.test.ts src/__tests__/services/quarantine-hash-verification.test.ts src/__tests__/services/quarantine-streaming.test.ts src/__tests__/services/quarantine-vault-exclusion.test.ts src/__tests__/services/gap24-quarantine-path-safety.test.ts
 
   desktop-ransomware-shield:
-    name: "33. Desktop Ransomware Shield & Tamper Defense"
+    name: "36. Desktop Ransomware Shield & Tamper Defense"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -658,8 +715,50 @@ jobs:
       - name: Test Sliding-Window Ransomware Shield & Tamper Detector
         run: npm --workspace=@private-protection/desktop exec vitest run src/__tests__/services/ransomware-shield.test.ts src/__tests__/services/tamper-detector.test.ts
 
+  desktop-behavior-process:
+    name: "37. Desktop Behavioral Engine & Process Auditor"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Core, ML & Desktop
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/desktop
+      - name: Test Behavioral Engine & Process Auditor
+        run: npm --workspace=@private-protection/desktop exec vitest run src/__tests__/services/behavior-engine.test.ts src/__tests__/services/process-auditor.test.ts src/__tests__/services/process-monitor.test.ts
+
+  desktop-persistence-forensics:
+    name: "38. Desktop Persistence Monitor & Windows Forensics"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Core, ML & Desktop
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/desktop
+      - name: Test Persistence & Forensics
+        run: npm --workspace=@private-protection/desktop exec vitest run src/__tests__/core src/__tests__/services/persistence-auditor.test.ts src/__tests__/services/persistence-monitor.test.ts
+
   desktop-system-watchdog:
-    name: "34. Desktop Watchdog, Crash Recovery & Media Shield"
+    name: "39. Desktop Watchdog, Crash Recovery & Media Shield"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -677,10 +776,10 @@ jobs:
           npm run build --workspace=@private-protection/ml
           npm run build --workspace=@private-protection/desktop
       - name: Test Watchdog, Single Instance & Media Protection
-        run: npm --workspace=@private-protection/desktop exec vitest run src/__tests__/services/watchdog.test.ts src/__tests__/services/watchdog-crash-recovery.test.ts src/__tests__/services/single-instance.test.ts src/__tests__/services/removable-media.test.ts src/__tests__/services/windows-process-event-source.test.ts
+        run: npm --workspace=@private-protection/desktop exec vitest run src/__tests__/services/watchdog.test.ts src/__tests__/services/watchdog-crash-recovery.test.ts src/__tests__/services/single-instance.test.ts src/__tests__/services/removable-media.test.ts src/__tests__/services/windows-process-event-source.test.ts src/__tests__/services/health-monitor.test.ts
 
   desktop-policy-updates:
-    name: "35. Desktop Policy Engine & Signed Update Verifier"
+    name: "40. Desktop Policy Engine & Signed Update Verifier"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -698,10 +797,115 @@ jobs:
           npm run build --workspace=@private-protection/ml
           npm run build --workspace=@private-protection/desktop
       - name: Test Response Policy Engine, Schedulers & Update Verifier
-        run: npm --workspace=@private-protection/desktop exec vitest run src/__tests__/services/response-policy-engine.test.ts src/__tests__/services/update-verifier.test.ts src/__tests__/services/quick-scan.test.ts src/__tests__/services/scan-scheduler.test.ts src/__tests__/services/scan-progress-throttling.test.ts
+        run: npm --workspace=@private-protection/desktop exec vitest run src/__tests__/services/response-policy-engine.test.ts src/__tests__/services/update-verifier.test.ts src/__tests__/services/quick-scan.test.ts src/__tests__/services/quick-scan-expansion.test.ts src/__tests__/services/scan-scheduler.test.ts src/__tests__/services/scan-progress-throttling.test.ts src/__tests__/services/exclusion-manager.test.ts
+
+  desktop-ipc-security:
+    name: "41. Desktop IPC Security & Network Monitors"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Core, ML & Desktop
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/desktop
+      - name: Test IPC Security & Network Monitors
+        run: npm --workspace=@private-protection/desktop exec vitest run src/__tests__/ipc src/__tests__/services/network-monitor.test.ts src/__tests__/services/audit-logger.test.ts src/__tests__/services/notification-rate-limiter.test.ts src/__tests__/services/notification.service.test.ts
+
+  desktop-adversarial-security:
+    name: "42. Desktop Adversarial Scenarios & Hardening"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Core, ML & Desktop
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/desktop
+      - name: Test Desktop Adversarial Scenarios
+        run: npm --workspace=@private-protection/desktop exec vitest run src/__tests__/security src/__tests__/services/phase-f-adversarial.test.ts src/__tests__/regression
+
+  desktop-integration-suite:
+    name: "43. Desktop Subsystem Integration & E2E"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Core, ML & Desktop
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/desktop
+      - name: Test Desktop Integration & E2E
+        run: npm --workspace=@private-protection/desktop exec vitest run src/__tests__/integration src/__tests__/e2e
+
+  desktop-ui-dashboard:
+    name: "44. Desktop UI Dashboard & Screens"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Core, ML & Desktop
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/desktop
+      - name: Test Desktop UI Dashboard & Renderer
+        run: npm --workspace=@private-protection/desktop exec vitest run src/__tests__/ui src/__tests__/renderer
+
+  desktop-performance-benchmarks:
+    name: "45. Desktop Performance & Burst Benchmarks"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Core, ML & Desktop
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/desktop
+      - name: Run Desktop Performance Benchmarks
+        run: npm --workspace=@private-protection/desktop exec vitest run src/__tests__/benchmarks
 
   desktop-soak-reliability:
-    name: "36. Desktop Soak, Leak & Long-Running Stability"
+    name: "46. Desktop Soak, Leak & Long-Running Stability"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -726,7 +930,7 @@ jobs:
   # =========================================================================
 
   mobile-threat-services:
-    name: "37. Mobile Web Shield, App Installer & Live QR Scanner"
+    name: "47. Mobile Web Shield & Threat Intelligence"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -743,11 +947,74 @@ jobs:
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
           npm run build --workspace=@private-protection/ui
-      - name: Test Mobile Threat Protection Services
-        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/web-shield.test.ts src/__tests__/services/app-installation-shield.test.ts src/__tests__/services/realtime-download-protection.test.ts src/__tests__/services/camera-scanner.test.ts src/__tests__/services/mobile-threat-intel.test.ts src/__tests__/screens/website-vulnerability-screen.test.tsx
+      - name: Test Mobile Web Shield & Threat Intel
+        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/web-shield.test.ts src/__tests__/services/mobile-threat-intel.test.ts src/__tests__/services/realtime-download-protection.test.ts
+
+  mobile-app-installer:
+    name: "48. Mobile App Installation Shield & Package Auditor"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Core, ML & UI Dependencies
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
+      - name: Test App Installation Shield & Auto-Scan
+        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/app-installation-shield.test.ts src/__tests__/services/background-auto-scan.test.ts
+
+  mobile-scanner-screens:
+    name: "49. Mobile Camera QR Scanner & Port Scanner Screens"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Core, ML & UI Dependencies
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
+      - name: Test Camera QR Scanner & Port Scanner Screens
+        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/camera-scanner.test.ts src/__tests__/screens/port-scanner-screen.test.tsx
+
+  mobile-vulnerability-auditor:
+    name: "50. Mobile Website Vulnerability & Entry Point Auditor"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Core, ML & UI Dependencies
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
+      - name: Test Website Vulnerability Screen
+        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/screens/website-vulnerability-screen.test.tsx
 
   mobile-device-files:
-    name: "38. Mobile Full Device Audit & Universal File Shield"
+    name: "51. Mobile Full Device Audit & File Scanners"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -765,10 +1032,10 @@ jobs:
           npm run build --workspace=@private-protection/ml
           npm run build --workspace=@private-protection/ui
       - name: Test Mobile File & Audit Protections
-        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/device-audit.test.ts src/__tests__/services/full-device-scan.test.ts src/__tests__/services/file-scanner.test.ts src/__tests__/services/universal-file-shield.test.ts
+        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/device-audit.test.ts src/__tests__/services/full-device-scan.test.ts src/__tests__/services/file-scanner.test.ts
 
-  mobile-quarantine-storage:
-    name: "39. Mobile KeyStore Vault, Warnings & Notifications"
+  mobile-universal-file-shield:
+    name: "52. Mobile Universal File Shield & SAF Interception"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -785,11 +1052,95 @@ jobs:
           npm run build --workspace=@private-protection/core
           npm run build --workspace=@private-protection/ml
           npm run build --workspace=@private-protection/ui
-      - name: Test Mobile Quarantine Vault, Privacy & Coordinator
-        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/mobile-quarantine.test.ts src/__tests__/services/secure-storage.test.ts src/__tests__/services/permissions-privacy.test.ts src/__tests__/services/pre-threat-warning.test.ts src/__tests__/services/gap18-gap19-remediation.test.ts src/__tests__/services/password-generator.test.ts src/__tests__/services/notification.test.ts src/__tests__/services/deep-link.test.ts src/__tests__/services/native-coordinator.test.ts src/__tests__/services/background-auto-scan.test.ts
+      - name: Test Universal File Shield
+        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/universal-file-shield.test.ts
+
+  mobile-quarantine-vault:
+    name: "53. Mobile KeyStore Vault & Secure Storage"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Core, ML & UI Dependencies
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
+      - name: Test KeyStore Vault & Secure Storage
+        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/mobile-quarantine.test.ts src/__tests__/services/secure-storage.test.ts
+
+  mobile-warnings-notifications:
+    name: "54. Mobile Pre-Threat Warnings & Push Notifications"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Core, ML & UI Dependencies
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
+      - name: Test Pre-Threat Warnings & Notifications
+        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/pre-threat-warning.test.ts src/__tests__/services/notification.test.ts src/__tests__/components
+
+  mobile-coordinator-privacy:
+    name: "55. Mobile Native Coordinator & Privacy Permissions"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Core, ML & UI Dependencies
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
+      - name: Test Native Coordinator, Privacy & Deep Links
+        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/services/native-coordinator.test.ts src/__tests__/services/permissions-privacy.test.ts src/__tests__/services/adaptive-protection.test.ts src/__tests__/services/deep-link.test.ts src/__tests__/services/password-generator.test.ts src/__tests__/services/gap18-gap19-remediation.test.ts
+
+  mobile-screen-presentation:
+    name: "56. Mobile Screens & Presentation Layer"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Core, ML & UI Dependencies
+        run: |
+          npm run build --workspace=@private-protection/core
+          npm run build --workspace=@private-protection/ml
+          npm run build --workspace=@private-protection/ui
+      - name: Test Mobile Screens & UI Flow
+        run: npm --workspace=@private-protection/mobile exec vitest run src/__tests__/screens/screens.test.tsx src/__tests__/screens/password-generator-screen.test.tsx
 
   mobile-security-benchmarks:
-    name: "40. Mobile Offline Parity, Isolation & SLA Benchmarks"
+    name: "57. Mobile Offline Parity, Isolation & SLA Benchmarks"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -814,7 +1165,7 @@ jobs:
   # =========================================================================
 
   coverage-gate:
-    name: "41. Monorepo 90% Code Coverage Gate"
+    name: "58. Monorepo 90% Code Coverage Gate"
     runs-on: ubuntu-latest
     needs:
       - core-rules-engine
@@ -847,7 +1198,7 @@ jobs:
         run: npm run test:coverage --workspace=@private-protection/ml
 
   build-and-package:
-    name: "42. Build Distribution Packages & Verify Artifacts"
+    name: "59. Build Distribution Packages & Verify Artifacts"
     runs-on: ubuntu-latest
     needs:
       - security-audit
@@ -887,7 +1238,7 @@ jobs:
           path: release/
 
   deploy-privex-production:
-    name: "43. Production Deployment to privex.io (Cloudflare Pages)"
+    name: "60. Production Deployment to privex.io (Cloudflare Pages)"
     runs-on: ubuntu-latest
     needs:
       - build-and-package
