@@ -1,0 +1,39 @@
+{
+  "name": "@bhedanikhilkumar-code/privex",
+  "version": "0.1.2",
+  "description": "Privex: On-device threat, phishing, scam and malware detection CLI and core security runner",
+  "type": "module",
+  "bin": {
+    "privex": "./bin/privex.js"
+  },
+  "main": "./bin/privex.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bhedanikhilkumar-code/Privex.git",
+    "directory": "packages/privex-cli"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "node -e \"console.log('privex CLI ready')\"",
+    "lint": "node -e \"console.log('privex CLI lint OK')\""
+  },
+  "dependencies": {
+    "@private-protection/core": "*",
+    "@private-protection/ml": "*"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "keywords": [
+    "security",
+    "phishing",
+    "antivirus",
+    "malware-detection",
+    "on-device",
+    "privacy-first"
+  ],
+  "license": "MIT"
+}

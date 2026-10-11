@@ -1,0 +1,28 @@
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+
+group = 'com.github.bhedanikhilkumar-code'
+version = '0.1.2'
+
+publishing {
+    publications {
+        gpr(MavenPublication) {
+            from components.java
+            pom {
+                name = 'Privex Android Security SDK'
+                description = 'On-device threat, phishing and scam detection SDK for Android / Java'
+                url = 'https://github.com/bhedanikhilkumar-code/Privex'
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'GitHubPackages'
+            url = uri('https://maven.pkg.github.com/bhedanikhilkumar-code/Privex')
+            credentials {
+                username = project.findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
+                password = project.findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
+            }
+        }
+    }
+}
