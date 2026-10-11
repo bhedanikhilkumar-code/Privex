@@ -141,16 +141,16 @@ if (trackedLeaks.length > 0) {
 
 // 5. Audit Cloudflare configuration & workflows
 console.log('\n--- 5. AUDITING CLOUDFLARE SCRIPTS & WORKFLOWS ---');
-const deployWorkflowPath = path.join(ROOT, '.github', 'workflows', 'deploy-pages.yml');
+const deployWorkflowPath = path.join(ROOT, '.github', 'workflows', 'ci.yml');
 if (fs.existsSync(deployWorkflowPath)) {
   const content = fs.readFileSync(deployWorkflowPath, 'utf8');
   const hasSecretsContext = content.includes('${{ secrets.CLOUDFLARE_API_TOKEN }}') && content.includes('${{ secrets.CLOUDFLARE_ACCOUNT_ID }}');
   const hasHardcodedToken = /apiToken:\s*[^$\s\n]+/i.test(content) && !content.includes('apiToken: ${{');
   
   if (hasSecretsContext && !hasHardcodedToken) {
-    console.log('[PASS] .github/workflows/deploy-pages.yml uses parameterized secrets (${{ secrets.* }}). No tokens exposed.');
+    console.log('[PASS] .github/workflows/ci.yml uses parameterized secrets (${{ secrets.* }}). No tokens exposed.');
   } else {
-    console.log('[FAIL] .github/workflows/deploy-pages.yml may have hardcoded tokens!');
+    console.log('[FAIL] .github/workflows/ci.yml may have hardcoded tokens!');
   }
 }
 

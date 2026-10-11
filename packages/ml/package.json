@@ -20,6 +20,18 @@
   "dependencies": {
     "@private-protection/core": "*"
   },
+  "description": "On-device ML classifiers and intent detection layer for Privex",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bhedanikhilkumar-code/Privex.git",
+    "directory": "packages/ml"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "typescript": "*",
     "vitest": "*"

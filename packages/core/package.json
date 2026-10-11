@@ -17,6 +17,18 @@
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },
+  "description": "Core on-device threat, phishing, and scam detection engine for Privex",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bhedanikhilkumar-code/Privex.git",
+    "directory": "packages/core"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "typescript": "*",
     "vitest": "*"

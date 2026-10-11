@@ -1,7 +1,7 @@
 {
   "name": "@private-protection/ui",
   "version": "0.1.2",
-  "private": true,
+  "description": "Shared UI design system and security components for Privex",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,6 +12,18 @@
     },
     "./motion.css": "./src/motion.css"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bhedanikhilkumar-code/Privex.git",
+    "directory": "packages/ui"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "files": [
+    "dist",
+    "src/motion.css"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "vitest run",

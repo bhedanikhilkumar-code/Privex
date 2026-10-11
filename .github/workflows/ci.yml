@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   deployments: write
+  packages: write
 
 jobs:
   # =========================================================================
@@ -1236,6 +1237,20 @@ jobs:
         with:
           name: release-artifacts
           path: release/
+      - name: Publish Packages to GitHub Packages
+        if: github.ref == 'refs/heads/main'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Configuring npm registry for GitHub Packages..."
+          echo "@private-protection:registry=https://npm.pkg.github.com" > ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
+          for pkg in core ml ui; do
+            echo "Publishing @private-protection/${pkg} to GitHub Packages..."
+            cd packages/${pkg}
+            npm publish || echo "Package @private-protection/${pkg} already published or skipped."
+            cd ../..
+          done
 
   deploy-privex-production:
     name: "60. Production Deployment to privex.io (Cloudflare Pages)"
