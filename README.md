@@ -75,7 +75,7 @@
 </p>
 
 > **Privacy-first, on-device AI security assistant for threat, phishing, scam, and suspicious-content detection.**  
-> **Problem Statement Code:** PS-05 | **Authoritative Version:** `v0.1.0` | **License:** MIT | **Platform Status:** Production Ready & Verified
+> **Problem Statement Code:** PS-05 | **Authoritative Version:** `v0.1.2` | **License:** MIT | **Platform Status:** Production Ready & Verified
 
 <p align="center">
   <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=10B981&center=true&vCenter=true&width=700&lines=PRIVEX%3A+Cross-Platform+Threat+Protection;100%25+On-Device+%E2%80%A2+Zero-Cloud+Dependency;Instant+Phishing+%26+Scam+Detection+%E2%80%A2+Air-Gapped+Offline" alt="PRIVEX Platform Matrix Animation" />
@@ -111,21 +111,21 @@ Access PRIVEX directly in your browser without installing anything:
       <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
       <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
       <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
-      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
     </tr>
     <tr>
       <td><b>🎣 Phishing Detection</b></td>
       <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
       <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
       <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
-      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
     </tr>
     <tr>
       <td><b>💬 Text Scan</b></td>
-      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
-      <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
       <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
       <td align="center"><img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A"></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
+      <td align="center"><img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Supported"></td>
     </tr>
     <tr>
       <td><b>📁 File Scan</b></td>
@@ -161,14 +161,14 @@ Access PRIVEX directly in your browser without installing anything:
 > 💡 **Matrix Notes:**  
 > - <img src="https://img.shields.io/badge/✓_Active-10B981?style=flat-square" alt="Active" /> **Active:** Real-time on-device capability executing in local memory without cloud dependencies.  
 > - <img src="https://img.shields.io/badge/%3F_Template-F59E0B?style=flat-square" alt="Template" /> **Template:** In the Browser Extension, Chromium MV3 background service worker lifetime and memory limits use a zero-allocation deterministic template explanation generator instead of in-memory LLM runtimes.  
-> - <img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A" /> **N/A:** Architectural platform boundary (e.g., Full PC Scan and Quarantine require OS filesystem daemon entitlements exclusive to Desktop; Text Scan on Mobile filters incoming SMS/notifications).
+> - <img src="https://img.shields.io/badge/—_N%2FA-374151?style=flat-square" alt="N/A" /> **N/A:** Architectural platform boundary (e.g., Full PC Scan and Quarantine require OS filesystem daemon entitlements exclusive to Desktop; automated background notification interception is mobile-exclusive while Web/Desktop provide direct text scanning).
 
 ---
 
 ## TABLE OF CONTENTS
 
 - [🌐 LIVE WEB & LANDING PAGE LINKS](#-live-web--landing-page-links)
-- [🛡️ PLATFORM CAPABILITY MATRIX](#-cross-platform-capability--feature-matrix)
+- [🛡️ PLATFORM CAPABILITY MATRIX](#️-cross-platform-capability--feature-matrix)
 1. [WHAT IS PRIVEX?](#1-what-is-privex)
 2. [HOW DOES IT WORK?](#2-how-does-it-work)
 3. [CORE ARCHITECTURAL & EVALUATOR Q&A](#3-core-architectural--evaluator-qa)
@@ -257,7 +257,7 @@ RAW UNTRUSTED INPUT (URL, Message, File Header, DOM Tree)
 
 ## 3. CORE ARCHITECTURAL & EVALUATOR Q&A
 
-> 🎯 **Quick-Reference Evaluator & Viva Guide:** This section directly addresses the 9 core technical and architectural questions regarding PRIVEX's threat detection pipeline, on-device boundaries, offline parity, and platform limits.
+> 🎯 **Quick-Reference Evaluator & Viva Guide:** This section directly addresses the 10 core technical and architectural questions regarding PRIVEX's threat detection pipeline, on-device boundaries, offline parity, and platform limits.
 
 ---
 
@@ -556,10 +556,10 @@ All release packages are independently verified and available from both producti
 | Platform / Artifact | File Name | Size | Cryptographic SHA-256 Checksum | Direct Public Download Link |
 |---|---|---|---|---|
 | **Web PWA** | Web Application | Hosted | Same-origin edge verified | [Launch Cloudflare](https://privex.pages.dev/) • [GitHub Pages Mirror](https://bhedanikhilkumar-code.github.io/Privex/) |
-| **Android APK** | `private-protection-mobile-0.1.0.apk` | 1.03 MB | `95ee838e739e69feed4f007c431cb6a7e74304f6751e17a38c6e21269fcdb5b5` | [Direct APK](https://github.com/bhedanikhilkumar-code/Privex/releases/tag/v0.1.2) |
-| **Windows Setup** | `PrivateProtection-Setup-0.1.0.exe` | 158 MB | `529bee4bc50bb73a0a282575f088099ef264bd0e8a5004be7eba3275eca9e569` | [GitHub Release v0.1.2](https://github.com/bhedanikhilkumar-code/Privex/releases/tag/v0.1.2) |
-| **Windows Portable** | `PrivateProtection-0.1.0-win-x64.exe` | 245 MB | `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa` | [GitHub Release v0.1.2](https://github.com/bhedanikhilkumar-code/Privex/releases/tag/v0.1.2) |
-| **Browser Extension** | `private-protection-extension-0.1.0.zip` | 100 KB | `d0f42ab50db530b752cffd3b6e39a6f3a1e23f888e145375fe4b8cc5c67b25dc` | [Direct ZIP](https://github.com/bhedanikhilkumar-code/Privex/releases/tag/v0.1.2) |
+| **Android APK** | `private-protection-mobile-0.1.2.apk` | 1.82 MB | `849db939732a1b91534807d8761682933324c31a64ee2eff4d7368e20005773b` | [Direct APK](https://github.com/bhedanikhilkumar-code/Privex/releases/tag/v0.1.2) |
+| **Windows Setup** | `PrivateProtection-Setup-0.1.2.exe` | 158 MB | `0b9a894a992f5f43e3c964c69e3b1ec60d2d2b9cc7f3c899eaeafb5b3ab9ebe9` | [GitHub Release v0.1.2](https://github.com/bhedanikhilkumar-code/Privex/releases/tag/v0.1.2) |
+| **Windows Portable** | `PrivateProtection-0.1.2-win-x64.exe` | 245 MB | `49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa` | [GitHub Release v0.1.2](https://github.com/bhedanikhilkumar-code/Privex/releases/tag/v0.1.2) |
+| **Browser Extension** | `private-protection-extension-0.1.2.zip` | 581 KB | `8c53f54be03d8f5e54a4e5bd9421f7ed997487fb6074125d111a472fe2213886` | [Direct ZIP](https://github.com/bhedanikhilkumar-code/Privex/releases/tag/v0.1.2) |
 | **Integrity Manifest**| `SHA256SUMS.txt` | 610 B | Authoritative | [Direct Manifest](https://github.com/bhedanikhilkumar-code/Privex/releases/tag/v0.1.2) |
 
 All release checksums are authoritatively recorded in [`release/SHA256SUMS.txt`](./release/SHA256SUMS.txt).
@@ -574,19 +574,19 @@ All release checksums are authoritatively recorded in [`release/SHA256SUMS.txt`]
 3. (Optional) Click **Install Web App** in your browser's address bar for offline home-screen usage.
 
 ### 📱 2. Android Mobile (Direct APK Sideload)
-1. Download [`private-protection-mobile-0.1.0.apk`](https://privex.pages.dev/downloads/private-protection-mobile-0.1.0.apk).
+1. Download [`private-protection-mobile-0.1.2.apk`](https://github.com/bhedanikhilkumar-code/Privex/releases/tag/v0.1.2).
 2. Open your device's **Files** or **Downloads** app and tap the APK.
 3. If prompted with *"Install unknown apps"*, enable **"Allow from this source"**.
 4. Tap **Install**, then tap **Open**.
 5. Grant Notification Listener permissions when prompted to enable inbound scam message protection.
 
 ### 💻 3. Windows Desktop (Installer or Portable)
-1. Download [`PrivateProtection-Setup-0.1.0.exe`](https://github.com/bhedanikhilkumar-code/Private-Protection/releases/tag/v0.1.0) (or portable executable).
+1. Download [`PrivateProtection-Setup-0.1.2.exe`](https://github.com/bhedanikhilkumar-code/Privex/releases/tag/v0.1.2) (or portable executable).
 2. Double-click the file. (If Windows SmartScreen appears on this self-signed binary, click *More info* $\rightarrow$ *Run anyway*).
 3. The application opens immediately into your local desktop threat scanner.
 
 ### 🧩 4. Browser Extension (Chromium: Chrome, Edge, Brave)
-1. Download [`private-protection-extension-0.1.0.zip`](https://privex.pages.dev/downloads/private-protection-extension-0.1.0.zip) and extract it to a local folder.
+1. Download [`private-protection-extension-0.1.2.zip`](https://github.com/bhedanikhilkumar-code/Privex/releases/tag/v0.1.2) and extract it to a local folder.
 2. In your browser, open `chrome://extensions` (or `edge://extensions`).
 3. Toggle on **Developer mode** in the top-right corner.
 4. Click **Load unpacked** and select the extracted folder.
@@ -750,9 +750,9 @@ In strict adherence to our engineering transparency doctrine:
 
 ## 17. VERSION
 
-- **Authoritative Product Version:** `v0.1.0` (Release Candidate)
-- **Release Date:** October 4, 2026
-- **Git Commit:** [`cc14dc1`](https://github.com/bhedanikhilkumar-code/Private-Protection/commit/cc14dc1)
+- **Authoritative Product Version:** `v0.1.2` (Production Ready & Verified)
+- **Release Date:** October 10, 2026
+- **Git Commit:** [`01b9d78`](https://github.com/bhedanikhilkumar-code/Privex/commit/01b9d78)
 - **Test Baseline:** 92 test files passed (100%), 506 unit/integration tests passed (100%), 0 failures, 0 skips.
 - **Verification Suites:**
   - R13 Launch Verification: 37/37 passed (100%)
