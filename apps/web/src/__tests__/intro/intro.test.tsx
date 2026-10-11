@@ -56,13 +56,13 @@ describe('PRIVEX Cinematic Intro Animation Suite', () => {
   });
 
   describe('IntroOverlay Lifecycle & Storyboard Progression', () => {
-    it('renders initial Scene 1 with caption and skip button on first mount', () => {
+    it('renders initial Scene 1 with caption on first mount', () => {
       const onComplete = vi.fn();
       render(<IntroOverlay onComplete={onComplete} />);
 
       expect(screen.getByRole('dialog', { name: /PRIVEX Cinematic Introduction/i })).toBeDefined();
       expect(screen.getAllByText(INTRO_CONFIG.scenes.scene1.caption).length).toBeGreaterThan(0);
-      expect(screen.getByRole('button', { name: /Skip introduction animation/i })).toBeDefined();
+      expect(screen.queryByRole('button', { name: /Skip introduction animation/i })).toBeNull();
     });
 
     it('progresses smoothly through all 4 scenes within 5 seconds exactly', () => {
@@ -101,23 +101,7 @@ describe('PRIVEX Cinematic Intro Animation Suite', () => {
       expect(localStorage.getItem(INTRO_CONFIG.storageKey)).toBe('true');
     });
 
-    it('allows skipping immediately when user clicks the Skip button', () => {
-      const onComplete = vi.fn();
-      render(<IntroOverlay onComplete={onComplete} />);
-
-      const skipButton = screen.getByRole('button', { name: /Skip introduction animation/i });
-      fireEvent.click(skipButton);
-
-      // Fast-forward fade transition
-      act(() => {
-        vi.advanceTimersByTime(500);
-      });
-
-      expect(onComplete).toHaveBeenCalledTimes(1);
-      expect(localStorage.getItem(INTRO_CONFIG.storageKey)).toBe('true');
-    });
-
-    it('allows skipping with the Escape key', () => {
+    it('allows closing with the Escape key', () => {
       const onComplete = vi.fn();
       render(<IntroOverlay onComplete={onComplete} />);
 
@@ -167,15 +151,14 @@ describe('PRIVEX Cinematic Intro Animation Suite', () => {
       // Intro overlay is mounted
       expect(screen.getByRole('dialog', { name: /PRIVEX Cinematic Introduction/i })).toBeDefined();
 
-      // Skip intro
-      const skipBtn = screen.getByRole('button', { name: /Skip introduction animation/i });
-      fireEvent.click(skipBtn);
+      // Dismiss intro via Escape key
+      fireEvent.keyDown(window, { key: 'Escape' });
 
       act(() => {
         vi.advanceTimersByTime(500);
       });
 
-      // After skip, intro is closed and persistent flag is set
+      // After dismissal, intro is closed and persistent flag is set
       expect(localStorage.getItem(INTRO_CONFIG.storageKey)).toBe('true');
 
       // Switch to Settings tab

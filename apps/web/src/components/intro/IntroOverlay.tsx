@@ -115,18 +115,6 @@ export const IntroOverlay: React.FC<IntroOverlayProps> = ({ onComplete }) => {
     >
       <div className="privex-intro-grid" />
 
-      {/* Skip Button */}
-      <button
-        type="button"
-        className="intro-skip-btn"
-        id="intro-skip-btn"
-        onClick={handleSkip}
-        aria-label="Skip introduction animation"
-      >
-        <span>SKIP</span>
-        <span>➔</span>
-      </button>
-
       {/* Scene 1: Person 1 + Everyday Digital Life (0.0s - 1.4s) */}
       <div className={`intro-scene ${activeScene === 1 ? 'active' : ''}`} id="scene-1">
         <img
