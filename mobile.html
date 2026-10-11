@@ -1,23 +1,97 @@
-<!DOCTYPE html><html lang="en" data-theme="night"><head><script id="privex_theme_preinit">try{var t=localStorage.getItem("privex_theme")||"night";document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>  <meta charset="UTF-8">  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>PRIVEX Mobile — Deterministic On-Device Threat Defense for Android</title>  <meta name="description" content="Download official PRIVEX Android APK (v0.1.2). Deterministic phishing detection, offline SMS extortion filtering, and on-device threat intelligence. Zero cloud telemetry.">  <link rel="icon" type="image/svg+xml" href="./favicon.svg">  <link rel="shortcut icon" href="./favicon.ico">  <link rel="apple-touch-icon" href="./icon-192.png">  <link rel="preconnect" href="https://fonts.googleapis.com">  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">  <style>    :root, [data-theme="light"] {      --bg-primary: #F7F3EB;      --bg-secondary: #EBE7DE;      --bg-card: #FFFFFF;      --bg-card-hover: #F2EFE8;      --bg-terminal: #0F172A;      --text-primary: #111111;      --text-muted: #555555;      --text-dim: #777777;      --border-color: #111111;      --border-dark: #111111;      --border-accent: #2457FF;      --shadow-brutal-sm: 2px 2px 0px #111111;      --shadow-brutal: 4px 4px 0px #111111;      --shadow-brutal-lg: 6px 6px 0px #111111;      --color-brand: #2457FF;      --color-brand-hover: #1844DD;      --color-accent: #D7FF3F;      --color-accent-text: #111111;      --color-safe: #1DB954;      --color-danger: #FF5A36;      --chassis-edge: #CCCCCC;      --chassis-body: #E5E1D8;    }    [data-theme="dark"] {      --bg-primary: #0B1120;      --bg-secondary: #151F32;      --bg-card: #111827;      --bg-card-hover: #182236;      --bg-terminal: #070B14;      --text-primary: #F8FAFC;      --text-muted: #94A3B8;      --text-dim: #64748B;      --border-color: #1E293B;      --border-dark: #334155;      --border-accent: #D7FF3F;      --shadow-brutal-sm: 2px 2px 0px #020617;      --shadow-brutal: 4px 4px 0px #020617;      --shadow-brutal-lg: 6px 6px 0px #020617;      --color-brand: #3B82F6;      --color-brand-hover: #2563EB;      --color-accent: #D7FF3F;      --color-accent-text: #070B14;      --color-safe: #22C55E;      --color-danger: #EF4444;      --chassis-edge: #2E384D;      --chassis-body: #0E1524;    }    [data-theme="night"] {      --bg-primary: #05070D;      --bg-secondary: #0A0E17;      --bg-card: #0D121D;      --bg-card-hover: #121826;      --bg-terminal: #020408;      --text-primary: #FFFFFF;      --text-muted: #9BA3AF;      --text-dim: #5E6778;      --border-color: #1A2234;      --border-dark: #2A364F;      --border-accent: #D7FF3F;      --shadow-brutal-sm: 2px 2px 0px #000000;      --shadow-brutal: 4px 4px 0px #000000;      --shadow-brutal-lg: 6px 6px 0px #000000;      --color-brand: #2457FF;      --color-brand-hover: #3B82F6;      --color-accent: #D7FF3F;      --color-accent-text: #05070D;      --color-safe: #10B981;      --color-danger: #FF5A36;      --chassis-edge: #232C3F;      --chassis-body: #080C14;    }    * {      box-sizing: border-box;      margin: 0;      padding: 0;    }    html {      scroll-behavior: smooth;    }    body {      background-color: var(--bg-primary);      color: var(--text-primary);      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;      line-height: 1.6;      min-height: 100vh;      -webkit-font-smoothing: antialiased;      transition: background-color 0.2s ease, color 0.2s ease;    }    .font-mono {      font-family: 'Space Grotesk', 'SFMono-Regular', Consolas, Menlo, monospace;    }    /* Architectural Subtle Grid */    .blueprint-grid {      position: fixed;      inset: 0;      background-image:         linear-gradient(rgba(128, 128, 128, 0.04) 1px, transparent 1px),        linear-gradient(90deg, rgba(128, 128, 128, 0.04) 1px, transparent 1px);      background-size: 32px 32px;      pointer-events: none;      z-index: 0;    }    .container {      max-width: 1240px;      margin: 0 auto;      padding: 0 24px;      position: relative;      z-index: 1;    }    /* Brutalist Buttons & Cut Corners */    .btn-brutal {      position: relative;      display: inline-flex;      align-items: center;      justify-content: center;      gap: 10px;      padding: 12px 24px;      font-family: 'Space Grotesk', sans-serif;      font-weight: 700;      font-size: 0.95rem;      text-decoration: none;      border: 2px solid var(--border-dark);      cursor: pointer;      user-select: none;      clip-path: polygon(        0 0,        calc(100% - 8px) 0,        100% 8px,        100% 100%,        8px 100%,        0 calc(100% - 8px)      );      transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.12s ease, background-color 0.15s ease;    }    .btn-brutal:hover {      transform: translate(-2px, -2px);      box-shadow: var(--shadow-brutal);    }    .btn-brutal:active {      transform: translate(1px, 1px);      box-shadow: 1px 1px 0px var(--border-dark);    }    .btn-accent {      background-color: var(--color-accent);      color: var(--color-accent-text);      box-shadow: var(--shadow-brutal-sm);    }    .btn-primary {      background-color: var(--color-brand);      color: #FFFFFF;      box-shadow: var(--shadow-brutal-sm);    }    .btn-secondary {      background-color: var(--bg-card);      color: var(--text-primary);      box-shadow: var(--shadow-brutal-sm);    }    /* Brutalist Badges & Cards */    .brutal-card {      background-color: var(--bg-card);      border: 2px solid var(--border-color);      box-shadow: var(--shadow-brutal);      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;    }    .brutal-card:hover {      border-color: var(--border-dark);    }    .brutal-badge {      display: inline-flex;      align-items: center;      gap: 6px;      padding: 4px 10px;      border: 1.5px solid var(--border-color);      font-family: 'Space Grotesk', monospace;      font-size: 0.72rem;      font-weight: 700;      text-transform: uppercase;      letter-spacing: 0.05em;      background-color: var(--bg-secondary);      color: var(--text-primary);    }    .brutal-badge.active-indicator {      border-color: var(--color-safe);      color: var(--color-safe);    }    /* Top Telemetry Ticker */    .top-telemetry-bar {      background-color: var(--bg-terminal);      color: #7AA2FF;      border-bottom: 1px solid var(--border-color);      padding: 6px 0;      font-family: 'Space Grotesk', monospace;      font-size: 0.76rem;      font-weight: 600;      letter-spacing: 0.03em;    }    .telemetry-inner {      display: flex;      justify-content: space-between;      align-items: center;      flex-wrap: wrap;      gap: 12px;    }    .telemetry-item {      display: inline-flex;      align-items: center;      gap: 8px;    }    .dot-pulse {      width: 7px;      height: 7px;      border-radius: 50%;      background-color: var(--color-safe);      box-shadow: 0 0 8px var(--color-safe);      animation: pulseAnim 2s infinite ease-in-out;    }    @keyframes pulseAnim {      0%, 100% { opacity: 1; transform: scale(1); }      50% { opacity: 0.35; transform: scale(0.85); }    }    /* Navigation Bar */    .navbar {      position: sticky;      top: 0;      z-index: 100;      background-color: var(--bg-primary);      border-bottom: 2px solid var(--border-color);      padding: 14px 0;      transition: background-color 0.2s ease;    }    .nav-wrapper {      display: flex;      align-items: center;      justify-content: space-between;      gap: 20px;    }    .brand-group {      display: flex;      align-items: center;      gap: 12px;      text-decoration: none;      color: var(--text-primary);    }    .brand-svg-box {      width: 38px;      height: 38px;      border: 2px solid var(--border-dark);      background-color: var(--bg-card);      display: flex;      align-items: center;      justify-content: center;      box-shadow: var(--shadow-brutal-sm);    }    .brand-name {      font-family: 'Space Grotesk', sans-serif;      font-size: 1.4rem;      font-weight: 800;      letter-spacing: -0.02em;    }    .nav-menu {      display: flex;      align-items: center;      gap: 24px;      list-style: none;    }    .nav-link {      font-family: 'Space Grotesk', sans-serif;      font-size: 0.88rem;      font-weight: 700;      text-transform: uppercase;      letter-spacing: 0.05em;      color: var(--text-muted);      text-decoration: none;      transition: color 0.15s ease;    }    .nav-link:hover {      color: var(--text-primary);      text-decoration: underline;      text-underline-offset: 4px;    }    .nav-actions {
+<!DOCTYPE html><html lang="en" data-theme="night"><head><script id="privex_theme_preinit">try{var t=localStorage.getItem("privex_theme")||"night";document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>  <meta charset="UTF-8">  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>PRIVEX Mobile — Deterministic On-Device Threat Defense for Android</title>  <meta name="description" content="Download official PRIVEX Android APK (v0.1.2). Deterministic phishing detection, offline SMS extortion filtering, and on-device threat intelligence. Zero cloud telemetry.">  <link rel="icon" type="image/svg+xml" href="./favicon.svg">  <link rel="shortcut icon" href="./favicon.ico">  <link rel="apple-touch-icon" href="./icon-192.png">  <link rel="preconnect" href="https://fonts.googleapis.com">  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">  <style>    :root, [data-theme="light"] {      --bg-primary: #F7F3EB;      --bg-secondary: #EBE7DE;      --bg-card: #FFFFFF;      --bg-card-hover: #F2EFE8;      --bg-terminal: #0F172A;      --text-primary: #111111;      --text-muted: #555555;      --text-dim: #777777;      --border-color: #111111;      --border-dark: #111111;      --border-accent: #2457FF;      --shadow-brutal-sm: 2px 2px 0px #111111;      --shadow-brutal: 4px 4px 0px #111111;      --shadow-brutal-lg: 6px 6px 0px #111111;      --color-brand: #2457FF;      --color-brand-hover: #1844DD;      --color-accent: #D7FF3F;      --color-accent-text: #111111;      --color-safe: #1DB954;      --color-danger: #FF5A36;      --chassis-edge: #CCCCCC;      --chassis-body: #E5E1D8;    }    [data-theme="dark"] {      --bg-primary: #0B1120;      --bg-secondary: #151F32;      --bg-card: #111827;      --bg-card-hover: #182236;      --bg-terminal: #070B14;      --text-primary: #F8FAFC;      --text-muted: #94A3B8;      --text-dim: #64748B;      --border-color: #1E293B;      --border-dark: #334155;      --border-accent: #D7FF3F;      --shadow-brutal-sm: 2px 2px 0px #020617;      --shadow-brutal: 4px 4px 0px #020617;      --shadow-brutal-lg: 6px 6px 0px #020617;      --color-brand: #3B82F6;      --color-brand-hover: #2563EB;      --color-accent: #D7FF3F;      --color-accent-text: #070B14;      --color-safe: #22C55E;      --color-danger: #EF4444;      --chassis-edge: #2E384D;      --chassis-body: #0E1524;    }    [data-theme="night"] {      --bg-primary: #05070D;      --bg-secondary: #0A0E17;      --bg-card: #0D121D;      --bg-card-hover: #121826;      --bg-terminal: #020408;      --text-primary: #FFFFFF;      --text-muted: #9BA3AF;      --text-dim: #5E6778;      --border-color: #1A2234;      --border-dark: #2A364F;      --border-accent: #D7FF3F;      --shadow-brutal-sm: 2px 2px 0px #000000;      --shadow-brutal: 4px 4px 0px #000000;      --shadow-brutal-lg: 6px 6px 0px #000000;      --color-brand: #2457FF;      --color-brand-hover: #3B82F6;      --color-accent: #D7FF3F;      --color-accent-text: #05070D;      --color-safe: #10B981;      --color-danger: #FF5A36;      --chassis-edge: #232C3F;      --chassis-body: #080C14;    }    * {      box-sizing: border-box;      margin: 0;      padding: 0;    }    html {      scroll-behavior: smooth;    }    body {      background-color: var(--bg-primary);      color: var(--text-primary);      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;      line-height: 1.6;      min-height: 100vh;      -webkit-font-smoothing: antialiased;      transition: background-color 0.2s ease, color 0.2s ease;    }    .font-mono {      font-family: 'Space Grotesk', 'SFMono-Regular', Consolas, Menlo, monospace;    }    /* Architectural Subtle Grid */    .blueprint-grid {      position: fixed;      inset: 0;      background-image:         linear-gradient(rgba(128, 128, 128, 0.04) 1px, transparent 1px),        linear-gradient(90deg, rgba(128, 128, 128, 0.04) 1px, transparent 1px);      background-size: 32px 32px;      pointer-events: none;      z-index: 0;    }    .container {      max-width: 1240px;      margin: 0 auto;      padding: 0 24px;      position: relative;      z-index: 1;    }    /* Brutalist Buttons & Cut Corners */    .btn-brutal {      position: relative;      display: inline-flex;      align-items: center;      justify-content: center;      gap: 10px;      padding: 12px 24px;      font-family: 'Space Grotesk', sans-serif;      font-weight: 700;      font-size: 0.95rem;      text-decoration: none;      border: 2px solid var(--border-dark);      cursor: pointer;      user-select: none;      clip-path: polygon(        0 0,        calc(100% - 8px) 0,        100% 8px,        100% 100%,        8px 100%,        0 calc(100% - 8px)      );      transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.12s ease, background-color 0.15s ease;    }    .btn-brutal:hover {      transform: translate(-2px, -2px);      box-shadow: var(--shadow-brutal);    }    .btn-brutal:active {      transform: translate(1px, 1px);      box-shadow: 1px 1px 0px var(--border-dark);    }    .btn-accent {      background-color: var(--color-accent);      color: var(--color-accent-text);      box-shadow: var(--shadow-brutal-sm);    }    .btn-primary {      background-color: var(--color-brand);      color: #FFFFFF;      box-shadow: var(--shadow-brutal-sm);    }    .btn-secondary {      background-color: var(--bg-card);      color: var(--text-primary);      box-shadow: var(--shadow-brutal-sm);    }    /* Brutalist Badges & Cards */    .brutal-card {      background-color: var(--bg-card);      border: 2px solid var(--border-color);      box-shadow: var(--shadow-brutal);      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;    }    .brutal-card:hover {      border-color: var(--border-dark);    }    .brutal-badge {      display: inline-flex;      align-items: center;      gap: 6px;      padding: 4px 10px;      border: 1.5px solid var(--border-color);      font-family: 'Space Grotesk', monospace;      font-size: 0.72rem;      font-weight: 700;      text-transform: uppercase;      letter-spacing: 0.05em;      background-color: var(--bg-secondary);      color: var(--text-primary);    }    .brutal-badge.active-indicator {      border-color: var(--color-safe);      color: var(--color-safe);    }    /* Top Telemetry Ticker */    .top-telemetry-bar {      background-color: var(--bg-terminal);      color: #7AA2FF;      border-bottom: 1px solid var(--border-color);      padding: 6px 0;      font-family: 'Space Grotesk', monospace;      font-size: 0.76rem;      font-weight: 600;      letter-spacing: 0.03em;    }    .telemetry-inner {      display: flex;      justify-content: space-between;      align-items: center;      flex-wrap: wrap;      gap: 12px;    }    .telemetry-item {      display: inline-flex;      align-items: center;      gap: 8px;    }    .dot-pulse {      width: 7px;      height: 7px;      border-radius: 50%;      background-color: var(--color-safe);      box-shadow: 0 0 8px var(--color-safe);      animation: pulseAnim 2s infinite ease-in-out;    }    @keyframes pulseAnim {      0%, 100% { opacity: 1; transform: scale(1); }      50% { opacity: 0.35; transform: scale(0.85); }    }    /* Navigation Bar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: var(--bg-primary);
+      border-bottom: 2px solid var(--border-color);
+      padding: 10px 0;
+      transition: background-color 0.2s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .nav-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: relative;
+    }
+    .brand-group {
       display: flex;
       align-items: center;
       gap: 10px;
+      text-decoration: none;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+    .brand-svg-box {
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--border-dark);
+      background-color: var(--bg-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-brutal-sm);
+    }
+    .brand-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .nav-link {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 6px 4px;
+      white-space: nowrap;
+      transition: color 0.15s ease, border-color 0.15s ease;
+      border-bottom: 2px solid transparent;
+    }
+    .nav-link:hover {
+      color: var(--text-primary);
+      border-bottom-color: var(--color-brand);
+    }
+    .nav-link-web {
+      color: var(--color-brand) !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       flex-shrink: 0;
     }
     .theme-toggle-btn {
-      padding: 7px 12px;
+      padding: 6px 12px;
       background-color: var(--bg-card);
       border: 2px solid var(--border-dark);
       color: var(--text-primary);
       font-family: 'Space Grotesk', monospace;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 700;
       cursor: pointer;
       box-shadow: var(--shadow-brutal-sm);
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      height: 38px;
+      height: 36px;
       line-height: 1;
       box-sizing: border-box;
       white-space: nowrap;
@@ -29,14 +103,15 @@
     .theme-toggle-btn:hover {
       background-color: var(--bg-secondary);
       border-color: var(--color-brand);
+      transform: translate(-1px, -1px);
     }
     .theme-toggle-btn:active {
       transform: scale(0.96);
     }
     .nav-download-btn {
-      padding: 7px 14px !important;
-      font-size: 0.8rem !important;
-      height: 38px !important;
+      padding: 6px 14px !important;
+      font-size: 0.78rem !important;
+      height: 36px !important;
       line-height: 1 !important;
       box-sizing: border-box !important;
       white-space: nowrap !important;
@@ -46,38 +121,26 @@
       gap: 6px !important;
     }
     .nav-download-btn svg {
-      width: 15px !important;
-      height: 15px !important;
+      width: 14px !important;
+      height: 14px !important;
       flex-shrink: 0 !important;
       margin: 0 !important;
     }
-    @media (max-width: 680px) {
-      .nav-wrapper { gap: 8px; }
-      .nav-actions { gap: 6px; }
-      .theme-toggle-btn { padding: 5px 8px; font-size: 0.72rem; height: 34px; gap: 4px; }
-      .nav-download-btn { padding: 5px 10px !important; font-size: 0.74rem !important; height: 34px !important; gap: 4px !important; }
-      .nav-download-btn svg { width: 13px !important; height: 13px !important; }
-    }
-    @media (max-width: 420px) {
-      .brand-name { font-size: 1.15rem; }
-      .theme-toggle-btn span:not(#themeIcon) { display: none; }
-      .nav-download-btn { padding: 5px 8px !important; font-size: 0.7rem !important; }
-    }
-    /* GitHub Navigation & Floating Buttons */
+    /* GitHub Navigation Button */
     .nav-github-btn {
-      padding: 7px 12px;
+      padding: 6px 12px;
       background-color: var(--bg-card);
       border: 2px solid var(--border-dark);
       color: var(--text-primary);
       font-family: 'Space Grotesk', monospace;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 700;
       text-decoration: none;
       box-shadow: var(--shadow-brutal-sm);
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      height: 38px;
+      height: 36px;
       line-height: 1;
       box-sizing: border-box;
       white-space: nowrap;
@@ -91,26 +154,115 @@
       box-shadow: var(--shadow-brutal);
     }
     .nav-github-btn svg {
-      width: 16px;
-      height: 16px;
+      width: 15px;
+      height: 15px;
       fill: currentColor;
     }
-    @media (max-width: 680px) {
-      .nav-github-btn {
-        padding: 5px 8px;
-        font-size: 0.72rem;
-        height: 34px;
-        gap: 4px;
-      }
-      .nav-github-btn svg {
-        width: 14px;
-        height: 14px;
-      }
+
+    /* Mobile Hamburger Menu Toggle Button */
+    .nav-mobile-toggle {
+      display: none;
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--border-dark);
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-brutal-sm);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+      transition: background-color 0.15s ease, transform 0.1s ease;
     }
-    @media (max-width: 480px) {
-      .nav-github-btn span {
+    .nav-mobile-toggle:hover {
+      background-color: var(--bg-secondary);
+      border-color: var(--color-brand);
+    }
+    .nav-mobile-toggle:active {
+      transform: scale(0.95);
+    }
+    .nav-mobile-toggle svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+    }
+
+    /* Responsive Breakpoints for Navigation Bar */
+    @media (max-width: 1040px) {
+      .nav-menu {
         display: none;
       }
+      .nav-mobile-toggle {
+        display: inline-flex;
+      }
+    }
+    @media (max-width: 680px) {
+      .nav-wrapper { gap: 8px; }
+      .nav-actions { gap: 6px; }
+      .theme-toggle-btn { padding: 5px 8px; font-size: 0.72rem; height: 34px; gap: 4px; }
+      .nav-github-btn { padding: 5px 8px; font-size: 0.72rem; height: 34px; gap: 4px; }
+      .nav-download-btn { padding: 5px 10px !important; font-size: 0.74rem !important; height: 34px !important; gap: 4px !important; }
+      .nav-mobile-toggle { width: 34px; height: 34px; }
+    }
+    @media (max-width: 480px) {
+      .brand-name { font-size: 1.15rem; }
+      .nav-github-btn span { display: none; }
+      .theme-toggle-btn span:not(#themeIcon) { display: none; }
+      .nav-download-btn { padding: 5px 8px !important; font-size: 0.7rem !important; }
+    }
+
+    /* Mobile Navigation Dropdown Drawer */
+    .mobile-menu-drawer {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background-color: var(--bg-card);
+      border-bottom: 3px solid var(--border-dark);
+      box-shadow: 0 16px 32px rgba(0,0,0,0.35);
+      z-index: 99;
+      padding: 12px 24px 20px;
+      animation: menuSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .mobile-menu-drawer.is-open {
+      display: block;
+    }
+    @keyframes menuSlideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .mobile-menu-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin: 0;
+      padding: 0;
+    }
+    .mobile-menu-list li a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-primary);
+      text-decoration: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+    }
+    .mobile-menu-list li a:hover,
+    .mobile-menu-list li a:active {
+      background-color: var(--bg-secondary);
+      border-color: var(--border-dark);
+      color: var(--color-brand);
+      padding-left: 18px;
     }
 
     /* Fixed Floating Right-Side GitHub Button */
@@ -841,17 +993,61 @@
       }
     }
 
-  </style></head><body>  <div class="blueprint-grid"></div>  <!-- Telemetry Header Ticker -->  <div class="top-telemetry-bar">    <div class="container telemetry-inner">      <div class="telemetry-item">        <span class="dot-pulse"></span>        <span>CORE ENGINE v0.1.2 // REPRODUCIBLE RELEASE</span>      </div>      <div class="telemetry-item font-mono">        <span>SECURITY ENCLAVE: VOLATILE RAM</span>        <span>•</span>        <span>NETWORK ENTITLEMENT: 0 OUTBOUND BYTES</span>      </div>      <div class="telemetry-item font-mono">        <span>SHA-256 VERIFIED</span>      </div>    </div>  </div>  <!-- Primary Navigation -->  <header class="navbar">    <div class="container nav-wrapper">      <a href="index.html" class="brand-group">        <div class="brand-svg-box">          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>            <path d="m9 12 2 2 4-4"/>          </svg>        </div>        <div class="brand-name">PRIVEX</div>      </a>      <ul class="nav-menu">
+  </style></head><body>  <div class="blueprint-grid"></div>  <!-- Telemetry Header Ticker -->  <div class="top-telemetry-bar">    <div class="container telemetry-inner">      <div class="telemetry-item">        <span class="dot-pulse"></span>        <span>CORE ENGINE v0.1.2 // REPRODUCIBLE RELEASE</span>      </div>      <div class="telemetry-item font-mono">        <span>SECURITY ENCLAVE: VOLATILE RAM</span>        <span>•</span>        <span>NETWORK ENTITLEMENT: 0 OUTBOUND BYTES</span>      </div>      <div class="telemetry-item font-mono">        <span>SHA-256 VERIFIED</span>      </div>    </div>  </div>  <!-- Primary Navigation -->
+  <header class="navbar" id="mainNavbar">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="brand-group" title="PRIVEX Home">
+        <div class="brand-svg-box">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <div class="brand-name">PRIVEX</div>
+      </a>
+
+      <ul class="nav-menu">
         <li><a href="#ecosystem" class="nav-link">Ecosystem</a></li>
         <li><a href="#downloads" class="nav-link">Downloads</a></li>
         <li><a href="#screens" class="nav-link">Mobile Screens</a></li>
         <li><a href="#architecture" class="nav-link">Pipeline</a></li>
         <li><a href="#permissions" class="nav-link">Security Audit</a></li>
-        <li><a href="index.html" class="nav-link" style="color:var(--color-brand);">Web Scanner ↗</a></li>
-      </ul>      <div class="nav-actions">        <a href="https://github.com/bhedanikhilkumar-code/Privex" target="_blank" rel="noopener noreferrer" class="nav-github-btn" title="View Source on GitHub">
+        <li><a href="index.html" class="nav-link nav-link-web">Web Scanner ↗</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="https://github.com/bhedanikhilkumar-code/Privex" target="_blank" rel="noopener noreferrer" class="nav-github-btn" title="View Source on GitHub">
           <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
           <span>GitHub</span>
-        </a>        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Switch Theme (Night / Light / Dark)" aria-label="Switch Theme"><span id="themeIcon">🌙</span> <span>THEME:</span> <strong id="themeLabel">NIGHT</strong></button>        <a href="downloads/privex-mobile-release.apk" class="btn-brutal btn-accent nav-download-btn" download="privex-mobile-release.apk">          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">            <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm9 4H3v-2h18v2z"/>          </svg>          <span>APK (1.86 MB)</span>        </a>      </div>    </div>  </header>
+        </a>
+        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Switch Theme (Night / Light / Dark)" aria-label="Switch Theme"><span id="themeIcon">🌙</span> <span>THEME:</span> <strong id="themeLabel">NIGHT</strong></button>
+        <a href="downloads/privex-mobile-release.apk" class="btn-brutal btn-accent nav-download-btn" download="privex-mobile-release.apk">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm9 4H3v-2h18v2z"/>
+          </svg>
+          <span>APK (1.86 MB)</span>
+        </a>
+        <button class="nav-mobile-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu" title="Menu" onclick="toggleMobileMenu()">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <!-- Responsive Mobile Drawer -->
+    <div class="mobile-menu-drawer" id="mobileMenuDrawer">
+      <ul class="mobile-menu-list">
+        <li><a href="#ecosystem" onclick="closeMobileMenu()"><span>Ecosystem</span> <span>→</span></a></li>
+        <li><a href="#downloads" onclick="closeMobileMenu()"><span>Downloads</span> <span>→</span></a></li>
+        <li><a href="#screens" onclick="closeMobileMenu()"><span>Mobile Screens</span> <span>→</span></a></li>
+        <li><a href="#architecture" onclick="closeMobileMenu()"><span>Pipeline Architecture</span> <span>→</span></a></li>
+        <li><a href="#permissions" onclick="closeMobileMenu()"><span>Security Audit</span> <span>→</span></a></li>
+        <li><a href="index.html" style="color:var(--color-brand);"><span>Web Scanner (Client-Side)</span> <span>↗</span></a></li>
+      </ul>
+    </div>
+  </header>
 
   <!-- Multi-Device Ecosystem Overview (Animation & Device Portfolio) -->
   <section class="ecosystem-section" id="ecosystem">
@@ -1782,6 +1978,22 @@
     }
 
     // Call dynamic release sync on page load
+    // Mobile menu toggle handling
+    function toggleMobileMenu() {
+      const drawer = document.getElementById('mobileMenuDrawer');
+      if (drawer) {
+        drawer.classList.toggle('is-open');
+      }
+    }
+    function closeMobileMenu() {
+      const drawer = document.getElementById('mobileMenuDrawer');
+      if (drawer) {
+        drawer.classList.remove('is-open');
+      }
+    }
+    window.toggleMobileMenu = toggleMobileMenu;
+    window.closeMobileMenu = closeMobileMenu;
+
     syncLatestGitHubRelease();
 
   
