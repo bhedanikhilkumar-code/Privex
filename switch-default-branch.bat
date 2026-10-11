@@ -1,69 +1,93 @@
 @echo off
-setlocal enabledelayedexpansion
+setlocal EnableDelayedExpansion
 title PRIVEX - Switch Default GitHub Branch
 
+cls
 echo =======================================================
 echo          PRIVEX GITHUB DEFAULT BRANCH SWITCHER
 echo =======================================================
 echo.
 
-:: Check GitHub CLI authentication
+:: Check GitHub CLI
 where gh >nul 2>&1
-if %ERRORLEVEL% neq 0 (
-    echo [ERROR] GitHub CLI ('gh') is not installed or not in PATH.
-    echo Please install gh or ensure it is accessible.
+if errorlevel 1 (
+    echo [ERROR] GitHub CLI is not installed or not in PATH.
+    echo Please ensure gh CLI is installed.
+    echo.
     pause
     exit /b 1
 )
 
 :: Get current default branch
 echo [*] Fetching current default branch from GitHub...
-for /f "delims=" %%i in ('gh repo view --json defaultBranchRef -q .defaultBranchRef.name 2^>nul') do set CURRENT_BRANCH=%%i
-
-if "%CURRENT_BRANCH%"=="" (
-    echo [!] Could not automatically detect current branch.
-    set CURRENT_BRANCH=unknown
+set CURRENT_BRANCH=unknown
+for /f "tokens=*" %%i in ('gh repo view bhedanikhilkumar-code/Privex --json defaultBranchRef -q .defaultBranchRef.name') do (
+    set CURRENT_BRANCH=%%i
 )
 
-echo [*] Current Default Branch is: [%CURRENT_BRANCH%]
+echo [*] Current Default Branch is: [!CURRENT_BRANCH!]
 echo.
-echo Select an option:
-echo   [1] Set 'main' as default branch (Full Source Code)
-echo   [2] Set 'master' as default branch (Structure & MD Docs Only)
-echo   [3] Toggle (Switch between main ^<--^> master)
-echo   [4] Exit
+echo =======================================================
+echo  Select an option:
+echo    1. Set 'main' as default (Full Source Code)
+echo    2. Set 'master' as default (Structure and MD Docs Only)
+echo    3. Toggle switch between main and master
+echo    4. Exit
+echo =======================================================
 echo.
 
-set /p CHOICE="Enter choice (1/2/3/4): "
+set CHOICE=
+set /p CHOICE="Enter choice (1, 2, 3, or 4): "
 
-if "%CHOICE%"=="1" (
-    set TARGET_BRANCH=main
-) else if "%CHOICE%"=="2" (
+if "!CHOICE!"=="1" goto SET_MAIN
+if "!CHOICE!"=="2" goto SET_MASTER
+if "!CHOICE!"=="3" goto DO_TOGGLE
+if "!CHOICE!"=="4" goto DO_EXIT
+goto INVALID_CHOICE
+
+:SET_MAIN
+set TARGET_BRANCH=main
+goto EXECUTE_SWITCH
+
+:SET_MASTER
+set TARGET_BRANCH=master
+goto EXECUTE_SWITCH
+
+:DO_TOGGLE
+if /i "!CURRENT_BRANCH!"=="main" (
     set TARGET_BRANCH=master
-) else if "%CHOICE%"=="3" (
-    if /i "%CURRENT_BRANCH%"=="main" (
-        set TARGET_BRANCH=master
-    ) else (
-        set TARGET_BRANCH=main
-    )
 ) else (
-    echo [*] Exiting without changes.
-    exit /b 0
+    set TARGET_BRANCH=main
+)
+goto EXECUTE_SWITCH
+
+:INVALID_CHOICE
+echo.
+echo [!] Invalid option selected.
+pause
+exit /b 1
+
+:EXECUTE_SWITCH
+echo.
+echo [*] Changing default branch on GitHub to: !TARGET_BRANCH! ...
+gh repo edit bhedanikhilkumar-code/Privex --default-branch !TARGET_BRANCH!
+if errorlevel 1 (
+    echo.
+    echo [ERROR] Failed to switch default branch. Please check GitHub permissions.
+    echo.
+    pause
+    exit /b 1
 )
 
 echo.
-echo [*] Changing default branch on GitHub to '%TARGET_BRANCH%'...
-gh repo edit --default-branch %TARGET_BRANCH%
-
-if %ERRORLEVEL% equ 0 (
-    echo.
-    echo =======================================================
-    echo [SUCCESS] Default branch is now successfully set to: %TARGET_BRANCH%
-    echo =======================================================
-) else (
-    echo.
-    echo [ERROR] Failed to switch default branch. Please verify permissions.
-)
-
+echo =======================================================
+echo [SUCCESS] Default branch is now: !TARGET_BRANCH!
+echo =======================================================
 echo.
 pause
+exit /b 0
+
+:DO_EXIT
+echo.
+echo [*] Exited without changes.
+exit /b 0
