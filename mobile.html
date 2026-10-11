@@ -1156,6 +1156,233 @@
       }
     }
 
+    /* ==========================================================================
+       COMPREHENSIVE ALL-PHONE COMPATIBILITY SUITE (320px - 768px)
+       Supports iPhone SE/Mini, iPhone Standard/Pro Max, Samsung Galaxy S/Fold,
+       Google Pixel, OnePlus, Xiaomi, and all modern mobile viewports.
+       ========================================================================== */
+    @media (max-width: 768px) {
+      html, body {
+        overflow-x: hidden;
+        width: 100%;
+        position: relative;
+      }
+      .container {
+        padding: 0 16px;
+        max-width: 100%;
+      }
+      .top-telemetry-bar {
+        display: none;
+      }
+      .navbar {
+        padding: 8px 0;
+      }
+      .hero-section {
+        padding: 40px 0 32px;
+      }
+      .hero-grid {
+        gap: 28px;
+      }
+      .hero-title {
+        font-size: 2.1rem;
+        line-height: 1.15;
+      }
+      .hero-desc {
+        font-size: 0.96rem;
+        line-height: 1.55;
+        margin-bottom: 24px;
+      }
+      .hero-buttons-row {
+        flex-direction: column;
+        width: 100%;
+      }
+      .hero-buttons-row .btn-brutal {
+        width: 100%;
+        text-align: center;
+        padding: 12px 18px;
+      }
+      .cli-install-box {
+        width: 100%;
+        max-width: 100%;
+        font-size: 0.78rem;
+        padding: 8px 12px;
+      }
+      .hero-specs-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        max-width: 100%;
+      }
+      .spec-cell {
+        padding: 8px 10px;
+      }
+      .spec-cell-val {
+        font-size: 0.95rem;
+      }
+      .section-main-heading {
+        font-size: 1.95rem;
+        line-height: 1.2;
+      }
+      .section-lead-text {
+        font-size: 0.92rem;
+      }
+
+      /* Studio Layout & Phone Mockup Scaling on Mobile */
+      .section-screen-studio {
+        padding: 50px 0 36px;
+      }
+      .studio-workspace-grid {
+        grid-template-columns: 1fr;
+        gap: 28px;
+      }
+      .studio-phone-column {
+        width: 100%;
+        max-width: 320px;
+        margin: 0 auto;
+      }
+      .studio-phone-column::before {
+        width: 280px;
+        height: 540px;
+        filter: blur(24px);
+      }
+      .phone-hardware-chassis {
+        width: 100% !important;
+        max-width: 300px !important;
+        height: 600px !important;
+        padding: 10px !important;
+        border-radius: 38px !important;
+      }
+      .phone-oled-screen {
+        border-radius: 28px !important;
+      }
+      .phone-pill-notch {
+        width: 75px !important;
+        height: 18px !important;
+        top: 8px !important;
+      }
+      .phone-vol-up, .phone-vol-down, .phone-pwr {
+        display: none; /* Hide button protrusions on small mobile widths */
+      }
+
+      /* Screen selector grid for phones */
+      .screens-selector-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+      }
+      .screen-pill-btn {
+        padding: 8px 10px;
+      }
+      .pill-title {
+        font-size: 0.78rem;
+      }
+      .engineering-spec-card {
+        padding: 20px 16px;
+      }
+      .spec-screen-heading {
+        font-size: 1.45rem;
+      }
+      .spec-desc-text {
+        font-size: 0.88rem;
+      }
+      .spec-caps-matrix {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+      }
+
+      /* Sections Spacing & Gallery Cards */
+      .gallery-cards-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+      }
+      .gallery-preview-frame {
+        height: 200px !important;
+      }
+      .arch-pipeline-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+      }
+      .install-step-card {
+        padding: 20px 16px;
+      }
+      .checksum-audit-container {
+        grid-template-columns: 1fr !important;
+        padding: 18px 16px;
+      }
+      .hash-display-pill {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .hash-string {
+        font-size: 0.72rem;
+      }
+      .btn-copy-cli {
+        width: 100%;
+        text-align: center;
+        padding: 8px;
+      }
+
+      /* Permissions Table Mobile Scrolling Card */
+      .permissions-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .permissions-table th, .permissions-table td {
+        padding: 10px 12px;
+        font-size: 0.82rem;
+        white-space: nowrap;
+      }
+
+      /* Footer */
+      .site-footer {
+        padding: 40px 0 24px;
+      }
+      .footer-columns-grid {
+        grid-template-columns: 1fr !important;
+        gap: 24px;
+      }
+      .footer-bottom-bar {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+      }
+    }
+
+    /* Extra Small Phones (iPhone SE, Galaxy A-series, Fold outer screens: 320px - 420px) */
+    @media (max-width: 420px) {
+      .container {
+        padding: 0 12px;
+      }
+      .hero-title {
+        font-size: 1.8rem;
+      }
+      .brand-name {
+        font-size: 1.1rem;
+      }
+      .nav-download-btn {
+        padding: 4px 6px !important;
+        font-size: 0.68rem !important;
+      }
+      .phone-hardware-chassis {
+        max-width: 270px !important;
+        height: 540px !important;
+      }
+      .screens-selector-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .gallery-cards-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .hero-specs-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .floating-github-badge {
+        bottom: 12px;
+        right: 12px;
+        padding: 6px 10px;
+        font-size: 0.72rem;
+      }
+    }
+
   </style></head><body>
   <!-- Motion Video Background Engine -->
   <div class="tech-video-bg-container" aria-hidden="true">
