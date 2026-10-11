@@ -1,23 +1,294 @@
-<!DOCTYPE html><html lang="en" data-theme="night"><head><script id="privex_theme_preinit">try{var t=localStorage.getItem("privex_theme")||"night";document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>  <meta charset="UTF-8">  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>PRIVEX Mobile — Deterministic On-Device Threat Defense for Android</title>  <meta name="description" content="Download official PRIVEX Android APK (v0.1.2). Deterministic phishing detection, offline SMS extortion filtering, and on-device threat intelligence. Zero cloud telemetry.">  <link rel="icon" type="image/svg+xml" href="./favicon.svg">  <link rel="shortcut icon" href="./favicon.ico">  <link rel="apple-touch-icon" href="./icon-192.png">  <link rel="preconnect" href="https://fonts.googleapis.com">  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">  <style>    :root, [data-theme="light"] {      --bg-primary: #F7F3EB;      --bg-secondary: #EBE7DE;      --bg-card: #FFFFFF;      --bg-card-hover: #F2EFE8;      --bg-terminal: #0F172A;      --text-primary: #111111;      --text-muted: #555555;      --text-dim: #777777;      --border-color: #111111;      --border-dark: #111111;      --border-accent: #2457FF;      --shadow-brutal-sm: 2px 2px 0px #111111;      --shadow-brutal: 4px 4px 0px #111111;      --shadow-brutal-lg: 6px 6px 0px #111111;      --color-brand: #2457FF;      --color-brand-hover: #1844DD;      --color-accent: #D7FF3F;      --color-accent-text: #111111;      --color-safe: #1DB954;      --color-danger: #FF5A36;      --chassis-edge: #CCCCCC;      --chassis-body: #E5E1D8;    }    [data-theme="dark"] {      --bg-primary: #0B1120;      --bg-secondary: #151F32;      --bg-card: #111827;      --bg-card-hover: #182236;      --bg-terminal: #070B14;      --text-primary: #F8FAFC;      --text-muted: #94A3B8;      --text-dim: #64748B;      --border-color: #1E293B;      --border-dark: #334155;      --border-accent: #D7FF3F;      --shadow-brutal-sm: 2px 2px 0px #020617;      --shadow-brutal: 4px 4px 0px #020617;      --shadow-brutal-lg: 6px 6px 0px #020617;      --color-brand: #3B82F6;      --color-brand-hover: #2563EB;      --color-accent: #D7FF3F;      --color-accent-text: #070B14;      --color-safe: #22C55E;      --color-danger: #EF4444;      --chassis-edge: #2E384D;      --chassis-body: #0E1524;    }    [data-theme="night"] {      --bg-primary: #05070D;      --bg-secondary: #0A0E17;      --bg-card: #0D121D;      --bg-card-hover: #121826;      --bg-terminal: #020408;      --text-primary: #FFFFFF;      --text-muted: #9BA3AF;      --text-dim: #5E6778;      --border-color: #1A2234;      --border-dark: #2A364F;      --border-accent: #D7FF3F;      --shadow-brutal-sm: 2px 2px 0px #000000;      --shadow-brutal: 4px 4px 0px #000000;      --shadow-brutal-lg: 6px 6px 0px #000000;      --color-brand: #2457FF;      --color-brand-hover: #3B82F6;      --color-accent: #D7FF3F;      --color-accent-text: #05070D;      --color-safe: #10B981;      --color-danger: #FF5A36;      --chassis-edge: #232C3F;      --chassis-body: #080C14;    }    * {      box-sizing: border-box;      margin: 0;      padding: 0;    }    html {      scroll-behavior: smooth;    }    body {      background-color: var(--bg-primary);      color: var(--text-primary);      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;      line-height: 1.6;      min-height: 100vh;      -webkit-font-smoothing: antialiased;      transition: background-color 0.2s ease, color 0.2s ease;    }    .font-mono {      font-family: 'Space Grotesk', 'SFMono-Regular', Consolas, Menlo, monospace;    }    /* Architectural Subtle Grid */    .blueprint-grid {      position: fixed;      inset: 0;      background-image:         linear-gradient(rgba(128, 128, 128, 0.04) 1px, transparent 1px),        linear-gradient(90deg, rgba(128, 128, 128, 0.04) 1px, transparent 1px);      background-size: 32px 32px;      pointer-events: none;      z-index: 0;    }    .container {      max-width: 1240px;      margin: 0 auto;      padding: 0 24px;      position: relative;      z-index: 1;    }    /* Brutalist Buttons & Cut Corners */    .btn-brutal {      position: relative;      display: inline-flex;      align-items: center;      justify-content: center;      gap: 10px;      padding: 12px 24px;      font-family: 'Space Grotesk', sans-serif;      font-weight: 700;      font-size: 0.95rem;      text-decoration: none;      border: 2px solid var(--border-dark);      cursor: pointer;      user-select: none;      clip-path: polygon(        0 0,        calc(100% - 8px) 0,        100% 8px,        100% 100%,        8px 100%,        0 calc(100% - 8px)      );      transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.12s ease, background-color 0.15s ease;    }    .btn-brutal:hover {      transform: translate(-2px, -2px);      box-shadow: var(--shadow-brutal);    }    .btn-brutal:active {      transform: translate(1px, 1px);      box-shadow: 1px 1px 0px var(--border-dark);    }    .btn-accent {      background-color: var(--color-accent);      color: var(--color-accent-text);      box-shadow: var(--shadow-brutal-sm);    }    .btn-primary {      background-color: var(--color-brand);      color: #FFFFFF;      box-shadow: var(--shadow-brutal-sm);    }    .btn-secondary {      background-color: var(--bg-card);      color: var(--text-primary);      box-shadow: var(--shadow-brutal-sm);    }    /* Brutalist Badges & Cards */    .brutal-card {      background-color: var(--bg-card);      border: 2px solid var(--border-color);      box-shadow: var(--shadow-brutal);      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;    }    .brutal-card:hover {      border-color: var(--border-dark);    }    .brutal-badge {      display: inline-flex;      align-items: center;      gap: 6px;      padding: 4px 10px;      border: 1.5px solid var(--border-color);      font-family: 'Space Grotesk', monospace;      font-size: 0.72rem;      font-weight: 700;      text-transform: uppercase;      letter-spacing: 0.05em;      background-color: var(--bg-secondary);      color: var(--text-primary);    }    .brutal-badge.active-indicator {      border-color: var(--color-safe);      color: var(--color-safe);    }    /* Top Telemetry Ticker */    .top-telemetry-bar {      background-color: var(--bg-terminal);      color: #7AA2FF;      border-bottom: 1px solid var(--border-color);      padding: 6px 0;      font-family: 'Space Grotesk', monospace;      font-size: 0.76rem;      font-weight: 600;      letter-spacing: 0.03em;    }    .telemetry-inner {      display: flex;      justify-content: space-between;      align-items: center;      flex-wrap: wrap;      gap: 12px;    }    .telemetry-item {      display: inline-flex;      align-items: center;      gap: 8px;    }    .dot-pulse {      width: 7px;      height: 7px;      border-radius: 50%;      background-color: var(--color-safe);      box-shadow: 0 0 8px var(--color-safe);      animation: pulseAnim 2s infinite ease-in-out;    }    @keyframes pulseAnim {      0%, 100% { opacity: 1; transform: scale(1); }      50% { opacity: 0.35; transform: scale(0.85); }    }    /* Navigation Bar */    .navbar {      position: sticky;      top: 0;      z-index: 100;      background-color: var(--bg-primary);      border-bottom: 2px solid var(--border-color);      padding: 14px 0;      transition: background-color 0.2s ease;    }    .nav-wrapper {      display: flex;      align-items: center;      justify-content: space-between;      gap: 20px;    }    .brand-group {      display: flex;      align-items: center;      gap: 12px;      text-decoration: none;      color: var(--text-primary);    }    .brand-svg-box {      width: 38px;      height: 38px;      border: 2px solid var(--border-dark);      background-color: var(--bg-card);      display: flex;      align-items: center;      justify-content: center;      box-shadow: var(--shadow-brutal-sm);    }    .brand-name {      font-family: 'Space Grotesk', sans-serif;      font-size: 1.4rem;      font-weight: 800;      letter-spacing: -0.02em;    }    .nav-menu {      display: flex;      align-items: center;      gap: 24px;      list-style: none;    }    .nav-link {      font-family: 'Space Grotesk', sans-serif;      font-size: 0.88rem;      font-weight: 700;      text-transform: uppercase;      letter-spacing: 0.05em;      color: var(--text-muted);      text-decoration: none;      transition: color 0.15s ease;    }    .nav-link:hover {      color: var(--text-primary);      text-decoration: underline;      text-underline-offset: 4px;    }    .nav-actions {
+<!DOCTYPE html><html lang="en" data-theme="night"><head><script id="privex_theme_preinit">try{var t=localStorage.getItem("privex_theme")||"night";document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>  <meta charset="UTF-8">  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>PRIVEX Mobile — Deterministic On-Device Threat Defense for Android</title>  <meta name="description" content="Download official PRIVEX Android APK (v0.1.2). Deterministic phishing detection, offline SMS extortion filtering, and on-device threat intelligence. Zero cloud telemetry.">  <link rel="icon" type="image/svg+xml" href="./favicon.svg">  <link rel="shortcut icon" href="./favicon.ico">  <link rel="apple-touch-icon" href="./icon-192.png">  <link rel="preconnect" href="https://fonts.googleapis.com">  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">  <style>    :root, [data-theme="light"] {      --bg-primary: #F7F3EB;      --bg-secondary: #EBE7DE;      --bg-card: rgba(255, 255, 255, 0.92);      --bg-card-hover: rgba(255, 255, 255, 0.98);      --glass-surface: rgba(255, 255, 255, 0.85);      --glass-border: rgba(17, 17, 17, 0.12);      --bg-terminal: #0F172A;      --text-primary: #111111;      --text-muted: #555555;      --text-dim: #777777;      --border-color: #111111;      --border-dark: #111111;      --border-accent: #2457FF;      --shadow-brutal-sm: 2px 2px 0px #111111;      --shadow-brutal: 4px 4px 0px #111111;      --shadow-brutal-lg: 6px 6px 0px #111111;      --color-brand: #2457FF;      --color-brand-hover: #1844DD;      --color-accent: #D7FF3F;      --color-accent-text: #111111;      --color-safe: #1DB954;      --color-danger: #FF5A36;      --chassis-edge: #CCCCCC;      --chassis-body: #E5E1D8;    }    [data-theme="dark"] {      --bg-primary: #0B1120;      --bg-secondary: #151F32;      --bg-card: rgba(17, 24, 39, 0.88);      --bg-card-hover: rgba(24, 34, 54, 0.94);      --glass-surface: rgba(17, 24, 39, 0.78);      --glass-border: rgba(255, 255, 255, 0.08);      --bg-terminal: #070B14;      --text-primary: #F8FAFC;      --text-muted: #94A3B8;      --text-dim: #64748B;      --border-color: #1E293B;      --border-dark: #334155;      --border-accent: #D7FF3F;      --shadow-brutal-sm: 2px 2px 0px #020617;      --shadow-brutal: 4px 4px 0px #020617;      --shadow-brutal-lg: 6px 6px 0px #020617;      --color-brand: #3B82F6;      --color-brand-hover: #2563EB;      --color-accent: #D7FF3F;      --color-accent-text: #070B14;      --color-safe: #22C55E;      --color-danger: #EF4444;      --chassis-edge: #2E384D;      --chassis-body: #0E1524;    }    [data-theme="night"] {      --bg-primary: #05070D;      --bg-secondary: #0A0E17;      --bg-card: rgba(13, 18, 29, 0.88);      --bg-card-hover: rgba(18, 24, 38, 0.94);      --glass-surface: rgba(13, 18, 29, 0.78);      --glass-border: rgba(255, 255, 255, 0.06);      --bg-terminal: #020408;      --text-primary: #FFFFFF;      --text-muted: #9BA3AF;      --text-dim: #5E6778;      --border-color: #1A2234;      --border-dark: #2A364F;      --border-accent: #D7FF3F;      --shadow-brutal-sm: 2px 2px 0px #000000;      --shadow-brutal: 4px 4px 0px #000000;      --shadow-brutal-lg: 6px 6px 0px #000000;      --color-brand: #2457FF;      --color-brand-hover: #3B82F6;      --color-accent: #D7FF3F;      --color-accent-text: #05070D;      --color-safe: #10B981;      --color-danger: #FF5A36;      --chassis-edge: #232C3F;      --chassis-body: #080C14;    }    * {      box-sizing: border-box;      margin: 0;      padding: 0;    }    html {      background-color: var(--bg-primary);      scroll-behavior: smooth;    }    body {      background-color: transparent;      color: var(--text-primary);      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;      line-height: 1.6;      min-height: 100vh;      -webkit-font-smoothing: antialiased;      transition: color 0.2s ease;    }    .font-mono {      font-family: 'Space Grotesk', 'SFMono-Regular', Consolas, Menlo, monospace;    }    /* Ultra-Tech Motion Video Background */
+    .tech-video-bg-container {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+      background-color: var(--bg-primary);
+    }
+    .tech-bg-video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 100vw;
+      min-height: 100vh;
+      width: auto;
+      height: auto;
+      object-fit: cover;
+      opacity: 0.65;
+      filter: saturate(160%) contrast(115%) brightness(0.95);
+      transition: opacity 0.4s ease, filter 0.4s ease;
+      display: block;
+    }
+    [data-theme="night"] .tech-bg-video {
+      opacity: 0.70;
+      filter: saturate(160%) contrast(120%) brightness(1.0);
+    }
+    [data-theme="dark"] .tech-bg-video {
+      opacity: 0.60;
+      filter: saturate(150%) contrast(115%) brightness(0.95);
+    }
+    [data-theme="light"] .tech-bg-video {
+      opacity: 0.35;
+      filter: saturate(120%) contrast(105%) brightness(1.1);
+    }
+
+    /* Cyber Holographic Overlay Tint & Scan Matrix */
+    .tech-video-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 40%, rgba(5, 7, 13, 0.15) 0%, rgba(5, 7, 13, 0.45) 75%, rgba(5, 7, 13, 0.7) 100%);
+      pointer-events: none;
+    }
+    [data-theme="light"] .tech-video-overlay {
+      background: radial-gradient(circle at 50% 40%, rgba(247, 243, 235, 0.2) 0%, rgba(247, 243, 235, 0.5) 75%, rgba(247, 243, 235, 0.75) 100%);
+    }
+
+    /* Interactive Tech Cyber Motion Background */
+    #cyberMotionCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.85;
+      transition: opacity 0.3s ease;
+    }
+    [data-theme="light"] #cyberMotionCanvas {
+      opacity: 0.55;
+    }
+
+    /* Multi-Spectrum Holographic Cyber Orbs */
+    .cyber-ambient-glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.24;
+      animation: ambientFloat 16s infinite alternate ease-in-out;
+    }
+    .glow-orb-1 {
+      top: 5%;
+      left: 10%;
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, #2457FF 0%, rgba(36,87,255,0.2) 50%, transparent 70%);
+    }
+    .glow-orb-2 {
+      bottom: 15%;
+      right: 8%;
+      width: 580px;
+      height: 580px;
+      background: radial-gradient(circle, #D7FF3F 0%, rgba(215,255,63,0.15) 50%, transparent 70%);
+      animation-delay: -8s;
+    }
+    .glow-orb-3 {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 440px;
+      height: 440px;
+      background: radial-gradient(circle, rgba(16,185,129,0.18) 0%, transparent 70%);
+      animation-duration: 22s;
+    }
+    @keyframes ambientFloat {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(45px, -35px) scale(1.12); }
+      100% { transform: translate(-35px, 45px) scale(0.92); }
+    }
+
+    /* Cyber Security Sweep Laser Line */
+    .cyber-radar-sweep {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, rgba(36, 87, 255, 0.2) 20%, #D7FF3F 50%, rgba(36, 87, 255, 0.2) 80%, transparent 100%);
+      box-shadow: 0 0 16px #D7FF3F, 0 0 32px #2457FF;
+      opacity: 0.45;
+      pointer-events: none;
+      z-index: 0;
+      animation: scanLaser 9s infinite linear;
+    }
+    @keyframes scanLaser {
+      0% { transform: translateY(-10px); opacity: 0; }
+      10% { opacity: 0.55; }
+      90% { opacity: 0.55; }
+      100% { transform: translateY(105vh); opacity: 0; }
+    }
+
+    /* Enhanced Glassmorphism Cards with Shimmer & Border Depth */
+    .glass-card,
+    .brutal-card,
+    .eco-card,
+    .pipeline-stage-card,
+    .engineering-spec-card,
+    .install-step-card,
+    .checksum-audit-container,
+    .permissions-table-wrap {
+      background: var(--bg-card) !important;
+      backdrop-filter: blur(14px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
+      border: 2px solid var(--border-dark) !important;
+      position: relative;
+    }
+
+    /* Architectural Subtle Grid */    .blueprint-grid {      position: fixed;      inset: 0;      background-image:         linear-gradient(rgba(128, 128, 128, 0.04) 1px, transparent 1px),        linear-gradient(90deg, rgba(128, 128, 128, 0.04) 1px, transparent 1px);      background-size: 32px 32px;      pointer-events: none;      z-index: 0;    }    .container {      max-width: 1240px;      margin: 0 auto;      padding: 0 24px;      position: relative;      z-index: 1;    }    /* Brutalist Buttons & Cut Corners */    .btn-brutal {      position: relative;      display: inline-flex;      align-items: center;      justify-content: center;      gap: 10px;      padding: 12px 24px;      font-family: 'Space Grotesk', sans-serif;      font-weight: 700;      font-size: 0.95rem;      text-decoration: none;      border: 2px solid var(--border-dark);      cursor: pointer;      user-select: none;      clip-path: polygon(        0 0,        calc(100% - 8px) 0,        100% 8px,        100% 100%,        8px 100%,        0 calc(100% - 8px)      );      transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.12s ease, background-color 0.15s ease;    }    .btn-brutal:hover {      transform: translate(-2px, -2px);      box-shadow: var(--shadow-brutal);    }    .btn-brutal:active {      transform: translate(1px, 1px);      box-shadow: 1px 1px 0px var(--border-dark);    }    .btn-accent {      background-color: var(--color-accent);      color: var(--color-accent-text);      box-shadow: var(--shadow-brutal-sm);    }    .btn-primary {      background-color: var(--color-brand);      color: #FFFFFF;      box-shadow: var(--shadow-brutal-sm);    }    .btn-secondary {      background-color: var(--bg-card);      color: var(--text-primary);      box-shadow: var(--shadow-brutal-sm);    }    /* Brutalist Badges & Cards with UX-Safe Glassmorphism */
+    .brutal-card {
+      background-color: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 2px solid var(--border-color);
+      box-shadow: var(--shadow-brutal);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease, backdrop-filter 0.15s ease;
+    }
+    .brutal-card:hover {
+      border-color: var(--border-dark);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }    .brutal-badge {      display: inline-flex;      align-items: center;      gap: 6px;      padding: 4px 10px;      border: 1.5px solid var(--border-color);      font-family: 'Space Grotesk', monospace;      font-size: 0.72rem;      font-weight: 700;      text-transform: uppercase;      letter-spacing: 0.05em;      background-color: var(--bg-secondary);      color: var(--text-primary);    }    .brutal-badge.active-indicator {      border-color: var(--color-safe);      color: var(--color-safe);    }    /* Top Telemetry Ticker */
+    .top-telemetry-bar {
+      background-color: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #7AA2FF;
+      border-bottom: 1px solid var(--border-color);
+      padding: 6px 0;
+      font-family: 'Space Grotesk', monospace;
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      width: 100%;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+    .telemetry-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      min-width: max-content;
+      width: 100%;
+    }
+    .telemetry-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .dot-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--color-safe);
+      box-shadow: 0 0 8px var(--color-safe);
+      animation: pulseAnim 2s infinite ease-in-out;
+    }
+    @keyframes pulseAnim {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.85); }
+    }    /* Navigation Bar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: var(--glass-surface);
+      border-bottom: 2px solid var(--border-color);
+      padding: 10px 0;
+      transition: background-color 0.2s ease;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .nav-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: relative;
+    }
+    .brand-group {
       display: flex;
       align-items: center;
       gap: 10px;
+      text-decoration: none;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+    .brand-svg-box {
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--border-dark);
+      background-color: var(--bg-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-brutal-sm);
+    }
+    .brand-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .nav-link {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 6px 4px;
+      white-space: nowrap;
+      transition: color 0.15s ease, border-color 0.15s ease;
+      border-bottom: 2px solid transparent;
+    }
+    .nav-link:hover {
+      color: var(--text-primary);
+      border-bottom-color: var(--color-brand);
+    }
+    .nav-link-web {
+      color: var(--color-brand) !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       flex-shrink: 0;
     }
     .theme-toggle-btn {
-      padding: 7px 12px;
+      padding: 6px 12px;
       background-color: var(--bg-card);
       border: 2px solid var(--border-dark);
       color: var(--text-primary);
       font-family: 'Space Grotesk', monospace;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 700;
       cursor: pointer;
       box-shadow: var(--shadow-brutal-sm);
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      height: 38px;
+      height: 36px;
       line-height: 1;
       box-sizing: border-box;
       white-space: nowrap;
@@ -29,14 +300,15 @@
     .theme-toggle-btn:hover {
       background-color: var(--bg-secondary);
       border-color: var(--color-brand);
+      transform: translate(-1px, -1px);
     }
     .theme-toggle-btn:active {
       transform: scale(0.96);
     }
     .nav-download-btn {
-      padding: 7px 14px !important;
-      font-size: 0.8rem !important;
-      height: 38px !important;
+      padding: 6px 14px !important;
+      font-size: 0.78rem !important;
+      height: 36px !important;
       line-height: 1 !important;
       box-sizing: border-box !important;
       white-space: nowrap !important;
@@ -46,38 +318,26 @@
       gap: 6px !important;
     }
     .nav-download-btn svg {
-      width: 15px !important;
-      height: 15px !important;
+      width: 14px !important;
+      height: 14px !important;
       flex-shrink: 0 !important;
       margin: 0 !important;
     }
-    @media (max-width: 680px) {
-      .nav-wrapper { gap: 8px; }
-      .nav-actions { gap: 6px; }
-      .theme-toggle-btn { padding: 5px 8px; font-size: 0.72rem; height: 34px; gap: 4px; }
-      .nav-download-btn { padding: 5px 10px !important; font-size: 0.74rem !important; height: 34px !important; gap: 4px !important; }
-      .nav-download-btn svg { width: 13px !important; height: 13px !important; }
-    }
-    @media (max-width: 420px) {
-      .brand-name { font-size: 1.15rem; }
-      .theme-toggle-btn span:not(#themeIcon) { display: none; }
-      .nav-download-btn { padding: 5px 8px !important; font-size: 0.7rem !important; }
-    }
-    /* GitHub Navigation & Floating Buttons */
+    /* GitHub Navigation Button */
     .nav-github-btn {
-      padding: 7px 12px;
+      padding: 6px 12px;
       background-color: var(--bg-card);
       border: 2px solid var(--border-dark);
       color: var(--text-primary);
       font-family: 'Space Grotesk', monospace;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 700;
       text-decoration: none;
       box-shadow: var(--shadow-brutal-sm);
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      height: 38px;
+      height: 36px;
       line-height: 1;
       box-sizing: border-box;
       white-space: nowrap;
@@ -91,26 +351,115 @@
       box-shadow: var(--shadow-brutal);
     }
     .nav-github-btn svg {
-      width: 16px;
-      height: 16px;
+      width: 15px;
+      height: 15px;
       fill: currentColor;
     }
-    @media (max-width: 680px) {
-      .nav-github-btn {
-        padding: 5px 8px;
-        font-size: 0.72rem;
-        height: 34px;
-        gap: 4px;
-      }
-      .nav-github-btn svg {
-        width: 14px;
-        height: 14px;
-      }
+
+    /* Mobile Hamburger Menu Toggle Button */
+    .nav-mobile-toggle {
+      display: none;
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--border-dark);
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-brutal-sm);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+      transition: background-color 0.15s ease, transform 0.1s ease;
     }
-    @media (max-width: 480px) {
-      .nav-github-btn span {
+    .nav-mobile-toggle:hover {
+      background-color: var(--bg-secondary);
+      border-color: var(--color-brand);
+    }
+    .nav-mobile-toggle:active {
+      transform: scale(0.95);
+    }
+    .nav-mobile-toggle svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+    }
+
+    /* Responsive Breakpoints for Navigation Bar */
+    @media (max-width: 1040px) {
+      .nav-menu {
         display: none;
       }
+      .nav-mobile-toggle {
+        display: inline-flex;
+      }
+    }
+    @media (max-width: 680px) {
+      .nav-wrapper { gap: 8px; }
+      .nav-actions { gap: 6px; }
+      .theme-toggle-btn { padding: 5px 8px; font-size: 0.72rem; height: 34px; gap: 4px; }
+      .nav-github-btn { padding: 5px 8px; font-size: 0.72rem; height: 34px; gap: 4px; }
+      .nav-download-btn { padding: 5px 10px !important; font-size: 0.74rem !important; height: 34px !important; gap: 4px !important; }
+      .nav-mobile-toggle { width: 34px; height: 34px; }
+    }
+    @media (max-width: 480px) {
+      .brand-name { font-size: 1.15rem; }
+      .nav-github-btn span { display: none; }
+      .theme-toggle-btn span:not(#themeIcon) { display: none; }
+      .nav-download-btn { padding: 5px 8px !important; font-size: 0.7rem !important; }
+    }
+
+    /* Mobile Navigation Dropdown Drawer */
+    .mobile-menu-drawer {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background-color: var(--bg-card);
+      border-bottom: 3px solid var(--border-dark);
+      box-shadow: 0 16px 32px rgba(0,0,0,0.35);
+      z-index: 99;
+      padding: 12px 24px 20px;
+      animation: menuSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .mobile-menu-drawer.is-open {
+      display: block;
+    }
+    @keyframes menuSlideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .mobile-menu-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin: 0;
+      padding: 0;
+    }
+    .mobile-menu-list li a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-primary);
+      text-decoration: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+    }
+    .mobile-menu-list li a:hover,
+    .mobile-menu-list li a:active {
+      background-color: var(--bg-secondary);
+      border-color: var(--border-dark);
+      color: var(--color-brand);
+      padding-left: 18px;
     }
 
     /* Fixed Floating Right-Side GitHub Button */
@@ -159,7 +508,7 @@
       }
     }
 
-    /* Hero Section */    .hero-section {      padding: 70px 0 50px;      border-bottom: 2px solid var(--border-color);    }    .hero-grid {      display: grid;      grid-template-columns: 1.15fr 0.85fr;      gap: 48px;      align-items: center;    }    .hero-label-row {      display: flex;      align-items: center;      gap: 12px;      margin-bottom: 20px;    }    .hero-title {      font-family: 'Space Grotesk', sans-serif;      font-size: 3.2rem;      font-weight: 800;      line-height: 1.1;      letter-spacing: -0.03em;      margin-bottom: 20px;    }    .hero-title .accent-block {      background-color: var(--color-accent);      color: var(--color-accent-text);      padding: 0 8px;      display: inline-block;      border: 2px solid var(--border-dark);      box-shadow: var(--shadow-brutal-sm);    }    .hero-desc {      font-size: 1.12rem;      color: var(--text-muted);      line-height: 1.7;      margin-bottom: 32px;      max-width: 600px;    }    .hero-actions-group {      display: flex;      flex-direction: column;      gap: 16px;      margin-bottom: 36px;    }    .hero-buttons-row {      display: flex;      flex-wrap: wrap;      align-items: center;      gap: 14px;    }    /* Terminal Quick Code Box */    .cli-install-box {      display: flex;      align-items: center;      justify-content: space-between;      background-color: var(--bg-terminal);      border: 2px solid var(--border-dark);      padding: 10px 16px;      max-width: 540px;      box-shadow: var(--shadow-brutal-sm);    }    .cli-code {      font-family: 'Space Grotesk', monospace;      font-size: 0.84rem;      color: #A3E635;      display: flex;      align-items: center;      gap: 8px;    }    .cli-prompt {      color: #64748B;      user-select: none;    }    .btn-copy-cli {      background: none;      border: 1px solid #334155;      color: #94A3B8;      padding: 4px 8px;      font-size: 0.72rem;      font-family: 'Space Grotesk', monospace;      cursor: pointer;      text-transform: uppercase;      font-weight: 700;    }    .btn-copy-cli:hover {      background-color: #1E293B;      color: #FFFFFF;      border-color: #64748B;    }    /* Hero Specs Row */    .hero-specs-grid {      display: grid;      grid-template-columns: repeat(4, 1fr);      gap: 12px;      max-width: 620px;    }    .spec-cell {      background-color: var(--bg-card);      border: 2px solid var(--border-color);      padding: 12px;      box-shadow: var(--shadow-brutal-sm);    }    .spec-cell-label {      font-family: 'Space Grotesk', monospace;      font-size: 0.68rem;      font-weight: 700;      text-transform: uppercase;      color: var(--text-dim);      margin-bottom: 4px;    }    .spec-cell-val {      font-family: 'Space Grotesk', sans-serif;      font-size: 1.05rem;      font-weight: 800;      color: var(--text-primary);    }    /* Hardware Flagship Smartphone Chassis */    .phone-stage-wrapper {      display: flex;      justify-content: center;      align-items: center;      position: relative;    }    .phone-hardware-chassis {      width: 360px;      height: 720px;      background-color: var(--chassis-body);      border: 3px solid var(--border-dark);      border-radius: 46px;      box-shadow: var(--shadow-brutal-lg);      position: relative;      padding: 12px;      display: flex;      flex-direction: column;    }    /* Hardware Side Buttons */    .phone-vol-up {      position: absolute;      left: -6px;      top: 110px;      width: 4px;      height: 38px;      background-color: var(--border-dark);      border-radius: 3px 0 0 3px;    }    .phone-vol-down {      position: absolute;      left: -6px;      top: 160px;      width: 4px;      height: 38px;      background-color: var(--border-dark);      border-radius: 3px 0 0 3px;    }    .phone-pwr {      position: absolute;      right: -6px;      top: 130px;      width: 4px;      height: 48px;      background-color: var(--border-dark);      border-radius: 0 3px 3px 0;    }    .phone-oled-screen {      width: 100%;      height: 100%;      background-color: #000000;      border-radius: 32px;      border: 2px solid var(--border-dark);      position: relative;      overflow: hidden;      display: flex;      flex-direction: column;    }    /* Dynamic Island / Pill Notch */    .phone-pill-notch {      position: absolute;      top: 12px;      left: 50%;      transform: translateX(-50%);      width: 90px;      height: 20px;      background-color: #000000;      border: 1px solid #222;      border-radius: 12px;      z-index: 50;      display: flex;      align-items: center;      justify-content: center;      gap: 8px;    }    .camera-lens-dot {      width: 8px;      height: 8px;      background-color: #0A111F;      border: 1px solid #1E293B;      border-radius: 50%;    }    .speaker-slit-bar {      width: 28px;      height: 3px;      background-color: #1A202C;      border-radius: 2px;    }    .phone-screen-view {      width: 100%;      height: 100%;      object-fit: cover;      object-position: top center;      display: block;      transition: opacity 0.2s ease;      cursor: zoom-in;    }    /* Bottom Home Indicator Bar */    .phone-gesture-bar {      position: absolute;      bottom: 8px;      left: 50%;      transform: translateX(-50%);      width: 90px;      height: 4px;      background-color: rgba(255, 255, 255, 0.4);      border-radius: 2px;      z-index: 40;    }    /* Interactive Showcase Section */
+    /* Hero Section */    .hero-section {      padding: 70px 0 50px;      border-bottom: 2px solid var(--border-color);    }    .hero-grid {      display: grid;      grid-template-columns: 1.15fr 0.85fr;      gap: 48px;      align-items: center;    }    .hero-label-row {      display: flex;      align-items: center;      gap: 12px;      margin-bottom: 20px;    }    .hero-title {      font-family: 'Space Grotesk', sans-serif;      font-size: 3.2rem;      font-weight: 800;      line-height: 1.1;      letter-spacing: -0.03em;      margin-bottom: 20px;    }    .hero-title .accent-block {      background-color: var(--color-accent);      color: var(--color-accent-text);      padding: 0 8px;      display: inline-block;      border: 2px solid var(--border-dark);      box-shadow: var(--shadow-brutal-sm);    }    .hero-desc {      font-size: 1.12rem;      color: var(--text-muted);      line-height: 1.7;      margin-bottom: 32px;      max-width: 600px;    }    .hero-actions-group {      display: flex;      flex-direction: column;      gap: 16px;      margin-bottom: 36px;    }    .hero-buttons-row {      display: flex;      flex-wrap: wrap;      align-items: center;      gap: 14px;    }    /* Terminal Quick Code Box */    .cli-install-box {      display: flex;      align-items: center;      justify-content: space-between;      background-color: var(--bg-terminal);      border: 2px solid var(--border-dark);      padding: 10px 16px;      max-width: 540px;      box-shadow: var(--shadow-brutal-sm);    }    .cli-code {      font-family: 'Space Grotesk', monospace;      font-size: 0.84rem;      color: #A3E635;      display: flex;      align-items: center;      gap: 8px;    }    .cli-prompt {      color: #64748B;      user-select: none;    }    .btn-copy-cli {      background: none;      border: 1px solid #334155;      color: #94A3B8;      padding: 4px 8px;      font-size: 0.72rem;      font-family: 'Space Grotesk', monospace;      cursor: pointer;      text-transform: uppercase;      font-weight: 700;    }    .btn-copy-cli:hover {      background-color: #1E293B;      color: #FFFFFF;      border-color: #64748B;    }    /* Hero Specs Row */    .hero-specs-grid {      display: grid;      grid-template-columns: repeat(4, 1fr);      gap: 12px;      max-width: 620px;    }    .spec-cell {      background-color: var(--bg-card);      border: 2px solid var(--border-color);      padding: 12px;      box-shadow: var(--shadow-brutal-sm);    }    .spec-cell-label {      font-family: 'Space Grotesk', monospace;      font-size: 0.68rem;      font-weight: 700;      text-transform: uppercase;      color: var(--text-dim);      margin-bottom: 4px;    }    .spec-cell-val {      font-family: 'Space Grotesk', sans-serif;      font-size: 1.05rem;      font-weight: 800;      color: var(--text-primary);    }    /* Hardware Flagship Smartphone Chassis */    .phone-stage-wrapper {      display: flex;      justify-content: center;      align-items: center;      position: relative;      width: 100%;      max-width: 100%;    }    .phone-hardware-chassis {      width: 100%;      max-width: 360px;      height: 720px;      max-height: 80vh;      background-color: var(--chassis-body);      border: 3px solid var(--border-dark);      border-radius: 46px;      box-shadow: var(--shadow-brutal-lg);      position: relative;      padding: 12px;      display: flex;      flex-direction: column;      margin: 0 auto;    }    /* Hardware Side Buttons */    .phone-vol-up {      position: absolute;      left: -6px;      top: 110px;      width: 4px;      height: 38px;      background-color: var(--border-dark);      border-radius: 3px 0 0 3px;    }    .phone-vol-down {      position: absolute;      left: -6px;      top: 160px;      width: 4px;      height: 38px;      background-color: var(--border-dark);      border-radius: 3px 0 0 3px;    }    .phone-pwr {      position: absolute;      right: -6px;      top: 130px;      width: 4px;      height: 48px;      background-color: var(--border-dark);      border-radius: 0 3px 3px 0;    }    .phone-oled-screen {      width: 100%;      height: 100%;      background-color: #000000;      border-radius: 32px;      border: 2px solid var(--border-dark);      position: relative;      overflow: hidden;      display: flex;      flex-direction: column;    }    /* Dynamic Island / Pill Notch */    .phone-pill-notch {      position: absolute;      top: 12px;      left: 50%;      transform: translateX(-50%);      width: 90px;      height: 20px;      background-color: #000000;      border: 1px solid #222;      border-radius: 12px;      z-index: 50;      display: flex;      align-items: center;      justify-content: center;      gap: 8px;    }    .camera-lens-dot {      width: 8px;      height: 8px;      background-color: #0A111F;      border: 1px solid #1E293B;      border-radius: 50%;    }    .speaker-slit-bar {      width: 28px;      height: 3px;      background-color: #1A202C;      border-radius: 2px;    }    .phone-screen-view {      width: 100%;      height: 100%;      object-fit: cover;      object-position: top center;      display: block;      transition: opacity 0.2s ease;      cursor: zoom-in;    }    /* Bottom Home Indicator Bar */    .phone-gesture-bar {      position: absolute;      bottom: 8px;      left: 50%;      transform: translateX(-50%);      width: 90px;      height: 4px;      background-color: rgba(255, 255, 255, 0.4);      border-radius: 2px;      z-index: 40;    }    /* Interactive Showcase Section */
     .section-screen-studio {
       padding: 88px 0;
       border-bottom: 2px solid var(--border-color);
@@ -605,12 +954,31 @@
       font-weight: 700;
       color: var(--text-primary);
     }
-    /* Technical Architecture Flow Section */    .section-architecture-flow {      padding: 80px 0;      border-bottom: 2px solid var(--border-color);      background-color: var(--bg-secondary);    }    .arch-pipeline-grid {      display: grid;      grid-template-columns: repeat(5, 1fr);      gap: 16px;      margin-top: 36px;      position: relative;    }    .pipeline-stage-card {      background-color: var(--bg-card);      border: 2px solid var(--border-dark);      box-shadow: var(--shadow-brutal-sm);      padding: 20px 16px;      position: relative;    }    .stage-step-num {      font-family: 'Space Grotesk', monospace;      font-size: 0.75rem;      font-weight: 800;      color: var(--color-brand);      margin-bottom: 8px;    }    .stage-title {      font-family: 'Space Grotesk', sans-serif;      font-size: 1.05rem;      font-weight: 800;      margin-bottom: 8px;    }    .stage-desc {      font-size: 0.86rem;      color: var(--text-muted);      line-height: 1.6;    }    /* Permission Audit Section */    .section-permission-audit {      padding: 80px 0;      border-bottom: 2px solid var(--border-color);    }    .permissions-table-wrap {      border: 2px solid var(--border-dark);      box-shadow: var(--shadow-brutal);      background-color: var(--bg-card);      margin-top: 36px;      overflow-x: auto;    }    .permissions-table {      width: 100%;      border-collapse: collapse;      text-align: left;    }    .permissions-table th,    .permissions-table td {      padding: 16px 20px;      border-bottom: 1px solid var(--border-color);      font-size: 0.92rem;    }    .permissions-table th {      background-color: var(--bg-secondary);      font-family: 'Space Grotesk', sans-serif;      font-weight: 800;      text-transform: uppercase;      font-size: 0.8rem;      letter-spacing: 0.05em;      border-bottom: 2px solid var(--border-dark);    }    .badge-denied {      display: inline-block;      padding: 3px 8px;      background-color: rgba(239, 68, 68, 0.12);      border: 1px solid var(--color-danger);      color: var(--color-danger);      font-family: 'Space Grotesk', monospace;      font-size: 0.74rem;      font-weight: 800;    }    .badge-granted {      display: inline-block;      padding: 3px 8px;      background-color: rgba(34, 197, 94, 0.12);      border: 1px solid var(--color-safe);      color: var(--color-safe);      font-family: 'Space Grotesk', monospace;      font-size: 0.74rem;      font-weight: 800;    }    /* Installation & Integrity Guide */    .section-install-guide {      padding: 80px 0;      border-bottom: 2px solid var(--border-color);    }    .install-steps-layout {      display: grid;      grid-template-columns: repeat(3, 1fr);      gap: 24px;      margin-top: 36px;    }    .install-step-card {      background-color: var(--bg-card);      border: 2px solid var(--border-dark);      box-shadow: var(--shadow-brutal);      padding: 28px 24px;    }    .install-step-index {      font-family: 'Space Grotesk', monospace;      font-size: 1.4rem;      font-weight: 800;      color: var(--color-brand);      margin-bottom: 12px;    }    .install-step-title {      font-family: 'Space Grotesk', sans-serif;      font-size: 1.15rem;      font-weight: 800;      margin-bottom: 8px;    }    .install-step-body {      font-size: 0.92rem;      color: var(--text-muted);      line-height: 1.6;    }    /* Checksum Audit Box */    .checksum-audit-container {      margin-top: 40px;      background-color: var(--bg-card);      border: 2px solid var(--border-dark);      box-shadow: var(--shadow-brutal);      padding: 28px;      display: grid;      grid-template-columns: 1fr 1fr;      gap: 32px;      align-items: center;    }    .hash-display-pill {      background-color: var(--bg-terminal);      border: 1px solid var(--border-color);      padding: 12px 14px;      display: flex;      align-items: center;      justify-content: space-between;      gap: 12px;      margin-top: 8px;    }    .hash-string {      font-family: 'Space Grotesk', monospace;      font-size: 0.8rem;      color: #A3E635;      word-break: break-all;    }    /* Lightbox Modal */    .lightbox-overlay {      position: fixed;      inset: 0;      background-color: rgba(5, 7, 13, 0.94);      z-index: 1000;      display: none;      align-items: center;      justify-content: center;      padding: 20px;    }    .lightbox-overlay.active {      display: flex;    }    .lightbox-viewport {      position: relative;      max-width: 90vw;      max-height: 90vh;      display: flex;      flex-direction: column;      align-items: center;    }    .lightbox-target-img {      max-height: 82vh;      max-width: 100%;      border: 2px solid var(--border-dark);      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);      object-fit: contain;    }    .lightbox-info-bar {      margin-top: 14px;      font-family: 'Space Grotesk', monospace;      font-size: 0.95rem;      font-weight: 700;      color: var(--color-accent);    }    .lightbox-dismiss-btn {      position: absolute;      top: -40px;      right: 0;      background: none;      border: none;      color: #FFFFFF;      font-size: 2rem;      cursor: pointer;      line-height: 1;    }    /* Footer */    .site-footer {      background-color: var(--bg-terminal);      color: #94A3B8;      border-top: 2px solid var(--border-dark);      padding: 60px 0 36px;      font-size: 0.88rem;    }    .footer-columns-grid {      display: grid;      grid-template-columns: 2fr 1fr 1fr;      gap: 40px;      margin-bottom: 40px;    }    .footer-col-header {      font-family: 'Space Grotesk', sans-serif;      font-size: 0.92rem;      font-weight: 800;      color: #F8FAFC;      text-transform: uppercase;      letter-spacing: 0.05em;      margin-bottom: 16px;    }    .footer-nav-list {      list-style: none;      display: flex;      flex-direction: column;      gap: 10px;    }    .footer-nav-item a {      color: #94A3B8;      text-decoration: none;      transition: color 0.15s ease;    }    .footer-nav-item a:hover {      color: #D7FF3F;    }    .footer-bottom-bar {      border-top: 1px solid #1E293B;      padding-top: 24px;      display: flex;      justify-content: space-between;      align-items: center;      flex-wrap: wrap;      gap: 14px;      font-family: 'Space Grotesk', monospace;      font-size: 0.78rem;    }    /* Responsive Media Queries */    @media (max-width: 1080px) {      .hero-grid {        grid-template-columns: 1fr;      }      .studio-workspace-grid {        grid-template-columns: 1fr;      }      .studio-phone-column {        margin: 0 auto;      }      .screens-selector-grid {        grid-template-columns: repeat(3, 1fr);      }      .gallery-cards-grid {        grid-template-columns: repeat(3, 1fr);      }      .arch-pipeline-grid {        grid-template-columns: repeat(2, 1fr);      }      .install-steps-layout {        grid-template-columns: 1fr;      }      .checksum-audit-container {        grid-template-columns: 1fr;      }    }    @media (max-width: 768px) {      .nav-menu {        display: none;      }      .hero-title {        font-size: 2.4rem;      }      .screens-selector-grid {        grid-template-columns: repeat(2, 1fr);      }      .gallery-cards-grid {        grid-template-columns: repeat(2, 1fr);      }      .hero-specs-grid {        grid-template-columns: repeat(2, 1fr);      }      .spec-caps-matrix {        grid-template-columns: 1fr;      }      .footer-columns-grid {        grid-template-columns: 1fr;      }      .phone-hardware-chassis {        width: 320px;        height: 650px;      }    }  
+    /* Technical Architecture Flow Section */    .section-architecture-flow {      padding: 80px 0;      border-bottom: 2px solid var(--border-color);      background-color: transparent;    }    .arch-pipeline-grid {      display: grid;      grid-template-columns: repeat(5, 1fr);      gap: 16px;      margin-top: 36px;      position: relative;    }    .pipeline-stage-card {
+      background-color: var(--bg-card);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 2px solid var(--border-dark);
+      box-shadow: var(--shadow-brutal-sm);
+      padding: 20px 16px;
+      position: relative;
+    }    .stage-step-num {      font-family: 'Space Grotesk', monospace;      font-size: 0.75rem;      font-weight: 800;      color: var(--color-brand);      margin-bottom: 8px;    }    .stage-title {      font-family: 'Space Grotesk', sans-serif;      font-size: 1.05rem;      font-weight: 800;      margin-bottom: 8px;    }    .stage-desc {      font-size: 0.86rem;      color: var(--text-muted);      line-height: 1.6;    }    /* Permission Audit Section */    .section-permission-audit {      padding: 80px 0;      border-bottom: 2px solid var(--border-color);    }    .permissions-table-wrap {      border: 2px solid var(--border-dark);      box-shadow: var(--shadow-brutal);      background-color: var(--bg-card);      margin-top: 36px;      overflow-x: auto;    }    .permissions-table {      width: 100%;      border-collapse: collapse;      text-align: left;    }    .permissions-table th,    .permissions-table td {      padding: 16px 20px;      border-bottom: 1px solid var(--border-color);      font-size: 0.92rem;    }    .permissions-table th {      background-color: var(--bg-secondary);      font-family: 'Space Grotesk', sans-serif;      font-weight: 800;      text-transform: uppercase;      font-size: 0.8rem;      letter-spacing: 0.05em;      border-bottom: 2px solid var(--border-dark);    }    .badge-denied {      display: inline-block;      padding: 3px 8px;      background-color: rgba(239, 68, 68, 0.12);      border: 1px solid var(--color-danger);      color: var(--color-danger);      font-family: 'Space Grotesk', monospace;      font-size: 0.74rem;      font-weight: 800;    }    .badge-granted {      display: inline-block;      padding: 3px 8px;      background-color: rgba(34, 197, 94, 0.12);      border: 1px solid var(--color-safe);      color: var(--color-safe);      font-family: 'Space Grotesk', monospace;      font-size: 0.74rem;      font-weight: 800;    }    /* Installation & Integrity Guide */    .section-install-guide {      padding: 80px 0;      border-bottom: 2px solid var(--border-color);    }    .install-steps-layout {      display: grid;      grid-template-columns: repeat(3, 1fr);      gap: 24px;      margin-top: 36px;    }    .install-step-card {      background-color: var(--bg-card);      border: 2px solid var(--border-dark);      box-shadow: var(--shadow-brutal);      padding: 28px 24px;    }    .install-step-index {      font-family: 'Space Grotesk', monospace;      font-size: 1.4rem;      font-weight: 800;      color: var(--color-brand);      margin-bottom: 12px;    }    .install-step-title {      font-family: 'Space Grotesk', sans-serif;      font-size: 1.15rem;      font-weight: 800;      margin-bottom: 8px;    }    .install-step-body {      font-size: 0.92rem;      color: var(--text-muted);      line-height: 1.6;    }    /* Checksum Audit Box */    .checksum-audit-container {      margin-top: 40px;      background-color: var(--bg-card);      border: 2px solid var(--border-dark);      box-shadow: var(--shadow-brutal);      padding: 28px;      display: grid;      grid-template-columns: 1fr 1fr;      gap: 32px;      align-items: center;    }    .hash-display-pill {      background-color: var(--bg-terminal);      border: 1px solid var(--border-color);      padding: 12px 14px;      display: flex;      align-items: center;      justify-content: space-between;      gap: 12px;      margin-top: 8px;    }    .hash-string {      font-family: 'Space Grotesk', monospace;      font-size: 0.8rem;      color: #A3E635;      word-break: break-all;    }    /* Lightbox Modal */    .lightbox-overlay {      position: fixed;      inset: 0;      background-color: rgba(5, 7, 13, 0.94);      z-index: 1000;      display: none;      align-items: center;      justify-content: center;      padding: 20px;    }    .lightbox-overlay.active {      display: flex;    }    .lightbox-viewport {      position: relative;      max-width: 90vw;      max-height: 90vh;      display: flex;      flex-direction: column;      align-items: center;    }    .lightbox-target-img {      max-height: 82vh;      max-width: 100%;      border: 2px solid var(--border-dark);      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);      object-fit: contain;    }    .lightbox-info-bar {      margin-top: 14px;      font-family: 'Space Grotesk', monospace;      font-size: 0.95rem;      font-weight: 700;      color: var(--color-accent);    }    .lightbox-dismiss-btn {      position: absolute;      top: -40px;      right: 0;      background: none;      border: none;      color: #FFFFFF;      font-size: 2rem;      cursor: pointer;      line-height: 1;    }    /* Footer */    .site-footer {      background-color: var(--bg-terminal);      color: #94A3B8;      border-top: 2px solid var(--border-dark);      padding: 60px 0 36px;      font-size: 0.88rem;    }    .footer-columns-grid {      display: grid;      grid-template-columns: 2fr 1fr 1fr;      gap: 40px;      margin-bottom: 40px;    }    .footer-col-header {      font-family: 'Space Grotesk', sans-serif;      font-size: 0.92rem;      font-weight: 800;      color: #F8FAFC;      text-transform: uppercase;      letter-spacing: 0.05em;      margin-bottom: 16px;    }    .footer-nav-list {      list-style: none;      display: flex;      flex-direction: column;      gap: 10px;    }    .footer-nav-item a {      color: #94A3B8;      text-decoration: none;      transition: color 0.15s ease;    }    .footer-nav-item a:hover {      color: #D7FF3F;    }
+    .footer-bottom-bar {
+      border-top: 1px solid #1E293B;
+      padding-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-family: 'Space Grotesk', monospace;
+      font-size: 0.78rem;
+    }  
     /* Multi-Device Ecosystem Live Showcase & Interactive Selector */
     .ecosystem-section {
       padding: 60px 0 40px;
       border-bottom: 2px solid var(--border-color);
-      background-color: var(--bg-secondary);
+      background-color: transparent;
       position: relative;
     }
     .ecosystem-header {
@@ -742,7 +1110,7 @@
     .section-downloads-hub {
       padding: 80px 0;
       border-bottom: 2px solid var(--border-color);
-      background-color: var(--bg-primary);
+      background-color: transparent;
     }
     .downloads-hub-grid {
       display: grid;
@@ -841,17 +1209,326 @@
       }
     }
 
-  </style></head><body>  <div class="blueprint-grid"></div>  <!-- Telemetry Header Ticker -->  <div class="top-telemetry-bar">    <div class="container telemetry-inner">      <div class="telemetry-item">        <span class="dot-pulse"></span>        <span>CORE ENGINE v0.1.2 // REPRODUCIBLE RELEASE</span>      </div>      <div class="telemetry-item font-mono">        <span>SECURITY ENCLAVE: VOLATILE RAM</span>        <span>•</span>        <span>NETWORK ENTITLEMENT: 0 OUTBOUND BYTES</span>      </div>      <div class="telemetry-item font-mono">        <span>SHA-256 VERIFIED</span>      </div>    </div>  </div>  <!-- Primary Navigation -->  <header class="navbar">    <div class="container nav-wrapper">      <a href="index.html" class="brand-group">        <div class="brand-svg-box">          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>            <path d="m9 12 2 2 4-4"/>          </svg>        </div>        <div class="brand-name">PRIVEX</div>      </a>      <ul class="nav-menu">
+    /* ==========================================================================
+       COMPREHENSIVE ALL-PHONE COMPATIBILITY SUITE (320px - 768px)
+       Supports iPhone SE/Mini, iPhone Standard/Pro Max, Samsung Galaxy S/Fold,
+       Google Pixel, OnePlus, Xiaomi, and all modern mobile viewports.
+       ========================================================================== */
+    @media (max-width: 768px) {
+      html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        position: relative;
+      }
+      .container {
+        padding: 0 16px !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .top-telemetry-bar {
+        font-size: 0.68rem;
+        padding: 4px 0;
+      }
+      .telemetry-inner {
+        min-width: 100%;
+        justify-content: flex-start;
+        gap: 16px;
+        padding: 0 16px;
+      }
+      .navbar {
+        padding: 8px 0;
+      }
+      .hero-section {
+        padding: 40px 0 32px;
+      }
+      .hero-grid {
+        gap: 28px;
+      }
+      .hero-title {
+        font-size: 2.1rem;
+        line-height: 1.15;
+      }
+      .hero-desc {
+        font-size: 0.96rem;
+        line-height: 1.55;
+        margin-bottom: 24px;
+      }
+      .hero-buttons-row {
+        flex-direction: column;
+        width: 100%;
+      }
+      .hero-buttons-row .btn-brutal {
+        width: 100%;
+        text-align: center;
+        padding: 12px 18px;
+      }
+      .cli-install-box {
+        width: 100%;
+        max-width: 100%;
+        font-size: 0.78rem;
+        padding: 8px 12px;
+      }
+      .hero-specs-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        max-width: 100%;
+      }
+      .spec-cell {
+        padding: 8px 10px;
+      }
+      .spec-cell-val {
+        font-size: 0.95rem;
+      }
+      .section-main-heading {
+        font-size: 1.65rem !important;
+        line-height: 1.25 !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        hyphens: auto;
+      }
+      .section-pre-tag {
+        font-size: 0.68rem !important;
+        padding: 3px 8px !important;
+        white-space: normal !important;
+        text-align: left;
+      }
+      .section-lead-text {
+        font-size: 0.90rem !important;
+        line-height: 1.55 !important;
+      }
+
+      /* Studio Layout & Phone Mockup Scaling on Mobile */
+      .section-screen-studio {
+        padding: 50px 0 36px;
+      }
+      .studio-workspace-grid {
+        grid-template-columns: 1fr;
+        gap: 28px;
+      }
+      .studio-phone-column {
+        width: 100%;
+        max-width: 320px;
+        margin: 0 auto;
+      }
+      .studio-phone-column::before {
+        width: 280px;
+        height: 540px;
+        filter: blur(24px);
+      }
+      .phone-hardware-chassis {
+        width: 100% !important;
+        max-width: 300px !important;
+        height: 600px !important;
+        padding: 10px !important;
+        border-radius: 38px !important;
+      }
+      .phone-oled-screen {
+        border-radius: 28px !important;
+      }
+      .phone-pill-notch {
+        width: 75px !important;
+        height: 18px !important;
+        top: 8px !important;
+      }
+      .phone-vol-up, .phone-vol-down, .phone-pwr {
+        display: none; /* Hide button protrusions on small mobile widths */
+      }
+
+      /* Screen selector grid for phones */
+      .screens-selector-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+      }
+      .screen-pill-btn {
+        padding: 8px 10px;
+      }
+      .pill-title {
+        font-size: 0.78rem;
+      }
+      .engineering-spec-card {
+        padding: 20px 16px;
+      }
+      .spec-screen-heading {
+        font-size: 1.45rem;
+      }
+      .spec-desc-text {
+        font-size: 0.88rem;
+      }
+      .spec-caps-matrix {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+      }
+
+      /* Sections Spacing & Gallery Cards */
+      .gallery-cards-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+      }
+      .gallery-preview-frame {
+        height: 200px !important;
+      }
+      .arch-pipeline-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+      }
+      .install-step-card {
+        padding: 20px 16px;
+      }
+      .checksum-audit-container {
+        grid-template-columns: 1fr !important;
+        padding: 18px 16px;
+      }
+      .hash-display-pill {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .hash-string {
+        font-size: 0.72rem;
+      }
+      .btn-copy-cli {
+        width: 100%;
+        text-align: center;
+        padding: 8px;
+      }
+
+      /* Permissions Table Mobile Scrolling Card */
+      .permissions-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .permissions-table th, .permissions-table td {
+        padding: 10px 12px;
+        font-size: 0.82rem;
+        white-space: nowrap;
+      }
+
+      /* Footer */
+      .site-footer {
+        padding: 40px 0 24px;
+      }
+      .footer-columns-grid {
+        grid-template-columns: 1fr !important;
+        gap: 24px;
+      }
+      .footer-bottom-bar {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+      }
+    }
+
+    /* Extra Small Phones (iPhone SE, Galaxy A-series, Fold outer screens: 320px - 420px) */
+    @media (max-width: 420px) {
+      .container {
+        padding: 0 12px !important;
+      }
+      .hero-title {
+        font-size: 1.6rem !important;
+        word-break: break-word !important;
+      }
+      .section-main-heading {
+        font-size: 1.35rem !important;
+        word-break: break-word !important;
+      }
+      .brand-name {
+        font-size: 1.1rem;
+      }
+      .nav-download-btn {
+        padding: 4px 6px !important;
+        font-size: 0.68rem !important;
+      }
+      .phone-hardware-chassis {
+        max-width: 270px !important;
+        height: 540px !important;
+      }
+      .screens-selector-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .gallery-cards-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .hero-specs-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .floating-github-badge {
+        bottom: 12px;
+        right: 12px;
+        padding: 6px 10px;
+        font-size: 0.72rem;
+      }
+    }
+
+  </style></head><body>
+  <!-- Motion Video Background Engine -->
+  <div class="tech-video-bg-container" aria-hidden="true">
+    <video class="tech-bg-video" autoplay loop muted playsinline preload="auto">
+      <source src="assets/videos/tech-motion-bg.mp4" type="video/mp4">
+    </video>
+    <div class="tech-video-overlay"></div>
+  </div>
+
+  <!-- Dynamic Cyber Motion Canvas & Tech Ambient Glows -->
+  <canvas id="cyberMotionCanvas"></canvas>
+  <div class="cyber-ambient-glow glow-orb-1" aria-hidden="true"></div>
+  <div class="cyber-ambient-glow glow-orb-2" aria-hidden="true"></div>
+  <div class="cyber-ambient-glow glow-orb-3" aria-hidden="true"></div>
+  <div class="cyber-radar-sweep" aria-hidden="true"></div>
+  <div class="blueprint-grid"></div>  <!-- Telemetry Header Ticker -->  <div class="top-telemetry-bar">    <div class="container telemetry-inner">      <div class="telemetry-item">        <span class="dot-pulse"></span>        <span>CORE ENGINE v0.1.2 // REPRODUCIBLE RELEASE</span>      </div>      <div class="telemetry-item font-mono">        <span>SECURITY ENCLAVE: VOLATILE RAM</span>        <span>•</span>        <span>NETWORK ENTITLEMENT: 0 OUTBOUND BYTES</span>      </div>      <div class="telemetry-item font-mono">        <span>SHA-256 VERIFIED</span>      </div>    </div>  </div>  <!-- Primary Navigation -->
+  <header class="navbar" id="mainNavbar">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="brand-group" title="PRIVEX Home">
+        <div class="brand-svg-box">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <div class="brand-name">PRIVEX</div>
+      </a>
+
+      <ul class="nav-menu">
         <li><a href="#ecosystem" class="nav-link">Ecosystem</a></li>
         <li><a href="#downloads" class="nav-link">Downloads</a></li>
         <li><a href="#screens" class="nav-link">Mobile Screens</a></li>
         <li><a href="#architecture" class="nav-link">Pipeline</a></li>
         <li><a href="#permissions" class="nav-link">Security Audit</a></li>
-        <li><a href="index.html" class="nav-link" style="color:var(--color-brand);">Web Scanner ↗</a></li>
-      </ul>      <div class="nav-actions">        <a href="https://github.com/bhedanikhilkumar-code/Privex" target="_blank" rel="noopener noreferrer" class="nav-github-btn" title="View Source on GitHub">
+        <li><a href="index.html" class="nav-link nav-link-web">Web Scanner ↗</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="https://github.com/bhedanikhilkumar-code/Privex" target="_blank" rel="noopener noreferrer" class="nav-github-btn" title="View Source on GitHub">
           <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
           <span>GitHub</span>
-        </a>        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Switch Theme (Night / Light / Dark)" aria-label="Switch Theme"><span id="themeIcon">🌙</span> <span>THEME:</span> <strong id="themeLabel">NIGHT</strong></button>        <a href="downloads/privex-mobile-release.apk" class="btn-brutal btn-accent nav-download-btn" download="privex-mobile-release.apk">          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">            <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm9 4H3v-2h18v2z"/>          </svg>          <span>APK (1.86 MB)</span>        </a>      </div>    </div>  </header>
+        </a>
+        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Switch Theme (Night / Light / Dark)" aria-label="Switch Theme"><span id="themeIcon">🌙</span> <span>THEME:</span> <strong id="themeLabel">NIGHT</strong></button>
+        <a href="downloads/privex-mobile-release.apk" class="btn-brutal btn-accent nav-download-btn" download="privex-mobile-release.apk">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm9 4H3v-2h18v2z"/>
+          </svg>
+          <span>APK (1.86 MB)</span>
+        </a>
+        <button class="nav-mobile-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu" title="Menu" onclick="toggleMobileMenu()">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <!-- Responsive Mobile Drawer -->
+    <div class="mobile-menu-drawer" id="mobileMenuDrawer">
+      <ul class="mobile-menu-list">
+        <li><a href="#ecosystem" onclick="closeMobileMenu()"><span>Ecosystem</span> <span>→</span></a></li>
+        <li><a href="#downloads" onclick="closeMobileMenu()"><span>Downloads</span> <span>→</span></a></li>
+        <li><a href="#screens" onclick="closeMobileMenu()"><span>Mobile Screens</span> <span>→</span></a></li>
+        <li><a href="#architecture" onclick="closeMobileMenu()"><span>Pipeline Architecture</span> <span>→</span></a></li>
+        <li><a href="#permissions" onclick="closeMobileMenu()"><span>Security Audit</span> <span>→</span></a></li>
+        <li><a href="index.html" style="color:var(--color-brand);"><span>Web Scanner (Client-Side)</span> <span>↗</span></a></li>
+      </ul>
+    </div>
+  </header>
 
   <!-- Multi-Device Ecosystem Overview (Animation & Device Portfolio) -->
   <section class="ecosystem-section" id="ecosystem">
@@ -990,7 +1667,7 @@
       </div>
     </div>
   </section>
-  <!-- Hero Section -->  <section class="hero-section">    <div class="container hero-grid">      <!-- Left Hero Content -->      <div>        <div class="hero-label-row">          <span class="brutal-badge active-indicator">            <span class="dot-pulse"></span>            AIR-GAPPED COMPILATION          </span>          <span class="brutal-badge font-mono">ANDROID 8.0 TO 15</span>        </div>        <h1 class="hero-title">          Deterministic On-Device <br>          <span class="accent-block">Threat Defense.</span>        </h1>        <p class="hero-desc">          Inspect deceptive phishing links, parse urgency extortion messages, and evaluate inbound payloads directly inside volatile RAM. Zero cloud dependencies. Zero telemetry tracking.        </p>        <!-- CTA & ADB Commands -->        <div class="hero-actions-group">          <div class="hero-buttons-row">            <a href="downloads/privex-mobile-release.apk" class="btn-brutal btn-accent" download="privex-mobile-release.apk" id="heroDownloadBtn">              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">                <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm9 4H3v-2h18v2z"/>              </svg>              <span>Download APK v0.1.2</span>            </a>            <a href="#screens" class="btn-brutal btn-secondary">              <span>Inspect Screens (10)</span>              <span>↓</span>            </a>          </div>          <!-- Quick ADB Sideload Box -->          <div class="cli-install-box">            <div class="cli-code">              <span class="cli-prompt">$</span>              <span id="adbCodeText">adb install -r privex-mobile-release.apk</span>            </div>            <button class="btn-copy-cli" id="copyAdbBtn">Copy ADB</button>          </div>        </div>        <!-- Specifications Matrix Grid -->        <div class="hero-specs-grid">          <div class="spec-cell">            <div class="spec-cell-label">Verdict Latency</div>            <div class="spec-cell-val">&lt; 1.0 ms</div>          </div>          <div class="spec-cell">            <div class="spec-cell-label">Telemetry Sent</div>            <div class="spec-cell-val">0 Bytes</div>          </div>          <div class="spec-cell">            <div class="spec-cell-label">Package Size</div>            <div class="spec-cell-val">1.86 MB</div>          </div>          <div class="spec-cell">            <div class="spec-cell-label">Offline Parity</div>            <div class="spec-cell-val">100% Core</div>          </div>        </div>      </div>      <!-- Right Smartphone Hardware Preview -->      <div class="phone-stage-wrapper">        <div class="phone-hardware-chassis">          <div class="phone-vol-up"></div>          <div class="phone-vol-down"></div>          <div class="phone-pwr"></div>          <div class="phone-oled-screen">            <div class="phone-pill-notch">              <div class="camera-lens-dot"></div>              <div class="speaker-slit-bar"></div>            </div>            <img src="assets/screenshots/home-dashboard.png" alt="Home Dashboard Screen" class="phone-screen-view" id="heroPhoneScreenImg">            <div class="phone-gesture-bar"></div>          </div>        </div>      </div>    </div>  </section>  <!-- Screen Architecture Studio -->  <section class="section-screen-studio" id="screens">    <div class="container">      <div class="section-title-block">        <span class="section-pre-tag">INTERACTIVE SCREEN ARCHITECTURE</span>        <h2 class="section-main-heading">10 Endpoint Subsystems in Action</h2>        <p class="section-lead-text">          Select any subsystem below to inspect the interface layout, telemetry input boundaries, and verification SLAs.        </p>      </div>      <div class="studio-workspace-grid">        <!-- Smartphone View Column -->        <div class="studio-phone-column">          <div class="phone-hardware-chassis" id="studioPhoneChassis" style="width: 360px; height: 720px;">
+  <!-- Hero Section -->  <section class="hero-section">    <div class="container hero-grid">      <!-- Left Hero Content -->      <div>        <div class="hero-label-row">          <span class="brutal-badge active-indicator">            <span class="dot-pulse"></span>            AIR-GAPPED COMPILATION          </span>          <span class="brutal-badge font-mono">ANDROID 8.0 TO 15</span>        </div>        <h1 class="hero-title">          Deterministic On-Device <br>          <span class="accent-block">Threat Defense.</span>        </h1>        <p class="hero-desc">          Inspect deceptive phishing links, parse urgency extortion messages, and evaluate inbound payloads directly inside volatile RAM. Zero cloud dependencies. Zero telemetry tracking.        </p>        <!-- CTA & ADB Commands -->        <div class="hero-actions-group">          <div class="hero-buttons-row">            <a href="downloads/privex-mobile-release.apk" class="btn-brutal btn-accent" download="privex-mobile-release.apk" id="heroDownloadBtn">              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">                <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm9 4H3v-2h18v2z"/>              </svg>              <span>Download APK v0.1.2</span>            </a>            <a href="#screens" class="btn-brutal btn-secondary">              <span>Inspect Screens (10)</span>              <span>↓</span>            </a>          </div>          <!-- Quick ADB Sideload Box -->          <div class="cli-install-box">            <div class="cli-code">              <span class="cli-prompt">$</span>              <span id="adbCodeText">adb install -r privex-mobile-release.apk</span>            </div>            <button class="btn-copy-cli" id="copyAdbBtn">Copy ADB</button>          </div>        </div>        <!-- Specifications Matrix Grid -->        <div class="hero-specs-grid">          <div class="spec-cell">            <div class="spec-cell-label">Verdict Latency</div>            <div class="spec-cell-val">&lt; 1.0 ms</div>          </div>          <div class="spec-cell">            <div class="spec-cell-label">Telemetry Sent</div>            <div class="spec-cell-val">0 Bytes</div>          </div>          <div class="spec-cell">            <div class="spec-cell-label">Package Size</div>            <div class="spec-cell-val">1.86 MB</div>          </div>          <div class="spec-cell">            <div class="spec-cell-label">Offline Parity</div>            <div class="spec-cell-val">100% Core</div>          </div>        </div>      </div>      <!-- Right Smartphone Hardware Preview -->      <div class="phone-stage-wrapper">        <div class="phone-hardware-chassis">          <div class="phone-vol-up"></div>          <div class="phone-vol-down"></div>          <div class="phone-pwr"></div>          <div class="phone-oled-screen">            <div class="phone-pill-notch">              <div class="camera-lens-dot"></div>              <div class="speaker-slit-bar"></div>            </div>            <img src="assets/screenshots/home-dashboard.png" alt="Home Dashboard Screen" class="phone-screen-view" id="heroPhoneScreenImg">            <div class="phone-gesture-bar"></div>          </div>        </div>      </div>    </div>  </section>  <!-- Screen Architecture Studio -->  <section class="section-screen-studio" id="screens">    <div class="container">      <div class="section-title-block">        <span class="section-pre-tag">INTERACTIVE SCREEN ARCHITECTURE</span>        <h2 class="section-main-heading">10 Endpoint Subsystems in Action</h2>        <p class="section-lead-text">          Select any subsystem below to inspect the interface layout, telemetry input boundaries, and verification SLAs.        </p>      </div>      <div class="studio-workspace-grid">        <!-- Smartphone View Column -->        <div class="studio-phone-column">          <div class="phone-hardware-chassis" id="studioPhoneChassis">
               <div class="phone-vol-up"></div>
               <div class="phone-vol-down"></div>
               <div class="phone-pwr"></div>
@@ -1782,8 +2459,279 @@
     }
 
     // Call dynamic release sync on page load
-    syncLatestGitHubRelease();
+    // Mobile menu toggle handling
+    function toggleMobileMenu() {
+      const drawer = document.getElementById('mobileMenuDrawer');
+      if (drawer) {
+        drawer.classList.toggle('is-open');
+      }
+    }
+    function closeMobileMenu() {
+      const drawer = document.getElementById('mobileMenuDrawer');
+      if (drawer) {
+        drawer.classList.remove('is-open');
+      }
+    }
+    window.toggleMobileMenu = toggleMobileMenu;
+    window.closeMobileMenu = closeMobileMenu;
 
+    // ==========================================
+    // Advanced High-Tech Cyber Grid & Neural Matrix Background
+    // Interactive mouse gravitation, traveling data packets, hex floating tags
+    // 60FPS Hardware Accelerated Canvas • Zero external dependencies
+    // ==========================================
+    (function initAdvancedCyberMotion() {
+      const canvas = document.getElementById('cyberMotionCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      let width = 0;
+      let height = 0;
+      let particles = [];
+      let packets = [];
+      let hexFloaters = [];
+      let mouse = { x: -1000, y: -1000, active: false };
+
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize, { passive: true });
+
+      // Track mouse for subtle interactive node gravitation
+      window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+        mouse.active = true;
+      }, { passive: true });
+
+      window.addEventListener('mouseleave', () => {
+        mouse.active = false;
+        mouse.x = -1000;
+        mouse.y = -1000;
+      }, { passive: true });
+
+      // Node generation
+      const particleCount = Math.min(Math.floor(window.innerWidth / 24), 55);
+
+      function createParticle() {
+        return {
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.55,
+          vy: (Math.random() - 0.5) * 0.55,
+          radius: Math.random() * 2.2 + 1.2,
+          pulse: Math.random() * Math.PI * 2,
+          pulseSpeed: 0.025 + Math.random() * 0.03
+        };
+      }
+
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(createParticle());
+      }
+
+      // Traveling data packets (encrypted telemetry pulses traveling on wires)
+      function spawnPacket() {
+        if (particles.length < 2) return;
+        const i = Math.floor(Math.random() * particles.length);
+        let j = Math.floor(Math.random() * particles.length);
+        if (i === j) j = (j + 1) % particles.length;
+
+        const p1 = particles[i];
+        const p2 = particles[j];
+        const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+
+        if (dist < 160) {
+          packets.push({
+            from: p1,
+            to: p2,
+            progress: 0,
+            speed: 0.018 + Math.random() * 0.02
+          });
+        }
+      }
+
+      // Ambient Floating Hex / Cipher strings in background
+      const HEX_SNIPPETS = ['0x7F', 'SHA-256', 'RAM:0B', 'AES-GCM', '0x1A', 'VERDICT', 'NODE.SEC', '0x9C'];
+      for (let i = 0; i < 7; i++) {
+        hexFloaters.push({
+          x: Math.random() * (window.innerWidth || 1000),
+          y: Math.random() * (window.innerHeight || 800),
+          vy: -0.2 - Math.random() * 0.25,
+          text: HEX_SNIPPETS[Math.floor(Math.random() * HEX_SNIPPETS.length)],
+          opacity: 0.12 + Math.random() * 0.15
+        });
+      }
+
+      function getThemePalette() {
+        const theme = document.documentElement.getAttribute('data-theme') || 'night';
+        if (theme === 'light') {
+          return {
+            nodePrimary: '#2457FF',
+            nodeAccent: '#10B981',
+            lineColor: 'rgba(36, 87, 255, 0.11)',
+            packetColor: '#2457FF',
+            cipherColor: 'rgba(36, 87, 255, 0.22)'
+          };
+        } else if (theme === 'dark') {
+          return {
+            nodePrimary: '#3B82F6',
+            nodeAccent: '#D7FF3F',
+            lineColor: 'rgba(59, 130, 246, 0.16)',
+            packetColor: '#D7FF3F',
+            cipherColor: 'rgba(215, 255, 63, 0.25)'
+          };
+        } else {
+          // Night Mode
+          return {
+            nodePrimary: '#2457FF',
+            nodeAccent: '#D7FF3F',
+            lineColor: 'rgba(36, 87, 255, 0.20)',
+            packetColor: '#D7FF3F',
+            cipherColor: 'rgba(215, 255, 63, 0.28)'
+          };
+        }
+      }
+
+      let frameCounter = 0;
+
+      function render() {
+        ctx.clearRect(0, 0, width, height);
+        const palette = getThemePalette();
+
+        frameCounter++;
+        if (frameCounter % 15 === 0 && packets.length < 12) {
+          spawnPacket();
+        }
+
+        // 1. Draw Subtle Floating Hex Codes in Volatile Memory
+        ctx.font = '10px "Space Grotesk", monospace';
+        for (let i = 0; i < hexFloaters.length; i++) {
+          const hf = hexFloaters[i];
+          hf.y += hf.vy;
+          if (hf.y < -20) {
+            hf.y = height + 20;
+            hf.x = Math.random() * width;
+          }
+          ctx.fillStyle = palette.cipherColor;
+          ctx.fillText(hf.text, hf.x, hf.y);
+        }
+
+        // 2. Node Particle Physics & Connections
+        const maxDist = 145;
+
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.pulse += p.pulseSpeed;
+
+          // Mouse gravitation interaction
+          if (mouse.active) {
+            const mdx = mouse.x - p.x;
+            const mdy = mouse.y - p.y;
+            const mdist = Math.hypot(mdx, mdy);
+            if (mdist < 140 && mdist > 5) {
+              const force = (140 - mdist) / 140 * 0.28;
+              p.x += (mdx / mdist) * force;
+              p.y += (mdy / mdist) * force;
+            }
+          }
+
+          // Boundary bounce / wrap
+          if (p.x < -10) p.x = width + 10;
+          if (p.x > width + 10) p.x = -10;
+          if (p.y < -10) p.y = height + 10;
+          if (p.y > height + 10) p.y = -10;
+        }
+
+        // 3. Connect Mesh Lines
+        ctx.beginPath();
+        ctx.strokeStyle = palette.lineColor;
+        ctx.lineWidth = 1;
+
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.hypot(dx, dy);
+
+            if (dist < maxDist) {
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+            }
+          }
+        }
+        ctx.stroke();
+
+        // 4. Render Active Data Packets (Traveling Signals)
+        for (let k = packets.length - 1; k >= 0; k--) {
+          const pkt = packets[k];
+          pkt.progress += pkt.speed;
+
+          if (pkt.progress >= 1) {
+            packets.splice(k, 1);
+            continue;
+          }
+
+          const curX = pkt.from.x + (pkt.to.x - pkt.from.x) * pkt.progress;
+          const curY = pkt.from.y + (pkt.to.y - pkt.from.y) * pkt.progress;
+
+          ctx.beginPath();
+          ctx.arc(curX, curY, 2.4, 0, Math.PI * 2);
+          ctx.fillStyle = palette.packetColor;
+          ctx.shadowColor = palette.packetColor;
+          ctx.shadowBlur = 6;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+
+        // 5. Render Core Network Nodes
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          const radius = p.radius + Math.sin(p.pulse) * 0.75;
+          const isSpecialNode = (i % 6 === 0);
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, Math.max(0.5, radius), 0, Math.PI * 2);
+          ctx.fillStyle = isSpecialNode ? palette.nodeAccent : palette.nodePrimary;
+
+          if (isSpecialNode) {
+            ctx.shadowColor = palette.nodeAccent;
+            ctx.shadowBlur = 8;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          } else {
+            ctx.fill();
+          }
+        }
+
+        requestAnimationFrame(render);
+      }
+
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        render();
+      }
+    })();
+
+    // Ensure background motion video autoplays reliably
+    (function initBgVideoPlayback() {
+      const vid = document.querySelector('.tech-bg-video');
+      if (!vid) return;
+      vid.muted = true;
+      const playPromise = vid.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Fallback if browser suspended playback
+          document.addEventListener('touchstart', () => vid.play().catch(() => {}), { once: true, passive: true });
+          document.addEventListener('click', () => vid.play().catch(() => {}), { once: true, passive: true });
+        });
+      }
+    })();
+
+    syncLatestGitHubRelease();
   
   </script>
   <!-- Floating Right-Side GitHub Repository Button -->
