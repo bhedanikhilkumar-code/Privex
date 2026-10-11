@@ -1,77 +1,7 @@
 # PRIVEX
 
 <p align="center">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 180" width="100%" height="180" style="background:#05070d; border-radius:12px; border:2px solid #2a364f; box-shadow:0 8px 32px rgba(0,0,0,0.6); max-width:920px;">
-    <defs>
-      <!-- Custom Cyber Gradient -->
-      <linearGradient id="privexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#2457FF"/>
-        <stop offset="50%" stop-color="#3B82F6"/>
-        <stop offset="100%" stop-color="#D7FF3F"/>
-      </linearGradient>
-      <!-- Subtle Glow Filter -->
-      <filter id="privexGlow" x="-20%" y="-20%" width="140%" height="140%">
-        <feGaussianBlur stdDeviation="4" result="blur" />
-        <feComposite in="SourceGraphic" in2="blur" operator="over" />
-      </filter>
-      <!-- Architectural Grid Pattern -->
-      <pattern id="headerGrid" width="24" height="24" patternUnits="userSpaceOnUse">
-        <path d="M 24 0 L 0 0 0 24" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
-      </pattern>
-    </defs>
-
-    <!-- Grid Background -->
-    <rect width="920" height="180" fill="url(#headerGrid)"/>
-
-    <!-- Geometric Hex Shield Icon Badge -->
-    <g transform="translate(48, 30)">
-      <!-- Shield Outer Border -->
-      <polygon points="60,6 108,26 108,82 60,114 12,82 12,26" fill="#0c1220" stroke="#2457FF" stroke-width="3" filter="url(#privexGlow)"/>
-      <!-- Inner Shield Glow -->
-      <polygon points="60,16 98,33 98,77 60,103 22,77 22,33" fill="none" stroke="#D7FF3F" stroke-width="1.5" stroke-dasharray="4 2" opacity="0.8"/>
-      <!-- Core Check Shield Glyph -->
-      <path d="M 60 38 L 74 52 L 52 74 L 42 64" fill="none" stroke="#D7FF3F" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <!-- Quantum Node Accents -->
-      <circle cx="60" cy="6" r="3" fill="#D7FF3F"/>
-      <circle cx="108" cy="26" r="3" fill="#2457FF"/>
-      <circle cx="108" cy="82" r="3" fill="#2457FF"/>
-      <circle cx="60" cy="114" r="3" fill="#D7FF3F"/>
-      <circle cx="12" cy="82" r="3" fill="#2457FF"/>
-      <circle cx="12" cy="26" r="3" fill="#2457FF"/>
-    </g>
-
-    <!-- Bespoke Hand-Crafted Geometric Cyber Typography: P R I V E X -->
-    <!-- Custom constructed vector glyphs - zero external or pre-existing font reliance -->
-    <g transform="translate(195, 42)" fill="url(#privexGrad)">
-      <!-- LETTER 'P' -->
-      <path d="M 0 0 L 46 0 C 62 0 72 8 72 23 C 72 38 62 46 46 46 L 22 46 L 22 84 L 0 84 Z M 22 18 L 22 28 L 44 28 C 49 28 52 25 52 23 C 52 21 49 18 44 18 Z"/>
-      <!-- LETTER 'R' -->
-      <path d="M 92 0 L 138 0 C 154 0 164 8 164 23 C 164 35 156 42 144 45 L 168 84 L 143 84 L 123 48 L 114 48 L 114 84 L 92 84 Z M 114 18 L 114 30 L 136 30 C 141 30 144 27 144 24 C 144 21 141 18 136 18 Z"/>
-      <!-- LETTER 'I' -->
-      <path d="M 184 0 L 206 0 L 206 84 L 184 84 Z"/>
-      <!-- LETTER 'V' -->
-      <path d="M 226 0 L 248 0 L 268 62 L 288 0 L 310 0 L 280 84 L 256 84 Z"/>
-      <!-- LETTER 'E' -->
-      <path d="M 330 0 L 388 0 L 388 18 L 352 18 L 352 33 L 382 33 L 382 51 L 352 51 L 352 66 L 388 66 L 388 84 L 330 84 Z"/>
-      <!-- LETTER 'X' -->
-      <path d="M 408 0 L 431 0 L 452 38 L 473 0 L 496 0 L 464 42 L 498 84 L 474 84 L 452 46 L 430 84 L 406 84 L 440 42 Z"/>
-    </g>
-
-    <!-- Subtitle & Enclave Metadata Badges -->
-    <text x="198" y="146" fill="#9BA3AF" font-family="'Courier New', monospace" font-size="12" font-weight="700" letter-spacing="3.5">
-      ON-DEVICE ZERO-KNOWLEDGE CYBER DEFENSE ECOSYSTEM
-    </text>
-
-    <!-- Right-Side Holographic Status Indicator -->
-    <g transform="translate(730, 48)">
-      <rect x="0" y="0" width="148" height="34" rx="4" fill="#0d1424" stroke="#2457FF" stroke-width="1.5"/>
-      <circle cx="18" cy="17" r="4.5" fill="#10B981"/>
-      <text x="32" y="22" fill="#53E076" font-family="'Courier New', monospace" font-size="11" font-weight="bold" letter-spacing="1">RAM ENCLAVE</text>
-      
-      <rect x="0" y="44" width="148" height="34" rx="4" fill="#0d1424" stroke="#D7FF3F" stroke-width="1.5"/>
-      <text x="14" y="66" fill="#D7FF3F" font-family="'Courier New', monospace" font-size="10.5" font-weight="bold" letter-spacing="0.8">0 OUTBOUND BYTES</text>
-    </g>
-  </svg>
+  <img src="./assets/privex-banner.png" alt="PRIVEX Cyber Defense Ecosystem" width="100%" style="max-width:920px;" />
 </p>
 
 > **Privacy-first, on-device AI security assistant for threat, phishing, scam, and suspicious-content detection.**  
