@@ -4,7 +4,7 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Copy root configs & manifests
-COPY package.json package-lock.json tsconfig.json ./
+COPY package.json package-lock.json tsconfig.base.json ./
 COPY packages/ ./packages/
 COPY apps/ ./apps/
 
