@@ -17,13 +17,15 @@ export class IntroStorage {
     }
 
     try {
-      if (!window.localStorage) {
+      if (window.sessionStorage && window.sessionStorage.getItem(INTRO_CONFIG.storageKey) === 'true') {
         return true;
       }
-      return window.localStorage.getItem(INTRO_CONFIG.storageKey) === 'true';
+      if (window.localStorage && window.localStorage.getItem(INTRO_CONFIG.storageKey) === 'true') {
+        return true;
+      }
+      return false;
     } catch {
       // In restricted sandboxes or disabled cookies, fail safe:
-      // Do NOT repeatedly force the intro on the user.
       return true;
     }
   }
@@ -34,6 +36,9 @@ export class IntroStorage {
     }
 
     try {
+      if (window.sessionStorage) {
+        window.sessionStorage.setItem(INTRO_CONFIG.storageKey, 'true');
+      }
       if (window.localStorage) {
         window.localStorage.setItem(INTRO_CONFIG.storageKey, 'true');
       }
@@ -48,6 +53,9 @@ export class IntroStorage {
     }
 
     try {
+      if (window.sessionStorage) {
+        window.sessionStorage.removeItem(INTRO_CONFIG.storageKey);
+      }
       if (window.localStorage) {
         window.localStorage.removeItem(INTRO_CONFIG.storageKey);
       }

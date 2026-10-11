@@ -75,7 +75,7 @@ export const App: React.FC = () => {
         <IntroOverlay onComplete={() => setShowIntro(false)} />
       )}
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)' }}>
-        <Header theme={theme} onThemeChange={handleThemeChange} />
+        <Header theme={theme} onThemeChange={handleThemeChange} onReplayIntro={handleReplayIntro} />
         <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
 
 

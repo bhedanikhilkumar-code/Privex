@@ -8,6 +8,7 @@ import { App } from '../../app/App';
 describe('PRIVEX Cinematic Intro Animation Suite', () => {
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     vi.useFakeTimers();
   });
 
@@ -15,6 +16,7 @@ describe('PRIVEX Cinematic Intro Animation Suite', () => {
     vi.useRealTimers();
     vi.restoreAllMocks();
     localStorage.clear();
+    sessionStorage.clear();
   });
 
   describe('IntroStorage Persistent State Management', () => {

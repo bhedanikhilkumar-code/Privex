@@ -130,11 +130,13 @@ export const IntroOverlay: React.FC<IntroOverlayProps> = ({ onComplete }) => {
       {/* Scene 1: Person 1 + Everyday Digital Life (0.0s - 1.4s) */}
       <div className={`intro-scene ${activeScene === 1 ? 'active' : ''}`} id="scene-1">
         <img
-          src="/assets/intro-scene-1.png"
+          src="./assets/intro-scene-1.png"
           className="human-bg"
           alt="Everyday digital life"
           onError={(e) => {
-            (e.target as HTMLElement).style.display = 'none';
+            const img = e.currentTarget as HTMLImageElement;
+            if (img.src.endsWith('/assets/intro-scene-1.png')) return;
+            img.src = '/assets/intro-scene-1.png';
           }}
         />
         <div className="privex-brutal-card">
@@ -150,11 +152,13 @@ export const IntroOverlay: React.FC<IntroOverlayProps> = ({ onComplete }) => {
       {/* Scene 2: Person 2 + Unusual Network Traffic Intercepted (1.4s - 2.8s) */}
       <div className={`intro-scene ${activeScene === 2 ? 'active' : ''}`} id="scene-2">
         <img
-          src="/assets/intro-scene-2.png"
+          src="./assets/intro-scene-2.png"
           className="human-bg"
           alt="Unusual network activity"
           onError={(e) => {
-            (e.target as HTMLElement).style.display = 'none';
+            const img = e.currentTarget as HTMLImageElement;
+            if (img.src.endsWith('/assets/intro-scene-2.png')) return;
+            img.src = '/assets/intro-scene-2.png';
           }}
         />
         <div className="privex-brutal-card">
@@ -174,19 +178,56 @@ export const IntroOverlay: React.FC<IntroOverlayProps> = ({ onComplete }) => {
       {/* Scene 3: Protection Activates on Device (2.8s - 4.0s) */}
       <div className={`intro-scene ${activeScene === 3 ? 'active' : ''}`} id="scene-activate">
         <img
-          src="/assets/intro-scene-3.png"
+          src="./assets/intro-scene-3.png"
           className="human-bg"
           alt="Protection activates"
           style={{ opacity: 0.35, filter: 'blur(3px)' }}
           onError={(e) => {
-            (e.target as HTMLElement).style.display = 'none';
+            const img = e.currentTarget as HTMLImageElement;
+            if (img.src.endsWith('/assets/intro-scene-3.png')) return;
+            img.src = '/assets/intro-scene-3.png';
           }}
         />
         <div className="privex-shield-wrap">
           <div className="privex-shield-ring-out" />
           <div className="privex-shield-ring-in" />
           <div className="privex-shield-wave" />
-          <span className="privex-shield-center-icon" role="img" aria-label="Shield">🛡️</span>
+          <svg
+            className="privex-vector-shield-intro"
+            viewBox="0 0 100 115"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ width: '88px', height: '100px', zIndex: 10, filter: 'drop-shadow(0 0 16px rgba(215, 255, 63, 0.9)) drop-shadow(0 0 28px rgba(36, 87, 255, 0.7))' }}
+          >
+            <defs>
+              <linearGradient id="shieldGradIntro" x1="0" y1="0" x2="100" y2="115" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#00E5FF" stopOpacity="0.85" />
+                <stop offset="50%" stopColor="#2563EB" stopOpacity="0.75" />
+                <stop offset="100%" stopColor="#7C4DFF" stopOpacity="0.9" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M50 8 L88 24 L88 64 Q50 106 50 106 Q12 64 12 64 L12 24 Z"
+              fill="url(#shieldGradIntro)"
+              stroke="#D7FF3F"
+              strokeWidth="4"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M50 20 L76 33 L76 60 Q50 90 50 90 Q24 60 24 60 L24 33 Z"
+              stroke="#00E5FF"
+              strokeWidth="1.5"
+              strokeDasharray="4 2"
+              fill="none"
+            />
+            <path
+              d="M38 54 L47 63 L65 42"
+              stroke="#FFFFFF"
+              strokeWidth="4.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </div>
         <div className="privex-status-row">
           <div className="privex-status-chip">
@@ -208,7 +249,27 @@ export const IntroOverlay: React.FC<IntroOverlayProps> = ({ onComplete }) => {
       <div className={`intro-scene ${activeScene === 4 ? 'active' : ''}`} id="scene-reveal">
         <div className="privex-brand-lockup">
           <div className="privex-brand-shield-logo">
-            🛡️
+            <svg
+              viewBox="0 0 100 115"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ width: '48px', height: '54px' }}
+            >
+              <path
+                d="M50 8 L88 24 L88 64 Q50 106 50 106 Q12 64 12 64 L12 24 Z"
+                fill="#2457FF"
+                stroke="#D7FF3F"
+                strokeWidth="4"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M38 54 L47 63 L65 42"
+                stroke="#FFFFFF"
+                strokeWidth="4.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </div>
           <h1 className="privex-brand-heading">{INTRO_CONFIG.brandName}</h1>
           <div className="privex-brand-subtag">{INTRO_CONFIG.tagline}</div>

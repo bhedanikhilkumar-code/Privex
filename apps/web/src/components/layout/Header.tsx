@@ -5,9 +5,10 @@ import { AppTheme } from '../../scanner/types';
 export interface HeaderProps {
   theme?: AppTheme;
   onThemeChange?: (theme: AppTheme) => void;
+  onReplayIntro?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange }) => {
+export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange, onReplayIntro }) => {
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [isInstalled, setIsInstalled] = useState<boolean>(false);
 
@@ -159,6 +160,34 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange }) => {
         >
           <span>🔐</span> ENCLAVE
         </a>
+
+        {onReplayIntro && (
+          <button
+            type="button"
+            onClick={onReplayIntro}
+            title="Play Cinematic Intro"
+            aria-label="Play cinematic intro"
+            className="cut-corner-btn"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              padding: '0.45rem 0.85rem',
+              backgroundColor: 'var(--bg-secondary)',
+              border: '2px solid var(--border-dark)',
+              boxShadow: '2px 2px 0px var(--border-dark)',
+              fontSize: '0.75rem',
+              color: 'var(--text-primary)',
+              fontWeight: 700,
+              cursor: 'pointer',
+              fontFamily: 'var(--font-mono)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em'
+            }}
+          >
+            <span>🎬</span> INTRO
+          </button>
+        )}
 
         {installPrompt && !isInstalled && (
           <button
