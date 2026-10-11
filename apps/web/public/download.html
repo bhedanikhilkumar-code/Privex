@@ -200,8 +200,8 @@
       flex-direction: column;
       align-items: center;
       width: 326px;
-      margin-top: 20px;
-      gap: 11px;
+      margin-top: 18px;
+      gap: 12px;
       padding: 14px 16px;
       background: var(--bg-card);
       border: 2px solid var(--border-dark);
@@ -209,6 +209,7 @@
       box-shadow: var(--shadow-brutal);
       position: relative;
       overflow: hidden;
+      box-sizing: border-box;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .studio-phone-controls:hover {
@@ -219,22 +220,24 @@
       align-items: center;
       justify-content: space-between;
       width: 100%;
-      gap: 8px;
+      gap: 6px;
     }
     .studio-nav-btn {
-      padding: 8px 12px;
+      padding: 7px 10px;
       background-color: var(--bg-secondary);
       border: 2px solid var(--border-dark);
       border-radius: 8px;
       color: var(--text-primary);
       font-family: 'Space Grotesk', monospace;
-      font-size: 0.78rem;
+      font-size: 0.74rem;
       font-weight: 800;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
       transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
       box-shadow: var(--shadow-brutal-sm);
     }
@@ -250,8 +253,9 @@
       box-shadow: none;
     }
     .studio-nav-btn svg {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
+      flex-shrink: 0;
       transition: transform 0.18s ease;
     }
     #prevScreenBtn:hover svg {
@@ -264,41 +268,55 @@
     /* Modern Centered Index Badge */
     .studio-index-display {
       font-family: 'Space Grotesk', monospace;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 800;
-      padding: 6px 12px;
+      padding: 6px 10px;
       background: var(--bg-terminal);
       color: var(--color-brand);
       border: 1px solid var(--border-dark);
       border-radius: 6px;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
       display: inline-flex;
-      align-items: center;
-      gap: 4px;
+      align-items: baseline;
+      justify-content: center;
+      gap: 3px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .studio-index-num {
       color: #D7FF3F;
       font-weight: 900;
+      font-size: 0.95rem;
+      line-height: 1;
+    }
+    .studio-index-sep {
+      color: var(--text-dim);
+      font-size: 0.76rem;
+      margin: 0 1px;
     }
     .studio-index-total {
       color: #94A3B8;
       font-size: 0.76rem;
+      line-height: 1;
     }
 
     /* Auto-Tour Toggle Pill */
     .studio-tour-btn {
-      padding: 8px 13px;
+      padding: 7px 10px;
       background-color: var(--bg-secondary);
       border: 2px solid var(--border-dark);
       border-radius: 8px;
       color: var(--text-primary);
       font-family: 'Space Grotesk', monospace;
-      font-size: 0.78rem;
+      font-size: 0.74rem;
       font-weight: 800;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      gap: 5px;
+      white-space: nowrap;
+      flex-shrink: 0;
       transition: all 0.2s ease;
       box-shadow: var(--shadow-brutal-sm);
     }
@@ -311,7 +329,7 @@
       background: #EC4899 !important;
       color: #FFFFFF !important;
       border-color: #EC4899 !important;
-      box-shadow: 0 0 16px rgba(236, 72, 153, 0.55);
+      box-shadow: 0 0 12px rgba(236, 72, 153, 0.45);
     }
     .tour-dot-pulse {
       width: 7px;
@@ -319,6 +337,7 @@
       border-radius: 50%;
       background-color: #10B981;
       display: inline-block;
+      flex-shrink: 0;
       transition: all 0.2s ease;
     }
     .studio-tour-btn.tour-active .tour-dot-pulse {
@@ -327,7 +346,7 @@
     }
     @keyframes pulseTourDot {
       0% { transform: scale(0.8); opacity: 0.6; }
-      100% { transform: scale(1.35); opacity: 1; }
+      100% { transform: scale(1.3); opacity: 1; }
     }
 
     /* Auto-Tour Countdown Progress Bar */
@@ -365,8 +384,8 @@
       padding-top: 2px;
     }
     .studio-dot-step {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 4px;
       background-color: var(--border-dark);
       cursor: pointer;
@@ -377,7 +396,7 @@
       transform: scale(1.3);
     }
     .studio-dot-step.active {
-      width: 26px;
+      width: 22px;
       background: linear-gradient(90deg, var(--color-brand), #00F0FF);
       box-shadow: 0 0 10px rgba(36, 87, 255, 0.6);
     }
@@ -391,7 +410,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      max-width: 295px;
+      max-width: 280px;
       text-align: center;
     }
 
@@ -1112,7 +1131,7 @@
                 <span>PREV</span>
               </button>
               <div class="studio-index-display" id="screenIndexBadge" title="Current Subsystem Index">
-                <span class="studio-index-num">01</span><span class="studio-index-total"> / 10</span>
+                <span class="studio-index-num">01</span><span class="studio-index-sep">/</span><span class="studio-index-total">10</span>
               </div>
               <button class="studio-nav-btn" id="nextScreenBtn" title="Next Screen (Right Arrow)">
                 <span>NEXT</span>
@@ -1636,7 +1655,7 @@
 
       // Metadata Update
       if (indexBadge) {
-        indexBadge.innerHTML = `<span class="studio-index-num">${String(currentIndex + 1).padStart(2, '0')}</span><span class="studio-index-total"> / ${SCREENS_DATA.length}</span>`;
+        indexBadge.innerHTML = `<span class="studio-index-num">${String(currentIndex + 1).padStart(2, '0')}</span><span class="studio-index-sep">/</span><span class="studio-index-total">${SCREENS_DATA.length}</span>`;
       }
       if (studioSubsystemMiniTag) {
         studioSubsystemMiniTag.textContent = s.subsystem;
