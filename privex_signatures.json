@@ -1,0 +1,14 @@
+﻿{
+  "version": "2026.10.15.02",
+  "hashes": {
+    "275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f": "Win32.EICAR.StandardTestSignature",
+    "44d88612fea8a8f36de82e1278abb02f": "Win32.Malware.GenericSample",
+    "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08": "Trojan.TestSample.HashMatch"
+  },
+  "suspicious_extensions": [
+    ".pdf.exe", ".jpg.exe", ".docx.exe", ".txt.vbs", ".scr", ".pif", ".cmd.exe"
+  ],
+  "suspicious_markers": [
+    "PRIVEX-PRO-DEMO-THREAT-SIGNATURE-2026"
+  ]
+}
