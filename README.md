@@ -116,6 +116,7 @@ Access PRIVEX directly in your browser without installing anything:
 15. [SUPPORTED PLATFORMS](#15-supported-platforms)
 16. [KNOWN LIMITATIONS](#16-known-limitations)
 17. [VERSION](#17-version)
+18. [PRIVEX SECURITY PRO (WINDOWS DESKTOP)](#18-privex-security-pro-windows-desktop)
 
 ---
 
@@ -467,6 +468,7 @@ Privex operates under a strict 3-tier zero-knowledge data classification model:
 - **Ransomware Shield & ShadowVault:** 64-slot sliding-window mass-write velocity burst detector ($>25$ file writes in 3.0s) with 100% SHA-256 rollback capability via local encrypted snapshots.
 - **Process Lineage & LOLBin Detection:** Tracks Windows process trees, detects parent-child anomalies (Office/Browser spawning shells), and flags Living-off-the-Land binary exploitation across 30+ system executables.
 - **Zero Developer Dependencies:** Bundled standalone Electron 44.5.1 runtime. No Node.js, Python, or Git required on client.
+- **Privex Security Pro (Standalone Python GUI):** In addition to the Electron desktop client, PRIVEX provides a lightweight, standalone Windows security & privacy utility (`privex_security_pro.py`). See [Section 18: Privex Security Pro](#18-privex-security-pro-windows-desktop).
 
 ---
 
@@ -697,4 +699,70 @@ In strict adherence to our engineering transparency doctrine:
 - **Phase R10 Security Hardening Report:** [`docs/PHASE_R10_FINAL_SECURITY_RELEASE_HARDENING.md`](./docs/PHASE_R10_FINAL_SECURITY_RELEASE_HARDENING.md)
 - **Vulnerability Disclosure Policy:** [`SECURITY.md`](./SECURITY.md)
 - **Changelog History:** [`CHANGELOG.md`](./CHANGELOG.md)
-- **Release Checksums:** [`release/SHA256SUMS.txt`](./release/SHA256SUMS.txt) 
+- **Release Checksums:** [`release/SHA256SUMS.txt`](./release/SHA256SUMS.txt)
+
+---
+
+## 18. PRIVEX SECURITY PRO (WINDOWS DESKTOP)
+
+### 🛡️ Privex Security Pro
+**A Lightweight, Standalone Desktop Security & Privacy Utility for Windows**
+
+> 🚀 **Ready to secure your desktop? No Python installation required!**
+
+#### 📖 Overview
+Privex Security Pro is an open-source, offline-first desktop application designed to simplify privacy protection and everyday security operations on Windows. Built with Python and a responsive native GUI, Privex packages everything into a single portable executable—giving users instant access to security tools without complex setup or background bloatware.
+
+#### ✨ Key Features
+- ⚡ **100% Portable & Standalone:** Runs directly out of the box via a single `.exe` file—no Python or third-party dependencies needed.
+- 🔒 **Offline-First Privacy:** Operates completely locally on your system. Zero telemetry, zero cloud tracking, and no data ever leaves your PC.
+- 🖥️ **Clean & Fast Native GUI:** Built on a lightweight Tkinter interface optimized for minimal CPU and RAM consumption.
+- 🛠️ **All-in-One Security Toolkit:** Streamlined interface for managing desktop security and system privacy tasks effortlessly.
+
+#### 📥 Installation & Quick Start (For Users)
+1. Click the Download Privex v1.0.0 (.EXE) or (.ZIP) button at the top of this page, or visit the [Official Releases Page](https://github.com/bhedanikhilkumar-code/Privex/releases/latest).
+2. Double-click `Privex-v1.0.0-Windows-x64.exe` to launch the application immediately.
+
+##### ⚠️ Note on Windows SmartScreen
+Since Privex is an independent open-source project without a commercial Microsoft EV certificate, Windows Defender SmartScreen may show a *"Windows protected your PC"* alert on the first launch:
+1. Click **More info** on the popup.
+2. Click **Run anyway** to start the app.
+
+#### 💻 Running from Source (For Developers)
+If you want to explore the code, modify features, or build the executable yourself:
+
+**1. Clone the Repository**
+```bash
+git clone https://github.com/bhedanikhilkumar-code/Privex.git
+cd Privex
+```
+
+**2. Run the Application in Python**
+```bash
+python privex_security_pro.py
+```
+
+**3. Build Standalone .exe using PyInstaller**
+```bash
+pip install pyinstaller
+pyinstaller --noconfirm --clean --onefile --windowed --name Privex privex_security_pro.py
+```
+The compiled executable will be generated inside the `dist/` directory.
+
+#### 🖥️ System Requirements
+
+| Requirement | Minimum Specification |
+|---|---|
+| **Operating System** | Windows 10 / Windows 11 (64-bit) |
+| **Architecture** | x64 |
+| **RAM** | 100 MB free memory |
+| **Disk Space** | ~50 MB |
+
+#### 🤝 Contributing & Bug Reports
+Contributions, issues, and feature requests are welcome!
+- Found a bug? Open a report on the [Issues Page](https://github.com/bhedanikhilkumar-code/Privex/issues).
+- Want to improve Privex? Fork the repo, create a feature branch, and submit a Pull Request.
+
+#### 👤 Author
+**Nikhilkumar Bheda**  
+GitHub: [@bhedanikhilkumar-code](https://github.com/bhedanikhilkumar-code)
