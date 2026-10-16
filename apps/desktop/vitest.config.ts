@@ -5,7 +5,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: [],
+    setupFiles: ['src/__tests__/setup-act-filter.ts', ],
     include: ['src/**/__tests__/**/*.test.{ts,tsx}'],
     testTimeout: 15000,
     fileParallelism: false,

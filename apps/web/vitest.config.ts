@@ -13,6 +13,7 @@ export default defineConfig({
     },
   },
   test: {
+    setupFiles: ['src/__tests__/setup-act-filter.ts'],
     globals: true,
     environment: 'jsdom',
     include: ['src/__tests__/**/*.test.{ts,tsx}'],
